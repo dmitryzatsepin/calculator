@@ -1,6 +1,6 @@
 import { Router } from "express";
-import passport from "passport";
-import { register, login, logout } from "../controllers/authController"; 
+import { register, login, logout } from "../controllers/authController";
+import { protect } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -8,12 +8,9 @@ router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
 
-router.get(
-  "/protected",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    res.json({ message: "Доступ разрешён", user: req.user });
-  }
-);
+// 🔐 Защищенный маршрут, возвращает данные авторизованного пользователя
+router.get("/me", protect, (req, res) => {
+  res.json({ user: req.user });
+});
 
 export default router;
