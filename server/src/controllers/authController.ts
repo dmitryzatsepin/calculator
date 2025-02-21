@@ -73,5 +73,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 // 📝 Выход (Log Out)
 export const logout = async (req: Request, res: Response): Promise<void> => {
-  res.json({ message: "Вы вышли из системы" });
+  try {
+    res.status(200).json({ message: "Вы вышли из системы" });
+  } catch (error) {
+    console.error("Ошибка выхода:", error);
+    res.status(500).json({ message: "Ошибка сервера", error });
+  }
 };
