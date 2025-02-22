@@ -10,7 +10,8 @@ import {
 const router = Router();
 
 // 📌 Получение всех шагов пикселя
-router.get("/", protect, getPixelSteps);
+//router.get("/", protect, getPixelSteps); //🔐 API защищено middleware protectа
+router.get("/", getPixelSteps); // ❌ Убрали protect — теперь запрос не требует токена
 
 // 📌 Создание нового шага пикселя
 router.post("/", protect, createPixelStep);
