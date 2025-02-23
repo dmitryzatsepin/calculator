@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Select, Radio, Stack, Loader, TextInput } from "@mantine/core";
+import { Select, Radio, Stack, Loader, TextInput, Grid } from "@mantine/core";
 import classes from "../styles/FloatingLabelInput.module.css";
 
 const availableOptions: Record<string, string[]> = {
@@ -44,34 +44,41 @@ const ScreenTypeSelect = () => {
     : [];
 
   return (
-    <Stack gap="xl">
-      {/* Инпут Ширина */}
-        <TextInput
-          label="Ширина экрана (мм)"
-          type="number"
-          classNames={classes}
-          value={width}
-          onChange={(event) => setWidth(event.currentTarget.value)}
-          onFocus={() => setFocusedWidth(true)}
-          onBlur={() => setFocusedWidth(false)}
-          data-floating={width.trim().length !== 0 || focusedWidth || undefined}
-          labelProps={{ "data-floating": width.trim().length !== 0 || focusedWidth || undefined }}
-          required
-        />
+    <Stack gap="lg">
+      <Grid>
+        {/* Инпут Ширина */}
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <TextInput
+            label="Ширина экрана (мм)"
+            type="number"
+            classNames={classes}
+            value={width}
+            onChange={(event) => setWidth(event.currentTarget.value)}
+            onFocus={() => setFocusedWidth(true)}
+            onBlur={() => setFocusedWidth(false)}
+            data-floating={width.trim().length !== 0 || focusedWidth || undefined}
+            labelProps={{ "data-floating": width.trim().length !== 0 || focusedWidth || undefined }}
+            required
+          />
+        </Grid.Col>
 
         {/* Инпут Высота */}
-        <TextInput
-          label="Высота экрана (мм)"
-          type="number"
-          classNames={classes}
-          value={height}
-          onChange={(event) => setHeight(event.currentTarget.value)}
-          onFocus={() => setFocusedHeight(true)}
-          onBlur={() => setFocusedHeight(false)}
-          data-floating={height.trim().length !== 0 || focusedHeight || undefined}
-          labelProps={{ "data-floating": height.trim().length !== 0 || focusedHeight || undefined }}
-          required
-        />
+        <Grid.Col span={{ base: 12, sm: 6 }}>
+          <TextInput
+            label="Высота экрана (мм)"
+            type="number"
+            classNames={classes}
+            value={height}
+            onChange={(event) => setHeight(event.currentTarget.value)}
+            onFocus={() => setFocusedHeight(true)}
+            onBlur={() => setFocusedHeight(false)}
+            data-floating={height.trim().length !== 0 || focusedHeight || undefined}
+            labelProps={{ "data-floating": height.trim().length !== 0 || focusedHeight || undefined }}
+            required
+          />
+        </Grid.Col>
+      </Grid>
+
       {/* Выбор типа экрана */}
       <Select
         label="Тип экрана *"
