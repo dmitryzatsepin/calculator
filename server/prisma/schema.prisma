@@ -28,6 +28,7 @@ model PixelStep {
   name   String
   width  Int
   height Int
+  option String
 
   @@unique([type, name])
 }
@@ -47,12 +48,4 @@ model Cabinet {
   receiver          Int
 
   @@unique([name, type])
-}
-
-model Coefficient {
-  id       Int     @id @default(autoincrement())
-  name     String  @unique
-  value    Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
