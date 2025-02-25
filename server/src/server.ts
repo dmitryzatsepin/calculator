@@ -9,6 +9,7 @@ import { configurePassport } from "./config/passport";
 import authRoutes from "./routes/authRoutes";
 import pixelStepRoutes from "./routes/pixelStepRoutes";
 import cabinetRoutes from "./routes/cabinetRoutes";
+import screenTypeRoutes from "./routes/screenTypeRoutes";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(passport.initialize());
 configurePassport(passport);
 
 app.use("/auth", authRoutes);
+app.use("/screen-types", screenTypeRoutes); 
 app.use("/pixel-steps", pixelStepRoutes);
 app.use("/cabinets", cabinetRoutes);
 

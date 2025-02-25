@@ -6,8 +6,23 @@ async function main() {
   console.log('🌱 Заполняем базу данных...');
 
   // Полностью очищаем таблицы перед вставкой новых данных
+  await prisma.screenType.deleteMany({});
   await prisma.pixelStep.deleteMany({});
   await prisma.cabinet.deleteMany({});
+
+  // Данные для типов экрана
+  const screenTypeData = [
+    { type: 'outdoor', name: 'уличный', screenOption: ["монолит"] },
+    { type: 'indoor', name: 'интерьерный', screenOption: ["монолит", "гибкий экран"] },
+  ];
+
+  console.log("Будет загружено:", screenTypeData.length, "записей в ScreenType");
+
+  await prisma.screenType.createMany({
+    data: screenTypeData,
+    skipDuplicates: true,
+  });
+
 
   // Данные для шагов пикселя
   const pixelData = [

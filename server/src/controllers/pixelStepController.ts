@@ -16,14 +16,14 @@ export const getPixelSteps = async (req: Request, res: Response, next: NextFunct
 // 📌 Создание шага пикселя
 export const createPixelStep = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const { type, name, width, height } = req.body;
-        if (!type || !name || !width || !height) {
+        const { type, name, width, height, option } = req.body;
+        if (!type || !name || !width || !height || option === undefined) {
             res.status(400).json({ message: "Все поля обязательны" });
             return;
         }
 
         const step = await prisma.pixelStep.create({
-            data: { type, name, width, height },
+            data: { type, name, width, height, option },
         });
 
         res.status(201).json({ message: "Шаг пикселя создан", step });
@@ -36,16 +36,16 @@ export const createPixelStep = async (req: Request, res: Response, next: NextFun
 export const updatePixelStep = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         const { id } = req.params;
-        const { type, name, width, height } = req.body;
+        const { type, name, width, height, option } = req.body;
 
-        if (!type || !name || !width || !height) {
+        if (!type || !name || !width || !height || option === undefined) {
             res.status(400).json({ message: "Все поля обязательны" });
             return;
         }
 
         const step = await prisma.pixelStep.update({
             where: { id: Number(id) },
-            data: { type, name, width, height },
+            data: { type, name, width, height, option },
         });
 
         res.status(200).json({ message: "Шаг пикселя обновлен", step });

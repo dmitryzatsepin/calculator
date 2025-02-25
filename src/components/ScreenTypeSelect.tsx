@@ -1,50 +1,50 @@
 import { useState, useEffect } from "react";
-import { Select, Radio, Stack, Loader, TextInput, Grid } from "@mantine/core";
+import { Select, Stack, Loader, TextInput, Grid } from "@mantine/core";
 import classes from "../styles/FloatingLabelInput.module.css";
-
-const availableOptions: Record<string, string[]> = {
-  "Кабинетный": ["Монолит", "Гибкий экран"],
-  "Уличный": ["Монолит"],
-};
 
 const ScreenTypeSelect = () => {
   const [width, setWidth] = useState<string>("");
   const [height, setHeight] = useState<string>("");
   const [screenType, setScreenType] = useState<string | null>(null);
+  const [screenTypes, setScreenTypes] = useState<{ name: string; screenOption: string[] }[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [pixelStep, setPixelStep] = useState<string | null>(null);
-  const [pixelSteps, setPixelSteps] = useState<{ name: string; type: string }[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [focusedWidth, setFocusedWidth] = useState(false);
-  const [focusedHeight, setFocusedHeight] = useState(false);
 
+  // 📌 Загружаем типы экранов с сервера
   useEffect(() => {
-    fetch("http://localhost:5000/pixel-steps", {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && data.steps) {
-          setPixelSteps(data.steps);
-        } else {
-          console.error("Ошибка: Неверный формат данных от сервера");
+    const fetchScreenTypes = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/screen-types", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
         }
+
+        const data = await response.json();
+        console.log("📥 Полученные данные с API:", data);
+
+        if (!data || !Array.isArray(data.types)) { // ✅ Теперь ждем `types`
+          throw new Error("⚠ Неверный формат данных");
+        }
+
+        setScreenTypes(data.types);
+      } catch (error) {
+        console.error("❌ Ошибка загрузки типов экранов:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Ошибка загрузки шагов пикселя:", error);
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchScreenTypes();
   }, []);
 
-  const filteredPixelSteps = pixelSteps
-    ? pixelSteps
-        .filter((step) => step.type === (screenType === "Кабинетный" ? "indoor" : "outdoor"))
-        .map((step) => step.name)
-    : [];
+  // 📌 Получаем доступные опции для выбранного типа экрана
+  const currentOptions = screenTypes.find((type) => type.name === screenType)?.screenOption || [];
 
   return (
-    <Stack gap="lg">
+    <Stack gap="xs"> {/* ✅ Уменьшил отступы */}
       <Grid>
         {/* Инпут Ширина */}
         <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -54,10 +54,6 @@ const ScreenTypeSelect = () => {
             classNames={classes}
             value={width}
             onChange={(event) => setWidth(event.currentTarget.value)}
-            onFocus={() => setFocusedWidth(true)}
-            onBlur={() => setFocusedWidth(false)}
-            data-floating={width.trim().length !== 0 || focusedWidth || undefined}
-            labelProps={{ "data-floating": width.trim().length !== 0 || focusedWidth || undefined }}
             required
           />
         </Grid.Col>
@@ -70,52 +66,44 @@ const ScreenTypeSelect = () => {
             classNames={classes}
             value={height}
             onChange={(event) => setHeight(event.currentTarget.value)}
-            onFocus={() => setFocusedHeight(true)}
-            onBlur={() => setFocusedHeight(false)}
-            data-floating={height.trim().length !== 0 || focusedHeight || undefined}
-            labelProps={{ "data-floating": height.trim().length !== 0 || focusedHeight || undefined }}
             required
           />
         </Grid.Col>
       </Grid>
 
       {/* Выбор типа экрана */}
-      <Select
-        label="Тип экрана *"
-        placeholder="Выберите тип"
-        data={Object.keys(availableOptions)}
-        value={screenType}
-        onChange={(value) => {
-          setScreenType(value);
-          setSelectedOption(null);
-          setPixelStep(null);
-        }}
-        required
-      />
-
-      {/* Чекбоксы опций экрана */}
-      {screenType && (
-        <Radio.Group label="Опции экрана" value={selectedOption} onChange={setSelectedOption}>
-          <Stack mt="xs">
-            {availableOptions[screenType]?.map((option) => (
-              <Radio key={option} value={option} label={option} />
-            ))}
-          </Stack>
-        </Radio.Group>
-      )}
-
-      {/* Выбор шага пикселя */}
       {loading ? (
         <Loader size="sm" />
       ) : (
         <Select
-          label="Шаг пикселя"
-          placeholder="Выберите шаг"
-          data={filteredPixelSteps}
-          value={pixelStep}
-          onChange={setPixelStep}
+          label="Тип экрана *"
+          placeholder="Выберите тип"
+          data={screenTypes.map((type) => ({ value: type.name, label: type.name }))}
+          value={screenType}
+          onChange={(value) => {
+            setScreenType(value);
+            setSelectedOption(null); // Сбрасываем выбор при смене типа экрана
+          }}
           required
         />
+      )}
+
+      {/* Радио-кнопки для выбора одной опции */}
+      {screenType && currentOptions.length > 0 && (
+        <div style={{ display: "flex", gap: "15px", marginTop: "-5px" }}> {/* ✅ Подвинул ближе */}
+          {currentOptions.map((option) => (
+            <label key={option} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <input
+                type="radio"
+                name="screenOption"
+                value={option}
+                checked={selectedOption === option}
+                onChange={() => setSelectedOption(option)}
+              />
+              {option}
+            </label>
+          ))}
+        </div>
       )}
     </Stack>
   );

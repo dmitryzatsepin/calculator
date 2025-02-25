@@ -21,6 +21,12 @@ model User {
   createdAt DateTime @default(now())
 }
 
+model ScreenType {
+  id                Int      @id @default(autoincrement())
+  name              String   @unique
+  type              String
+  screenOption       String[]
+}
 
 model PixelStep {
   id     Int    @id @default(autoincrement())
