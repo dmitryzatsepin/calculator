@@ -6,9 +6,14 @@ const ScreenTypeSelect = () => {
   const [width, setWidth] = useState<string>("");
   const [height, setHeight] = useState<string>("");
   const [screenType, setScreenType] = useState<string | null>(null);
-  const [screenTypes, setScreenTypes] = useState<{ name: string; screenOption: string[] }[]>([]);
+  const [screenTypes, setScreenTypes] = useState<{ name: string; type: string; screenOption: string[] }[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [pixelSteps, setPixelSteps] = useState<{ name: string; type: string }[]>([]);
+  const [filteredPixelSteps, setFilteredPixelSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingSteps, setLoadingSteps] = useState<boolean>(false);
+  const [focusedWidth, setFocusedWidth] = useState(false);
+  const [focusedHeight, setFocusedHeight] = useState(false);
 
   // 📌 Загружаем типы экранов с сервера
   useEffect(() => {
@@ -23,9 +28,9 @@ const ScreenTypeSelect = () => {
         }
 
         const data = await response.json();
-        console.log("📥 Полученные данные с API:", data);
+        console.log("📥 Полученные типы экранов:", data);
 
-        if (!data || !Array.isArray(data.types)) { // ✅ Теперь ждем `types`
+        if (!data || !Array.isArray(data.types)) {
           throw new Error("⚠ Неверный формат данных");
         }
 
@@ -40,11 +45,57 @@ const ScreenTypeSelect = () => {
     fetchScreenTypes();
   }, []);
 
+  // 📌 Загружаем шаги пикселя
+  useEffect(() => {
+    const fetchPixelSteps = async () => {
+      setLoadingSteps(true);
+      try {
+        const response = await fetch("http://localhost:5000/pixel-steps", {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("📥 Полученные шаги пикселя:", data);
+
+        if (!data || !Array.isArray(data.steps)) {
+          throw new Error("⚠ Неверный формат данных");
+        }
+
+        setPixelSteps(data.steps);
+      } catch (error) {
+        console.error("❌ Ошибка загрузки шагов пикселя:", error);
+      } finally {
+        setLoadingSteps(false);
+      }
+    };
+
+    fetchPixelSteps();
+  }, []);
+
+  // 📌 Фильтруем шаги пикселя по выбранному типу экрана
+  useEffect(() => {
+    if (!screenType) return setFilteredPixelSteps([]);
+
+    const selectedScreen = screenTypes.find((type) => type.name === screenType);
+    if (!selectedScreen) return;
+
+    const availableSteps = pixelSteps
+      .filter((step) => step.type === selectedScreen.type)
+      .map((step) => step.name)
+      .sort((a, b) => a.localeCompare(b)); // 📌 Сортировка ASC
+
+    setFilteredPixelSteps(availableSteps);
+  }, [screenType, pixelSteps, screenTypes]);
+
   // 📌 Получаем доступные опции для выбранного типа экрана
   const currentOptions = screenTypes.find((type) => type.name === screenType)?.screenOption || [];
 
   return (
-    <Stack gap="xs"> {/* ✅ Уменьшил отступы */}
+    <Stack gap="xs">
       <Grid>
         {/* Инпут Ширина */}
         <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -54,6 +105,10 @@ const ScreenTypeSelect = () => {
             classNames={classes}
             value={width}
             onChange={(event) => setWidth(event.currentTarget.value)}
+            onFocus={() => setFocusedWidth(true)}
+            onBlur={() => setFocusedWidth(false)}
+            data-floating={width.trim().length !== 0 || focusedWidth || undefined}
+            labelProps={{ "data-floating": width.trim().length !== 0 || focusedWidth || undefined }}
             required
           />
         </Grid.Col>
@@ -66,6 +121,10 @@ const ScreenTypeSelect = () => {
             classNames={classes}
             value={height}
             onChange={(event) => setHeight(event.currentTarget.value)}
+            onFocus={() => setFocusedHeight(true)}
+            onBlur={() => setFocusedHeight(false)}
+            data-floating={height.trim().length !== 0 || focusedHeight || undefined}
+            labelProps={{ "data-floating": height.trim().length !== 0 || focusedHeight || undefined }}
             required
           />
         </Grid.Col>
@@ -82,7 +141,7 @@ const ScreenTypeSelect = () => {
           value={screenType}
           onChange={(value) => {
             setScreenType(value);
-            setSelectedOption(null); // Сбрасываем выбор при смене типа экрана
+            setSelectedOption(null);
           }}
           required
         />
@@ -90,7 +149,7 @@ const ScreenTypeSelect = () => {
 
       {/* Радио-кнопки для выбора одной опции */}
       {screenType && currentOptions.length > 0 && (
-        <div style={{ display: "flex", gap: "15px", marginTop: "-5px" }}> {/* ✅ Подвинул ближе */}
+        <div style={{ display: "flex", gap: "15px", marginTop: "-5px" }}>
           {currentOptions.map((option) => (
             <label key={option} style={{ display: "flex", alignItems: "center", gap: "5px" }}>
               <input
@@ -104,6 +163,17 @@ const ScreenTypeSelect = () => {
             </label>
           ))}
         </div>
+      )}
+
+      {/* Выбор шага пикселя */}
+      {screenType && (
+        <Select
+          label="Шаг пикселя *"
+          placeholder={loadingSteps ? "Загрузка..." : "Выберите шаг"}
+          data={filteredPixelSteps.map((step) => ({ value: step, label: step }))}
+          disabled={loadingSteps || filteredPixelSteps.length === 0}
+          required
+        />
       )}
     </Stack>
   );
