@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Select, Stack, Loader, TextInput, Grid } from "@mantine/core";
 import classes from "../styles/FloatingLabelInput.module.css";
 
@@ -8,12 +8,21 @@ const ScreenTypeSelect = () => {
   const [screenType, setScreenType] = useState<string | null>(null);
   const [screenTypes, setScreenTypes] = useState<{ name: string; type: string; screenOption: string[] }[]>([]);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [pixelSteps, setPixelSteps] = useState<{ name: string; type: string }[]>([]);
+  const [pixelSteps, setPixelSteps] = useState<{ name: string; type: string; option?: string | null }[]>([]);
   const [filteredPixelSteps, setFilteredPixelSteps] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [loadingSteps, setLoadingSteps] = useState<boolean>(false);
   const [focusedWidth, setFocusedWidth] = useState(false);
   const [focusedHeight, setFocusedHeight] = useState(false);
+
+  // Маппинг между опциями на русском и английском
+  const optionMapping: { [key: string]: string } = useMemo(() => ({
+    "гибкий экран": "flexible",
+    "жёсткий экран": "rigid",
+    "органический экран": "organic",
+    "монолит": "monolithic", // Добавляем опцию "монолит"
+    // Добавьте другие опции по необходимости
+  }), []);
 
   // 📌 Загружаем типы экранов с сервера
   useEffect(() => {
@@ -22,18 +31,14 @@ const ScreenTypeSelect = () => {
         const response = await fetch("http://localhost:5000/screen-types", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-
         if (!response.ok) {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
-
         const data = await response.json();
         console.log("📥 Полученные типы экранов:", data);
-
         if (!data || !Array.isArray(data.types)) {
           throw new Error("⚠ Неверный формат данных");
         }
-
         setScreenTypes(data.types);
       } catch (error) {
         console.error("❌ Ошибка загрузки типов экранов:", error);
@@ -41,7 +46,6 @@ const ScreenTypeSelect = () => {
         setLoading(false);
       }
     };
-
     fetchScreenTypes();
   }, []);
 
@@ -53,18 +57,14 @@ const ScreenTypeSelect = () => {
         const response = await fetch("http://localhost:5000/pixel-steps", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-
         if (!response.ok) {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
-
         const data = await response.json();
         console.log("📥 Полученные шаги пикселя:", data);
-
         if (!data || !Array.isArray(data.steps)) {
           throw new Error("⚠ Неверный формат данных");
         }
-
         setPixelSteps(data.steps);
       } catch (error) {
         console.error("❌ Ошибка загрузки шагов пикселя:", error);
@@ -72,24 +72,37 @@ const ScreenTypeSelect = () => {
         setLoadingSteps(false);
       }
     };
-
     fetchPixelSteps();
   }, []);
 
-  // 📌 Фильтруем шаги пикселя по выбранному типу экрана
+  // 📌 Фильтруем шаги пикселя по выбранному типу экрана и опции
   useEffect(() => {
     if (!screenType) return setFilteredPixelSteps([]);
-
     const selectedScreen = screenTypes.find((type) => type.name === screenType);
     if (!selectedScreen) return;
 
+    console.log("🎯 Текущий тип экрана:", selectedScreen.type);
+    console.log("🎯 Выбранная опция:", selectedOption);
+
     const availableSteps = pixelSteps
-      .filter((step) => step.type === selectedScreen.type)
+      .filter((step) => {
+        const matchesType = step.type === selectedScreen.type;
+        const matchesOption =
+          selectedOption && step.option
+            ? (selectedOption.toLowerCase() === "монолит" ||
+              step.option.toLowerCase() === optionMapping[selectedOption]?.toLowerCase())
+            : true;
+
+        console.log(`🧐 Анализ шага пикселя: ${step.name}, option: '${step.option}', matchesType: ${matchesType}, matchesOption: ${matchesOption}, ❓ ${matchesType && matchesOption}`);
+
+        return matchesType && matchesOption;
+      })
       .map((step) => step.name)
       .sort((a, b) => a.localeCompare(b)); // 📌 Сортировка ASC
 
+    console.log("✅ Доступные шаги пикселя после фильтрации:", availableSteps);
     setFilteredPixelSteps(availableSteps);
-  }, [screenType, pixelSteps, screenTypes]);
+  }, [screenType, selectedOption, pixelSteps, screenTypes, optionMapping]);
 
   // 📌 Получаем доступные опции для выбранного типа экрана
   const currentOptions = screenTypes.find((type) => type.name === screenType)?.screenOption || [];
@@ -112,7 +125,6 @@ const ScreenTypeSelect = () => {
             required
           />
         </Grid.Col>
-
         {/* Инпут Высота */}
         <Grid.Col span={{ base: 12, sm: 6 }}>
           <TextInput
@@ -129,7 +141,6 @@ const ScreenTypeSelect = () => {
           />
         </Grid.Col>
       </Grid>
-
       {/* Выбор типа экрана */}
       {loading ? (
         <Loader size="sm" />
@@ -146,7 +157,6 @@ const ScreenTypeSelect = () => {
           required
         />
       )}
-
       {/* Радио-кнопки для выбора одной опции */}
       {screenType && currentOptions.length > 0 && (
         <div style={{ display: "flex", gap: "15px", marginTop: "-5px" }}>
@@ -164,7 +174,6 @@ const ScreenTypeSelect = () => {
           ))}
         </div>
       )}
-
       {/* Выбор шага пикселя */}
       {screenType && (
         <Select
