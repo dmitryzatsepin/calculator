@@ -160,8 +160,8 @@ async function main() {
       pixelOption: ['P2.6 Pro', 'P3.91', 'P3.91 Pro', 'P2.97 Pro'],
     },
     {
-      name: '500×500 AL задний уличный',
-      type: 'outdoor',
+      name: '500×500 AL задний интерьерный',
+      type: 'indoor',
       width: 500,
       height: 500,
       modulesQ: 4,
@@ -169,7 +169,7 @@ async function main() {
       powerUnitQ: 1,
       receiver: 1,
       cooler: 0,
-      pixelOption: ['P3.91 Pro', 'P4.81 Pro', 'Р2.97 Pro'],
+      pixelOption: ['P2.6 Pro', 'P3.91', 'P3.91 Pro', 'P2.97 Pro'],
     },
     {
       name: '500×500 AL задний уличный',
@@ -193,7 +193,7 @@ async function main() {
       powerUnitQ: 2,
       receiver: 1,
       cooler: 0,
-      pixelOption: ['P2.6 Pro', 'P3.91 Pro', 'P3 Pro', 'P2.97 Pro'],
+      pixelOption: ['P3.91 Pro', 'P4.81 Pro', 'Р2.97 Pro'],
     },
     {
       name: '500×1000 AL задний интерьерный',
