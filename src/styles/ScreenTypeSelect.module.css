@@ -1,0 +1,25 @@
+/* ScreenTypeSelect.module.css */
+.drawerTitle {
+  text-align: center;
+  width: 100%;
+  font-weight: bold;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.th, .td {
+  text-align: center;
+  padding: 8px;
+}
+
+.th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.tableBorder {
+  border: 1px solid #ddd;
+}

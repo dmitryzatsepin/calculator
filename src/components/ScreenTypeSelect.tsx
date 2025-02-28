@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Select, Stack, TextInput, Grid, Button, Drawer, Table } from "@mantine/core";
+import '@mantine/core/styles/global.css';
+import styles from "../styles/ScreenTypeSelect.module.css";
 
 const ScreenTypeSelect = () => {
   const [width, setWidth] = useState<string>("");
@@ -154,42 +156,49 @@ const ScreenTypeSelect = () => {
           </Button>
         )}
       </Stack>
-
       {/* Drawer с таблицей Mantine */}
       <Drawer
         opened={drawerOpened}
         onClose={() => setDrawerOpened(false)}
-        title="Результаты расчета"
+        title={<div className={styles.drawerTitle}>Результаты расчета</div>}
         position="right"
         size="xl"
       >
-        <Table striped highlightOnHover>
+        <Table
+          striped
+          highlightOnHover
+          withTableBorder
+          withColumnBorders
+          className={styles.table} // ✅ Подключаем стили
+        >
           <thead>
             <tr>
-              <th>Характеристика</th>
-              <th>Значение</th>
+              <th className={styles.th}>Характеристика</th>
+              <th className={styles.th}>Значение</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Ширина экрана</td>
-              <td>{width} мм</td>
+              <td className={styles.td}>Ширина экрана</td>
+              <td className={styles.td}>{width} мм</td>
             </tr>
             <tr>
-              <td>Высота экрана</td>
-              <td>{height} мм</td>
+              <td className={styles.td}>Высота экрана</td>
+              <td className={styles.td}>{height} мм</td>
             </tr>
             <tr>
-              <td>Тип экрана</td>
-              <td>{screenType}</td>
+              <td className={styles.td}>Тип экрана</td>
+              <td className={styles.td}>{screenType}</td>
             </tr>
             <tr>
-              <td>Шаг пикселя</td>
-              <td>{selectedPixelStep}</td>
+              <td className={styles.td}>Шаг пикселя</td>
+              <td className={styles.td}>{selectedPixelStep}</td>
             </tr>
             <tr>
-              <td>Кабинет</td>
-              <td>{filteredCabinets.find((c) => c.id.toString() === selectedCabinet)?.name || "Не выбран"}</td>
+              <td className={styles.td}>Кабинет</td>
+              <td className={styles.td}>
+                {filteredCabinets.find((c) => c.id.toString() === selectedCabinet)?.name || "Не выбран"}
+              </td>
             </tr>
           </tbody>
         </Table>
