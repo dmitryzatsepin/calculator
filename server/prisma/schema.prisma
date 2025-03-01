@@ -24,34 +24,37 @@ model User {
 model ScreenType {
   id                Int      @id @default(autoincrement())
   name              String   @unique
-  type              String
-  screenOption       String[]
+  material          String[] 
+  option            String[]
 }
 
 model PixelStep {
-  id     Int    @id @default(autoincrement())
-  type   String
-  name   String
-  width  Int
-  height Int
-  option String
+  id                Int    @id @default(autoincrement())
+  name              String
+  type              String
+  width             Int
+  height            Int
+  location          String 
+  option            String[]
 
-  @@unique([type, name])
+  @@unique([name, location])
 }
 
 
 model Cabinet {
   id                Int      @id @default(autoincrement())
-  type              String
+  name              String
   width             Int
   height            Int
-  cooler            Int
   modulesQ          Int
-  name              String
-  pixelOption       String[]
+  powerUnitQ        Int  
   powerUnitCapacity Int
-  powerUnitQ        Int
   receiver          Int
+  cooler            Int
+  pixelStep         String[]
+  location          String
+  material          String[]
+  placement         String
 
-  @@unique([name, type])
+  @@unique([name, location])
 }

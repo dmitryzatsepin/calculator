@@ -1,30 +1,30 @@
 import { useState, useEffect } from "react";
-import { Select, Stack, TextInput, Grid, Button, Drawer, Table } from "@mantine/core";
+import { Select, Stack, TextInput, Grid, Button } from "@mantine/core";
 import '@mantine/core/styles/global.css';
-import styles from "../styles/ScreenTypeSelect.module.css";
+import CalculationResults from "./CalculationResults";
 
-const ScreenTypeSelect = () => {
+const DisplayParameters = () => {
   const [width, setWidth] = useState<string>("");
   const [height, setHeight] = useState<string>("");
   const [screenType, setScreenType] = useState<string | null>(null);
-  const [screenTypes, setScreenTypes] = useState<{ name: string; type: string; screenOption: string[] }[]>([]);
-  const [pixelSteps, setPixelSteps] = useState<{ id: number; name: string; type: string; option?: string | null }[]>([]);
+  const [screenTypes, setScreenTypes] = useState<{ name: string; material: string[]; option: string[] }[]>([]);
+  const [pixelSteps, setPixelSteps] = useState<{ id: number; name: string; type: string; location: string[]; option: string[] }[]>([]);
   const [filteredPixelSteps, setFilteredPixelSteps] = useState<string[]>([]);
   const [selectedPixelStep, setSelectedPixelStep] = useState<string | null>(null);
-  const [cabinets, setCabinets] = useState<{ id: number; name: string; type: string; pixelOption: string[] }[]>([]);
-  const [filteredCabinets, setFilteredCabinets] = useState<{ id: number; name: string; type: string; pixelOption: string[] }[]>([]);
+  const [cabinets, setCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[] }[]>([]);
+  const [filteredCabinets, setFilteredCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[] }[]>([]);
   const [selectedCabinet, setSelectedCabinet] = useState<string | null>(null);
   const [loadingSteps, setLoadingSteps] = useState<boolean>(false);
   const [loadingCabinets, setLoadingCabinets] = useState<boolean>(false);
-  const [drawerOpened, setDrawerOpened] = useState<boolean>(false); // 🔥 Состояние для Drawer
+  const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
 
-  // ✅ Проверяем, заполнены ли все поля перед активацией кнопки "Рассчитать"
+  // Проверяем, заполнены ли все поля перед активацией кнопки "Рассчитать"
   const isSizeValid = width.trim() !== "" && height.trim() !== "";
   const isScreenTypeSelected = isSizeValid && !!screenType;
   const isPixelStepSelected = isScreenTypeSelected && !!selectedPixelStep;
   const isCabinetSelected = isPixelStepSelected && !!selectedCabinet;
 
-  // 📌 Загружаем данные
+  // Загружаем данные
   useEffect(() => {
     fetch("http://localhost:5000/screen-types")
       .then((res) => res.json())
@@ -50,7 +50,7 @@ const ScreenTypeSelect = () => {
       .finally(() => setLoadingCabinets(false));
   }, []);
 
-  // 📌 Фильтруем шаги пикселя после выбора типа экрана
+  // Фильтруем шаги пикселя после выбора типа экрана
   useEffect(() => {
     if (!screenType) {
       setFilteredPixelSteps([]);
@@ -61,13 +61,15 @@ const ScreenTypeSelect = () => {
     if (!selectedScreen) return;
 
     setFilteredPixelSteps(
-      pixelSteps.filter((step) => step.type === selectedScreen.type).map((step) => step.name)
+      pixelSteps
+        .filter((step) => step.location.includes(selectedScreen.name))
+        .map((step) => step.name)
     );
     setSelectedPixelStep(null);
     setSelectedCabinet(null);
   }, [screenType, pixelSteps, screenTypes]);
 
-  // 📌 Фильтруем кабинеты **только после выбора шага пикселя**
+  // Фильтруем кабинеты только после выбора шага пикселя
   useEffect(() => {
     if (!screenType || !selectedPixelStep) {
       setFilteredCabinets([]);
@@ -82,11 +84,26 @@ const ScreenTypeSelect = () => {
 
     setFilteredCabinets(
       cabinets
-        .filter((cabinet) => cabinet.type === selectedScreen.type && cabinet.pixelOption.includes(selectedPixelStep))
-        .sort((a, b) => a.name.localeCompare(b.name)) // ✅ Сортируем по алфавиту
+        .filter((cabinet) => cabinet.location === selectedScreen.name && cabinet.pixelStep.includes(selectedPixelStep))
+        .sort((a, b) => a.name.localeCompare(b.name))
     );
     setSelectedCabinet(null);
   }, [screenType, selectedPixelStep, cabinets, screenTypes]);
+
+  // Получаем имя выбранного кабинета
+  const selectedCabinetName = selectedCabinet 
+    ? filteredCabinets.find(c => c.id.toString() === selectedCabinet)?.name || null
+    : null;
+
+  // Данные для передачи в компонент результатов
+  const calculationData = {
+    width,
+    height,
+    screenType,
+    selectedPixelStep,
+    selectedCabinet,
+    cabinetName: selectedCabinetName
+  };
 
   return (
     <>
@@ -156,55 +173,15 @@ const ScreenTypeSelect = () => {
           </Button>
         )}
       </Stack>
-      {/* Drawer с таблицей Mantine */}
-      <Drawer
+
+      {/* Используем отдельный компонент для отображения результатов */}
+      <CalculationResults 
         opened={drawerOpened}
         onClose={() => setDrawerOpened(false)}
-        title={<div className={styles.drawerTitle}>Результаты расчета</div>}
-        position="right"
-        size="xl"
-      >
-        <Table
-          striped
-          highlightOnHover
-          withTableBorder
-          withColumnBorders
-          className={styles.table} // ✅ Подключаем стили
-        >
-          <thead>
-            <tr>
-              <th className={styles.th}>Характеристика</th>
-              <th className={styles.th}>Значение</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className={styles.td}>Ширина экрана</td>
-              <td className={styles.td}>{width} мм</td>
-            </tr>
-            <tr>
-              <td className={styles.td}>Высота экрана</td>
-              <td className={styles.td}>{height} мм</td>
-            </tr>
-            <tr>
-              <td className={styles.td}>Тип экрана</td>
-              <td className={styles.td}>{screenType}</td>
-            </tr>
-            <tr>
-              <td className={styles.td}>Шаг пикселя</td>
-              <td className={styles.td}>{selectedPixelStep}</td>
-            </tr>
-            <tr>
-              <td className={styles.td}>Кабинет</td>
-              <td className={styles.td}>
-                {filteredCabinets.find((c) => c.id.toString() === selectedCabinet)?.name || "Не выбран"}
-              </td>
-            </tr>
-          </tbody>
-        </Table>
-      </Drawer>
+        data={calculationData}
+      />
     </>
   );
 };
 
-export default ScreenTypeSelect;
+export default DisplayParameters;

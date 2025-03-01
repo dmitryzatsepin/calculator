@@ -1,279 +1,181 @@
 import { PrismaClient } from '@prisma/client';
+import * as XLSX from 'xlsx';
+import * as path from 'path';
+import * as fs from 'fs';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Заполняем базу данных...');
-
-  // Полностью очищаем таблицы перед вставкой новых данных
-  await prisma.screenType.deleteMany({});
-  await prisma.pixelStep.deleteMany({});
-  await prisma.cabinet.deleteMany({});
-
-  // Данные для типов экрана
-  const screenTypeData = [
-    { type: 'outdoor', name: 'уличный', screenOption: ["монолит"] },
-    { type: 'indoor', name: 'интерьерный', screenOption: ["монолит", "гибкий экран"] },
-  ];
-
-  console.log("Будет загружено:", screenTypeData.length, "записей в ScreenType");
-
-  await prisma.screenType.createMany({
-    data: screenTypeData,
-    skipDuplicates: true,
-  });
-
-
-  // Данные для шагов пикселя
-  const pixelData = [
-    { type: 'indoor', name: 'P5', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P5 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P4', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P4 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P3.91', width: 250, height: 250, option: "standard" },
-    { type: 'indoor', name: 'P3.91 Pro', width: 250, height: 250, option: "standard" },
-    { type: 'indoor', name: 'P3.07', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P3.07 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P3', width: 192, height: 192, option: "standard" },
-    { type: 'indoor', name: 'P3 Pro', width: 192, height: 192, option: "standard" },
-    { type: 'indoor', name: 'P2.97 Pro', width: 250, height: 250, option: "standard" },
-    { type: 'indoor', name: 'P2.6 Pro', width: 250, height: 250, option: "standard" },
-    { type: 'indoor', name: 'P2.5', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P2.5 Pro', width: 160, height: 320, option: "flexible" },
-    { type: 'indoor', name: 'P2', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P2 Pro', width: 160, height: 320, option: "flexible" },
-    { type: 'indoor', name: 'P1.86', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P1.86 Pro', width: 160, height: 320, option: "flexible" },
-    { type: 'indoor', name: 'P1.66 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P1.53 Pro', width: 160, height: 320, option: "flexible" },
-    { type: 'indoor', name: 'P1.37 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'indoor', name: 'P1.25 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P8', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P8 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P6.66', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P6.66 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P6', width: 192, height: 192, option: "standard" },
-    { type: 'outdoor', name: 'P5', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P5 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P4.81 Pro', width: 250, height: 250, option: "standard" },
-    { type: 'outdoor', name: 'P4', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P4 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P3.91 Pro', width: 250, height: 250, option: "standard" },
-    { type: 'outdoor', name: 'P3.07', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P3.07 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P2.5 Pro', width: 160, height: 320, option: "standard" },
-    { type: 'outdoor', name: 'P3 Pro', width: 192, height: 192, option: "standard" },
-    { type: 'outdoor', name: 'P2.97 Pro', width: 250, height: 250, option: "standard" },
-  ];
-
-  console.log("Будет загружено:", pixelData.length, "записей в PixelOption");
-
-  await prisma.pixelStep.createMany({
-    data: pixelData,
-    skipDuplicates: true,
-  });
-
-  // Данные для кабинетов
-  const cabinetData = [
-    {
-      name: '960×960 AL задний уличный',
-      type: 'outdoor',
-      width: 960,
-      height: 960,
-      modulesQ: 18,
-      powerUnitCapacity: 300,
-      powerUnitQ: 3,
-      receiver: 2,
-      cooler: 2,
-      pixelOption: ['P8', 'P8 Pro', 'P6.66', 'P6.66 Pro', 'P5', 'P5 Pro', 'P4', 'P4 Pro', 'P3.07', 'P3.07 Pro', 'P2.5 Pro'],
-    },
-    {
-      name: '640×640 AL задний уличный',
-      type: 'outdoor',
-      width: 640,
-      height: 640,
-      modulesQ: 8,
-      powerUnitCapacity: 200,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 1,
-      pixelOption: ['P8', 'P8 Pro', 'P6.66', 'P6.66 Pro', 'P5', 'P5 Pro', 'P4', 'P4 Pro', 'P3.07', 'P3.07 Pro', 'P2.5 Pro'],
-    },
-    {
-      name: '576×576 AL задний уличный',
-      type: 'outdoor',
-      width: 576,
-      height: 576,
-      modulesQ: 9,
-      powerUnitCapacity: 200,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 1,
-      pixelOption: ['P3 Pro', 'P6'],
-    },
-    {
-      name: '960×960 AL задний интерьерный',
-      type: 'indoor',
-      width: 960,
-      height: 960,
-      modulesQ: 18,
-      powerUnitCapacity: 200,
-      powerUnitQ: 3,
-      receiver: 2,
-      cooler: 0,
-      pixelOption: ['P5', 'P5 Pro', 'P4', 'P4 Pro', 'P3.07', 'P3.07 Pro', 'P2.5', 'P2.5 Pro', 'P2'],
-    },
-    {
-      name: '640×640 AL задний интерьерный',
-      type: 'indoor',
-      width: 640,
-      height: 640,
-      modulesQ: 8,
-      powerUnitCapacity: 200,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P5', 'P5 Pro', 'P4', 'P4 Pro', 'P3.07', 'P3.07 Pro', 'P2.5', 'P2.5 Pro', 'P2', 'P2 Pro'],
-    },
-    {
-      name: '576×576 AL задний интерьерный',
-      type: 'indoor',
-      width: 576,
-      height: 576,
-      modulesQ: 9,
-      powerUnitCapacity: 200,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P3', 'P3 Pro'],
-    },
-    {
-      name: '500×500 AL фронтальный интерьерный',
-      type: 'indoor',
-      width: 500,
-      height: 500,
-      modulesQ: 4,
-      powerUnitCapacity: 200,
-      powerUnitQ: 1,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P2.6 Pro', 'P3.91', 'P3.91 Pro', 'P2.97 Pro'],
-    },
-    {
-      name: '500×500 AL задний интерьерный',
-      type: 'indoor',
-      width: 500,
-      height: 500,
-      modulesQ: 4,
-      powerUnitCapacity: 200,
-      powerUnitQ: 1,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P2.6 Pro', 'P3.91', 'P3.91 Pro', 'P2.97 Pro'],
-    },
-    {
-      name: '500×500 AL задний уличный',
-      type: 'outdoor',
-      width: 500,
-      height: 500,
-      modulesQ: 4,
-      powerUnitCapacity: 200,
-      powerUnitQ: 1,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P3.91 Pro', 'P4.81 Pro', 'Р2.97 Pro'],
-    },
-    {
-      name: '500×1000 AL задний уличный',
-      type: 'outdoor',
-      width: 500,
-      height: 1000,
-      modulesQ: 8,
-      powerUnitCapacity: 300,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P3.91 Pro', 'P4.81 Pro', 'Р2.97 Pro'],
-    },
-    {
-      name: '500×1000 AL задний интерьерный',
-      type: 'indoor',
-      width: 500,
-      height: 1000,
-      modulesQ: 8,
-      powerUnitCapacity: 200,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P2.6 Pro', 'P3.91', 'P3.91 Pro', 'P2.97 Pro'],
-    },
-    {
-      name: '500×1000 AL фронтальный интерьерный',
-      type: 'indoor',
-      width: 500,
-      height: 1000,
-      modulesQ: 8,
-      powerUnitCapacity: 200,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P2.6 Pro', 'P3.91', 'P3.91 Pro', 'P2.97 Pro'],
-    },
-    {
-      name: '640×640 C_AL фронтальный интерьерный',
-      type: 'indoor',
-      width: 640,
-      height: 640,
-      modulesQ: 8,
-      powerUnitCapacity: 200,
-      powerUnitQ: 2,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P4', 'P4 Pro', 'P3.07', 'P3.07 Pro', 'P2.5', 'P2.5 Pro', 'P2', 'P1.86', 'P1.86 Pro'],
-    },
-    {
-      name: '480×640 C_AL фронтальный интерьерный (шаг пикселя до 1.86)',
-      type: 'indoor',
-      width: 480,
-      height: 640,
-      modulesQ: 6,
-      powerUnitCapacity: 200,
-      powerUnitQ: 1,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P4', 'P4 Pro', 'P3.07', 'P3.07 Pro', 'P2.5', 'P2.5 Pro', 'P2', 'P1.86', 'P1.86 Pro'],
-    },
-    {
-      name: '480×640 C_AL фронтальный интерьерный (шаг пикселя ниже 1.86)',
-      type: 'indoor',
-      width: 480,
-      height: 640,
-      modulesQ: 6,
-      powerUnitCapacity: 300,
-      powerUnitQ: 1,
-      receiver: 1,
-      cooler: 0,
-      pixelOption: ['P1.66 Pro', 'P1.53 Pro', 'P1.37 Pro', 'P1.25 Pro'],
-    },
-  ];
+// Проверка обязательных полей
+function validateRequiredFields(data: Record<string, unknown>[], requiredFields: string[], sheetName: string): boolean {
+  if (data.length === 0) {
+    console.warn(`⚠️ Лист ${sheetName} пуст`);
+    return false;
+  }
   
-
-  console.log("Будет загружено:", cabinetData.length, "записей в Cabinet");
-
-  await prisma.cabinet.createMany({
-    data: cabinetData,
-    skipDuplicates: true,
-  });
-
-  console.log('✅ Данные успешно загружены!');
+  const firstRow = data[0];
+  const missingFields = requiredFields.filter(field => !(field in firstRow));
+  
+  if (missingFields.length > 0) {
+    console.error(`❌ В листе ${sheetName} отсутствуют обязательные поля: ${missingFields.join(', ')}`);
+    return false;
+  }
+  
+  return true;
 }
 
+async function importFromExcel(filePath: string): Promise<void> {
+  try {
+    console.log(`🔍 Импорт данных из файла: ${filePath}`);
+    
+    // Проверяем существование файла
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Файл не найден: ${filePath}`);
+    }
+    
+    // Читаем Excel файл
+    const workbook = XLSX.readFile(filePath);
+    
+    // Импортируем типы экранов
+    if (workbook.SheetNames.includes('ScreenTypes')) {
+      const screenTypesSheet = workbook.Sheets['ScreenTypes'];
+      const screenTypes: Record<string, unknown>[] = XLSX.utils.sheet_to_json(screenTypesSheet);
+      
+      // Проверяем обязательные поля
+      if (validateRequiredFields(screenTypes, ['name'], 'ScreenTypes')) {
+        // Очищаем таблицу перед вставкой
+        await prisma.screenType.deleteMany({});
+        
+        // Вставляем данные по одному
+        for (const row of screenTypes) {
+          // Преобразуем option и material в массивы строк
+          const optionArray = row.option 
+            ? String(row.option).split(',').map(s => s.trim()) 
+            : [];
+          const materialArray = row.material 
+            ? String(row.material).split(',').map(s => s.trim()) 
+            : [];
+            
+          await prisma.screenType.create({
+            data: {
+              name: String(row.name),
+              option: {set: optionArray},
+              material: {set: materialArray}
+            }
+          });
+        }
+        
+        console.log('✅ Типы экранов успешно импортированы');
+      }
+    } else {
+      console.warn('⚠️ Лист ScreenTypes не найден в Excel-файле');
+    }
+    
+    // Импортируем шаги пикселей
+    if (workbook.SheetNames.includes('PixelSteps')) {
+      const pixelStepsSheet = workbook.Sheets['PixelSteps'];
+      const pixelSteps: Record<string, unknown>[] = XLSX.utils.sheet_to_json(pixelStepsSheet);
+      
+      // Проверяем обязательные поля
+      if (validateRequiredFields(pixelSteps, ['name', 'type', 'width', 'height'], 'PixelSteps')) {
+        // Очищаем таблицу перед вставкой
+        await prisma.pixelStep.deleteMany({});
+        
+        // Вставляем данные по одному
+        for (const row of pixelSteps) {
+          // Преобразуем option в массив строк
+          const optionArray = row.option 
+            ? String(row.option).split(',').map(s => s.trim()) 
+            : [];
+            
+          await prisma.pixelStep.create({
+            data: {
+              name: String(row.name),
+              type: String(row.type),
+              width: Number(row.width),
+              height: Number(row.height),
+              location: String(row.location),
+              option: {set: optionArray}
+            }
+          });
+        }
+        
+        console.log('✅ Шаги пикселей успешно импортированы');
+      }
+    } else {
+      console.warn('⚠️ Лист PixelSteps не найден в Excel-файле');
+    }
+    
+    // Импортируем кабинеты
+    if (workbook.SheetNames.includes('Cabinets')) {
+      const cabinetsSheet = workbook.Sheets['Cabinets'];
+      const cabinets: Record<string, unknown>[] = XLSX.utils.sheet_to_json(cabinetsSheet);
+      
+      // Проверяем обязательные поля
+      const requiredCabinetFields = ['name', 'width', 'height', 'modulesQ', 'powerUnitCapacity', 'powerUnitQ', 'receiver', 'cooler'];
+      
+      if (validateRequiredFields(cabinets, requiredCabinetFields, 'Cabinets')) {
+        // Очищаем таблицу перед вставкой
+        await prisma.cabinet.deleteMany({});
+        
+        // Вставляем данные по одному
+        for (const row of cabinets) {
+          // Преобразуем pixelStep в массив строк
+          const pixelStepArray = row.pixelStep 
+            ? String(row.pixelStep).split(',').map(s => s.trim()) 
+            : [];
+            const materialArray = row.material 
+            ? String(row.material).split(',').map(s => s.trim()) 
+            : [];  
+            
+          await prisma.cabinet.create({
+            data: {
+              name: String(row.name),
+              width: Number(row.width),
+              height: Number(row.height),
+              modulesQ: Number(row.modulesQ),
+              powerUnitCapacity: Number(row.powerUnitCapacity),
+              powerUnitQ: Number(row.powerUnitQ),
+              receiver: Number(row.receiver),
+              cooler: Number(row.cooler),
+              location: String(row.location),
+              material: {set: materialArray},
+              placement: String(row.placement),
+              pixelStep: {set: pixelStepArray}
+            }
+          });
+        }
+        
+        console.log('✅ Кабинеты успешно импортированы');
+      }
+    } else {
+      console.warn('⚠️ Лист Cabinets не найден в Excel-файле');
+    }
+    
+    console.log('🎉 Импорт данных успешно завершен!');
+  } catch (error) {
+    console.error('❌ Ошибка при импорте данных:', error);
+    throw error;
+  }
+}
+
+// Основная функция
+async function main() {
+  try {
+    const defaultPath = path.resolve(__dirname, '../data/database.xlsx');
+    console.log(`🌱 Заполняем базу данных из Excel: ${defaultPath}`);
+    
+    await importFromExcel(defaultPath);
+  } catch (error) {
+    console.error('❌ Ошибка при заполнении базы:', error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Запускаем основную функцию
 main()
   .catch((e) => {
-    console.error('❌ Ошибка при заполнении базы:', e);
     console.error(e);
-    globalThis.process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
+    process.exit(1);
   });

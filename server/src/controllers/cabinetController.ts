@@ -17,12 +17,10 @@ export const getCabinets = async (req: Request, res: Response): Promise<void> =>
 // 📌 Создание нового кабинета
 export const createCabinet = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { type, width, height, cooler, modulesQ, name, pixelOption, powerUnitCapacity, powerUnitQ, receiver } = req.body;
+        const { name, width, height, modulesQ, powerUnitQ, powerUnitCapacity, receiver, cooler, pixelStep, location, material, placement} = req.body;
         
         if (
-            !type || !width || !height || !cooler || !modulesQ || !name || 
-            !Array.isArray(pixelOption) || pixelOption.length === 0 || 
-            !powerUnitCapacity || !powerUnitQ || !receiver
+            !name || !width || !height || !modulesQ || !powerUnitQ || !powerUnitCapacity || !receiver || !cooler || !Array.isArray(pixelStep) || pixelStep.length === 0 || !location || !Array.isArray(material) || material.length === 0|| !placement
         ) {
             res.status(400).json({ message: "Все поля обязательны" });
             return;
@@ -30,16 +28,18 @@ export const createCabinet = async (req: Request, res: Response): Promise<void> 
 
         const cabinet = await prisma.cabinet.create({
             data: {
-                type,
+                name,
                 width: parseInt(width, 10),
                 height: parseInt(height, 10),
-                cooler: parseInt(cooler, 10),
                 modulesQ: parseInt(modulesQ, 10),
-                name,
-                pixelOption,
-                powerUnitCapacity: parseInt(powerUnitCapacity, 10),
                 powerUnitQ: parseInt(powerUnitQ, 10),
+                powerUnitCapacity: parseInt(powerUnitCapacity, 10),
                 receiver: parseInt(receiver, 10),
+                cooler: parseInt(cooler, 10),
+                pixelStep,
+                location,
+                material,
+                placement,
             }
         });
 
@@ -54,11 +54,11 @@ export const createCabinet = async (req: Request, res: Response): Promise<void> 
 export const updateCabinet = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
-        const { type, width, height, cooler, modulesQ, name, pixelOption, powerUnitCapacity, powerUnitQ, receiver } = req.body;
+        const { name, width, height, modulesQ, powerUnitQ, powerUnitCapacity, receiver, cooler, pixelStep, location, material, placement} = req.body;
 
-        if (!id || !type || !width || !height || !cooler || !modulesQ || !name || 
-            !Array.isArray(pixelOption) || pixelOption.length === 0 || 
-            !powerUnitCapacity || !powerUnitQ || !receiver) {
+        if (
+            !name || !width || !height || !modulesQ || !powerUnitQ || !powerUnitCapacity || !receiver || !cooler || !Array.isArray(pixelStep) || pixelStep.length === 0 || !location || !Array.isArray(material) || material.length === 0|| !placement
+        ) {
             res.status(400).json({ message: "Все поля обязательны" });
             return;
         }
@@ -66,16 +66,18 @@ export const updateCabinet = async (req: Request, res: Response): Promise<void> 
         const updatedCabinet = await prisma.cabinet.update({
             where: { id: Number(id) },
             data: {
-                type,
+                name,
                 width: parseInt(width, 10),
                 height: parseInt(height, 10),
-                cooler: parseInt(cooler, 10),
                 modulesQ: parseInt(modulesQ, 10),
-                name,
-                pixelOption,
-                powerUnitCapacity: parseInt(powerUnitCapacity, 10),
                 powerUnitQ: parseInt(powerUnitQ, 10),
+                powerUnitCapacity: parseInt(powerUnitCapacity, 10),
                 receiver: parseInt(receiver, 10),
+                cooler: parseInt(cooler, 10),
+                pixelStep,
+                location,
+                material,
+                placement,
             }
         });
 
