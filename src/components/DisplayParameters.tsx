@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Select, Stack, TextInput, Grid, Button } from "@mantine/core";
-import '@mantine/core/styles/global.css';
+import { Select, Stack, TextInput, Grid, Button, Checkbox} from "@mantine/core";
+import classes from '../styles/DisplayParameters.module.scss';
 import CalculationResults from "./CalculationResults";
 
 const DisplayParameters = () => {
@@ -9,10 +9,14 @@ const DisplayParameters = () => {
   const [screenType, setScreenType] = useState<string | null>(null);
   const [screenTypes, setScreenTypes] = useState<{ name: string; material: string[]; option: string[] }[]>([]);
   const [pixelSteps, setPixelSteps] = useState<{ id: number; name: string; type: string; location: string[]; option: string[] }[]>([]);
+  const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
+  const [availableOptions, setAvailableOptions] = useState<string[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+
   const [filteredPixelSteps, setFilteredPixelSteps] = useState<string[]>([]);
   const [selectedPixelStep, setSelectedPixelStep] = useState<string | null>(null);
-  const [cabinets, setCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[] }[]>([]);
-  const [filteredCabinets, setFilteredCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[] }[]>([]);
+  const [cabinets, setCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[]; material: string[] }[]>([]);
+  const [filteredCabinets, setFilteredCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[]; material: string[] }[]>([]);
   const [selectedCabinet, setSelectedCabinet] = useState<string | null>(null);
   const [loadingSteps, setLoadingSteps] = useState<boolean>(false);
   const [loadingCabinets, setLoadingCabinets] = useState<boolean>(false);
@@ -23,6 +27,7 @@ const DisplayParameters = () => {
   const isScreenTypeSelected = isSizeValid && !!screenType;
   const isPixelStepSelected = isScreenTypeSelected && !!selectedPixelStep;
   const isCabinetSelected = isPixelStepSelected && !!selectedCabinet;
+  const isMaterialSelected = isSizeValid && !!screenType && !!selectedMaterial;
 
   // Загружаем данные
   useEffect(() => {
@@ -50,45 +55,70 @@ const DisplayParameters = () => {
       .finally(() => setLoadingCabinets(false));
   }, []);
 
+  // Фильтруем опции типа экрана после выбора материала
+  useEffect(() => {
+    if (!screenType || !selectedMaterial) {
+      setAvailableOptions([]);
+      setSelectedOptions([]);
+      return;
+    }
+  
+    const selectedScreen = screenTypes.find((type) => type.name === screenType);
+    if (!selectedScreen) return;
+  
+    setAvailableOptions(selectedScreen.option);
+    setSelectedOptions([]); // Сбрасываем выбранные опции при смене материала
+  }, [screenType, selectedMaterial, screenTypes]);
+
   // Фильтруем шаги пикселя после выбора типа экрана
   useEffect(() => {
-    if (!screenType) {
+    if (!screenType || !selectedMaterial) {
       setFilteredPixelSteps([]);
       return;
     }
-
+  
     const selectedScreen = screenTypes.find((type) => type.name === screenType);
     if (!selectedScreen) return;
-
-    setFilteredPixelSteps(
-      pixelSteps
-        .filter((step) => step.location.includes(selectedScreen.name))
-        .map((step) => step.name)
-    );
+  
+    let steps = pixelSteps.filter((step) => step.location.includes(selectedScreen.name));
+  
+    // 🔥 Если выбрана опция "гибкий экран", фильтруем по наличию в option
+    if (selectedOptions.includes("гибкий экран")) {
+      steps = steps.filter((step) => step.option.includes("гибкий экран"));
+    }
+  
+    setFilteredPixelSteps(steps.map((step) => step.name));
     setSelectedPixelStep(null);
     setSelectedCabinet(null);
-  }, [screenType, pixelSteps, screenTypes]);
+  }, [screenType, selectedMaterial, selectedOptions, pixelSteps, screenTypes]);
+  
 
   // Фильтруем кабинеты только после выбора шага пикселя
   useEffect(() => {
-    if (!screenType || !selectedPixelStep) {
+    if (!screenType || !selectedPixelStep || !selectedMaterial) {
       setFilteredCabinets([]);
       return;
     }
-
+  
     const selectedScreen = screenTypes.find((type) => type.name === screenType);
     if (!selectedScreen) {
       setFilteredCabinets([]);
       return;
     }
-
+  
     setFilteredCabinets(
       cabinets
-        .filter((cabinet) => cabinet.location === selectedScreen.name && cabinet.pixelStep.includes(selectedPixelStep))
+        .filter((cabinet) => 
+          cabinet.location === selectedScreen.name && 
+          cabinet.pixelStep.includes(selectedPixelStep) && 
+          cabinet.material.includes(selectedMaterial) // 🔥 Фильтр по материалу
+        )
         .sort((a, b) => a.name.localeCompare(b.name))
     );
+  
     setSelectedCabinet(null);
-  }, [screenType, selectedPixelStep, cabinets, screenTypes]);
+  }, [screenType, selectedPixelStep, selectedMaterial, cabinets, screenTypes]);
+  
 
   // Получаем имя выбранного кабинета
   const selectedCabinetName = selectedCabinet 
@@ -100,9 +130,11 @@ const DisplayParameters = () => {
     width,
     height,
     screenType,
+    selectedMaterial,
     selectedPixelStep,
     selectedCabinet,
-    cabinetName: selectedCabinetName
+    selectedOptions, // ✅ Добавляем выбранные опции
+    cabinetName: selectedCabinetName,
   };
 
   return (
@@ -127,27 +159,61 @@ const DisplayParameters = () => {
               required
             />
           </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <Select
+            label="Тип экрана"
+            placeholder="Выберите тип"
+            data={screenTypes.map((type) => ({ value: type.name, label: type.name }))}
+            value={screenType}
+            onChange={(value) => {
+              setScreenType(value);
+              setSelectedPixelStep(null);
+              setSelectedCabinet(null);
+            }}
+            disabled={!isSizeValid}
+            required
+          />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 6 }}>
+            <Select
+            label="Материал"
+            placeholder="Выберите материал"
+            data={
+              screenTypes
+              .find((type) => type.name === screenType)?.material
+              ?.map((mat) => ({ value: mat, label: mat }))}
+              value={selectedMaterial}
+              onChange={(value) => setSelectedMaterial(value)}
+              disabled={!screenType}
+              required
+          />
+          </Grid.Col>
         </Grid>
-
-        <Select
-          label="Тип экрана"
-          placeholder="Выберите тип"
-          data={screenTypes.map((type) => ({ value: type.name, label: type.name }))}
-          value={screenType}
-          onChange={(value) => {
-            setScreenType(value);
-            setSelectedPixelStep(null);
-            setSelectedCabinet(null);
-          }}
-          disabled={!isSizeValid}
-          required
-        />
-
+        {availableOptions.length > 0 && (
+          <Stack>
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              {availableOptions.map((option) => (
+                <Checkbox
+                  classNames={classes}
+                  key={option}
+                  label={option}
+                  checked={selectedOptions.includes(option)}
+                  onChange={(event) => {
+                    const updatedOptions = event.currentTarget.checked
+                      ? [...selectedOptions, option]
+                      : selectedOptions.filter((opt) => opt !== option);
+                    setSelectedOptions(updatedOptions);
+                  }}
+                />
+              ))}
+            </div>
+          </Stack>
+        )}      
         <Select
           label="Шаг пикселя"
           placeholder={loadingSteps ? "Загрузка..." : "Выберите шаг"}
           data={filteredPixelSteps.map((step) => ({ value: step, label: step }))}
-          disabled={!isScreenTypeSelected || loadingSteps || filteredPixelSteps.length === 0}
+          disabled={!isMaterialSelected || loadingSteps || filteredPixelSteps.length === 0}
           value={selectedPixelStep}
           onChange={(value) => {
             setSelectedPixelStep(value);
