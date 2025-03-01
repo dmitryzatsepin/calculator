@@ -9,15 +9,25 @@ const DisplayParameters = () => {
   const [screenType, setScreenType] = useState<string | null>(null);
   const [screenTypes, setScreenTypes] = useState<{ name: string; material: string[]; option: string[] }[]>([]);
   const [pixelSteps, setPixelSteps] = useState<{ id: number; name: string; type: string; location: string[]; option: string[] }[]>([]);
+  
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
   const [availableOptions, setAvailableOptions] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const [filteredPixelSteps, setFilteredPixelSteps] = useState<string[]>([]);
   const [selectedPixelStep, setSelectedPixelStep] = useState<string | null>(null);
-  const [cabinets, setCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[]; material: string[] }[]>([]);
-  const [filteredCabinets, setFilteredCabinets] = useState<{ id: number; name: string; location: string; pixelStep: string[]; material: string[] }[]>([]);
-  const [selectedCabinet, setSelectedCabinet] = useState<string | null>(null);
+  
+  const [cabinets, setCabinets] = useState<{ id: number; name: string; width: number; height: number;location: string; pixelStep: string[]; material: string[] }[]>([]);
+  const [filteredCabinets, setFilteredCabinets] = useState<{ id: number; name: string; width: number; height: number; location: string; pixelStep: string[]; material: string[] }[]>([]);
+  const [selectedCabinet, setSelectedCabinet] = useState<{
+    id: number;
+    name: string;
+    location: string;
+    width: number;
+    height: number;
+    pixelStep: string[];
+    material: string[];
+  } | null>(null);
   const [loadingSteps, setLoadingSteps] = useState<boolean>(false);
   const [loadingCabinets, setLoadingCabinets] = useState<boolean>(false);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
@@ -46,11 +56,32 @@ const DisplayParameters = () => {
       .finally(() => setLoadingSteps(false));
   }, []);
 
+  type CabinetType = {
+    id: number;
+    name: string;
+    location: string;
+    width: number;
+    height: number;
+    pixelStep: string[];
+    material: string[];
+  };
+  
+
   useEffect(() => {
     setLoadingCabinets(true);
     fetch("http://localhost:5000/cabinets")
       .then((res) => res.json())
-      .then((data) => setCabinets(data.cabinets))
+      .then((data) => 
+        setCabinets(data.cabinets.map((cabinet: CabinetType) => ({
+          id: cabinet.id,
+          name: cabinet.name,
+          width: cabinet.width || 0,  
+          height: cabinet.height || 0, 
+          location: cabinet.location,
+          pixelStep: cabinet.pixelStep,
+          material: cabinet.material,
+        })))
+      )
       .catch((error) => console.error("❌ Ошибка загрузки кабинетов:", error))
       .finally(() => setLoadingCabinets(false));
   }, []);
@@ -121,9 +152,8 @@ const DisplayParameters = () => {
   
 
   // Получаем имя выбранного кабинета
-  const selectedCabinetName = selectedCabinet 
-    ? filteredCabinets.find(c => c.id.toString() === selectedCabinet)?.name || null
-    : null;
+  //const selectedCabinetName = selectedCabinet ? selectedCabinet.name : null;
+
 
   // Данные для передачи в компонент результатов
   const calculationData = {
@@ -132,9 +162,11 @@ const DisplayParameters = () => {
     screenType,
     selectedMaterial,
     selectedPixelStep,
-    selectedCabinet,
+    selectedCabinet: selectedCabinet ? selectedCabinet.id.toString() : null,
+    cabinetName: selectedCabinet ? selectedCabinet.name : null,
+    cabinetWidth: selectedCabinet ? selectedCabinet.width : null,
+    cabinetHeight: selectedCabinet ? selectedCabinet.height : null,
     selectedOptions, // ✅ Добавляем выбранные опции
-    cabinetName: selectedCabinetName,
   };
 
   return (
@@ -225,10 +257,24 @@ const DisplayParameters = () => {
         <Select
           label="Кабинет"
           placeholder="Выберите кабинет"
-          data={filteredCabinets.map((cabinet) => ({ value: cabinet.id.toString(), label: cabinet.name }))}
+          data={filteredCabinets.map((cabinet) => ({ 
+            value: cabinet.id.toString(), 
+            label: cabinet.name 
+          }))}
           disabled={!isPixelStepSelected || loadingCabinets || filteredCabinets.length === 0}
-          value={selectedCabinet}
-          onChange={setSelectedCabinet}
+          value={selectedCabinet ? selectedCabinet.id.toString() : null}
+          onChange={(value) => {
+            const cabinetObj = filteredCabinets.find((c) => c.id.toString() === value);
+            if (cabinetObj) {
+              setSelectedCabinet({
+                ...cabinetObj,
+                width: cabinetObj.width,
+                height: cabinetObj.height,
+              });
+            } else {
+              setSelectedCabinet(null);
+            }
+          }}
           required
         />
 

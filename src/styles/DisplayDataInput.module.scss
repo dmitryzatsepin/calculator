@@ -34,6 +34,7 @@
 .controlLabel {
   position: relative;
   z-index: 1;
+  font-size: 17px;
 }
 
 .indicator {
@@ -42,7 +43,7 @@
 }
 
 .controlInner {
-  padding: 0 10px;
+  padding: 10px;
 }
 
 .contentContainer {
