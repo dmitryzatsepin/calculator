@@ -64,7 +64,7 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
       <Table striped highlightOnHover withTableBorder withColumnBorders className={styles.table}>
         <thead>
           <tr>
-            <th className={styles.th}>Харакеристика</th>
+            <th className={styles.th}>Характеристика</th>
             <th className={styles.th}>Значение</th>
           </tr>
         </thead>

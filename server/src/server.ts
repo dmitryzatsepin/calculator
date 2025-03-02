@@ -10,6 +10,7 @@ import authRoutes from "./routes/authRoutes";
 import pixelStepRoutes from "./routes/pixelStepRoutes";
 import cabinetRoutes from "./routes/cabinetRoutes";
 import screenTypeRoutes from "./routes/screenTypeRoutes";
+import protectionRoutes from "./routes/ingressProtection"; 
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ configurePassport(passport);
 app.use("/auth", authRoutes);
 app.use("/screen-types", screenTypeRoutes); 
 app.use("/pixel-steps", pixelStepRoutes);
+app.use("/protection", protectionRoutes);
 app.use("/cabinets", cabinetRoutes);
 
 

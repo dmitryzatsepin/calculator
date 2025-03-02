@@ -1,24 +1,61 @@
 import { useState, useEffect } from "react";
-import { Select, Stack, TextInput, Grid, Button, Checkbox} from "@mantine/core";
-import classes from '../styles/DisplayParameters.module.scss';
+import {
+  Select,
+  Stack,
+  TextInput,
+  Grid,
+  Button,
+  Checkbox,
+} from "@mantine/core";
+import classes from "../styles/DisplayParameters.module.scss";
 import CalculationResults from "./CalculationResults";
 
 const DisplayParameters = () => {
   const [width, setWidth] = useState<string>("");
   const [height, setHeight] = useState<string>("");
   const [screenType, setScreenType] = useState<string | null>(null);
-  const [screenTypes, setScreenTypes] = useState<{ name: string; material: string[]; option: string[] }[]>([]);
-  const [pixelSteps, setPixelSteps] = useState<{ id: number; name: string; type: string; location: string[]; option: string[] }[]>([]);
-  
+  const [screenTypes, setScreenTypes] = useState<{ name: string; material: string[]; option: string[] }[] >([]);
+  const [pixelSteps, setPixelSteps] = useState<{
+    id: number;
+    name: string;
+    type: string;
+    location: string[];
+    option: string[];
+  }[]>([]);
   const [selectedMaterial, setSelectedMaterial] = useState<string | null>(null);
+
   const [availableOptions, setAvailableOptions] = useState<string[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
+  const [protectionOptions, setProtectionOptions] = useState<{ code: string }[]>([]); // 🆕 Степень защиты
+  const [selectedProtection, setSelectedProtection] = useState<string | null>(null); // 🆕 Степень защиты
+
   const [filteredPixelSteps, setFilteredPixelSteps] = useState<string[]>([]);
-  const [selectedPixelStep, setSelectedPixelStep] = useState<string | null>(null);
+  const [selectedPixelStep, setSelectedPixelStep] = useState<string | null>(null);  
+
+  const [cabinets, setCabinets] = useState<
+    {
+      id: number;
+      name: string;
+      width: number;
+      height: number;
+      location: string;
+      pixelStep: string[];
+      material: string[];
+    }[]
+  >([]);
   
-  const [cabinets, setCabinets] = useState<{ id: number; name: string; width: number; height: number;location: string; pixelStep: string[]; material: string[] }[]>([]);
-  const [filteredCabinets, setFilteredCabinets] = useState<{ id: number; name: string; width: number; height: number; location: string; pixelStep: string[]; material: string[] }[]>([]);
+  const [filteredCabinets, setFilteredCabinets] = useState<
+    {
+      id: number;
+      name: string;
+      width: number;
+      height: number;
+      location: string;
+      pixelStep: string[];
+      material: string[];
+    }[]>([]);
+  
   const [selectedCabinet, setSelectedCabinet] = useState<{
     id: number;
     name: string;
@@ -43,16 +80,57 @@ const DisplayParameters = () => {
   useEffect(() => {
     fetch("http://localhost:5000/screen-types")
       .then((res) => res.json())
-      .then((data) => setScreenTypes(data.types))
-      .catch((error) => console.error("❌ Ошибка загрузки типов экранов:", error));
+      .then((data) => {
+        console.log("Данные типов экранов:", data.types); // Логирование для отладки
+        setScreenTypes(data.types);
+      })
+      .catch((error) =>
+        console.error("❌ Ошибка загрузки типов экранов:", error)
+      );
   }, []);
+
+  // Фетч степеней защиты (только IP29 - IP69)
+  useEffect(() => {
+    fetch("http://localhost:5000/protection")
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("🔍 Данные из API:", data); // 👉 Логируем ответ сервера
+        const filtered = data.protections.filter((p: { code: string }) => {
+          const ipNumber = parseInt(p.code.replace("IP", ""), 10);
+          return ipNumber >= 29 && ipNumber <= 69;
+        });
+        console.log("📌 Отфильтрованные данные:", filtered); // 👉 Логируем после фильтрации
+        setProtectionOptions(filtered);
+      })
+      .catch((error) =>
+        console.error("❌ Ошибка загрузки степеней защиты:", error)
+      );
+  }, []);
+
+  // Устанавливаем дефолтное значение защиты при смене типа экрана
+  useEffect(() => {
+    if (!screenType) return;
+
+    const defaultProtection = screenType === "интерьерный" ? "IP29" : "IP69";
+    console.log("🔄 Смена экрана:", screenType, "| Устанавливаем защиту:", defaultProtection);
+
+    setSelectedProtection(defaultProtection);
+  }, [screenType]);
+
+  // 🔥 🔄 Форсируем обновление Select (React не всегда ререндерит)
+  useEffect(() => {
+    console.log("✅ selectedProtection обновился:", selectedProtection);
+  }, [selectedProtection]);
+
 
   useEffect(() => {
     setLoadingSteps(true);
     fetch("http://localhost:5000/pixel-steps")
       .then((res) => res.json())
       .then((data) => setPixelSteps(data.steps))
-      .catch((error) => console.error("❌ Ошибка загрузки шагов пикселя:", error))
+      .catch((error) =>
+        console.error("❌ Ошибка загрузки шагов пикселя:", error)
+      )
       .finally(() => setLoadingSteps(false));
   }, []);
 
@@ -65,22 +143,23 @@ const DisplayParameters = () => {
     pixelStep: string[];
     material: string[];
   };
-  
 
   useEffect(() => {
     setLoadingCabinets(true);
     fetch("http://localhost:5000/cabinets")
       .then((res) => res.json())
-      .then((data) => 
-        setCabinets(data.cabinets.map((cabinet: CabinetType) => ({
-          id: cabinet.id,
-          name: cabinet.name,
-          width: cabinet.width || 0,  
-          height: cabinet.height || 0, 
-          location: cabinet.location,
-          pixelStep: cabinet.pixelStep,
-          material: cabinet.material,
-        })))
+      .then((data) =>
+        setCabinets(
+          data.cabinets.map((cabinet: CabinetType) => ({
+            id: cabinet.id,
+            name: cabinet.name,
+            width: cabinet.width || 0,
+            height: cabinet.height || 0,
+            location: cabinet.location,
+            pixelStep: cabinet.pixelStep,
+            material: cabinet.material,
+          }))
+        )
       )
       .catch((error) => console.error("❌ Ошибка загрузки кабинетов:", error))
       .finally(() => setLoadingCabinets(false));
@@ -93,10 +172,10 @@ const DisplayParameters = () => {
       setSelectedOptions([]);
       return;
     }
-  
+
     const selectedScreen = screenTypes.find((type) => type.name === screenType);
     if (!selectedScreen) return;
-  
+
     setAvailableOptions(selectedScreen.option);
     setSelectedOptions([]); // Сбрасываем выбранные опции при смене материала
   }, [screenType, selectedMaterial, screenTypes]);
@@ -107,22 +186,23 @@ const DisplayParameters = () => {
       setFilteredPixelSteps([]);
       return;
     }
-  
+
     const selectedScreen = screenTypes.find((type) => type.name === screenType);
     if (!selectedScreen) return;
-  
-    let steps = pixelSteps.filter((step) => step.location.includes(selectedScreen.name));
-  
+
+    let steps = pixelSteps.filter((step) =>
+      step.location.includes(selectedScreen.name)
+    );
+
     // 🔥 Если выбрана опция "гибкий экран", фильтруем по наличию в option
     if (selectedOptions.includes("гибкий экран")) {
       steps = steps.filter((step) => step.option.includes("гибкий экран"));
     }
-  
+
     setFilteredPixelSteps(steps.map((step) => step.name));
     setSelectedPixelStep(null);
     setSelectedCabinet(null);
   }, [screenType, selectedMaterial, selectedOptions, pixelSteps, screenTypes]);
-  
 
   // Фильтруем кабинеты только после выбора шага пикселя
   useEffect(() => {
@@ -130,30 +210,29 @@ const DisplayParameters = () => {
       setFilteredCabinets([]);
       return;
     }
-  
+
     const selectedScreen = screenTypes.find((type) => type.name === screenType);
     if (!selectedScreen) {
       setFilteredCabinets([]);
       return;
     }
-  
+
     setFilteredCabinets(
       cabinets
-        .filter((cabinet) => 
-          cabinet.location === selectedScreen.name && 
-          cabinet.pixelStep.includes(selectedPixelStep) && 
-          cabinet.material.includes(selectedMaterial) // 🔥 Фильтр по материалу
+        .filter(
+          (cabinet) =>
+            cabinet.location === selectedScreen.name &&
+            cabinet.pixelStep.includes(selectedPixelStep) &&
+            cabinet.material.includes(selectedMaterial) // 🔥 Фильтр по материалу
         )
         .sort((a, b) => a.name.localeCompare(b.name))
     );
-  
+
     setSelectedCabinet(null);
   }, [screenType, selectedPixelStep, selectedMaterial, cabinets, screenTypes]);
-  
 
   // Получаем имя выбранного кабинета
   //const selectedCabinetName = selectedCabinet ? selectedCabinet.name : null;
-
 
   // Данные для передачи в компонент результатов
   const calculationData = {
@@ -162,6 +241,7 @@ const DisplayParameters = () => {
     screenType,
     selectedMaterial,
     selectedPixelStep,
+    selectedProtection,
     selectedCabinet: selectedCabinet ? selectedCabinet.id.toString() : null,
     cabinetName: selectedCabinet ? selectedCabinet.name : null,
     cabinetWidth: selectedCabinet ? selectedCabinet.width : null,
@@ -191,92 +271,126 @@ const DisplayParameters = () => {
               required
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Grid.Col span={{ base: 12, sm: 4 }}>
             <Select
-            label="Тип экрана"
-            placeholder="Выберите тип"
-            data={screenTypes.map((type) => ({ value: type.name, label: type.name }))}
-            value={screenType}
-            onChange={(value) => {
-              setScreenType(value);
-              setSelectedPixelStep(null);
-              setSelectedCabinet(null);
-            }}
-            disabled={!isSizeValid}
-            required
-          />
+              label="Тип экрана"
+              placeholder="Выберите тип"
+              data={screenTypes.map((type) => ({
+                value: type.name,
+                label: type.name,
+              }))}
+              value={screenType}
+              onChange={(value) => {
+                setScreenType(value);
+                setSelectedPixelStep(null);
+                setSelectedCabinet(null);
+              }}
+              disabled={!isSizeValid}
+              required
+            />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Grid.Col span={{ base: 12, sm: 4 }}>
             <Select
-            label="Материал"
-            placeholder="Выберите материал"
-            data={
-              screenTypes
-              .find((type) => type.name === screenType)?.material
-              ?.map((mat) => ({ value: mat, label: mat }))}
+              label="Степень защиты"
+              placeholder="Выберите степень защиты"
+              data={protectionOptions.map((p) => ({
+                value: p.code,
+                label: p.code,
+              }))}
+              value={selectedProtection}
+              onChange={setSelectedProtection}
+              disabled={!screenType} // Активируется после выбора типа экрана
+              required
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 4 }}>
+            <Select
+              label="Материал"
+              placeholder="Выберите материал"
+              data={screenTypes
+                .find((type) => type.name === screenType)
+                ?.material?.map((mat) => ({ value: mat, label: mat }))}
               value={selectedMaterial}
               onChange={(value) => setSelectedMaterial(value)}
               disabled={!screenType}
               required
-          />
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 12 }}>
+            {availableOptions.length > 0 && (
+              <Stack>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                  {availableOptions.map((option) => (
+                    <Checkbox
+                      classNames={classes}
+                      key={option}
+                      label={option}
+                      checked={selectedOptions.includes(option)}
+                      onChange={(event) => {
+                        const updatedOptions = event.currentTarget.checked
+                          ? [...selectedOptions, option]
+                          : selectedOptions.filter((opt) => opt !== option);
+                        setSelectedOptions(updatedOptions);
+                      }}
+                    />
+                  ))}
+                </div>
+              </Stack>
+            )}
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 12 }}>
+            <Select
+              label="Шаг пикселя"
+              placeholder={loadingSteps ? "Загрузка..." : "Выберите шаг"}
+              data={filteredPixelSteps.map((step) => ({
+                value: step,
+                label: step,
+              }))}
+              disabled={
+                !isMaterialSelected ||
+                loadingSteps ||
+                filteredPixelSteps.length === 0
+              }
+              value={selectedPixelStep}
+              onChange={(value) => {
+                setSelectedPixelStep(value);
+                setSelectedCabinet(null);
+              }}
+              required
+            />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 12 }}>
+            <Select
+              label="Кабинет"
+              placeholder="Выберите кабинет"
+              data={filteredCabinets.map((cabinet) => ({
+                value: cabinet.id.toString(),
+                label: cabinet.name,
+              }))}
+              disabled={
+                !isPixelStepSelected ||
+                loadingCabinets ||
+                filteredCabinets.length === 0
+              }
+              value={selectedCabinet ? selectedCabinet.id.toString() : null}
+              onChange={(value) => {
+                const cabinetObj = filteredCabinets.find(
+                  (c) => c.id.toString() === value
+                );
+                if (cabinetObj) {
+                  setSelectedCabinet({
+                    ...cabinetObj,
+                    width: cabinetObj.width,
+                    height: cabinetObj.height,
+                  });
+                } else {
+                  setSelectedCabinet(null);
+                }
+              }}
+              required
+            />
           </Grid.Col>
         </Grid>
-        {availableOptions.length > 0 && (
-          <Stack>
-            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              {availableOptions.map((option) => (
-                <Checkbox
-                  classNames={classes}
-                  key={option}
-                  label={option}
-                  checked={selectedOptions.includes(option)}
-                  onChange={(event) => {
-                    const updatedOptions = event.currentTarget.checked
-                      ? [...selectedOptions, option]
-                      : selectedOptions.filter((opt) => opt !== option);
-                    setSelectedOptions(updatedOptions);
-                  }}
-                />
-              ))}
-            </div>
-          </Stack>
-        )}      
-        <Select
-          label="Шаг пикселя"
-          placeholder={loadingSteps ? "Загрузка..." : "Выберите шаг"}
-          data={filteredPixelSteps.map((step) => ({ value: step, label: step }))}
-          disabled={!isMaterialSelected || loadingSteps || filteredPixelSteps.length === 0}
-          value={selectedPixelStep}
-          onChange={(value) => {
-            setSelectedPixelStep(value);
-            setSelectedCabinet(null);
-          }}
-          required
-        />
-
-        <Select
-          label="Кабинет"
-          placeholder="Выберите кабинет"
-          data={filteredCabinets.map((cabinet) => ({ 
-            value: cabinet.id.toString(), 
-            label: cabinet.name 
-          }))}
-          disabled={!isPixelStepSelected || loadingCabinets || filteredCabinets.length === 0}
-          value={selectedCabinet ? selectedCabinet.id.toString() : null}
-          onChange={(value) => {
-            const cabinetObj = filteredCabinets.find((c) => c.id.toString() === value);
-            if (cabinetObj) {
-              setSelectedCabinet({
-                ...cabinetObj,
-                width: cabinetObj.width,
-                height: cabinetObj.height,
-              });
-            } else {
-              setSelectedCabinet(null);
-            }
-          }}
-          required
-        />
 
         {/* Кнопка "Рассчитать" появляется только после выбора кабинета */}
         {isCabinetSelected && (
@@ -287,7 +401,7 @@ const DisplayParameters = () => {
       </Stack>
 
       {/* Используем отдельный компонент для отображения результатов */}
-      <CalculationResults 
+      <CalculationResults
         opened={drawerOpened}
         onClose={() => setDrawerOpened(false)}
         data={calculationData}
