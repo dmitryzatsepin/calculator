@@ -34,6 +34,8 @@ model PixelStep {
   type              String
   width             Int
   height            Int
+  brightness        Int
+  refreshFreq       Int
   location          String 
   option            String[]
 
@@ -57,4 +59,13 @@ model Cabinet {
   placement         String
 
   @@unique([name, location])
+}
+
+model IngressProtection {
+  id                    Int    @id @default(autoincrement())
+  code                  String
+  hardObjectProtection  String
+  waterProtection       String
+
+  @@unique([code])
 }

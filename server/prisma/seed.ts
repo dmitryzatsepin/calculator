@@ -93,6 +93,8 @@ async function importFromExcel(filePath: string): Promise<void> {
               type: String(row.type),
               width: Number(row.width),
               height: Number(row.height),
+              brightness: row.brightness ? Number(row.brightness) : 0,  // ✅ Проверяем, есть ли значение
+              refreshFreq: row.refreshFreq ? Number(row.refreshFreq) : 60, // ✅ Если NaN, ставим 60 Гц
               location: String(row.location),
               option: {set: optionArray}
             }
@@ -151,6 +153,33 @@ async function importFromExcel(filePath: string): Promise<void> {
       console.warn('⚠️ Лист Cabinets не найден в Excel-файле');
     }
     
+        // 🔥 Импортируем таблицу IP-кодов (защиты)
+        if (workbook.SheetNames.includes('IngressProtection')) {
+          const ipProtectionSheet = workbook.Sheets['IngressProtection'];
+          const ipProtection: Record<string, unknown>[] = XLSX.utils.sheet_to_json(ipProtectionSheet);
+    
+          // Проверяем обязательные поля
+          if (validateRequiredFields(ipProtection, ['code', 'hardObjectProtection', 'waterProtection'], 'IPProtection')) {
+            // Очищаем таблицу перед вставкой
+            await prisma.ingressProtection.deleteMany({});
+    
+            // Вставляем данные по одному
+            for (const row of ipProtection) {
+              await prisma.ingressProtection.create({
+                data: {
+                  code: String(row.code),
+                  hardObjectProtection: String(row.hardObjectProtection),
+                  waterProtection: String(row.waterProtection),
+                }
+              });
+            }
+    
+            console.log('✅ Данные IP-защиты успешно импортированы');
+          }
+        } else {
+          console.warn('⚠️ Лист IngressProtection не найден в Excel-файле');
+        }
+
     console.log('🎉 Импорт данных успешно завершен!');
   } catch (error) {
     console.error('❌ Ошибка при импорте данных:', error);

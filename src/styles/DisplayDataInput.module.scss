@@ -12,7 +12,7 @@
 
 .control {
   position: relative;
-  min-height: 25px;
+  min-height: 20px;
   display: flex;
   align-items: center;
   color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-2));
@@ -43,7 +43,7 @@
 }
 
 .controlInner {
-  padding: 10px;
+  padding: 5px 20px;
 }
 
 .contentContainer {
