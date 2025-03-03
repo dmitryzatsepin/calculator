@@ -19,6 +19,8 @@ const DisplayParameters = () => {
     id: number;
     name: string;
     type: string;
+    brightness: number;
+    refreshFreq: number;
     location: string[];
     option: string[];
   }[]>([]);
@@ -123,18 +125,40 @@ const DisplayParameters = () => {
   }, [selectedProtection]);
 
 
-  
+  type PixelStep = {
+    id: number;
+    name: string;
+    type: string;
+    width: number;
+    height: number;
+    brightness: number;
+    refreshFreq: number;
+    location: string;
+    option: string[];
+  };
 
 
   useEffect(() => {
     setLoadingSteps(true);
     fetch("http://localhost:5000/pixel-steps")
       .then((res) => res.json())
-      .then((data) => setPixelSteps(data.steps))
-      
-      .catch((error) =>
-        console.error("❌ Ошибка загрузки шагов пикселя:", error)
+      .then((data) => 
+        setPixelSteps(
+          data.steps.map((pixelStep: PixelStep) => ({
+            id: pixelStep.id,
+            name: pixelStep.name,
+            type: pixelStep.type,
+            width: pixelStep.width,
+            height: pixelStep.height,
+            brightness: pixelStep.brightness,
+            refreshFreq: pixelStep.refreshFreq,
+            location: pixelStep.location,
+            option: pixelStep.option,
+          }))
+        )
       )
+      .catch((error) =>
+        console.error("❌ Ошибка загрузки шагов пикселя:", error))
       .finally(() => setLoadingSteps(false));
   }, []);
 
@@ -253,7 +277,7 @@ const DisplayParameters = () => {
     cabinetName: selectedCabinet ? selectedCabinet.name : null,
     cabinetWidth: selectedCabinet ? selectedCabinet.width : null,
     cabinetHeight: selectedCabinet ? selectedCabinet.height : null,
-    selectedOptions, // ✅ Добавляем выбранные опции
+    selectedOptions,
   };
 
   return (
