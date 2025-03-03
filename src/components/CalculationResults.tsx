@@ -8,12 +8,21 @@ interface CalculationResultsProps {
     width: string;
     height: string;
     screenType: string | null;
+    selectedProtection: string | null;
     selectedMaterial: string | null;
     selectedPixelStep: string | null;
     selectedCabinet: string | null;
     cabinetName: string | null;
     cabinetWidth: number | null;
     cabinetHeight: number | null;
+    selectedOptions: string[];
+    pixelSteps: {
+      id: number;
+      name: string;
+      type: string;
+      brightness: number;
+      refreshFreq: number;
+    }[];
   };
 }
 
@@ -24,11 +33,27 @@ const extractNumericPixelStep = (pixelStep: string | null): string => {
   return match ? match[0] : "-"; // Если нашли, возвращаем; иначе прочерк
 };
 
+// Определяем тип диодов
+const getDiodeType = (pixelStep: string | null): string => {
+  if (!pixelStep) return "-";
+  return pixelStep.includes("eco") ? "SMD" : "SMD2";
+};
 
-const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) => {
+const CalculationResults = ({
+  opened,
+  onClose,
+  data,
+}: CalculationResultsProps) => {
   if (!data.selectedCabinet || !data.cabinetWidth || !data.cabinetHeight) {
     return null; // Если данные не выбраны, не рендерим таблицу
   }
+
+  // **🔥 Находим выбранный шаг пикселя**
+  const selectedStep = data.pixelSteps.find(
+    (step) => step.name === data.selectedPixelStep
+  );
+  const brightness = selectedStep?.brightness ?? "-"; // Если нет данных, ставим прочерк
+  const refreshFreq = selectedStep?.refreshFreq ?? "-"; // Если нет данных, ставим прочерк
 
   // Преобразуем размеры в числа
   const screenWidth = parseInt(data.width, 10);
@@ -47,11 +72,21 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
 
   // 🔥 Выбираем лучший вариант размещения (чтобы уместилось больше кабинетов)
   const isHorizontal = totalHorizontal >= totalVertical;
-  const widthCabinetsCount = isHorizontal ? widthCabinetsHorizontal : widthCabinetsVertical;
-  const heightCabinetsCount = isHorizontal ? heightCabinetsHorizontal : heightCabinetsVertical;
+  const widthCabinetsCount = isHorizontal
+    ? widthCabinetsHorizontal
+    : widthCabinetsVertical;
+  const heightCabinetsCount = isHorizontal
+    ? heightCabinetsHorizontal
+    : heightCabinetsVertical;
   const totalCabinets = widthCabinetsCount * heightCabinetsCount;
-  const finalWidth = widthCabinetsCount * (isHorizontal ? cabinetWidth : cabinetHeight);
-  const finalHeight = heightCabinetsCount * (isHorizontal ? cabinetHeight : cabinetWidth);
+  const finalWidth =
+    widthCabinetsCount * (isHorizontal ? cabinetWidth : cabinetHeight);
+  const finalHeight =
+    heightCabinetsCount * (isHorizontal ? cabinetHeight : cabinetWidth);
+  const activeArea = (finalWidth * finalHeight) / 1_000_000; // Площадь в м²
+
+  // 🔥 Дистанция обзора (число из шага пикселя)
+  const viewingDistance = extractNumericPixelStep(data.selectedPixelStep);
 
   return (
     <Drawer
@@ -61,7 +96,13 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
       position="right"
       size="xl"
     >
-      <Table striped highlightOnHover withTableBorder withColumnBorders className={styles.table}>
+      <Table
+        striped
+        highlightOnHover
+        withTableBorder
+        withColumnBorders
+        className={styles.table}
+      >
         <thead>
           <tr>
             <th className={styles.th}>Характеристика</th>
@@ -70,10 +111,6 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
         </thead>
         <tbody>
           <tr>
-            <td className={styles.td}>Компоновка (шаг пикселя)</td>
-            <td className={styles.td}>{extractNumericPixelStep(data.selectedPixelStep)} мм</td>
-          </tr>
-          <tr>
             <td className={styles.td}>Исполнение экрана</td>
             <td className={styles.td}>{data.screenType || "-"}</td>
           </tr>
@@ -81,17 +118,37 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
             <td className={styles.td}>Материал кабинета</td>
             <td className={styles.td}>{data.selectedMaterial || "-"}</td>
           </tr>
-        <tr>
+          <tr>
             <td className={styles.td}>Размер кабинета</td>
-            <td className={styles.td}>{`${cabinetHeight}×${cabinetWidth} мм`}</td>
+            <td
+              className={styles.td}
+            >{`${cabinetHeight}×${cabinetWidth} мм`}</td>
           </tr>
           <tr>
             <td className={styles.td}>Количество кабинетов</td>
-            <td className={styles.td}>{totalCabinets} шт.</td> 
+            <td className={styles.td}>{totalCabinets} шт.</td>
           </tr>
           <tr>
             <td className={styles.td}>Ориентация кабинетов</td>
-            <td className={styles.td}>{isHorizontal ? "горизонтальная" : "вертикальная"}</td>
+            <td className={styles.td}>
+              {isHorizontal ? "горизонтальная" : "вертикальная"}
+            </td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Пыле и влагозащита</td>
+            <td className={styles.td}>{data.selectedProtection || "-"}</td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Тип диодов</td>
+            <td className={styles.td}>
+              {getDiodeType(data.selectedPixelStep)}
+            </td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Компоновка (шаг пикселя)</td>
+            <td className={styles.td}>
+              {extractNumericPixelStep(data.selectedPixelStep)} мм
+            </td>
           </tr>
           <tr>
             <td className={styles.td}>Ширина светодиодного полотна</td>
@@ -100,6 +157,31 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
           <tr>
             <td className={styles.td}>Высота светодиодного полотна</td>
             <td className={styles.td}>{finalHeight} мм</td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Площадь активной области</td>
+            <td className={styles.td}>{activeArea.toFixed(2)} м²</td>
+          </tr>
+
+          <tr>
+            <td className={styles.td}>Яркость</td>
+            <td className={styles.td}>{brightness} кд/м²</td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Частота обновления</td>
+            <td className={styles.td}>{refreshFreq} Гц</td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Горизонтальный угол обзора</td>
+            <td className={styles.td}>149°</td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Вертикальный угол обзора</td>
+            <td className={styles.td}>149°</td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Дистанция обзора</td>
+            <td className={styles.td}>от {viewingDistance} м</td>
           </tr>
         </tbody>
       </Table>

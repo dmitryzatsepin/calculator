@@ -123,16 +123,22 @@ const DisplayParameters = () => {
   }, [selectedProtection]);
 
 
+  
+
+
   useEffect(() => {
     setLoadingSteps(true);
     fetch("http://localhost:5000/pixel-steps")
       .then((res) => res.json())
       .then((data) => setPixelSteps(data.steps))
+      
       .catch((error) =>
         console.error("❌ Ошибка загрузки шагов пикселя:", error)
       )
       .finally(() => setLoadingSteps(false));
   }, []);
+
+  
 
   type CabinetType = {
     id: number;
@@ -239,9 +245,10 @@ const DisplayParameters = () => {
     width,
     height,
     screenType,
-    selectedMaterial,
-    selectedPixelStep,
     selectedProtection,
+    selectedMaterial,
+    pixelSteps,
+    selectedPixelStep,
     selectedCabinet: selectedCabinet ? selectedCabinet.id.toString() : null,
     cabinetName: selectedCabinet ? selectedCabinet.name : null,
     cabinetWidth: selectedCabinet ? selectedCabinet.width : null,
