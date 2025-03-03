@@ -69,6 +69,7 @@ const DisplayParameters = () => {
   } | null>(null);
   const [loadingSteps, setLoadingSteps] = useState<boolean>(false);
   const [loadingCabinets, setLoadingCabinets] = useState<boolean>(false);
+  const [exchangeRate, setExchangeRate] = useState<number>(0);
   const [drawerOpened, setDrawerOpened] = useState<boolean>(false);
 
   // Проверяем, заполнены ли все поля перед активацией кнопки "Рассчитать"
@@ -264,6 +265,21 @@ const DisplayParameters = () => {
   // Получаем имя выбранного кабинета
   //const selectedCabinetName = selectedCabinet ? selectedCabinet.name : null;
 
+    // 🔥 Добавляем обработку курса валют
+    useEffect(() => {
+      fetch("https://www.cbr-xml-daily.ru/daily_json.js")
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("📡 Ответ API ЦБ РФ:", data);
+          if (data && data.Valute && data.Valute.USD) {
+            setExchangeRate(parseFloat(data.Valute.USD.Value.toFixed(2))); 
+          } else {
+            console.error("❌ Ошибка: структура ответа API ЦБ РФ изменилась!", data);
+          }
+        })
+        .catch((error) => console.error("❌ Ошибка загрузки курса валют:", error));
+    }, []); 
+
   // Данные для передачи в компонент результатов
   const calculationData = {
     width,
@@ -423,12 +439,25 @@ const DisplayParameters = () => {
           </Grid.Col>
         </Grid>
 
-        {/* Кнопка "Рассчитать" появляется только после выбора кабинета */}
         {isCabinetSelected && (
-          <Button onClick={() => setDrawerOpened(true)} fullWidth>
-            Рассчитать
-          </Button>
-        )}
+  <Grid align="center">
+    <Grid.Col span="content">
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <span role="img" aria-label="USD">🇺🇸</span>
+        <TextInput
+          type="number"
+          value={exchangeRate !== null ? exchangeRate.toString() : ""}
+          onChange={(event) => setExchangeRate(parseFloat(event.currentTarget.value))}
+          required
+          style={{ width: "80px" }}
+        />
+      </div>
+    </Grid.Col>
+    <Grid.Col span="auto">
+      <Button fullWidth onClick={() => setDrawerOpened(true)}>Рассчитать</Button>
+    </Grid.Col>
+  </Grid>
+)}
       </Stack>
 
       {/* Используем отдельный компонент для отображения результатов */}
