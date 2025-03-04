@@ -1,4 +1,4 @@
-import { Drawer, Table } from "@mantine/core";
+import { Drawer, Table, Button, Center } from "@mantine/core";
 import styles from "../styles/CalculationResults.module.scss";
 
 interface CalculationResultsProps {
@@ -11,7 +11,17 @@ interface CalculationResultsProps {
     selectedProtection: string | null;
     selectedMaterial: string | null;
     selectedPixelStep: string | null;
-    selectedCabinet: string | null;
+    selectedCabinet: {
+      id: number;
+      name: string;
+      width: number;
+      height: number;
+      pixelStep: string[];
+      material: string[];
+      modulesQ: number;
+      powerUnitQ: number;
+      receiver: number;
+    } | null;
     cabinetName: string | null;
     cabinetWidth: number | null;
     cabinetHeight: number | null;
@@ -25,6 +35,7 @@ interface CalculationResultsProps {
     }[];
   };
 }
+
 
 // Функция для извлечения числового значения шага пикселя
 const extractNumericPixelStep = (pixelStep: string | null): string => {
@@ -47,6 +58,11 @@ const CalculationResults = ({
   if (!data.selectedCabinet || !data.cabinetWidth || !data.cabinetHeight) {
     return null; // Если данные не выбраны, не рендерим таблицу
   }
+  // 🔥 Функция-заглушка для будущей логики сохранения
+  const handleSaveOffer = () => {
+    console.log("📝 Сохранение предложения...", data);
+    // Здесь позже добавим отправку данных в API или сохранение в localStorage
+  };
 
   // **🔥 Находим выбранный шаг пикселя**
   const selectedStep = data.pixelSteps.find(
@@ -87,6 +103,15 @@ const CalculationResults = ({
 
   // 🔥 Дистанция обзора (число из шага пикселя)
   const viewingDistance = extractNumericPixelStep(data.selectedPixelStep);
+
+    // **🔥 Расчет ЗИП комплекта (5% от общего количества)**
+  const spareModules = Math.ceil((totalCabinets * (data.selectedCabinet?.modulesQ ?? 0)) * 0.05);
+  const sparePowerUnits = Math.ceil((totalCabinets * (data.selectedCabinet?.powerUnitQ ?? 0)) * 0.05);
+  const spareReceivers = Math.ceil((totalCabinets * (data.selectedCabinet?.receiver ?? 0)) * 0.05);
+
+  // **🔥 Формируем строку ЗИП комплекта**
+  const zipKit = `модули - ${spareModules} шт.; БП - ${sparePowerUnits} шт.; приёмные карты - ${spareReceivers} шт.`;
+
 
   return (
     <Drawer
@@ -183,8 +208,19 @@ const CalculationResults = ({
             <td className={styles.td}>Дистанция обзора</td>
             <td className={styles.td}>от {viewingDistance} м</td>
           </tr>
+          <tr>
+            <td className={styles.td}>ЗИП комплект (Запасные части)</td>
+            <td className={styles.td}>{zipKit}</td>
+          </tr>
+          <tr>
+            <td className={styles.td}>Цена предложения</td>
+            <td className={styles.td}></td>
+          </tr>
         </tbody>
       </Table>
+      <Center mt="md">
+          <Button onClick={handleSaveOffer}>Сохранить предложение</Button>
+      </Center>
     </Drawer>
   );
 };

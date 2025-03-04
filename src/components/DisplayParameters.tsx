@@ -173,6 +173,9 @@ const DisplayParameters = () => {
     height: number;
     pixelStep: string[];
     material: string[];
+    modulesQ: number;
+    powerUnitQ: number;
+    receiver: number;
   };
 
   useEffect(() => {
@@ -189,6 +192,9 @@ const DisplayParameters = () => {
             location: cabinet.location,
             pixelStep: cabinet.pixelStep,
             material: cabinet.material,
+            modulesQ: cabinet.modulesQ || 0,
+            powerUnitQ: cabinet.powerUnitQ || 0,
+            receiver: cabinet.receiver || 0,
           }))
         )
       )
@@ -289,7 +295,17 @@ const DisplayParameters = () => {
     selectedMaterial,
     pixelSteps,
     selectedPixelStep,
-    selectedCabinet: selectedCabinet ? selectedCabinet.id.toString() : null,
+    selectedCabinet: selectedCabinet ? { 
+      id: selectedCabinet.id,
+      name: selectedCabinet.name,
+      width: selectedCabinet.width,
+      height: selectedCabinet.height,
+      pixelStep: selectedCabinet.pixelStep,
+      material: selectedCabinet.material,
+      modulesQ: selectedCabinet.modulesQ ?? 0, //
+      powerUnitQ: selectedCabinet.powerUnitQ ?? 0, //
+      receiver: selectedCabinet.receiver ?? 0 //
+    } : null,
     cabinetName: selectedCabinet ? selectedCabinet.name : null,
     cabinetWidth: selectedCabinet ? selectedCabinet.width : null,
     cabinetHeight: selectedCabinet ? selectedCabinet.height : null,
