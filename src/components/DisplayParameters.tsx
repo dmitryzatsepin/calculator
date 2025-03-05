@@ -35,38 +35,10 @@ const DisplayParameters = () => {
   const [filteredPixelSteps, setFilteredPixelSteps] = useState<string[]>([]);
   const [selectedPixelStep, setSelectedPixelStep] = useState<string | null>(null);  
 
-  const [cabinets, setCabinets] = useState<
-    {
-      id: number;
-      name: string;
-      width: number;
-      height: number;
-      location: string;
-      pixelStep: string[];
-      material: string[];
-    }[]
-  >([]);
+  const [cabinets, setCabinets] = useState<CabinetType[]>([]);
+  const [filteredCabinets, setFilteredCabinets] = useState<CabinetType[]>([]);
   
-  const [filteredCabinets, setFilteredCabinets] = useState<
-    {
-      id: number;
-      name: string;
-      width: number;
-      height: number;
-      location: string;
-      pixelStep: string[];
-      material: string[];
-    }[]>([]);
-  
-  const [selectedCabinet, setSelectedCabinet] = useState<{
-    id: number;
-    name: string;
-    location: string;
-    width: number;
-    height: number;
-    pixelStep: string[];
-    material: string[];
-  } | null>(null);
+  const [selectedCabinet, setSelectedCabinet] = useState<CabinetType | null>(null);
   const [loadingSteps, setLoadingSteps] = useState<boolean>(false);
   const [loadingCabinets, setLoadingCabinets] = useState<boolean>(false);
   const [exchangeRate, setExchangeRate] = useState<number>(0);
@@ -437,18 +409,8 @@ const DisplayParameters = () => {
               }
               value={selectedCabinet ? selectedCabinet.id.toString() : null}
               onChange={(value) => {
-                const cabinetObj = filteredCabinets.find(
-                  (c) => c.id.toString() === value
-                );
-                if (cabinetObj) {
-                  setSelectedCabinet({
-                    ...cabinetObj,
-                    width: cabinetObj.width,
-                    height: cabinetObj.height,
-                  });
-                } else {
-                  setSelectedCabinet(null);
-                }
+                const cabinetObj = filteredCabinets.find((c) => c.id.toString() === value);
+                setSelectedCabinet(cabinetObj || null);
               }}
               required
             />
