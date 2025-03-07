@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: dimpin
+      POSTGRES_PASSWORD: 265032557
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: backend_app
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: "postgresql://dimpin:265032557@db:5432/mydb?schema=public"
+      JWT_SECRET: "your_secret_key_here"
+      JWT_EXPIRES_IN: "7d"
+      BCRYPT_SALT: "10"
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend_app
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  pg_data:

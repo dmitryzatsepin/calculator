@@ -11,6 +11,7 @@ import pixelStepRoutes from "./routes/pixelStepRoutes";
 import cabinetRoutes from "./routes/cabinetRoutes";
 import screenTypeRoutes from "./routes/screenTypeRoutes";
 import protectionRoutes from "./routes/ingressProtection"; 
+import healthcheck from "./routes/healthcheck";
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ app.use(morgan("dev"));
 app.use(passport.initialize());
 configurePassport(passport);
 
+app.use("/", healthcheck);
 app.use("/auth", authRoutes);
 app.use("/screen-types", screenTypeRoutes); 
 app.use("/pixel-steps", pixelStepRoutes);
