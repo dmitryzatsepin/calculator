@@ -1,18 +1,40 @@
-# Logs
+# 📝 Логи
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# 🚀 Node.js
 node_modules
 dist
 dist-ssr
 *.local
 
-# Editor directories and files
+# 🛑 Файлы конфигурации окружения (⚠️ Скрываем пароли!)
+.env
+.env.local
+.env.*.local
+
+# 🏗️ Сборочные файлы
+.cache
+.out
+.next
+.vite
+coverage
+build
+public/build
+prisma/migrations
+
+# 🛳️ Docker
+docker-compose.override.yml
+docker-compose.override.yaml
+docker-compose.dev.yml
+docker-compose.dev.yaml
+.Dockerfile.swp
+
+# 🖊️ IDE / Редакторы
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -22,3 +44,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.iml
+*.bak
+*.tmp
+
+# 🚀 Prisma (но сохраняем schema.prisma!)
+prisma/migrations/
+!prisma/schema.prisma
+
+# 🚀 Yarn / pnpm кеши
+.pnpm-store
+.yarn
+.yarncache
+.yarn-integrity

@@ -1,4 +1,4 @@
-# 1. Используем официальный образ Node.js
+# 1. Используем Node.js для сборки React-приложения
 FROM node:18-alpine AS builder
 
 # 2. Указываем рабочую директорию
@@ -25,8 +25,11 @@ FROM nginx:1.23
 # 9. Копируем собранный проект в Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# 10. Открываем порт 80
+# 10. ✅ Копируем наш кастомный конфиг в Nginx
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# 11. Открываем порт 80
 EXPOSE 80
 
-# 11. Запускаем Nginx
+# 12. Запускаем Nginx
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  name      String
+}
+
+model ScreenType {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
+  material String[]
+  option   String[]
+}
+
+model PixelStep {
+  type        String
+  name        String
+  width       Int
+  height      Int
+  id          Int      @id @default(autoincrement())
+  location    String
+  option      String[]
+  brightness  Int
+  refreshFreq Int
+
+  @@unique([name, location])
+}
+
+model Cabinet {
+  name              String
+  width             Int
+  height            Int
+  powerUnitCapacity Int
+  powerUnitQ        Int
+  receiver          Int
+  cooler            Int
+  modulesQ          Int
+  id                Int      @id @default(autoincrement())
+  location          String
+  material          String[]
+  pixelStep         String[]
+  placement         String
+
+  @@unique([name, location])
+}
+
+model IngressProtection {
+  id                   Int    @id @default(autoincrement())
+  code                 String @unique
+  hardObjectProtection String
+  waterProtection      String
+}
+
+enum Role {
+  USER
+  ADMIN
+}
