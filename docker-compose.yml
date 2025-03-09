@@ -12,7 +12,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - postgress_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
       interval: 10s
@@ -36,7 +36,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - backend_data:/app/prisma/migrations
+      - prisma_migrations:/app/prisma/migrations
 
   frontend:
     build:
@@ -50,5 +50,5 @@ services:
       - "80:80"
 
 volumes:
-  pg_data:
-  backend_data:
+  postgress_data:
+  prisma_migrations:
