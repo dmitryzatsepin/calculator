@@ -202,6 +202,7 @@ const DisplayParameters = () => {
     let steps = pixelSteps.filter((step) =>
       step.location.includes(selectedScreen.name)
     );
+    
 
     // 🔥 Если выбрана опция "гибкий экран", фильтруем по наличию в option
     if (selectedOptions.includes("гибкий экран")) {
@@ -307,22 +308,55 @@ const DisplayParameters = () => {
             />
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 4 }}>
-            <Select
-              label="Тип экрана"
-              placeholder="Выберите тип"
-              data={screenTypes.map((type) => ({
-                value: type.name,
-                label: type.name,
-              }))}
-              value={screenType}
-              onChange={(value) => {
-                setScreenType(value);
-                setSelectedPixelStep(null);
-                setSelectedCabinet(null);
-              }}
-              disabled={!isSizeValid}
-              required
-            />
+            <div>
+              <label className={classes.checkboxGroupLabel}>Тип экрана</label>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                {screenTypes.map((type) => (
+                  <Checkbox
+                    classNames={classes}
+                    key={type.name}
+                    label={type.name}
+                    checked={screenType === type.name}
+                    onChange={(event) => {
+                      if (event.currentTarget.checked) {
+                        setScreenType(type.name);
+                      } else if (screenType === type.name) {
+                        setScreenType(null);
+                      }
+                      setSelectedPixelStep(null);
+                      setSelectedCabinet(null);
+                    }}
+                    disabled={!isSizeValid}
+                  />
+                ))}
+              </div>
+            </div>
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, sm: 4 }}>
+            <div>
+              <label className={classes.checkboxGroupLabel}>Материал</label>
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                {(screenType 
+                  ? screenTypes.find((type) => type.name === screenType)?.material || []
+                  : screenTypes.flatMap(type => type.material).filter((v, i, a) => a.indexOf(v) === i)
+                ).map((mat) => (
+                  <Checkbox
+                    classNames={classes}
+                    key={mat}
+                    label={mat}
+                    checked={selectedMaterial === mat}
+                    onChange={(event) => {
+                      if (event.currentTarget.checked) {
+                        setSelectedMaterial(mat);
+                      } else if (selectedMaterial === mat) {
+                        setSelectedMaterial(null);
+                      }
+                    }}
+                    disabled={!screenType}
+                  />
+                ))}
+              </div>
+            </div>
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 4 }}>
             <Select
@@ -335,19 +369,6 @@ const DisplayParameters = () => {
               value={selectedProtection}
               onChange={setSelectedProtection}
               disabled={!screenType} // Активируется после выбора типа экрана
-              required
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 4 }}>
-            <Select
-              label="Материал"
-              placeholder="Выберите материал"
-              data={screenTypes
-                .find((type) => type.name === screenType)
-                ?.material?.map((mat) => ({ value: mat, label: mat }))}
-              value={selectedMaterial}
-              onChange={(value) => setSelectedMaterial(value)}
-              disabled={!screenType}
               required
             />
           </Grid.Col>

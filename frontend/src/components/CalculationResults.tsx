@@ -120,104 +120,110 @@ const CalculationResults = ({
       title={<div className={styles.drawerTitle}>Результаты расчёта</div>}
       position="right"
       size="xl"
+      styles={{
+        header: {
+          justifyContent: 'center',
+        },
+        title: {
+          width: '100%',
+          textAlign: 'center',
+        }
+      }}
     >
       <Table
-        striped
-        highlightOnHover
-        withTableBorder
-        withColumnBorders
-        className={styles.table}
-      >
-        <thead>
-          <tr>
-            <th className={styles.th}>Характеристика</th>
-            <th className={styles.th}>Значение</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td className={styles.td}>Исполнение экрана</td>
-            <td className={styles.td}>{data.screenType || "-"}</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Материал кабинета</td>
-            <td className={styles.td}>{data.selectedMaterial || "-"}</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Размер кабинета</td>
-            <td
-              className={styles.td}
-            >{`${cabinetHeight}×${cabinetWidth} мм`}</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Количество кабинетов</td>
-            <td className={styles.td}>{totalCabinets} шт.</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Ориентация кабинетов</td>
-            <td className={styles.td}>
-              {isHorizontal ? "горизонтальная" : "вертикальная"}
-            </td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Пыле и влагозащита</td>
-            <td className={styles.td}>{data.selectedProtection || "-"}</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Тип диодов</td>
-            <td className={styles.td}>
-              {getDiodeType(data.selectedPixelStep)}
-            </td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Компоновка (шаг пикселя)</td>
-            <td className={styles.td}>
-              {extractNumericPixelStep(data.selectedPixelStep)} мм
-            </td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Ширина светодиодного полотна</td>
-            <td className={styles.td}>{finalWidth} мм</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Высота светодиодного полотна</td>
-            <td className={styles.td}>{finalHeight} мм</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Площадь активной области</td>
-            <td className={styles.td}>{activeArea.toFixed(2)} м²</td>
-          </tr>
-
-          <tr>
-            <td className={styles.td}>Яркость</td>
-            <td className={styles.td}>{brightness} кд/м²</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Частота обновления</td>
-            <td className={styles.td}>{refreshFreq} Гц</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Горизонтальный угол обзора</td>
-            <td className={styles.td}>149°</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Вертикальный угол обзора</td>
-            <td className={styles.td}>149°</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Дистанция обзора</td>
-            <td className={styles.td}>от {viewingDistance} м</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>ЗИП комплект (Запасные части)</td>
-            <td className={styles.td}>{zipKit}</td>
-          </tr>
-          <tr>
-            <td className={styles.td}>Цена предложения</td>
-            <td className={styles.td}></td>
-          </tr>
-        </tbody>
-      </Table>
+  striped
+  highlightOnHover
+  withTableBorder
+  withColumnBorders
+  className={styles.table}
+>
+  <Table.Thead>
+    <Table.Tr>
+      <Table.Th className={styles.th}>Характеристика</Table.Th>
+      <Table.Th className={styles.th}>Значение</Table.Th>
+    </Table.Tr>
+  </Table.Thead>
+  <Table.Tbody>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Исполнение экрана</Table.Td>
+      <Table.Td className={styles.td}>{data.screenType || "-"}</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Материал кабинета</Table.Td>
+      <Table.Td className={styles.td}>{data.selectedMaterial || "-"}</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Размер кабинета</Table.Td>
+      <Table.Td className={styles.td}>{`${cabinetHeight}×${cabinetWidth} мм`}</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Количество кабинетов</Table.Td>
+      <Table.Td className={styles.td}>{totalCabinets} шт.</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Ориентация кабинетов</Table.Td>
+      <Table.Td className={styles.td}>
+        {isHorizontal ? "горизонтальная" : "вертикальная"}
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Пыле и влагозащита</Table.Td>
+      <Table.Td className={styles.td}>{data.selectedProtection || "-"}</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Тип диодов</Table.Td>
+      <Table.Td className={styles.td}>
+        {getDiodeType(data.selectedPixelStep)}
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Компоновка (шаг пикселя)</Table.Td>
+      <Table.Td className={styles.td}>
+        {extractNumericPixelStep(data.selectedPixelStep)} мм
+      </Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Ширина светодиодного полотна</Table.Td>
+      <Table.Td className={styles.td}>{finalWidth} мм</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Высота светодиодного полотна</Table.Td>
+      <Table.Td className={styles.td}>{finalHeight} мм</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Площадь активной области</Table.Td>
+      <Table.Td className={styles.td}>{activeArea.toFixed(2)} м²</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Яркость</Table.Td>
+      <Table.Td className={styles.td}>{brightness} кд/м²</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Частота обновления</Table.Td>
+      <Table.Td className={styles.td}>{refreshFreq} Гц</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Горизонтальный угол обзора</Table.Td>
+      <Table.Td className={styles.td}>149°</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Вертикальный угол обзора</Table.Td>
+      <Table.Td className={styles.td}>149°</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Дистанция обзора</Table.Td>
+      <Table.Td className={styles.td}>от {viewingDistance} м</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>ЗИП комплект (Запасные части)</Table.Td>
+      <Table.Td className={styles.td}>{zipKit}</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Цена предложения</Table.Td>
+      <Table.Td className={styles.td}></Table.Td>
+    </Table.Tr>
+  </Table.Tbody>
+</Table>
       <Center mt="md">
           <Button onClick={handleSaveOffer}>Сохранить предложение</Button>
       </Center>
