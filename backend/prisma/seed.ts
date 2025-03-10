@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import * as path from 'path';
 import * as fs from 'fs';
-
 const prisma = new PrismaClient();
 
 // Проверка обязательных полей
@@ -96,7 +95,8 @@ async function importFromExcel(filePath: string): Promise<void> {
               brightness: row.brightness ? Number(row.brightness) : 0,  // ✅ Проверяем, есть ли значение
               refreshFreq: row.refreshFreq ? Number(row.refreshFreq) : 60, // ✅ Если NaN, ставим 60 Гц
               location: String(row.location),
-              option: {set: optionArray}
+              option: {set: optionArray},
+              priceUsd: row.priceUsd ? Number(row.priceUsd) : 0
             }
           });
         }
@@ -142,7 +142,11 @@ async function importFromExcel(filePath: string): Promise<void> {
               location: String(row.location),
               material: {set: materialArray},
               placement: String(row.placement),
-              pixelStep: {set: pixelStepArray}
+              pixelStep: {set: pixelStepArray},
+              priceUsd: row.priceUsd ? Number(row.priceUsd) : 0,
+              mountPriceRub: row.mountPriceRub ? Number(row.mountPriceRub) : 0,
+              deliveryPriceRub: row.deliveryPriceRub ? Number(row.deliveryPriceRub) : 0,
+              addPriceRub: row.addPriceRub ? Number(row.addPriceRub) : 0
             }
           });
         }

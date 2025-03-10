@@ -1,5 +1,5 @@
 # 1. Используем Node.js для сборки React-приложения
-FROM node:18-alpine AS builder
+FROM node:18-alpine
 
 # 2. Указываем рабочую директорию
 WORKDIR /app

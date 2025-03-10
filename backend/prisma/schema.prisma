@@ -33,6 +33,7 @@ model PixelStep {
   option      String[]
   brightness  Int
   refreshFreq Int
+  priceUsd    Float    @default(0)
 
   @@unique([name, location])
 }
@@ -51,6 +52,11 @@ model Cabinet {
   material          String[]
   pixelStep         String[]
   placement         String
+  priceUsd          Float    @default(0)
+  mountPriceRub     Float    @default(0)
+  deliveryPriceRub  Float    @default(0)
+  addPriceRub       Float    @default(0)
+
 
   @@unique([name, location])
 }
