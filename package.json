@@ -1,0 +1,13 @@
+{
+  "name": "webapp",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "clean": "pnpm -r run clean",
+    "b": "pnpm --filter backend",
+    "f": "pnpm --filter frontend"
+  },
+  "packageManager": "pnpm@10.5.2"
+}
