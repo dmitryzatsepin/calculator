@@ -99,6 +99,10 @@ const CalculationResults = ({
     widthCabinetsCount * (isHorizontal ? cabinetWidth : cabinetHeight);
   const finalHeight =
     heightCabinetsCount * (isHorizontal ? cabinetHeight : cabinetWidth);
+
+  // 🔥 Общее количество модулей
+  const totalModules = totalCabinets * (data.selectedCabinet?.modulesQ ?? 0);
+
   const activeArea = (finalWidth * finalHeight) / 1_000_000; // Площадь в м²
 
   // 🔥 Дистанция обзора (число из шага пикселя)
@@ -169,6 +173,10 @@ const CalculationResults = ({
     <Table.Tr>
       <Table.Td className={styles.td}>Пыле и влагозащита</Table.Td>
       <Table.Td className={styles.td}>{data.selectedProtection || "-"}</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Td className={styles.td}>Количество модулей</Table.Td>
+      <Table.Td className={styles.td}>{totalModules} шт.</Table.Td>
     </Table.Tr>
     <Table.Tr>
       <Table.Td className={styles.td}>Тип диодов</Table.Td>

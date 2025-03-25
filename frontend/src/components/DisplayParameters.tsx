@@ -86,7 +86,7 @@ const DisplayParameters = () => {
   useEffect(() => {
     if (!screenType) return;
 
-    const defaultProtection = screenType === "интерьерный" ? "IP29" : "IP69";
+    const defaultProtection = screenType === "интерьерный" ? "IP30" : "IP65";
     console.log("🔄 Смена экрана:", screenType, "| Устанавливаем защиту:", defaultProtection);
 
     setSelectedProtection(defaultProtection);
