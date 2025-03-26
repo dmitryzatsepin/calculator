@@ -12,6 +12,7 @@ import cabinetRoutes from "./routes/cabinetRoutes";
 import screenTypeRoutes from "./routes/screenTypeRoutes";
 import protectionRoutes from "./routes/ingressProtection"; 
 import healthcheck from "./routes/healthcheck";
+import currencyRoutes from "./routes/currencyRoutes";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use("/screen-types", screenTypeRoutes);
 app.use("/pixel-steps", pixelStepRoutes);
 app.use("/protection", protectionRoutes);
 app.use("/cabinets", cabinetRoutes);
+app.use("/api/currency", currencyRoutes);
 
 
 app.get("/", (req, res) => {

@@ -17,8 +17,14 @@
     "overrides": {
       "@prisma/client": "*"
     },
-    "neverBuiltDependencies": [
-      "prisma"
+    "ignoredBuiltDependencies": [
+      "esbuild",
+      "prisma",
+      "axios"
+    ],
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines"
     ]
   },
   "packageManager": "pnpm@10.5.2",

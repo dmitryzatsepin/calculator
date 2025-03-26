@@ -20,6 +20,7 @@
   "dependencies": {
     "@prisma/client": "^6.5.0",
     "@types/xlsx": "^0.0.36",
+    "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -50,15 +51,5 @@
   },
   "prisma": {
     "seed": "pnpm run prisma:seed"
-  },
-  "pnpm": {
-    "ignoredBuiltDependencies": [
-      "esbuild",
-      "prisma"
-    ],
-    "onlyBuiltDependencies": [
-      "@prisma/client",
-      "@prisma/engines"
-    ]
   }
 }

@@ -246,7 +246,7 @@ const DisplayParameters = () => {
 
     // 🔥 Добавляем обработку курса валют
     useEffect(() => {
-      fetch("https://www.cbr-xml-daily.ru/daily_json.js")
+      fetch("/api/currency")
         .then((res) => res.json())
         .then((data) => {
           console.log("📡 Ответ API ЦБ РФ:", data);
