@@ -1,76 +1,56 @@
-import { Request, Response, NextFunction } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { Request, Response, NextFunction } from "express"; // NextFunction может быть не нужна, если используем asyncHandler везде
+import { prisma } from '../lib/prisma';
+import { asyncHandler } from '../middleware/asyncHandler'; // Предполагаем, что asyncHandler вынесен
+import { idParamSchema } from '../validators/commonValidators';
+import { createPixelStepSchema, updatePixelStepSchema } from '../validators/pixelStepValidators';
 
 // 📌 Получение всех шагов пикселя
-export const getPixelSteps = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const steps = await prisma.pixelStep.findMany();
-        res.status(200).json({ message: "Список шагов пикселя", steps });
-    } catch (error) {
-        next(error); // Передаем ошибку в middleware обработки ошибок
-    }
-};
+export const getPixelSteps = asyncHandler(async (req: Request, res: Response) => {
+    const steps = await prisma.pixelStep.findMany();
+    res.status(200).json({ message: "Список шагов пикселя", data: steps }); // Используем data
+});
 
 // 📌 Создание шага пикселя
-export const createPixelStep = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { name, type, width, height, location, option, brightness, refreshFreq } = req.body;
-        if (!type || !name || !width || !height || location ||option  || brightness || refreshFreq === undefined) {
-            res.status(400).json({ message: "Все поля обязательны" });
-            return;
-        }
+export const createPixelStep = asyncHandler(async (req: Request, res: Response) => {
+    // Валидация и преобразование с помощью Zod
+    const validatedData = createPixelStepSchema.parse(req.body);
 
-        const step = await prisma.pixelStep.create({
-            data: { 
-                name, 
-                type, 
-                width, 
-                height, 
-                location, 
-                option,
-                brightness, 
-                refreshFreq
-            },
-        });
+    const step = await prisma.pixelStep.create({
+        data: validatedData, // Используем валидированные данные
+    });
 
-        res.status(201).json({ message: "Шаг пикселя создан", step });
-    } catch (error) {
-        next(error);
-    }
-};
+    res.status(201).json({ message: "Шаг пикселя успешно создан", data: step }); // Используем data
+});
 
 // 📌 Обновление шага пикселя
-export const updatePixelStep = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { id } = req.params;
-        const { name, type, width, height, location, option } = req.body;
+export const updatePixelStep = asyncHandler(async (req: Request, res: Response) => {
+    // Валидация ID из параметров
+    const { id } = idParamSchema.parse(req.params);
+    // Валидация данных из тела (частичная)
+    const validatedData = updatePixelStepSchema.parse(req.body);
 
-        if (!type || !name || !width || !height || location || option === undefined) {
-            res.status(400).json({ message: "Все поля обязательны" });
-            return;
-        }
-
-        const step = await prisma.pixelStep.update({
-            where: { id: Number(id) },
-            data: { type, name, width, height, option },
-        });
-
-        res.status(200).json({ message: "Шаг пикселя обновлен", step });
-    } catch (error) {
-        next(error);
+    // Проверка, есть ли что обновлять
+    if (Object.keys(validatedData).length === 0) {
+        res.status(400).json({ message: "Нет данных для обновления" });
+        return;
     }
-};
+
+    const step = await prisma.pixelStep.update({
+        where: { id }, // ID уже число
+        data: validatedData, // Передаем только валидированные поля
+    });
+
+    res.status(200).json({ message: "Шаг пикселя успешно обновлен", data: step }); // Используем data
+});
 
 // 📌 Удаление шага пикселя
-export const deletePixelStep = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
-        const { id } = req.params;
-        await prisma.pixelStep.delete({ where: { id: Number(id) } });
+export const deletePixelStep = asyncHandler(async (req: Request, res: Response) => {
+    // Валидация ID
+    const { id } = idParamSchema.parse(req.params);
 
-        res.status(200).json({ message: "Шаг пикселя удален" });
-    } catch (error) {
-        next(error);
-    }
-};
+    await prisma.pixelStep.delete({ where: { id } }); // ID уже число
+
+    // Ответ 200 с сообщением или 204 без тела
+    res.status(200).json({ message: "Шаг пикселя успешно удален" });
+    // или res.status(204).send();
+});

@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+
 const prisma = new PrismaClient();
 
 // 🔑 Функция для генерации JWT
