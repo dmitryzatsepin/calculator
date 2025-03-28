@@ -348,6 +348,12 @@ const DisplayParameters = () => {
       cabinetName: selectedCabinet?.name ?? null,
       cabinetWidth: selectedCabinet?.width ?? null,
       cabinetHeight: selectedCabinet?.height ?? null,
+      selectedBrightness:
+        pixelStepsAll.find((s) => s.name === selectedPixelStep)?.brightness ??
+        0,
+      selectedRefreshFreq:
+        pixelStepsAll.find((s) => s.name === selectedPixelStep)?.refreshFreq ??
+        0,
     }),
     [
       width,
@@ -401,7 +407,6 @@ const DisplayParameters = () => {
         <Grid>
           {/* Поля ввода */}
           <Grid.Col span={{ base: 12, sm: 6 }}>
-            {" "}
             <TextInput
               label="Ширина экрана (мм)"
               type="number"
@@ -409,10 +414,9 @@ const DisplayParameters = () => {
               value={width}
               onChange={(e) => setWidth(e.currentTarget.value)}
               required
-            />{" "}
+            />
           </Grid.Col>
           <Grid.Col span={{ base: 12, sm: 6 }}>
-            {" "}
             <TextInput
               label="Высота экрана (мм)"
               type="number"
@@ -420,18 +424,13 @@ const DisplayParameters = () => {
               value={height}
               onChange={(e) => setHeight(e.currentTarget.value)}
               required
-            />{" "}
+            />
           </Grid.Col>
           {/* Тип экрана */}
           <Grid.Col span={{ base: 12, sm: 4 }}>
-            {" "}
             <div>
-              {" "}
-              <label className={classes.checkboxGroupLabel}>
-                Тип экрана
-              </label>{" "}
+              <label className={classes.checkboxGroupLabel}>Тип экрана</label>
               <Stack gap={5}>
-                {" "}
                 {screenTypes.map((type) => (
                   <Checkbox
                     classNames={classes}
@@ -443,20 +442,15 @@ const DisplayParameters = () => {
                     }
                     disabled={!width.trim() || !height.trim()}
                   />
-                ))}{" "}
-              </Stack>{" "}
-            </div>{" "}
+                ))}
+              </Stack>
+            </div>
           </Grid.Col>
           {/* Материал */}
           <Grid.Col span={{ base: 12, sm: 4 }}>
-            {" "}
             <div>
-              {" "}
-              <label className={classes.checkboxGroupLabel}>
-                Материал
-              </label>{" "}
+              <label className={classes.checkboxGroupLabel}>Материал</label>
               <Stack gap={5}>
-                {" "}
                 {availableMaterials.map((mat) => (
                   <Checkbox
                     classNames={classes}
@@ -468,13 +462,12 @@ const DisplayParameters = () => {
                     }
                     disabled={!screenType}
                   />
-                ))}{" "}
-              </Stack>{" "}
-            </div>{" "}
+                ))}
+              </Stack>
+            </div>
           </Grid.Col>
           {/* Степень защиты */}
           <Grid.Col span={{ base: 12, sm: 4 }}>
-            {" "}
             <Select
               label="Степень защиты"
               placeholder={
@@ -486,17 +479,14 @@ const DisplayParameters = () => {
               disabled={!screenType || loadingProtection}
               searchable
               required
-            />{" "}
+            />
           </Grid.Col>
           {/* Доп. опции */}
           {availableOptions.length > 0 && (
             <Grid.Col span={{ base: 12, sm: 12 }}>
-              {" "}
               <Stack>
-                {" "}
-                <label className={classes.checkboxGroupLabel}>Опции</label>{" "}
+                <label className={classes.checkboxGroupLabel}>Опции</label>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  {" "}
                   {availableOptions.map((option) => (
                     <Checkbox
                       classNames={classes}
@@ -507,14 +497,13 @@ const DisplayParameters = () => {
                         handleOptionChange(option, e.currentTarget.checked)
                       }
                     />
-                  ))}{" "}
-                </div>{" "}
-              </Stack>{" "}
+                  ))}
+                </div>
+              </Stack>
             </Grid.Col>
           )}
           {/* Шаг пикселя */}
           <Grid.Col span={{ base: 12, sm: 12 }}>
-            {" "}
             <Select
               label="Шаг пикселя"
               placeholder={loadingSteps ? "Загрузка..." : "Выберите шаг"}
@@ -529,11 +518,10 @@ const DisplayParameters = () => {
               searchable
               required
               clearable
-            />{" "}
+            />
           </Grid.Col>
           {/* Кабинет */}
           <Grid.Col span={{ base: 12, sm: 12 }}>
-            {" "}
             <Select
               label="Кабинет"
               placeholder={loadingCabinets ? "Загрузка..." : "Выберите кабинет"}
@@ -548,7 +536,7 @@ const DisplayParameters = () => {
               searchable
               required
               clearable
-            />{" "}
+            />
           </Grid.Col>
         </Grid>
 
@@ -585,22 +573,19 @@ const DisplayParameters = () => {
               </div>
               {currencyError && (
                 <Text c={getCurrencyMessageColor()} size="xs" mt={2}>
-                  {" "}
-                  {currencyError}{" "}
+                  {currencyError}
                 </Text>
               )}
             </Stack>
           </Grid.Col>
           <Grid.Col span="auto">
-            {" "}
             <Button
               fullWidth
               onClick={() => setDrawerOpened(true)}
               disabled={!isCalculationPossible || isLoading}
             >
-              {" "}
-              Рассчитать{" "}
-            </Button>{" "}
+              Рассчитать
+            </Button>
           </Grid.Col>
         </Grid>
       </Stack>

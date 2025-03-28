@@ -26,37 +26,44 @@ interface CalculationResultsProps {
     selectedProtection: string | null;
     selectedMaterial: string | null;
     selectedPixelStep: string | null;
-    selectedCabinet: CabinetInfo | null; // Объект выбранного кабинета
+    selectedCabinet: CabinetInfo | null;
     selectedOptions: string[];
     exchangeRate: number;
-    selectedBrightness: number | string; // Яркость выбранного шага
-    selectedRefreshFreq: number | string; // Частота выбранного шага
+    selectedBrightness: number | string;
+    selectedRefreshFreq: number | string;
   };
 }
 
 // --- Константы ---
 const SPARE_PARTS_PERCENTAGE = 0.05; // 5% ЗИП
-const DEFAULT_VIEW_ANGLE = 149; // Стандартный угол обзора
+const DEFAULT_VIEW_ANGLE = 140; // Стандартный угол обзора
 
 // --- Вспомогательные функции ---
-const extractNumericPixelStep = (pixelStepName: string | null): string => {
-  if (!pixelStepName) return "-";
-  const match = pixelStepName.match(/\d+(\.\d+)?/);
-  return match ? match[0] : "-";
+// Извлекает числовое значение шага пикселя из имени (например, из "P3.91" вернет 3.91)
+const getNumericPixelStep = (pixelStepName: string | null): number | null => {
+  if (!pixelStepName) return null;
+  const match = pixelStepName.match(/(\d+(\.\d+)?)/);
+  if (match && match[0]) {
+    const num = parseFloat(match[0]);
+    return isNaN(num) ? null : num;
+  }
+  return null;
 };
 
+// Определяет тип диодов (упрощенно) - убрана из деструктуризации, т.к. не используется
+/*
 const getDiodeType = (pixelStepName: string | null): string => {
   if (!pixelStepName) return "-";
-  // Упрощенная логика
-  return pixelStepName.toLowerCase().includes("eco") ? "SMD" : "SMD2";
+  return pixelStepName.toLowerCase().includes("eco") ? "SMD" : "SMD";
 };
+*/
 
 // --- Компонент ---
 const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) => {
   // Деструктуризация основных данных
   const {
     width: inputWidth, height: inputHeight, screenType, selectedProtection, selectedMaterial,
-    selectedPixelStep, selectedCabinet, selectedOptions, exchangeRate,
+    selectedPixelStep, selectedCabinet,
     selectedBrightness, selectedRefreshFreq
   } = data;
 
@@ -104,41 +111,57 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
   const finalHeight = heightCabCount * (isHorizontal ? cabinetHeight : cabinetWidth);
   const activeArea = (finalWidth * finalHeight) / 1_000_000;
 
+  // --- Расчет разрешения и общего кол-ва пикселей ---
+  const numericPixelStep = getNumericPixelStep(selectedPixelStep);
+  let resolution = "-";
+  let totalPixels: number | string = "-";
+  if (numericPixelStep && numericPixelStep > 0) {
+    const heightPixels = Math.round(finalHeight / numericPixelStep);
+    const widthPixels = Math.round(finalWidth / numericPixelStep);
+    resolution = `${heightPixels}×${widthPixels} пикс.`;
+    totalPixels = heightPixels * widthPixels;
+  } else {
+    console.warn("Не удалось рассчитать разрешение: шаг пикселя некорректен.", selectedPixelStep);
+  }
+
+  // Дистанция обзора
+  const viewingDistance = numericPixelStep ? numericPixelStep.toFixed(1) : "-";
+
   // Компоненты
   const totalModules = totalCabinets * modulesPerCabinet;
   const totalPowerUnits = totalCabinets * powerUnitsPerCabinet;
   const totalReceivers = totalCabinets * receiversPerCabinet;
 
-  const viewingDistance = extractNumericPixelStep(selectedPixelStep);
-
   // ЗИП
   const spareModules = Math.ceil(totalModules * SPARE_PARTS_PERCENTAGE);
   const sparePowerUnits = Math.ceil(totalPowerUnits * SPARE_PARTS_PERCENTAGE);
   const spareReceivers = Math.ceil(totalReceivers * SPARE_PARTS_PERCENTAGE);
-  const zipKit = `модули - ${spareModules} шт.; БП - ${sparePowerUnits} шт.; карты - ${spareReceivers} шт.`;
+  const zipKit = `модули-${spareModules}шт; БП-${sparePowerUnits}шт; карты-${spareReceivers}шт.`;
 
   // --- Расчет цены (ЗАГЛУШКА!) ---
   const calculatePrice = (): string => {
-      // !!! ЭТО ЗАГЛУШКА - НЕОБХОДИМЫ РЕАЛЬНЫЕ ЦЕНЫ !!!
-      const approximatePricePerModuleUSD = 50; // <- ЗАМЕНИТЬ!
-      if (exchangeRate && totalModules > 0) {
-         const totalPriceUSD = totalModules * approximatePricePerModuleUSD;
-         const totalPriceRUB = totalPriceUSD * exchangeRate;
-         return `${totalPriceRUB.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })} (курс ${exchangeRate} ₽/$)`;
-      }
-      return "Нет данных";
+    return "Расчет будет доступен позже";
   };
   const offerPrice = calculatePrice();
 
-  // --- Обработчик сохранения (заглушка) ---
   const handleSaveOffer = () => {
-    console.log("📝 Сохранение предложения (данные):", { inputWidth, inputHeight, screenType, selectedProtection, selectedMaterial, selectedPixelStep, selectedCabinet, selectedOptions, exchangeRate, isHorizontal, widthCabCount, heightCabCount, totalCabinets, finalWidth, finalHeight, activeArea: activeArea.toFixed(2), totalModules, totalPowerUnits, totalReceivers, brightness, refreshFreq, viewingDistance, zipKit, calculatedPrice: offerPrice });
+    // Собираем все данные для лога/сохранения
+    const offerData = {
+      inputWidth, inputHeight, screenType, selectedProtection, selectedMaterial,
+      selectedPixelStep, selectedCabinet, selectedOptions: data.selectedOptions,
+      exchangeRate: data.exchangeRate,
+      isHorizontal, widthCabCount, heightCabCount, totalCabinets, finalWidth, finalHeight,
+      activeArea: activeArea.toFixed(2), resolution, totalPixels,
+      totalModules, totalPowerUnits, totalReceivers, brightness, refreshFreq,
+      viewingDistance, zipKit, calculatedPrice: offerPrice
+    };
+    console.log("📝 Сохранение предложения (данные):", offerData);
     // TODO: Отправить данные в API
     onClose();
   };
 
   return (
-    <Drawer opened={opened} onClose={onClose} title={<div className={styles.drawerTitle}>Результаты расчёта</div>} position="right" size="xl" styles={{ header: { justifyContent: 'center' }, title: { width: '100%', textAlign: 'center' } }}>
+    <Drawer opened={opened} onClose={onClose} title={<div className={styles.drawerTitle}>Результаты расчёта</div>} position="right" size="xl" styles={{ header: { justifyContent: "center" }, title: { width: "100%", textAlign: "center" } }}>
       <Stack>
         {/* Таблица с результатами */}
         <Table striped highlightOnHover withTableBorder withColumnBorders className={styles.table} layout="fixed">
@@ -183,11 +206,11 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
             </Table.Tr>
             <Table.Tr>
               <Table.Td>Тип диодов</Table.Td>
-              <Table.Td>{getDiodeType(selectedPixelStep)}</Table.Td>
+              <Table.Td>SMD</Table.Td>
             </Table.Tr>
             <Table.Tr>
               <Table.Td>Шаг пикселя</Table.Td>
-              <Table.Td>{extractNumericPixelStep(selectedPixelStep)} мм</Table.Td>
+              <Table.Td>{selectedPixelStep || "-"} ({numericPixelStep ? `${numericPixelStep.toFixed(2)} мм` : '-'})</Table.Td>
             </Table.Tr>
             <Table.Tr>
               <Table.Td>Ширина полотна</Table.Td>
@@ -196,6 +219,19 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
             <Table.Tr>
               <Table.Td>Высота полотна</Table.Td>
               <Table.Td>{finalHeight} мм</Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>Разрешение (В×Ш)</Table.Td>
+              <Table.Td>{resolution}</Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>Общее кол-во пикселей</Table.Td>
+              <Table.Td>
+                {typeof totalPixels === 'number'
+                  ? `${totalPixels.toLocaleString('ru-RU')} пикс.`
+                  : totalPixels
+                }
+              </Table.Td>
             </Table.Tr>
             <Table.Tr>
               <Table.Td>Площадь</Table.Td>
@@ -222,12 +258,11 @@ const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) 
               <Table.Td>{zipKit}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td><b>Ориент. цена</b></Table.Td>
+              <Table.Td><b>Цена решения</b></Table.Td>
               <Table.Td><b>{offerPrice}</b></Table.Td>
             </Table.Tr>
           </Table.Tbody>
         </Table>
-        {/* Кнопка сохранения */}
         <Center mt="md">
           <Button onClick={handleSaveOffer}>Сохранить предложение</Button>
         </Center>
