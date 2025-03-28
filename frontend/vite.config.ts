@@ -1,11 +1,23 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      "/api": "http://localhost:5000", // 🔥 Проксируем API-запросы
-    },
-  },
-});
+      // Правило №1: Для API Центробанка
+      '/api/currency': {
+         target: 'https://www.cbr-xml-daily.ru/daily_json.js',
+         changeOrigin: true,
+         // 👇 Убираем параметр, так как он не нужен 👇
+         rewrite: () => '',
+      },
+      // Правило №2: Для твоего локального бэкенда
+      '/api/local': {
+         target: 'http://localhost:5000',
+         changeOrigin: true,
+         rewrite: (path) => path.replace(/^\/api\/local/, ''),
+      }
+    }
+  }
+})
