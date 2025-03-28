@@ -2,16 +2,7 @@ import { Drawer, Table, Button, Center, Text, Stack } from "@mantine/core";
 import styles from "../styles/CalculationResults.module.scss";
 
 // --- Типы ---
-// (Опционально: Можно вынести типы CabinetType и PixelStep в отдельный файл types.ts и импортировать здесь и в DisplayParameters)
-type PixelStepInfo = {
-  id: number;
-  name: string;
-  type: string; // Добавим type, может пригодиться
-  brightness: number;
-  refreshFreq: number;
-  // Добавьте location/option, если они нужны для расчетов здесь
-};
-
+// Тип для информации о кабинете, ожидаемый от DisplayParameters
 type CabinetInfo = {
   id: number;
   name: string;
@@ -24,6 +15,7 @@ type CabinetInfo = {
   receiver: number;
 };
 
+// Тип пропсов для компонента CalculationResults
 interface CalculationResultsProps {
   opened: boolean;
   onClose: () => void;
@@ -34,17 +26,17 @@ interface CalculationResultsProps {
     selectedProtection: string | null;
     selectedMaterial: string | null;
     selectedPixelStep: string | null;
-    selectedCabinet: CabinetInfo | null; // Используем обновленный тип
-    // Убраны cabinetName, cabinetWidth, cabinetHeight
+    selectedCabinet: CabinetInfo | null; // Объект выбранного кабинета
     selectedOptions: string[];
-    pixelSteps: PixelStepInfo[]; // Используем обновленный тип
-    exchangeRate: number; // Добавлено поле курса
+    exchangeRate: number;
+    selectedBrightness: number | string; // Яркость выбранного шага
+    selectedRefreshFreq: number | string; // Частота выбранного шага
   };
 }
 
 // --- Константы ---
 const SPARE_PARTS_PERCENTAGE = 0.05; // 5% ЗИП
-const DEFAULT_VIEW_ANGLE = 149; // Стандартный угол обзора, если он всегда такой
+const DEFAULT_VIEW_ANGLE = 149; // Стандартный угол обзора
 
 // --- Вспомогательные функции ---
 const extractNumericPixelStep = (pixelStepName: string | null): string => {
@@ -55,34 +47,21 @@ const extractNumericPixelStep = (pixelStepName: string | null): string => {
 
 const getDiodeType = (pixelStepName: string | null): string => {
   if (!pixelStepName) return "-";
-  // Упрощенная логика, можно доработать, если типы сложнее
+  // Упрощенная логика
   return pixelStepName.toLowerCase().includes("eco") ? "SMD" : "SMD2";
 };
 
 // --- Компонент ---
-const CalculationResults = ({
-  opened,
-  onClose,
-  data,
-}: CalculationResultsProps) => {
-  // Деструктуризация для удобства
+const CalculationResults = ({ opened, onClose, data }: CalculationResultsProps) => {
+  // Деструктуризация основных данных
   const {
-    width: inputWidth, // Переименуем, чтобы не конфликтовать с шириной кабинета
-    height: inputHeight,
-    screenType,
-    selectedProtection,
-    selectedMaterial,
-    selectedPixelStep,
-    selectedCabinet, // Ключевое изменение - используем этот объект
-    selectedOptions,
-    pixelSteps,
-    exchangeRate,
+    width: inputWidth, height: inputHeight, screenType, selectedProtection, selectedMaterial,
+    selectedPixelStep, selectedCabinet, selectedOptions, exchangeRate,
+    selectedBrightness, selectedRefreshFreq
   } = data;
 
   // --- Ранний выход, если кабинет не выбран ---
-  // (Можно также добавить проверку на inputWidth/inputHeight, если нужно)
   if (!selectedCabinet) {
-    // Можно вернуть null или заглушку внутри Drawer
     return (
       <Drawer opened={opened} onClose={onClose} title="Результаты расчёта" position="right" size="xl">
         <Center style={{ height: '100%' }}>
@@ -92,214 +71,163 @@ const CalculationResults = ({
     );
   }
 
-  // --- Теперь мы знаем, что selectedCabinet не null ---
+  // --- Деструктуризация данных выбранного кабинета ---
   const {
-    name: cabinetName,
-    width: cabinetWidth,
-    height: cabinetHeight,
-    modulesQ: modulesPerCabinet,
-    powerUnitQ: powerUnitsPerCabinet,
-    receiver: receiversPerCabinet,
+    name: cabinetName, width: cabinetWidth, height: cabinetHeight,
+    modulesQ: modulesPerCabinet, powerUnitQ: powerUnitsPerCabinet, receiver: receiversPerCabinet
   } = selectedCabinet;
 
-  // --- Поиск информации о выбранном шаге пикселя ---
-  const selectedStepInfo = pixelSteps.find(
-    (step) => step.name === selectedPixelStep
-  );
-  const brightness = selectedStepInfo?.brightness ?? "-";
-  const refreshFreq = selectedStepInfo?.refreshFreq ?? "-";
+  // Используем переданные яркость и частоту
+  const brightness = selectedBrightness;
+  const refreshFreq = selectedRefreshFreq;
 
   // --- Основные расчеты ---
-  const screenWidth = parseInt(inputWidth, 10) || 0; // Преобразуем в числа, с fallback на 0
+  const screenWidth = parseInt(inputWidth, 10) || 0;
   const screenHeight = parseInt(inputHeight, 10) || 0;
 
-  // Расчет кол-ва кабинетов при разной ориентации
-  const widthCabinetsHorizontal = Math.floor(screenWidth / cabinetWidth);
-  const heightCabinetsHorizontal = Math.floor(screenHeight / cabinetHeight);
-  const totalHorizontal = widthCabinetsHorizontal * heightCabinetsHorizontal;
-
-  const widthCabinetsVertical = Math.floor(screenWidth / cabinetHeight); // Меняем местами ширину/высоту кабинета
-  const heightCabinetsVertical = Math.floor(screenHeight / cabinetWidth);
-  const totalVertical = widthCabinetsVertical * heightCabinetsVertical;
+  // Расчет кол-ва кабинетов
+  const widthCabHor = Math.floor(screenWidth / cabinetWidth);
+  const heightCabHor = Math.floor(screenHeight / cabinetHeight);
+  const totalHor = widthCabHor * heightCabHor;
+  const widthCabVert = Math.floor(screenWidth / cabinetHeight);
+  const heightCabVert = Math.floor(screenHeight / cabinetWidth);
+  const totalVert = widthCabVert * heightCabVert;
 
   // Выбор оптимального размещения
-  const isHorizontal = totalHorizontal >= totalVertical;
-  const widthCabinetsCount = isHorizontal ? widthCabinetsHorizontal : widthCabinetsVertical;
-  const heightCabinetsCount = isHorizontal ? heightCabinetsHorizontal : heightCabinetsVertical;
-  const totalCabinets = widthCabinetsCount * heightCabinetsCount;
+  const isHorizontal = totalHor >= totalVert;
+  const widthCabCount = isHorizontal ? widthCabHor : widthCabVert;
+  const heightCabCount = isHorizontal ? heightCabHor : heightCabVert;
+  const totalCabinets = widthCabCount * heightCabCount;
 
-  // Финальные размеры полотна
-  const finalWidth = widthCabinetsCount * (isHorizontal ? cabinetWidth : cabinetHeight);
-  const finalHeight = heightCabinetsCount * (isHorizontal ? cabinetHeight : cabinetWidth);
-  const activeArea = (finalWidth * finalHeight) / 1_000_000; // Площадь в м²
+  // Финальные размеры
+  const finalWidth = widthCabCount * (isHorizontal ? cabinetWidth : cabinetHeight);
+  const finalHeight = heightCabCount * (isHorizontal ? cabinetHeight : cabinetWidth);
+  const activeArea = (finalWidth * finalHeight) / 1_000_000;
 
-  // Расчет компонентов
+  // Компоненты
   const totalModules = totalCabinets * modulesPerCabinet;
-  const totalPowerUnits = totalCabinets * powerUnitsPerCabinet; // Может понадобиться для расчета мощности
-  const totalReceivers = totalCabinets * receiversPerCabinet; // Может понадобиться
+  const totalPowerUnits = totalCabinets * powerUnitsPerCabinet;
+  const totalReceivers = totalCabinets * receiversPerCabinet;
 
-  // Дистанция обзора
   const viewingDistance = extractNumericPixelStep(selectedPixelStep);
 
-  // Расчет ЗИП комплекта
+  // ЗИП
   const spareModules = Math.ceil(totalModules * SPARE_PARTS_PERCENTAGE);
   const sparePowerUnits = Math.ceil(totalPowerUnits * SPARE_PARTS_PERCENTAGE);
   const spareReceivers = Math.ceil(totalReceivers * SPARE_PARTS_PERCENTAGE);
-  const zipKit = `модули - ${spareModules} шт.; БП - ${sparePowerUnits} шт.; приёмные карты - ${spareReceivers} шт.`;
+  const zipKit = `модули - ${spareModules} шт.; БП - ${sparePowerUnits} шт.; карты - ${spareReceivers} шт.`;
 
-  // Заглушка для расчета цены (требует доп. данных о ценах компонентов)
+  // --- Расчет цены (ЗАГЛУШКА!) ---
   const calculatePrice = (): string => {
-      // TODO: Реализовать логику расчета цены на основе totalModules, totalCabinets, exchangeRate и т.д.
-      // Нужны будут цены на модуль, кабинет, БП, карту, возможно контроллер и т.д.
+      // !!! ЭТО ЗАГЛУШКА - НЕОБХОДИМЫ РЕАЛЬНЫЕ ЦЕНЫ !!!
+      const approximatePricePerModuleUSD = 50; // <- ЗАМЕНИТЬ!
       if (exchangeRate && totalModules > 0) {
-         // Примерная заглушка
-         const approximatePricePerModuleUSD = 50; // Очень грубо!
          const totalPriceUSD = totalModules * approximatePricePerModuleUSD;
          const totalPriceRUB = totalPriceUSD * exchangeRate;
-         return `${totalPriceRUB.toLocaleString('ru-RU', { maximumFractionDigits: 0 })} ₽ (по курсу ${exchangeRate} ₽/$)`;
+         return `${totalPriceRUB.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 })} (курс ${exchangeRate} ₽/$)`;
       }
-      return "Требуется больше данных для расчета";
+      return "Нет данных";
   };
   const offerPrice = calculatePrice();
 
-
-  // --- Обработчик сохранения ---
+  // --- Обработчик сохранения (заглушка) ---
   const handleSaveOffer = () => {
-    console.log("📝 Сохранение предложения...");
-    // Собрать все рассчитанные данные для отправки
-    const offerData = {
-        inputWidth, inputHeight, screenType, selectedProtection, selectedMaterial,
-        selectedPixelStep, selectedCabinet, selectedOptions, exchangeRate,
-        // Рассчитанные значения:
-        isHorizontal, widthCabinetsCount, heightCabinetsCount, totalCabinets,
-        finalWidth, finalHeight, activeArea: activeArea.toFixed(2),
-        totalModules, totalPowerUnits, totalReceivers,
-        brightness, refreshFreq, viewingDistance, zipKit,
-        calculatedPrice: offerPrice // Сохраняем рассчитанную цену
-    };
-    console.log("Данные для сохранения:", offerData);
-    // TODO: Отправить offerData в API или сохранить локально
-    onClose(); // Закрыть Drawer после сохранения (опционально)
+    console.log("📝 Сохранение предложения (данные):", { inputWidth, inputHeight, screenType, selectedProtection, selectedMaterial, selectedPixelStep, selectedCabinet, selectedOptions, exchangeRate, isHorizontal, widthCabCount, heightCabCount, totalCabinets, finalWidth, finalHeight, activeArea: activeArea.toFixed(2), totalModules, totalPowerUnits, totalReceivers, brightness, refreshFreq, viewingDistance, zipKit, calculatedPrice: offerPrice });
+    // TODO: Отправить данные в API
+    onClose();
   };
 
-
   return (
-    <Drawer
-      opened={opened}
-      onClose={onClose}
-      title={<div className={styles.drawerTitle}>Результаты расчёта</div>}
-      position="right"
-      size="xl"
-      styles={{
-        header: { justifyContent: 'center' },
-        title: { width: '100%', textAlign: 'center' },
-      }}
-    >
-      <Stack> {/* Оборачиваем таблицу и кнопку в Stack для отступов */}
-        <Table
-          striped
-          highlightOnHover
-          withTableBorder
-          withColumnBorders
-          className={styles.table}
-          // Добавим layout=fixed для лучшего контроля ширины колонок, если нужно
-          // layout="fixed"
-        >
+    <Drawer opened={opened} onClose={onClose} title={<div className={styles.drawerTitle}>Результаты расчёта</div>} position="right" size="xl" styles={{ header: { justifyContent: 'center' }, title: { width: '100%', textAlign: 'center' } }}>
+      <Stack>
+        {/* Таблица с результатами */}
+        <Table striped highlightOnHover withTableBorder withColumnBorders className={styles.table} layout="fixed">
           <Table.Thead>
             <Table.Tr>
-              {/* Можно задать ширину колонок */}
-              <Table.Th className={styles.th} style={{ width: '40%' }}>Характеристика</Table.Th>
-              <Table.Th className={styles.th} style={{ width: '60%' }}>Значение</Table.Th>
+              <Table.Th className={styles.th} w="40%">Характеристика</Table.Th>
+              <Table.Th className={styles.th} w="60%">Значение</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {/* Используем деструктурированные переменные */}
             <Table.Tr>
-              <Table.Td className={styles.td}>Исполнение экрана</Table.Td>
-              <Table.Td className={styles.td}>{screenType || "-"}</Table.Td>
-            </Table.Tr>
-             <Table.Tr>
-               <Table.Td className={styles.td}>Материал кабинета</Table.Td>
-               <Table.Td className={styles.td}>{selectedMaterial || "-"}</Table.Td>
-             </Table.Tr>
-             <Table.Tr>
-               <Table.Td className={styles.td}>Модель кабинета</Table.Td>
-               <Table.Td className={styles.td}>{cabinetName || "-"}</Table.Td>
-             </Table.Tr>
-            <Table.Tr>
-              <Table.Td className={styles.td}>Размер кабинета (В×Ш)</Table.Td>
-              {/* Используем переменные после проверки !selectedCabinet */}
-              <Table.Td className={styles.td}>{`${cabinetHeight}×${cabinetWidth} мм`}</Table.Td>
+              <Table.Td>Исполнение</Table.Td>
+              <Table.Td>{screenType || "-"}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Количество кабинетов (В×Ш)</Table.Td>
-              <Table.Td className={styles.td}>{`${heightCabinetsCount}×${widthCabinetsCount} = ${totalCabinets} шт.`}</Table.Td>
+              <Table.Td>Материал кабинета</Table.Td>
+              <Table.Td>{selectedMaterial || "-"}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Ориентация кабинетов</Table.Td>
-              <Table.Td className={styles.td}>
-                {isHorizontal ? "горизонтальная" : "вертикальная"}
-              </Table.Td>
-            </Table.Tr>
-             <Table.Tr>
-               <Table.Td className={styles.td}>Пыле- и влагозащита</Table.Td>
-               <Table.Td className={styles.td}>{selectedProtection || "-"}</Table.Td>
-             </Table.Tr>
-            <Table.Tr>
-              <Table.Td className={styles.td}>Количество модулей</Table.Td>
-              <Table.Td className={styles.td}>{totalModules} шт.</Table.Td>
+              <Table.Td>Модель кабинета</Table.Td>
+              <Table.Td>{cabinetName || "-"}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Тип диодов</Table.Td>
-              <Table.Td className={styles.td}>
-                {getDiodeType(selectedPixelStep)}
-              </Table.Td>
+              <Table.Td>Размер кабинета (В×Ш)</Table.Td>
+              <Table.Td>{`${cabinetHeight}×${cabinetWidth} мм`}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Компоновка (шаг пикселя)</Table.Td>
-              <Table.Td className={styles.td}>
-                {extractNumericPixelStep(selectedPixelStep)} мм
-              </Table.Td>
+              <Table.Td>Кол-во кабинетов (В×Ш)</Table.Td>
+              <Table.Td>{`${heightCabCount}×${widthCabCount} = ${totalCabinets} шт.`}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Ширина полотна</Table.Td>
-              <Table.Td className={styles.td}>{finalWidth} мм</Table.Td>
+              <Table.Td>Ориентация</Table.Td>
+              <Table.Td>{isHorizontal ? "горизонтальная" : "вертикальная"}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Высота полотна</Table.Td>
-              <Table.Td className={styles.td}>{finalHeight} мм</Table.Td>
+              <Table.Td>Пыле/влагозащита</Table.Td>
+              <Table.Td>{selectedProtection || "-"}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Площадь активной области</Table.Td>
-              <Table.Td className={styles.td}>{activeArea.toFixed(2)} м²</Table.Td>
+              <Table.Td>Кол-во модулей</Table.Td>
+              <Table.Td>{totalModules} шт.</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Яркость</Table.Td>
-              <Table.Td className={styles.td}>{brightness} кд/м²</Table.Td>
+              <Table.Td>Тип диодов</Table.Td>
+              <Table.Td>{getDiodeType(selectedPixelStep)}</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Частота обновления</Table.Td>
-              <Table.Td className={styles.td}>{refreshFreq} Гц</Table.Td>
+              <Table.Td>Шаг пикселя</Table.Td>
+              <Table.Td>{extractNumericPixelStep(selectedPixelStep)} мм</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Угол обзора (Г°/В°)</Table.Td>
-              <Table.Td className={styles.td}>{`${DEFAULT_VIEW_ANGLE}° / ${DEFAULT_VIEW_ANGLE}°`}</Table.Td>
+              <Table.Td>Ширина полотна</Table.Td>
+              <Table.Td>{finalWidth} мм</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>Дистанция обзора</Table.Td>
-              <Table.Td className={styles.td}>от {viewingDistance} м</Table.Td>
+              <Table.Td>Высота полотна</Table.Td>
+              <Table.Td>{finalHeight} мм</Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td className={styles.td}>ЗИП комплект</Table.Td>
-              <Table.Td className={styles.td}>{zipKit}</Table.Td>
+              <Table.Td>Площадь</Table.Td>
+              <Table.Td>{activeArea.toFixed(2)} м²</Table.Td>
             </Table.Tr>
-             {/* Строка с ценой */}
-             <Table.Tr>
-               <Table.Td className={styles.td}><b>Ориентировочная цена</b></Table.Td>
-               <Table.Td className={styles.td}><b>{offerPrice}</b></Table.Td>
-             </Table.Tr>
+            <Table.Tr>
+              <Table.Td>Яркость</Table.Td>
+              <Table.Td>{brightness} кд/м²</Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>Частота обновления</Table.Td>
+              <Table.Td>{refreshFreq} Гц</Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>Угол обзора (Г°/В°)</Table.Td>
+              <Table.Td>{`${DEFAULT_VIEW_ANGLE}° / ${DEFAULT_VIEW_ANGLE}°`}</Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>Дистанция обзора</Table.Td>
+              <Table.Td>от {viewingDistance} м</Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td>ЗИП</Table.Td>
+              <Table.Td>{zipKit}</Table.Td>
+            </Table.Tr>
+            <Table.Tr>
+              <Table.Td><b>Ориент. цена</b></Table.Td>
+              <Table.Td><b>{offerPrice}</b></Table.Td>
+            </Table.Tr>
           </Table.Tbody>
         </Table>
+        {/* Кнопка сохранения */}
         <Center mt="md">
           <Button onClick={handleSaveOffer}>Сохранить предложение</Button>
         </Center>
