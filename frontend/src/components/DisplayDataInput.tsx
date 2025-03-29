@@ -161,8 +161,8 @@ const DisplayParameters = () => {
         .clone()
         .text()
         .then((text) => {
-          console.log(`--- RAW TEXT (${dayLabel}) ---`);
-          console.log(text);
+          // console.log(`--- RAW TEXT (${dayLabel}) ---`);
+          // console.log(text);
           try {
             // JSON.parse возвращает any, поэтому приводим к нашему типу
             const data = JSON.parse(text) as CbrApiResponse;
@@ -333,41 +333,53 @@ const DisplayParameters = () => {
     exchangeRate > 0;
 
   // --- Данные для CalculationResults ---
-  const calculationData = useMemo(
-    () => ({
+  const calculationData = useMemo(() => {
+    // Находим информацию о выбранном шаге пикселя
+    const selectedStepInfo = pixelStepsAll.find(
+      (step) => step.name === selectedPixelStep
+    );
+
+    // Проверяем наличие данных и преобразуем их в числа
+    const moduleWidth = selectedStepInfo?.width;
+    const moduleHeight = selectedStepInfo?.height;
+
+    // Убедимся, что значения являются числами
+    const finalModWidth = typeof moduleWidth === "number" ? moduleWidth : 0;
+    const finalModHeight = typeof moduleHeight === "number" ? moduleHeight : 0;
+
+    console.log("Данные модуля перед отправкой:", {
+      width: finalModWidth,
+      height: finalModHeight,
+      rawData: selectedStepInfo,
+    });
+
+    return {
       width,
       height,
       screenType,
       selectedProtection,
       selectedMaterial,
-      pixelSteps: pixelStepsAll,
       selectedPixelStep,
       selectedCabinet: selectedCabinet ? { ...selectedCabinet } : null,
       selectedOptions,
       exchangeRate: exchangeRate ?? 0,
-      cabinetName: selectedCabinet?.name ?? null,
-      cabinetWidth: selectedCabinet?.width ?? null,
-      cabinetHeight: selectedCabinet?.height ?? null,
-      selectedBrightness:
-        pixelStepsAll.find((s) => s.name === selectedPixelStep)?.brightness ??
-        0,
-      selectedRefreshFreq:
-        pixelStepsAll.find((s) => s.name === selectedPixelStep)?.refreshFreq ??
-        0,
-    }),
-    [
-      width,
-      height,
-      screenType,
-      selectedProtection,
-      selectedMaterial,
-      pixelStepsAll,
-      selectedPixelStep,
-      selectedCabinet,
-      selectedOptions,
-      exchangeRate,
-    ]
-  );
+      selectedBrightness: selectedStepInfo?.brightness ?? "-",
+      selectedRefreshFreq: selectedStepInfo?.refreshFreq ?? "-",
+      selectedModuleWidth: finalModWidth,
+      selectedModuleHeight: finalModHeight,
+    };
+  }, [
+    width,
+    height,
+    screenType,
+    selectedProtection,
+    selectedMaterial,
+    pixelStepsAll,
+    selectedPixelStep,
+    selectedCabinet,
+    selectedOptions,
+    exchangeRate,
+  ]);
 
   // --- Обработчики ---
   const handleScreenTypeChange = (n: string, c: boolean) =>

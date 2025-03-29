@@ -48,3 +48,5 @@ export default tseslint.config({
   },
 })
 ```
+$ netstat -ano | findstr ":5000"
+$ taskkill //PID 15288 //F

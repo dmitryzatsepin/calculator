@@ -58,7 +58,7 @@ const DisplayParameters = () => {
   const [protectionOptionsAll, setProtectionOptionsAll] = useState<
     ProtectionOption[]
   >([]);
-  const [pixelStepsAll, setPixelStepsAll] = useState<PixelStep[]>([]); // Храним все шаги здесь
+  const [pixelStepsAll, setPixelStepsAll] = useState<PixelStep[]>([]);
   const [cabinetsAll, setCabinetsAll] = useState<CabinetType[]>([]);
   const [exchangeRate, setExchangeRate] = useState<number | null>(null);
   const [screenType, setScreenType] = useState<string | null>(null);
@@ -69,7 +69,7 @@ const DisplayParameters = () => {
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [selectedPixelStep, setSelectedPixelStep] = useState<string | null>(
     null
-  ); // Храним имя выбранного шага
+  );
   const [selectedCabinet, setSelectedCabinet] = useState<CabinetType | null>(
     null
   );
@@ -129,59 +129,55 @@ const DisplayParameters = () => {
       .catch((e) => console.error("❌ cabinets:", e))
       .finally(() => setLoadingCabinets(false));
 
-    // --- Загрузка валюты с fallback ---
+    // Валюта
     setLoadingCurrency(true);
     setCurrencyError(null);
-    fetch("/api/currency") // 1. Текущий курс
+    fetch("/api/currency")
       .then((res) =>
         res.ok
           ? (res.json() as Promise<CbrApiResponse>)
           : Promise.reject(`HTTP ${res.status}`)
       )
       .then((data) => {
-        const currentRateValue = data?.Valute?.USD?.Value;
-        if (typeof currentRateValue === "number") {
-          setExchangeRate(parseFloat(currentRateValue.toFixed(2)));
+        const currentRate = data?.Valute?.USD?.Value;
+        if (typeof currentRate === "number") {
+          setExchangeRate(parseFloat(currentRate.toFixed(2)));
           setCurrencyError(null);
           return null;
         } else {
-          const previousURL = data?.PreviousURL;
-          if (typeof previousURL === "string") {
-            const fullPreviousURL = previousURL.startsWith("//")
-              ? `https:${previousURL}`
-              : previousURL;
-            return fetch(fullPreviousURL).then((prevRes) =>
+          const prevURL = data?.PreviousURL;
+          if (typeof prevURL === "string") {
+            const fullPrevURL = prevURL.startsWith("//")
+              ? `https:${prevURL}`
+              : prevURL;
+            return fetch(fullPrevURL).then((prevRes) =>
               prevRes.ok
                 ? (prevRes.json() as Promise<CbrApiResponse>)
-                : Promise.reject(`HTTP ${prevRes.status} (previous)`)
+                : Promise.reject(`HTTP ${prevRes.status}(prev)`)
             );
           } else {
-            throw new Error(
-              "Курс USD не найден, ссылка на предыдущий день отсутствует."
-            );
+            throw new Error("Нет курса и ссылки на пред. день");
           }
         }
       })
       .then((prevData) => {
         if (!prevData) return;
-        const previousRateValue = prevData?.Valute?.USD?.Value;
-        if (typeof previousRateValue === "number") {
-          setExchangeRate(parseFloat(previousRateValue.toFixed(2)));
+        const prevRate = prevData?.Valute?.USD?.Value;
+        if (typeof prevRate === "number") {
+          setExchangeRate(parseFloat(prevRate.toFixed(2)));
           setCurrencyError("Используется курс за предыдущий день.");
         } else {
-          throw new Error(
-            "Курс USD не найден ни за текущий, ни за предыдущий день."
-          );
+          throw new Error("Нет курса и за пред. день");
         }
       })
       .catch((error) => {
-        const errorMsg =
+        const msg =
           error instanceof Error
             ? error.message
             : `Неизвестная ошибка: ${error}`;
-        console.error("❌ Ошибка загрузки курса:", errorMsg);
+        console.error("❌ Курс:", msg);
         setExchangeRate(null);
-        setCurrencyError(errorMsg);
+        setCurrencyError(msg);
       })
       .finally(() => {
         setLoadingCurrency(false);
@@ -280,12 +276,12 @@ const DisplayParameters = () => {
     exchangeRate > 0;
 
   // --- Данные для CalculationResults ---
-  // 👇 ИЗМЕНЕНИЯ ЗДЕСЬ 👇
   const calculationData = useMemo(() => {
-    // Находим информацию о выбранном шаге пикселя внутри useMemo
     const selectedStepInfo = pixelStepsAll.find(
       (step) => step.name === selectedPixelStep
     );
+    const finalModWidth = selectedStepInfo?.width ?? "-"; // Используем fallback
+    const finalModHeight = selectedStepInfo?.height ?? "-"; // Используем fallback
 
     return {
       width,
@@ -299,6 +295,8 @@ const DisplayParameters = () => {
       exchangeRate: exchangeRate ?? 0,
       selectedBrightness: selectedStepInfo?.brightness ?? "-",
       selectedRefreshFreq: selectedStepInfo?.refreshFreq ?? "-",
+      selectedModuleWidth: finalModWidth,
+      selectedModuleHeight: finalModHeight,
     };
   }, [
     width,
@@ -312,7 +310,6 @@ const DisplayParameters = () => {
     selectedOptions,
     exchangeRate,
   ]);
-  // --------------------------
 
   // --- Обработчики ---
   const handleScreenTypeChange = (n: string, c: boolean) =>
@@ -330,7 +327,7 @@ const DisplayParameters = () => {
   // --- Цвет сообщения о курсе ---
   const getCurrencyMessageColor = () => {
     if (!currencyError) return "transparent";
-    if (currencyError.includes("Используется курс")) return "orange";
+    if (currencyError.includes("Исп. курс за пред. день")) return "orange";
     return "red";
   };
 
@@ -351,7 +348,7 @@ const DisplayParameters = () => {
       <Stack gap="xs" style={{ position: "relative" }}>
         <Grid>
           {/* Поля ввода */}
-          <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Grid.Col span={{ base: 12, sm: 6 }}>            
             <TextInput
               label="Ширина экрана (мм)"
               type="number"
@@ -361,7 +358,7 @@ const DisplayParameters = () => {
               required
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
+          <Grid.Col span={{ base: 12, sm: 6 }}>            
             <TextInput
               label="Высота экрана (мм)"
               type="number"
@@ -372,10 +369,13 @@ const DisplayParameters = () => {
             />
           </Grid.Col>
           {/* Тип экрана */}
-          <Grid.Col span={{ base: 12, sm: 4 }}>
+          <Grid.Col span={{ base: 12, sm: 4 }}>            
             <div>
-              <label className={classes.checkboxGroupLabel}>Тип экрана</label>
-              <Stack gap={5}>
+              
+              <label className={classes.checkboxGroupLabel}>
+                Тип экрана
+              </label>
+              <Stack gap={5}>               
                 {screenTypes.map((type) => (
                   <Checkbox
                     classNames={classes}
@@ -392,10 +392,12 @@ const DisplayParameters = () => {
             </div>
           </Grid.Col>
           {/* Материал */}
-          <Grid.Col span={{ base: 12, sm: 4 }}>
-            <div>
-              <label className={classes.checkboxGroupLabel}>Материал</label>
-              <Stack gap={5}>
+          <Grid.Col span={{ base: 12, sm: 4 }}>            
+            <div>              
+              <label className={classes.checkboxGroupLabel}>
+                Материал
+              </label>
+              <Stack gap={5}>                
                 {availableMaterials.map((mat) => (
                   <Checkbox
                     classNames={classes}
@@ -412,7 +414,7 @@ const DisplayParameters = () => {
             </div>
           </Grid.Col>
           {/* Степень защиты */}
-          <Grid.Col span={{ base: 12, sm: 4 }}>
+          <Grid.Col span={{ base: 12, sm: 4 }}>            
             <Select
               label="Степень защиты"
               placeholder={
@@ -428,10 +430,10 @@ const DisplayParameters = () => {
           </Grid.Col>
           {/* Доп. опции */}
           {availableOptions.length > 0 && (
-            <Grid.Col span={{ base: 12, sm: 12 }}>
-              <Stack>
+            <Grid.Col span={{ base: 12, sm: 12 }}>              
+              <Stack>                
                 <label className={classes.checkboxGroupLabel}>Опции</label>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>                  
                   {availableOptions.map((option) => (
                     <Checkbox
                       classNames={classes}
@@ -448,7 +450,7 @@ const DisplayParameters = () => {
             </Grid.Col>
           )}
           {/* Шаг пикселя */}
-          <Grid.Col span={{ base: 12, sm: 12 }}>
+          <Grid.Col span={{ base: 12, sm: 12 }}>           
             <Select
               label="Шаг пикселя"
               placeholder={loadingSteps ? "Загрузка..." : "Выберите шаг"}
@@ -466,7 +468,7 @@ const DisplayParameters = () => {
             />
           </Grid.Col>
           {/* Кабинет */}
-          <Grid.Col span={{ base: 12, sm: 12 }}>
+          <Grid.Col span={{ base: 12, sm: 12 }}>            
             <Select
               label="Кабинет"
               placeholder={loadingCabinets ? "Загрузка..." : "Выберите кабинет"}
@@ -484,7 +486,6 @@ const DisplayParameters = () => {
             />
           </Grid.Col>
         </Grid>
-
         {/* Курс валют и Кнопка Рассчитать */}
         <Grid align="flex-start" mt="md">
           <Grid.Col span="content">
@@ -510,20 +511,20 @@ const DisplayParameters = () => {
                   style={{ width: "100px" }}
                   error={
                     currencyError &&
-                    !currencyError.includes("Используется курс")
+                    !currencyError.includes("Исп. курс за пред. день")
                       ? true
                       : undefined
                   }
                 />
               </div>
               {currencyError && (
-                <Text c={getCurrencyMessageColor()} size="xs" mt={2}>
+                <Text c={getCurrencyMessageColor()} size="xs" mt={2}>                 
                   {currencyError}
                 </Text>
               )}
             </Stack>
           </Grid.Col>
-          <Grid.Col span="auto">
+          <Grid.Col span="auto">        
             <Button
               fullWidth
               onClick={() => setDrawerOpened(true)}
