@@ -1,3 +1,5 @@
+// Файл: backend/prisma/schema.prisma
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,68 +18,257 @@ model User {
   name      String
 }
 
-model ScreenType {
-  id       Int      @id @default(autoincrement())
-  name     String   @unique
-  material String[]
-  option   String[]
-}
-
-model PixelStep {
-  type        String
-  name        String
-  width       Int
-  height      Int
-  id          Int      @id @default(autoincrement())
-  location    String
-  option      String[]
-  brightness  Int
-  refreshFreq Int
-  priceUsd    Float    @default(0)
-
-  @@unique([name, location])
-}
-
-model Cabinet {
-  name              String
-  width             Int
-  height            Int
-  powerUnit         String
-  powerUnitCapacity Int
-  powerUnitQ        Int
-  receiver          Int
-  cooler            Int
-  modulesQ          Int
-  id                Int      @id @default(autoincrement())
-  location          String
-  material          String[]
-  pixelStep         String[]
-  placement         String
-  priceUsd          Float    @default(0)
-  mountPriceRub     Float    @default(0)
-  deliveryPriceRub  Float    @default(0)
-  addPriceRub       Float    @default(0)
-
-
-  @@unique([name, location])
-}
-
-model IngressProtection {
-  id                   Int    @id @default(autoincrement())
-  code                 String @unique
-  hardObjectProtection String
-  waterProtection      String
-}
-
-model PartPrice {
-  id       Int     @id @default(autoincrement())
-  name     String  @unique
-  nameEn   String 
-  priceUsd Float?  @default(0)
-  priceRub Float?  @default(0)
-}
-
 enum Role {
   USER
   ADMIN
+}
+
+// --- Базовые справочники ---
+
+model Material {
+  id   Int    @id @default(autoincrement())
+  code String @unique @map("material_code")
+  name String @map("material_name")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screenTypes ScreenTypeMaterial[]
+  cabinets    CabinetMaterial[] // Связь через CabinetMaterial
+
+  @@map("materials")
+}
+
+model Option {
+  id   Int    @id @default(autoincrement())
+  code String @unique @map("option_code")
+  name String @unique @map("option_name") // Добавляем unique, так как pixel_options ссылается по имени
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screenTypes ScreenTypeOption[]
+  // Связь с PixelOption будет непрямой, через поле optionName
+
+  @@map("options")
+}
+
+model Manufacturer {
+  id   Int    @id @default(autoincrement())
+  code String @unique @map("manufacturer_code")
+  name String @map("manufacturer_name")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  modules Module[]
+
+  @@map("manufacturers")
+}
+
+model ScreenType {
+  id         Int     @id @default(autoincrement())
+  name       String  @unique @map("screen_type")
+  brightness Int?    @map("screen_brightness")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  materials    ScreenTypeMaterial[] @relation("ScreenTypeMaterials")
+  options      ScreenTypeOption[]   @relation("ScreenTypeOptions")
+  modules      Module[]
+  cabinets     Cabinet[]
+  pixelOptions PixelOption[]
+
+  @@map("screen_types")
+}
+
+model IpProtection {
+  id              Int    @id @default(autoincrement())
+  code            String @unique @map("ip_code")
+  protectionSolid String @map("protection_solid")
+  protectionWater String @map("protection_water")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("ip_protection")
+}
+
+model ComponentService {
+  id       Int     @id @default(autoincrement())
+  category String? @map("component_category")
+  code     String  @unique @map("component_code")
+  name     String  @map("component_name")
+  priceUsd Decimal? @map("price_usd") @db.Decimal(12, 2)
+  priceRub Decimal? @map("price_rub") @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cabinetComponents CabinetComponent[]
+
+  @@map("component_service_price")
+}
+
+// --- Модели, связанные с Pixel ---
+
+// Лист: pixel_steps (Уникальные определения шага)
+model PixelStepDefinition {
+  id        Int     @id @default(autoincrement())
+  code      String  @unique @map("pixel_code")  // Уникальный код из pixel_steps
+  stepValue Decimal @map("pixel_step") @db.Decimal(5, 2) // Числовое значение
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Связи
+  pixelOptions PixelOption[] // Варианты с этим шагом
+  modules      Module[]      // Модули с этим шагом
+
+  @@map("pixel_step_definitions") // Новое имя таблицы
+}
+
+// Лист: pixel_types (Уникальные типы пикселей)
+model PixelType {
+  id        Int    @id @default(autoincrement())
+  type      String @unique @map("pixel_type") // Тип уникален (SMD, DIP)
+  frequency Int?   @map("pixel_frequency")    // Частота для этого типа
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pixelOptions PixelOption[]
+
+  @@map("pixel_types")
+}
+
+// Лист: pixel_options (Конкретные конфигурации/варианты пикселей)
+model PixelOption {
+  id           Int     @id @default(autoincrement())
+  pixelCode    String  @map("pixel_code") // Ссылка на PixelStepDefinition.code (НЕ УНИКАЛЬНО ЗДЕСЬ)
+
+  moduleWidth  Int     @map("module_width")
+  moduleHeight Int     @map("module_height")
+  optionName   String? // Имя опции из Excel
+
+  // Связи
+  stepDefinition PixelStepDefinition @relation(fields: [pixelCode], references: [code]) // Связь по pixelCode
+
+  pixelTypeId  Int?
+  pixelType    PixelType?    @relation(fields: [pixelTypeId], references: [id])
+
+  screenTypeId Int?
+  screenType   ScreenType?   @relation(fields: [screenTypeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // У модуля будет ссылка на PixelStepDefinition, а не сюда напрямую
+
+  // Возможно, стоит добавить индекс для ускорения поиска по pixelCode
+  @@index([pixelCode])
+  @@map("pixel_options")
+}
+
+
+// --- Зависимые сущности ---
+
+model Module {
+  id               Int      @id @default(autoincrement())
+  sku              String   @unique @map("module_sku")
+  type             String?  @map("module_type")
+  moduleWidth      Int      @map("module_width") // Собственные размеры модуля
+  moduleHeight     Int      @map("module_height")// Собственные размеры модуля
+  moduleFrequency  Int?     @map("module_frequency")
+  moduleBrightness Int?     @map("module_brightness")
+  priceUsd         Decimal? @map("price_usd") @db.Decimal(12, 2)
+
+  manufacturerCode String?
+  manufacturer     Manufacturer?  @relation(fields: [manufacturerCode], references: [code])
+
+  screenTypeId   Int
+  screenType     ScreenType      @relation(fields: [screenTypeId], references: [id])
+
+  // Связь с уникальным определением шага
+  pixelCode        String              @map("pixel_code") // Уникальный код из pixel_steps
+  stepDefinition   PixelStepDefinition @relation(fields: [pixelCode], references: [code]) // Связь по pixelCode
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("modules")
+}
+
+model Cabinet {
+  id           Int      @id @default(autoincrement())
+  sku          String   @unique @map("cabinet_sku")
+  name         String?  @map("cabinet_name")
+  width        Int?     @map("cabinet_width")
+  height       Int?     @map("cabinet_height")
+  placement    String?  @map("cabinet_placement")
+  moduleWidth  Int?     @map("module_width")
+  moduleHeight Int?     @map("module_height")
+  modulesCount Int?     @map("modules_count")
+  priceUsd     Decimal? @map("price_usd") @db.Decimal(12, 2)
+  // Поле cabinet_material из Excel игнорируем
+
+  screenTypeId Int?
+  screenType   ScreenType? @relation(fields: [screenTypeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  materials  CabinetMaterial[]  // Связь через CabinetMaterial
+  components CabinetComponent[]
+
+  @@map("cabinets")
+}
+
+// --- Связующие таблицы M-N ---
+
+model ScreenTypeMaterial {
+  screenTypeId Int @map("screen_type_id")
+  materialId   Int @map("material_id")
+
+  screenType ScreenType @relation("ScreenTypeMaterials", fields: [screenTypeId], references: [id], onDelete: Cascade)
+  material   Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@id([screenTypeId, materialId])
+  @@map("screen_type_materials")
+}
+
+model ScreenTypeOption {
+  screenTypeId Int @map("screen_type_id")
+  optionId     Int @map("option_id")
+
+  screenType ScreenType @relation("ScreenTypeOptions", fields: [screenTypeId], references: [id], onDelete: Cascade)
+  option     Option     @relation(fields: [optionId], references: [id], onDelete: Cascade)
+
+  @@id([screenTypeId, optionId])
+  @@map("screen_type_options")
+}
+
+// Используется листом 'cabinet_options' (бывший 'cabinet_materials')
+model CabinetMaterial {
+  cabinetId  Int @map("cabinet_id")  // Связь по ID кабинета
+  materialId Int @map("material_id") // Связь по ID материала
+
+  cabinet  Cabinet  @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@id([cabinetId, materialId])
+  @@map("cabinet_materials") // Имя таблицы оставляем прежним для совместимости
+}
+
+model CabinetComponent {
+  cabinetId   Int @map("cabinet_id")
+  componentId Int @map("component_id")
+  quantity    Int @map("component_count")
+
+  cabinet   Cabinet          @relation(fields: [cabinetId], references: [id], onDelete: Cascade)
+  component ComponentService @relation(fields: [componentId], references: [id], onDelete: Restrict)
+
+  @@id([cabinetId, componentId])
+  @@map("cabinet_components")
 }

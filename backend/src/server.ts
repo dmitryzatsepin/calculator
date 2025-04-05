@@ -1,100 +1,148 @@
-import express, { Request, Response, NextFunction } from "express"; // Добавили типы
-import http from 'http'; // Для управления сервером
+import express, { Request, Response, NextFunction, Application } from "express"; // 
+import http from 'http';
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 
+// --- Конфигурация и Библиотеки ---
 import { prisma } from './lib/prisma';
-
 import { configurePassport } from "./config/passport";
+
+// --- Маршруты ---
+import healthcheckRoute from "./routes/healthcheck";
 import authRoutes from "./routes/authRoutes";
-import pixelStepRoutes from "./routes/pixelStepRoutes";
 import cabinetRoutes from "./routes/cabinetRoutes";
+import componentServiceRoutes from "./routes/componentServiceRoutes";
+import ipProtectionRoutes from "./routes/ipProtectionRoutes";
+import manufacturerRoutes from "./routes/manufacturerRoutes";
+import materialRoutes from "./routes/materialRoutes";
+import moduleRoutes from "./routes/moduleRoutes";
+import optionRoutes from "./routes/optionRoutes";
+import pixelStepDefinitionRoutes from "./routes/pixelStepDefinitionRoutes";
 import screenTypeRoutes from "./routes/screenTypeRoutes";
-import protectionRoutes from "./routes/ingressProtection";
-import healthcheck from "./routes/healthcheck";
+//import currencyRoutes from './routes/currencyRoutes';
 
+// --- Инициализация ---
+dotenv.config(); // Загружаем переменные окружения
+const app: Application = express(); // Явно типизируем app
+const API_PREFIX = process.env.API_PREFIX || '/api/v1'; // Префикс для API, можно задать в .env
 
-dotenv.config();
+// --- Основные Middleware ---
+app.use(cors()); // Настройки CORS (можно ужесточить для продакшена)
+app.use(helmet()); // Базовая защита HTTP заголовков
+app.use(express.json()); // Парсинг JSON тел запросов
+app.use(morgan("dev")); // Логирование HTTP запросов в консоль
+app.use(passport.initialize()); // Инициализация Passport
+configurePassport(passport); // Конфигурируем стратегии Passport
 
-const app = express();
+// --- Регистрация Маршрутов API ---
+console.log(`Registering routes with prefix: ${API_PREFIX}`);
 
-// Middleware
-app.use(express.json());
-app.use(cors()); // Рассмотри более строгие настройки CORS для продакшена
-app.use(helmet());
-app.use(morgan("dev"));
-app.use(passport.initialize());
-configurePassport(passport);
+// Простой ответ на корневой путь API
+app.get(API_PREFIX, (req: Request, res: Response) => {
+  res.status(200).json({ message: 'Calculator API is running!' });
+});
 
-// Routes
-// Healthcheck обычно монтируют на отдельный путь, но оставим на / для совместимости
-app.use("/", healthcheck);
-app.use("/auth", authRoutes);
-app.use("/screen-types", screenTypeRoutes);
-app.use("/pixel-steps", pixelStepRoutes);
-app.use("/protection", protectionRoutes);
-app.use("/cabinets", cabinetRoutes);
+// Регистрация всех роутов для сущностей
+app.use(`${API_PREFIX}/healthcheck`, healthcheckRoute);
+app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/cabinets`, cabinetRoutes);
+app.use(`${API_PREFIX}/component-services`, componentServiceRoutes);
+app.use(`${API_PREFIX}/ip-protection`, ipProtectionRoutes);
+app.use(`${API_PREFIX}/manufacturers`, manufacturerRoutes);
+app.use(`${API_PREFIX}/materials`, materialRoutes);
+app.use(`${API_PREFIX}/modules`, moduleRoutes);
+app.use(`${API_PREFIX}/options`, optionRoutes);
+app.use(`${API_PREFIX}/pixel-step-definitions`, pixelStepDefinitionRoutes);
+app.use(`${API_PREFIX}/screen-types`, screenTypeRoutes);
+// if (currencyRoutes) { app.use(`${API_PREFIX}/currencies', currencyRoutes); } // Если нужен
 
+// --- Обработка ошибок ---
+// Middleware для обработки не найденных роутов (404) - опционально
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const error = new Error(`Маршрут не найден - ${req.originalUrl}`);
+  res.status(404);
+  next(error);
+});
 
-// --- Базовый обработчик ошибок ---
-// Должен идти ПОСЛЕ всех роутов
+// Основной обработчик ошибок (должен идти последним)
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error("Unhandled Error:", err.stack || err); // Логируем ошибку
+  // Логируем полную ошибку для отладки
+  console.error(`[ERROR] ${err.message}\n${err.stack}`);
 
-  // Отправляем общий ответ об ошибке клиенту
-  res.status(500).json({ message: "Internal Server Error" });
+  // Устанавливаем статус ошибки (если он не был установлен ранее)
+  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  res.status(statusCode);
+
+  // Отправляем стандартизированный JSON ответ клиенту
+  res.json({
+    message: err.message || "Internal Server Error",
+    // В режиме разработки можно отправлять стек вызовов, в продакшене - нет
+    stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
+  });
 });
 
 
-// --- Запуск сервера и Graceful Shutdown ---
+// --- Запуск Сервера и Корректное Завершение ---
 const PORT = process.env.PORT || 5000;
 
-// Создаем и запускаем HTTP сервер
-const server = http.createServer(app).listen(PORT, () => { // Используем http.createServer
-  console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
+// Используем стандартный http сервер для лучшего контроля над shutdown
+const server = http.createServer(app).listen(PORT, () => {
+  console.log(`🚀 Backend server started successfully.`);
+  console.log(`   Listening on: http://localhost:${PORT}`);
+  console.log(`   API Root: http://localhost:${PORT}${API_PREFIX}`);
 });
 
-// Функция для корректного завершения
-const gracefulShutdown = async (signal: string) => { // Сделали async для await prisma.$disconnect()
-  console.log(`\nReceived ${signal}. Closing HTTP server...`);
-  server.close(async (err) => { // Добавили async и сюда
+// Функция корректного завершения
+const gracefulShutdown = async (signal: string) => {
+  console.log(`\n🔌 Received ${signal}. Starting graceful shutdown...`);
+  console.log("   Closing HTTP server...");
+  server.close(async (err) => {
     if (err) {
-      console.error('Error closing server:', err);
-      process.exit(1);
-    } else {
-      console.log('HTTP server closed.');
-      try {
-        // Закрываем соединение с Prisma перед выходом
-        await prisma.$disconnect();
-        console.log('Prisma connection closed.');
-      } catch (dbErr) {
-        console.error('Error disconnecting Prisma:', dbErr);
-      } finally {
-         process.exit(0); // Успешный выход
-      }
+      console.error('   [Error] closing server:', err);
+      process.exit(1); // Выход с ошибкой
+    }
+    console.log('   ✅ HTTP server closed.');
+    try {
+      console.log('   Disconnecting Prisma...');
+      await prisma.$disconnect(); // Закрываем соединение Prisma
+      console.log('   ✅ Prisma connection closed.');
+      process.exit(0); // Успешный выход
+    } catch (dbErr) {
+      console.error('   [Error] disconnecting Prisma:', dbErr);
+      process.exit(1); // Выход с ошибкой
     }
   });
 
-  // Таймаут для принудительного завершения
+  // Таймаут для принудительного завершения, если что-то зависло
   setTimeout(() => {
-    console.error('Could not close connections in time, forcefully shutting down');
+    console.error('   [Timeout] Could not close connections in time, forcing shutdown.');
     process.exit(1);
   }, 15000); // 15 секунд
 };
 
-// Обработчики сигналов
+// Обработчики сигналов завершения
 process.on('SIGINT', () => gracefulShutdown('SIGINT')); // Ctrl+C
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM')); // Сигнал завершения
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM')); // docker stop, kill, etc.
 
-// Опционально: Обработка других необработанных ошибок
-process.on('uncaughtException', (error) => {
-  console.error('UNCAUGHT EXCEPTION! 💥 Shutting down...', error);
-  process.exit(1); // В таких случаях лучше сразу падать
+// Обработка критических ошибок процесса
+process.on('uncaughtException', (error, origin) => {
+  console.error(`\n💥 UNCAUGHT EXCEPTION! Origin: ${origin}`);
+  console.error(error);
+  console.error('   Shutting down application...');
+  process.exit(1); // При таких ошибках лучше перезапустить приложение
 });
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('UNHANDLED REJECTION! 💥 Shutting down...', reason);
-  process.exit(1); // В таких случаях лучше сразу падать
+  console.error('\n💥 UNHANDLED REJECTION!');
+  console.error('   Reason:', reason);
+  console.error('   Promise:', promise);
+  console.error('   Shutting down application...');
+  // ВАЖНО: Неправильно вызывать gracefulShutdown здесь, т.к. состояние может быть неконсистентным.
+  // Лучше просто завершить процесс.
+  server.close(() => {
+      process.exit(1);
+  });
+  setTimeout(() => process.exit(1), 2000); // Принудительное завершение через 2с
 });

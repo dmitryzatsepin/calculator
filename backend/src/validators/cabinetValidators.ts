@@ -1,32 +1,41 @@
-// src/validators/cabinetValidators.ts (новый файл)
 import { z } from 'zod';
 
-// Схема для создания кабинета
+const componentInputSchema = z.object({
+    componentCode: z.string().min(1, "Код компонента обязателен"),
+    quantity: z.coerce.number().int().positive("Количество компонента должно быть положительным числом"),
+}).strict("В объекте компонента разрешены только поля componentCode и quantity"); // Запрещаем лишние поля
+
+// --- Схема для СОЗДАНИЯ кабинета ---
 export const createCabinetSchema = z.object({
-    name: z.string().min(1, "Имя обязательно"),
-    width: z.coerce.number().int().positive("Ширина должна быть положительным числом"), // coerce пытается преобразовать строку в число
-    height: z.coerce.number().int().positive("Высота должна быть положительным числом"),
-    modulesQ: z.coerce.number().int().positive("Кол-во модулей должно быть положительным числом"),
-    powerUnit: z.string().min(1, "Тип блока питания обязателен"),
-    powerUnitQ: z.coerce.number().int().positive("Кол-во блоков питания должно быть положительным числом"),
-    powerUnitCapacity: z.coerce.number().int().positive("Мощность блока питания должна быть положительным числом"),
-    receiver: z.coerce.number().int().positive("Кол-во приемников должно быть положительным числом"),
-    cooler: z.coerce.number().int().nonnegative("Кол-во кулеров не может быть отрицательным"), // 0 - допустимо
-    pixelStep: z.array(z.string()).min(1, "Хотя бы один шаг пикселя обязателен"),
-    location: z.string().min(1, "Локация обязательна"),
-    material: z.array(z.string()).min(1, "Хотя бы один материал обязателен"),
-    placement: z.string().min(1, "Размещение обязательно"),
-    priceUsd: z.coerce.number().nonnegative("Цена USD не может быть отрицательной").optional().default(0),
-    mountPriceRub: z.coerce.number().nonnegative("Цена монтажа не может быть отрицательной").optional().default(0),
-    deliveryPriceRub: z.coerce.number().nonnegative("Цена доставки не может быть отрицательной").optional().default(0),
-    addPriceRub: z.coerce.number().nonnegative("Доп. цена не может быть отрицательной").optional().default(0),
-});
 
-// Схема для обновления кабинета (делаем все поля необязательными для PATCH)
-// Если используете PUT, можно скопировать createCabinetSchema
-export const updateCabinetSchema = createCabinetSchema.partial(); // Все поля становятся optional
+    // --- Основные поля Cabinet ---
+    sku: z.string().min(1, "SKU обязателен"),
+    name: z.string().min(1, "Имя не может быть пустым").optional(),
+    width: z.coerce.number().int().positive("Ширина должна быть положительным числом").optional(),
+    height: z.coerce.number().int().positive("Высота должна быть положительным числом").optional(),
+    modulesCount: z.coerce.number().int().positive("Кол-во модулей должно быть положительным числом").optional(), // 
+    placement: z.string().min(1, "Размещение не может быть пустым").optional(),
+    priceUsd: z.coerce.number().nonnegative("Цена USD не может быть отрицательной").optional(),
 
-// Тип для данных создания, выведенный из схемы
+    // --- Связи ---
+    location: z.string().min(1, "Локация (имя типа экрана) не может быть пустой").optional(),
+
+    materialCodes: z.array(z.string().min(1, "Код материала не может быть пустым"))
+        .min(1, "Требуется хотя бы один код материала"),
+
+    components: z.array(componentInputSchema)
+        .optional(),
+
+  }).strict("В запросе на создание кабинета присутствуют лишние поля");
+  
+
+// --- Схема для ОБНОВЛЕНИЯ кабинета ---
+export const updateCabinetSchema = createCabinetSchema.partial()
+    .refine(obj => Object.keys(obj).length > 0, {
+         message: "Хотя бы одно поле должно быть предоставлено для обновления",
+    });
+
+
+// --- Вывод типов TypeScript из схем Zod ---
 export type CreateCabinetInput = z.infer<typeof createCabinetSchema>;
-// Тип для данных обновления
 export type UpdateCabinetInput = z.infer<typeof updateCabinetSchema>;

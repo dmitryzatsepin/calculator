@@ -17,14 +17,20 @@ type ScreenTypeData = { name: string; material: string[]; option: string[] };
 type ProtectionOption = { code: string };
 type PixelStep = {
   id: number;
-  name: string;
-  type: string;
-  width: number;
-  height: number;
-  brightness: number;
-  refreshFreq: number;
-  location: string | string[];
-  option: string[];
+  name: string;        // Есть, строка
+  type: string | null; // Может быть null? Сделай nullable
+  width: number;       // Есть, число
+  height: number;      // Есть, число
+  brightness: number;  // Есть, число
+  refreshFreq: number; // Есть, число
+  location: string | null; // ВСЕГДА строка (имя ScreenType) или null, если связи нет
+  options: string[];   // Есть, массив строк
+  ipCode: string | null; // Есть, строка (код IP) или null
+  priceUsd: string | number | null; // Приходит как строка из Decimal, может быть null
+  screenTypeId: number; // Добавляем
+  ipCodeId: number | null; // Добавляем
+  createdAt: string; // Добавляем
+  updatedAt: string; // Добавляем
 };
 type CabinetType = {
   id: number;
@@ -109,23 +115,32 @@ const DisplayParameters = () => {
       .catch((e) => console.error("❌ protection:", e))
       .finally(() => setLoadingProtection(false));
     setLoadingSteps(true);
-    fetch("/api/local/pixel-steps")
-      .then((res) =>
-        res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))
-      )
-      .then((data) => {
-        const steps = (data?.data ?? []).map((s: PixelStep) => ({
-          ...s,
-          location: Array.isArray(s.location)
-            ? s.location
-            : typeof s.location === "string"
-            ? s.location.split(",").map((l) => l.trim())
-            : [],
-        }));
-        setPixelStepsAll(steps);
-      })
-      .catch((e) => console.error("❌ pixel-steps:", e))
-      .finally(() => setLoadingSteps(false));
+    fetch("/api/local/pixel-steps") 
+   .then(res => res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`))
+   .then(data => {
+    const steps: PixelStep[] = (data?.data ?? []).map((s: Partial<PixelStep> & { priceUsd?: string | number | null }) => ({ // Используем частичный тип + ожидаем priceUsd как строку/число
+      // Устанавливаем значения по умолчанию для полей, которые могут отсутствовать в Partial
+      id: s.id ?? 0,
+      name: s.name ?? '',
+      type: s.type ?? null,
+      width: s.width ?? 0,
+      height: s.height ?? 0,
+      brightness: s.brightness ?? 0,
+      refreshFreq: s.refreshFreq ?? 0,
+      location: s.location ?? null,
+      options: s.options ?? [],
+      ipCode: s.ipCode ?? null,
+      screenTypeId: s.screenTypeId ?? 0,
+      ipCodeId: s.ipCodeId ?? null,
+      createdAt: s.createdAt ?? new Date().toISOString(), // Пример значения по умолчанию
+      updatedAt: s.updatedAt ?? new Date().toISOString(), // Пример значения по умолчанию
+      // Преобразуем priceUsd
+      priceUsd: s.priceUsd != null ? parseFloat(String(s.priceUsd)) : null
+    }));
+     setPixelStepsAll(steps);
+   })
+   .catch(e => console.error("❌ pixel-steps:", e))
+   .finally(() => setLoadingSteps(false));
     setLoadingCabinets(true);
     fetch("/api/local/cabinets")
       .then((res) =>
@@ -241,57 +256,95 @@ const DisplayParameters = () => {
       });
   }, []);
 
-  // --- Вычисляемые данные (useMemo) ---
-  const selectedScreenData = useMemo(
-    () => screenTypes.find((t) => t.name === screenType),
-    [screenType, screenTypes]
-  );
-  const filteredProtectionOptions = useMemo(
-    () =>
-      protectionOptionsAll
-        .filter((p) => {
-          const ip = parseInt(p.code.replace("IP", ""), 10);
-          return !isNaN(ip) && ip >= 29 && ip <= 69;
-        })
-        .map((p) => ({ value: p.code, label: p.code })),
-    [protectionOptionsAll]
-  );
-  const availableMaterials = useMemo(
-    () =>
-      selectedScreenData
-        ? selectedScreenData.material
-        : [...new Set(screenTypes.flatMap((t) => t.material))],
-    [selectedScreenData, screenTypes]
-  );
-  const availableOptions = useMemo(
-    () =>
-      selectedScreenData && selectedMaterial ? selectedScreenData.option : [],
-    [selectedScreenData, selectedMaterial]
-  );
-  const filteredPixelSteps = useMemo(() => {
-    if (!selectedScreenData || !selectedMaterial) return [];
-    let steps = pixelStepsAll.filter(
-      (s) =>
-        Array.isArray(s.location) &&
-        s.location.includes(selectedScreenData.name)
+
+    // --- Вычисляемые данные (useMemo) ---
+    const selectedScreenData = useMemo(
+      () => screenTypes.find((t) => t.name === screenType),
+      [screenType, screenTypes]
     );
-    if (selectedOptions.includes("гибкий экран"))
-      steps = steps.filter((s) => s.option.includes("гибкий экран"));
-    return steps.map((s) => ({ value: s.name, label: s.name }));
-  }, [selectedScreenData, selectedMaterial, selectedOptions, pixelStepsAll]);
-  const filteredCabinets = useMemo(() => {
-    if (!selectedScreenData || !selectedPixelStep || !selectedMaterial)
-      return [];
-    return cabinetsAll
-      .filter(
-        (c) =>
-          c.location === selectedScreenData.name &&
-          c.pixelStep.includes(selectedPixelStep) &&
-          c.material.includes(selectedMaterial)
-      )
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((c) => ({ value: c.id.toString(), label: c.name }));
-  }, [selectedScreenData, selectedPixelStep, selectedMaterial, cabinetsAll]);
+    const filteredProtectionOptions = useMemo(
+      () =>
+        protectionOptionsAll
+          .filter((p) => {
+            const ip = parseInt(p.code.replace("IP", ""), 10);
+            return !isNaN(ip) && ip >= 29 && ip <= 69;
+          })
+          .map((p) => ({ value: p.code, label: p.code })),
+      [protectionOptionsAll]
+    );
+    const availableMaterials = useMemo(
+      () =>
+        selectedScreenData
+          ? selectedScreenData.material
+          : [...new Set(screenTypes.flatMap((t) => t.material))],
+      [selectedScreenData, screenTypes]
+    );
+    const availableOptions = useMemo(
+      () =>
+        selectedScreenData && selectedMaterial ? selectedScreenData.option : [],
+      [selectedScreenData, selectedMaterial]
+    );
+  
+    // --- ИЗМЕНЕННЫЙ БЛОК filteredPixelSteps ---
+    const filteredPixelSteps = useMemo(() => {
+      // Условие для возврата пустого массива, если не выбраны тип экрана или материал
+      if (!selectedScreenData || !selectedMaterial) {
+          console.log("filteredPixelSteps: Не выбран тип экрана или материал, возвращаем [].");
+          return [];
+      }
+  
+      // Фильтруем все шаги по выбранному типу экрана (location)
+      let steps = pixelStepsAll.filter(
+        (s) => s.location === selectedScreenData.name
+      );
+      console.log(`filteredPixelSteps: Найдено шагов после фильтра по location '${selectedScreenData.name}':`, steps.length);
+  
+  
+      // Применяем дополнительный фильтр, если выбрана опция "гибкий экран"
+      if (selectedOptions.includes("гибкий экран")) {
+          console.log("filteredPixelSteps: Применяем фильтр по опции 'гибкий экран'.");
+          steps = steps.filter((s) =>
+              Array.isArray(s.options) && s.options.includes("гибкий экран") // Добавлена проверка Array.isArray
+          );
+           console.log(`filteredPixelSteps: Найдено шагов после фильтра по опции:`, steps.length);
+      }
+  
+      // Логируем шаги ПЕРЕД преобразованием в {value, label}
+      console.log("filteredPixelSteps: Отфильтрованные шаги (перед map):", JSON.stringify(steps, null, 2)); // Используем JSON.stringify для детального лога
+  
+      // Преобразуем отфильтрованные шаги в формат для Select, добавляя проверку s.name
+      const selectData = steps.map((s) => {
+          const label = s.name || 'Неизвестный шаг'; // Заглушка для label
+          const value = s.name || ''; // Пустая строка для value, если name отсутствует
+          // Дополнительный лог, если имя отсутствует
+          if (!s.name) {
+              console.warn("filteredPixelSteps: Обнаружен шаг без имени (name):", s);
+          }
+          return { value, label };
+      }).filter(item => item.value !== ''); // Убираем элементы с пустым value, если они не нужны в Select
+  
+       // Логируем финальный массив данных для Select
+       console.log("filteredPixelSteps: Данные для Select:", selectData);
+  
+      return selectData;
+    }, [selectedScreenData, selectedMaterial, selectedOptions, pixelStepsAll]);
+    // --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
+  
+    const filteredCabinets = useMemo(() => {
+      // ... (остальной код без изменений) ...
+      if (!selectedScreenData || !selectedPixelStep || !selectedMaterial)
+        return [];
+      return cabinetsAll
+        .filter(
+          (c) =>
+            c.location === selectedScreenData.name &&
+            Array.isArray(c.pixelStep) && c.pixelStep.includes(selectedPixelStep) && // Добавлена проверка Array.isArray
+            Array.isArray(c.material) && c.material.includes(selectedMaterial)      // Добавлена проверка Array.isArray
+        )
+        // Безопасная сортировка для name
+        .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+        .map((c) => ({ value: c.id.toString(), label: c.name || 'Без имени' })); // Добавлена заглушка для label
+    }, [selectedScreenData, selectedPixelStep, selectedMaterial, cabinetsAll]);
 
   // --- Эффекты для сброса полей ---
   useEffect(() => {

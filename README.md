@@ -49,4 +49,10 @@ export default tseslint.config({
 })
 ```
 $ netstat -ano | findstr ":5000"
-$ taskkill //PID 11916 //F
+$ taskkill //PID 15472 //F
+
+<!-- создание новой ветки -->
+git checkout -b <branch_name>
+
+<!-- Список веток -->
+git branch
