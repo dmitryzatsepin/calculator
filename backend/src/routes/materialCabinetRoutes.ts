@@ -4,5 +4,5 @@ import { getAllMaterialCabinets } from '../controllers/materialCabinetController
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllMaterialCabinets);
+router.get('/', getAllMaterialCabinets);
 export default router;

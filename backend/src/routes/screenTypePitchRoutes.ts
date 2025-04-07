@@ -4,5 +4,5 @@ import { getAllScreenTypePitches } from '../controllers/screenTypePitchControlle
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllScreenTypePitches);
+router.get('/', getAllScreenTypePitches);
 export default router;

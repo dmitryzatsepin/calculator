@@ -4,5 +4,5 @@ import { getAllScreenTypeLocations } from '../controllers/screenTypeLocationCont
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllScreenTypeLocations);
+router.get('/', getAllScreenTypeLocations);
 export default router;

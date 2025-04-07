@@ -4,5 +4,5 @@ import { getAllPitchTypePitches } from '../controllers/pitchTypePitchController'
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllPitchTypePitches);
+router.get('/', getAllPitchTypePitches);
 export default router;

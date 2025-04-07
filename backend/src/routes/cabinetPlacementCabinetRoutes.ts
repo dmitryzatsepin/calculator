@@ -4,5 +4,5 @@ import { getAllCabinetPlacementCabinets } from '../controllers/cabinetPlacementC
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllCabinetPlacementCabinets);
+router.get('/', getAllCabinetPlacementCabinets);
 export default router;

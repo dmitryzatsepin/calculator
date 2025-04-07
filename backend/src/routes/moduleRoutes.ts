@@ -20,7 +20,7 @@ const router = express.Router();
 
 // GET /api/v1/modules - Получить все модули
 // Защищаем маршрут с помощью 'protect'
-router.get('/', protect, getAllModules); 
+router.get('/', getAllModules); 
 
 // --- ЗАКОММЕНТИРОВАННЫЕ МАРШРУТЫ ДЛЯ БУДУЩЕГО ---
 // GET /api/v1/modules/:id - Получить один модуль

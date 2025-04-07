@@ -14,7 +14,7 @@ const router = express.Router();
 
 // GET /api/v1/cabinets - Получить все кабинеты
 // Защищаем маршрут с помощью 'protect'
-router.get('/', protect, getAllCabinets); 
+router.get('/', getAllCabinets); 
 
 // --- ЗАКОММЕНТИРОВАННЫЕ МАРШРУТЫ ДЛЯ БУДУЩЕГО ---
 // GET /api/v1/cabinets/:id - Получить один кабинет

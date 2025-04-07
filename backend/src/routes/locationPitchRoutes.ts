@@ -4,5 +4,5 @@ import { getAllLocationPitches } from '../controllers/locationPitchController'; 
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllLocationPitches);
+router.get('/', getAllLocationPitches);
 export default router;

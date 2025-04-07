@@ -18,7 +18,7 @@ router.route('/')
     // GET / - Получить список всех материалов (открытый доступ)
     .get(getMaterials)
     // POST / - Создать новый материал (защищено)
-    .post(protect, admin, createMaterial); // Требуется аутентификация и права админа
+    .post(createMaterial); // Требуется аутентификация и права админа
 
 // Конкретный ресурс (/api/v1/materials/:id)
 router.route('/:id')

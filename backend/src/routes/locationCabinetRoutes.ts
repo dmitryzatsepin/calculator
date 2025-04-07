@@ -4,5 +4,5 @@ import { getAllLocationCabinets } from '../controllers/locationCabinetController
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllLocationCabinets);
+router.get('/', getAllLocationCabinets);
 export default router;

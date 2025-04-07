@@ -4,5 +4,5 @@ import { getAllLocationMaterials } from '../controllers/locationMaterialControll
 import { protect } from '../middleware/authMiddleware';
 
 const router = express.Router();
-router.get('/', protect, getAllLocationMaterials);
+router.get('/', getAllLocationMaterials);
 export default router;
