@@ -1,286 +1,142 @@
 // src/controllers/moduleController.ts
 import { Request, Response, NextFunction } from "express";
-import { PrismaClient, Prisma } from "@prisma/client";
-import { prisma } from "../lib/prisma";
-import { asyncHandler } from "../middleware/asyncHandler";
-import { idParamSchema } from "../validators/commonValidators";
-import {
-  createModuleSchema,
-  updateModuleSchema,
-} from "../validators/moduleValidators";
-import { Decimal } from "@prisma/client/runtime/library";
+import { PrismaClient, Prisma } from "@prisma/client"; // Уберем лишнее позже
+import { prisma } from '../lib/prisma';
+import { asyncHandler } from '../middleware/asyncHandler'; // Оставляем
+// import { idParamSchema } from '../validators/commonValidators'; // Пока не нужно
+// import { createModuleSchema, updateModuleSchema } from '../validators/moduleValidators'; // Пока не нужно
+import { Decimal } from "@prisma/client/runtime/library"; // Оставляем, т.к. Decimal используется в запросе
 
 // --- Хелпер для проверки существования связанных сущностей ---
-// Возвращает null, если все ОК, или объект ошибки для next()
+// (Закомментируем, так как используется только в create/update)
+/*
 const checkRelatedEntities = async (
-    data: { manufacturerCode?: string | null, screenTypeId?: number, pixelCode?: string },
+    data: { manufacturerCode?: string | null, locationCode?: string | null, pitchCode?: string | null, refreshRateValue?: number | null, brightnessValue?: number | null },
     operation: 'create' | 'update'
 ) => {
-    // Проверяем ScreenType (обязателен при создании, если передан при обновлении)
-    if (data.screenTypeId !== undefined) {
-        const screenTypeExists = await prisma.screenType.findUnique({ where: { id: data.screenTypeId }, select: {id: true} });
-        if (!screenTypeExists) {
-            return new Error(`Тип экрана (ScreenType) с ID ${data.screenTypeId} не найден.`);
+    // Проверяем Location (если передан или обязателен)
+    if (data.locationCode !== undefined && data.locationCode !== null) {
+        const locationExists = await prisma.location.findUnique({ where: { code: data.locationCode }, select: {id: true} });
+        if (!locationExists) {
+            return new Error(`Локация (Location) с кодом '${data.locationCode}' не найдена.`);
         }
-    } else if (operation === 'create') {
-         return new Error(`screenTypeId обязателен при создании модуля.`); // На всякий случай, валидатор должен это ловить
+    } else if (operation === 'create' && !data.locationCode ) { // Если связь обязательна при создании
+         // return new Error(`locationCode обязателен при создании модуля.`);
     }
 
-    // Проверяем PixelStepDefinition (обязателен при создании, если передан при обновлении)
-    if (data.pixelCode !== undefined) {
-        const stepDefinitionExists = await prisma.pixelStepDefinition.findUnique({ where: { code: data.pixelCode }, select: {id: true} });
-        if (!stepDefinitionExists) {
-            return new Error(`Определение шага пикселя (PixelStepDefinition) с кодом '${data.pixelCode}' не найдено.`);
+    // Проверяем Pitch (обязателен всегда)
+    if (data.pitchCode !== undefined) {
+        const pitchExists = await prisma.pitch.findUnique({ where: { code: data.pitchCode }, select: {id: true} });
+        if (!pitchExists) {
+            return new Error(`Шаг пикселя (Pitch) с кодом '${data.pitchCode}' не найден.`);
         }
     } else if (operation === 'create') {
-         return new Error(`pixelCode обязателен при создании модуля.`); // На всякий случай
+         return new Error(`pitchCode обязателен при создании модуля.`);
     }
 
-    // Проверяем Manufacturer (необязателен, но если передан - должен существовать)
-    if (data.manufacturerCode !== undefined && data.manufacturerCode !== null) { // Проверяем, если передан не null
+    // Проверяем Manufacturer (необязателен)
+    if (data.manufacturerCode !== undefined && data.manufacturerCode !== null) {
         const manufacturerExists = await prisma.manufacturer.findUnique({ where: { code: data.manufacturerCode }, select: {id: true} });
         if (!manufacturerExists) {
             return new Error(`Производитель (Manufacturer) с кодом '${data.manufacturerCode}' не найден.`);
         }
     }
 
+    // Проверяем RefreshRate (необязателен)
+    if (data.refreshRateValue !== undefined && data.refreshRateValue !== null) {
+        const refreshRateExists = await prisma.refreshRate.findUnique({ where: { value: data.refreshRateValue }, select: {value: true} });
+        if (!refreshRateExists) {
+            return new Error(`Частота обновления (RefreshRate) со значением '${data.refreshRateValue}' не найдена.`);
+        }
+    }
+    
+    // Проверяем Brightness (необязателен)
+    if (data.brightnessValue !== undefined && data.brightnessValue !== null) {
+        const brightnessExists = await prisma.brightness.findUnique({ where: { value: data.brightnessValue }, select: {value: true} });
+        if (!brightnessExists) {
+            return new Error(`Яркость (Brightness) со значением '${data.brightnessValue}' не найдена.`);
+        }
+    }
+
     return null; // Все связанные сущности найдены
 }
+*/
 
-// 📌 Получение всех модулей
-export const getModules = asyncHandler(async (req: Request, res: Response) => {
+// 📌 Получение всех модулей (Переименовано и обновлен include)
+export const getAllModules = asyncHandler(async (req: Request, res: Response) => {
   const modules = await prisma.module.findMany({
-    orderBy: { sku: "asc" }, // Сортируем по SKU
-    include: { // Включаем связанные данные для контекста
-        manufacturer: { select: { code: true, name: true } },
-        screenType: { select: { id: true, name: true } },
-        stepDefinition: { select: { code: true, stepValue: true } },
+    orderBy: { sku: "asc" }, 
+    include: { // Включаем актуальные связи
+        manufacturer: { select: { code: true, name: true } }, // Manufacturer (опционально)
+        location: { select: { code: true, name: true } },     // Location (опционально/обязательно?)
+        pitch: { select: { code: true, pitchValue: true, moduleWidth: true, moduleHeight: true } }, // Pitch (обязательно)
+        refreshRate: { select: { value: true } },             // RefreshRate (опционально)
+        brightness: { select: { value: true } },              // Brightness (опционально)
     }
   });
-  res
-    .status(200)
-    .json({ message: "Список модулей", data: modules });
+
+  // Преобразуем Decimal в строки
+  const responseData = modules.map(m => ({
+      ...m,
+      priceUsd: m.priceUsd?.toString() ?? null,
+      pitch: {
+          ...m.pitch,
+          pitchValue: m.pitch.pitchValue.toString()
+      }
+  }));
+
+  // Возвращаем чистый массив
+  res.status(200).json(responseData);
 });
 
-// 📌 Получение одного модуля по ID
+// -------------------------------------------------------------------- //
+// --- ВЕСЬ КОД НИЖЕ ЗАКОММЕНТИРОВАН (getModuleById, create, update, delete) --- //
+// -------------------------------------------------------------------- //
+
+/*
+// 📌 Получение одного модуля по ID (Нуждается в обновлении include)
 export const getModuleById = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = idParamSchema.parse(req.params);
-    try {
-      const module = await prisma.module.findUniqueOrThrow({
-        where: { id },
-        include: { // Включаем связанные данные
-            manufacturer: { select: { code: true, name: true } },
-            screenType: { select: { id: true, name: true } },
-            stepDefinition: { select: { code: true, stepValue: true } },
-        }
-      });
-      res.status(200).json({ message: "Модуль найден", data: module });
-    } catch (e: any) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-        res.status(404);
-        return next(new Error(`Модуль с ID ${id} не найден.`));
-      }
-      return next(e);
-    }
+    // ... (код требует обновления include как в getAllModules и преобразования Decimal) ...
+    res.status(501).json({ message: "Получение модуля по ID еще не реализовано" });
   }
 );
+*/
 
-// 📌 Создание нового модуля
+/*
+// 📌 Создание нового модуля (ТРЕБУЕТ ПОЛНОЙ ПЕРЕРАБОТКИ)
 export const createModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const validatedData = createModuleSchema.parse(req.body);
-    const {
-        sku, type, moduleWidth, moduleHeight, moduleFrequency, moduleBrightness, priceUsd,
-        manufacturerCode, screenTypeId, pixelCode
-    } = validatedData;
-
-    // 1. Проверяем существование связанных сущностей
-    const entityCheckError = await checkRelatedEntities({ manufacturerCode, screenTypeId, pixelCode }, 'create');
-    if (entityCheckError) {
-        res.status(400); // Bad Request, т.к. переданы невалидные ID/коды
-        return next(entityCheckError);
-    }
-
-    // 2. Проверяем уникальность SKU
-    const existingModule = await prisma.module.findUnique({
-      where: { sku: sku },
-      select: { id: true },
-    });
-    if (existingModule) {
-      res.status(409); // Conflict
-      return next(new Error(`Модуль с SKU '${sku}' уже существует.`));
-    }
-
-    // 3. Создаем модуль
-    try {
-      const newModule = await prisma.module.create({
-        data: {
-          sku, type, moduleWidth, moduleHeight, moduleFrequency, moduleBrightness,
-          priceUsd: priceUsd !== undefined && priceUsd !== null ? new Prisma.Decimal(priceUsd) : null,
-          // Связи через connect
-          screenType: { connect: { id: screenTypeId } },
-          stepDefinition: { connect: { code: pixelCode } },
-          // Необязательная связь с производителем
-          ...(manufacturerCode && { manufacturer: { connect: { code: manufacturerCode } } })
-        },
-        include: { // Включаем связанные данные в ответ
-            manufacturer: { select: { code: true, name: true } },
-            screenType: { select: { id: true, name: true } },
-            stepDefinition: { select: { code: true, stepValue: true } },
-        }
-      });
-      res
-        .status(201)
-        .json({ message: "Модуль успешно создан", data: newModule });
-    } catch (e: any) {
-      // Обработка ошибки уникальности SKU (P2002)
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-        res.status(409);
-        return next(new Error(`Ошибка уникальности при создании модуля. SKU '${sku}' должен быть уникальным.`));
-      }
-      // Обработка ошибок FK (P2003) - маловероятно после проверок, но возможно
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2003") {
-         console.error("FK constraint error during module creation:", e);
-         res.status(400);
-         return next(new Error(`Ошибка связи с ${e.meta?.field_name ?? 'связанной таблицей'} при создании модуля.`));
-      }
-      return next(e);
-    }
+    // TODO: Переписать под новую схему
+    // 1. Обновить валидатор createModuleSchema
+    // 2. Использовать locationCode, pitchCode, manufacturerCode, refreshRateValue, brightnessValue
+    // 3. Обновить checkRelatedEntities или выполнять проверки здесь
+    // 4. Обновить prisma.module.create с новыми связями
+    res.status(501).json({ message: "Создание модуля еще не реализовано" });
   }
 );
+*/
 
-// 📌 Обновление модуля
+/*
+// 📌 Обновление модуля (ТРЕБУЕТ ПОЛНОЙ ПЕРЕРАБОТКИ)
 export const updateModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = idParamSchema.parse(req.params);
-    const validatedData = updateModuleSchema.parse(req.body);
-    const {
-        sku, type, moduleWidth, moduleHeight, moduleFrequency, moduleBrightness, priceUsd,
-        manufacturerCode, screenTypeId, pixelCode
-    } = validatedData; // Все поля здесь опциональны
-
-    // Проверка на пустое тело сделана валидатором .refine()
-
-    // 1. Проверяем существование связанных сущностей, ЕСЛИ они переданы для обновления
-    const entityCheckError = await checkRelatedEntities({ manufacturerCode, screenTypeId, pixelCode }, 'update');
-     if (entityCheckError) {
-         res.status(400); // Bad Request
-         return next(entityCheckError);
-     }
-
-    // 2. Если обновляется SKU, проверяем его уникальность
-    if (sku) {
-      const existingModule = await prisma.module.findUnique({
-        where: { sku: sku },
-        select: { id: true },
-      });
-      // Если модуль с таким SKU найден и это НЕ текущий обновляемый модуль
-      if (existingModule && existingModule.id !== id) {
-        res.status(409); // Conflict
-        return next(new Error(`Модуль с SKU '${sku}' уже существует.`));
-      }
-    }
-
-    // 3. Собираем данные для обновления
-    const dataToUpdate: Prisma.ModuleUpdateInput = {};
-    // Добавляем простые поля, если они переданы
-    if (sku !== undefined) dataToUpdate.sku = sku;
-    if (type !== undefined) dataToUpdate.type = type;
-    if (moduleWidth !== undefined) dataToUpdate.moduleWidth = moduleWidth;
-    if (moduleHeight !== undefined) dataToUpdate.moduleHeight = moduleHeight;
-    if (moduleFrequency !== undefined) dataToUpdate.moduleFrequency = moduleFrequency;
-    if (moduleBrightness !== undefined) dataToUpdate.moduleBrightness = moduleBrightness;
-    if (priceUsd !== undefined) dataToUpdate.priceUsd = priceUsd !== null ? new Decimal(priceUsd) : null;
-
-    // Обновляем связи, если переданы ID/коды
-    if (screenTypeId !== undefined) dataToUpdate.screenType = { connect: { id: screenTypeId } };
-    if (pixelCode !== undefined) dataToUpdate.stepDefinition = { connect: { code: pixelCode } };
-    // Обновление необязательной связи Manufacturer: connect, disconnect или ничего
-    if (manufacturerCode !== undefined) {
-        if (manufacturerCode === null) { // Явно передан null для отсоединения
-             dataToUpdate.manufacturer = { disconnect: true };
-        } else { // Передан новый код для соединения
-             dataToUpdate.manufacturer = { connect: { code: manufacturerCode } };
-        }
-    }
-
-    // 4. Обновляем модуль
-    try {
-      const updatedModule = await prisma.module.update({
-        where: { id },
-        data: dataToUpdate,
-        include: { // Включаем связанные данные в ответ
-            manufacturer: { select: { code: true, name: true } },
-            screenType: { select: { id: true, name: true } },
-            stepDefinition: { select: { code: true, stepValue: true } },
-        }
-      });
-      res
-        .status(200)
-        .json({ message: "Модуль успешно обновлен", data: updatedModule });
-    } catch (e: any) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError) {
-        if (e.code === "P2025") { // RecordNotFound
-          res.status(404);
-          return next(new Error(`Модуль с ID ${id} не найден.`));
-        } else if (e.code === "P2002") { // Unique constraint violation (для SKU)
-          res.status(409);
-          return next(
-            new Error(`Ошибка уникальности при обновлении модуля ID ${id}. SKU '${sku}' должен быть уникальным.`)
-          );
-        } else if (e.code === "P2003") { // Foreign key constraint failed
-            console.error("FK constraint error during module update:", e);
-            res.status(400);
-            // Определить, какая связь вызвала ошибку, сложнее без парсинга e.meta
-            return next(new Error(`Ошибка связи при обновлении модуля. Убедитесь, что указанные ScreenType, PixelStepDefinition и Manufacturer существуют.`));
-        }
-      }
-      return next(e);
-    }
+    // TODO: Переписать под новую схему
+    // 1. Обновить валидатор updateModuleSchema
+    // 2. Обновить checkRelatedEntities или выполнять проверки здесь
+    // 3. Обновить логику dataToUpdate для новых полей и связей
+    // 4. Обновить prisma.module.update
+     res.status(501).json({ message: "Обновление модуля еще не реализовано" });
   }
 );
+*/
 
-// 📌 Удаление модуля
+/*
+// 📌 Удаление модуля (Проверить и раскомментировать, если нужно)
 export const deleteModule = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = idParamSchema.parse(req.params);
-
-    try {
-      // 1. Проверка существования модуля (для правильного 404)
-      const moduleExists = await prisma.module.findUnique({
-        where: { id },
-        select: { id: true },
-      });
-      if (!moduleExists) {
-        res.status(404);
-        return next(new Error(`Модуль с ID ${id} не найден.`));
-      }
-
-      // 2. Проверка зависимостей (Зависят ли другие сущности от этого модуля?)
-      // В текущей схеме нет моделей, которые напрямую ссылались бы на Module.id
-      // как на внешний ключ с ограничением Restrict. Поэтому прямых блокировок
-      // при удалении быть не должно. Если появятся - добавить проверку здесь.
-      /*
-      const relatedEntitiesCount = await prisma.someOtherModel.count({ where: { moduleId: id } });
-      if (relatedEntitiesCount > 0) {
-          res.status(409);
-          return next(new Error(`Невозможно удалить модуль ID ${id}, так как он используется в ${relatedEntitiesCount} других записях.`));
-      }
-      */
-
-      // 3. Удаление модуля
-      await prisma.module.delete({ where: { id } });
-      res.status(200).json({ message: "Модуль успешно удален" });
-
-    } catch (e: any) {
-      console.error(`Ошибка при удалении модуля ID ${id}:`, e);
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2025") {
-          res.status(404);
-          return next(new Error(`Модуль с ID ${id} не найден (ошибка при удалении).`));
-      }
-      // P2003 не ожидается, если нет FK с Restrict, указывающих на Module
-      return next(e);
-    }
+    // ... (Логика удаления в целом должна работать, т.к. на Module никто не ссылается с Restrict) ...
+     res.status(501).json({ message: "Удаление модуля еще не реализовано" });
   }
 );
+*/
