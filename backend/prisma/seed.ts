@@ -1,3 +1,4 @@
+// src/seed.ts
 import { PrismaClient, Prisma } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import * as path from 'path';
@@ -15,33 +16,60 @@ function getDataFromSheet(workbook: XLSX.WorkBook, sheetName: string): any[] {
         return [];
     }
     const sheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(sheet, { raw: false, defval: null });
-    // *** Игнорируем вторую строку Excel (первый элемент в jsonData) ***
-    const dataWithoutSecondHeader = jsonData.slice(1);
-    console.log(`  - Прочитано строк из ${sheetName} (после пропуска 2-го заголовка): ${dataWithoutSecondHeader.length}`);
-    return dataWithoutSecondHeader;
+    // Используем header: 1 чтобы получить массив массивов, так проще пропустить вторую строку
+    const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+    if (rows.length < 3) { // Должно быть как минимум 2 строки заголовка + 1 строка данных
+        console.warn(`⚠️ Лист ${sheetName} пуст или содержит только заголовки (или меньше 3 строк). Пропуск.`);
+        return [];
+    }
+
+    const header = rows[0];
+    // Пропускаем вторую строку (rows[1])
+    const dataRows = rows.slice(2);
+
+    // Фильтруем строки, где все значения null или пустые строки
+    const filteredRows = dataRows.filter(row => 
+        row.some(cell => cell !== null && cell !== '')
+    );
+
+    const jsonData = filteredRows.map(row => {
+        const rowData: { [key: string]: any } = {};
+        header.forEach((key: any, index: number) => {
+            if (key != null) { // Пропускаем пустые заголовки
+               rowData[String(key)] = row[index];
+            }
+        });
+        return rowData;
+    });
+
+    if (dataRows.length !== filteredRows.length) {
+        console.log(`  - Пропущено ${dataRows.length - filteredRows.length} пустых строк в ${sheetName}`);
+    }
+    console.log(`  - Прочитано строк из ${sheetName} (после пропуска 2-го заголовка): ${jsonData.length}`);
+    return jsonData;
 }
 
-// --- Вспомогательные функции для безопасного преобразования ---
+
+// --- Вспомогательные функции (без изменений) ---
 function safeDecimal(value: any, context: string): Decimal | null {
     if (value == null || value === '') { return null; }
-    // Попробуем заменить запятую на точку для десятичных разделителей
     const normalizedValue = typeof value === 'string' ? value.replace(',', '.') : value;
     if (typeof normalizedValue === 'number' || (typeof normalizedValue === 'string' && !isNaN(parseFloat(normalizedValue)) && isFinite(Number(normalizedValue)))) {
         try { return new Decimal(normalizedValue); }
         catch (e) { console.error(`❌ ${context}: Ошибка конвертации значения '${value}' (норм: '${normalizedValue}') в Decimal`, e); return null; }
     } else { console.warn(`⚠️ ${context}: Некорректное значение для Decimal: '${value}'. Будет использовано null.`); return null; }
 }
+
 function safeInt(value: any, context: string, allowZero: boolean = true, allowNull: boolean = true): number | null {
      if (value == null || value === '') { return allowNull ? null : (allowZero ? 0 : null); }
-     // Убираем возможные пробелы
-     const trimmedValue = typeof value === 'string' ? value.trim() : value;
+     const trimmedValue = typeof value === 'string' ? String(value).trim() : value; // Добавили trim для строк
      const num = Number(trimmedValue);
      if (!isNaN(num) && Number.isInteger(num)) {
          if (!allowZero && num === 0) { console.warn(`⚠️ ${context}: Нулевое значение не разрешено для '${value}'. Будет использовано null.`); return null; }
          return num;
      } else { console.warn(`⚠️ ${context}: Некорректное целочисленное значение: '${value}'. Будет использовано ${allowNull ? 'null' : (allowZero ? '0' : 'null')}.`); return allowNull ? null : (allowZero ? 0 : null); }
 }
+
 
 // --- Основная функция импорта ---
 async function importDataFromExcel(filePath: string): Promise<void> {
@@ -51,127 +79,206 @@ async function importDataFromExcel(filePath: string): Promise<void> {
     const sheetNames = workbook.SheetNames;
     console.log('👀 Найденные листы:', sheetNames);
 
-    // --- 0. Чтение данных ---
+    // --- 0. Чтение данных (Обновлено) ---
     console.log("Чтение данных из Excel...");
+    const screenTypeData = getDataFromSheet(workbook, 'screen_type');
+    const locationData = getDataFromSheet(workbook, 'location');
     const materialsData = getDataFromSheet(workbook, 'materials');
-    const optionsData = getDataFromSheet(workbook, 'options');
+    const refreshRateData = getDataFromSheet(workbook, 'refresh_rate');
+    const brightnessData = getDataFromSheet(workbook, 'brightness');
     const manufacturersData = getDataFromSheet(workbook, 'manufacturers');
-    const screenTypesData = getDataFromSheet(workbook, 'screen_types');
-    const screenTypeMaterialsData = getDataFromSheet(workbook, 'screen_type_materials');
-    const screenTypeOptionsData = getDataFromSheet(workbook, 'screen_type_options');
-    const cabinetsData = getDataFromSheet(workbook, 'cabinets');
-    const cabinetOptionsSheetName = sheetNames.includes('cabinet_options') ? 'cabinet_options' : 'cabinet_materials';
-    if (!sheetNames.includes('cabinet_options') && sheetNames.includes('cabinet_materials')) console.warn("ℹ️ Лист 'cabinet_options' не найден, используется 'cabinet_materials'.");
-    else if (!sheetNames.includes('cabinet_options') && !sheetNames.includes('cabinet_materials')) console.warn("⚠️ Листы 'cabinet_options' и 'cabinet_materials' не найдены.");
-    const cabinetOptionsData = getDataFromSheet(workbook, cabinetOptionsSheetName);
-    const cabinetComponentsData = getDataFromSheet(workbook, 'cabinet_components');
+    const cabinetPlacementData = getDataFromSheet(workbook, 'cabinet_placement');
+    const pitchData = getDataFromSheet(workbook, 'pitch');
+    const pitchTypeData = getDataFromSheet(workbook, 'pitch_type');
+    const screenTypeLocationData = getDataFromSheet(workbook, 'screen_type>location');
+    const screenTypePitchData = getDataFromSheet(workbook, 'screen_type>pitch');
+    const locationMaterialsData = getDataFromSheet(workbook, 'location>materials');
+    const locationPitchData = getDataFromSheet(workbook, 'location>pitch');
+    const locationCabinetData = getDataFromSheet(workbook, 'location>cabinet');
+    const materialCabinetData = getDataFromSheet(workbook, 'material>cabinet');
+    const cabinetPlacementCabinetData = getDataFromSheet(workbook, 'cabinet_placement>cabinet');
+    const pitchTypePitchData = getDataFromSheet(workbook, 'pitch_type>pitch');
     const modulesData = getDataFromSheet(workbook, 'modules');
-    const pixelStepsData = getDataFromSheet(workbook, 'pixel_steps');       // code @unique + step (Decimal)
-    const pixelTypesData = getDataFromSheet(workbook, 'pixel_types');       // type @unique + frequency
-    const pixelOptionsData = getDataFromSheet(workbook, 'pixel_options');   // code + type + width + height + screen_type + option_name
-    const ipProtectionData = getDataFromSheet(workbook, 'ip_protection');
+    const cabinetsData = getDataFromSheet(workbook, 'cabinets');
     const componentPriceData = getDataFromSheet(workbook, 'component_and_service_price');
+    const cabinetComponentsData = getDataFromSheet(workbook, 'cabinet>components');
+    const ipProtectionData = getDataFromSheet(workbook, 'ip_protection');
     console.log("Чтение Excel завершено.");
 
-    // --- 1. Очистка таблиц ---
-    console.log('Очистка таблиц...');
+
+    // --- 1. Очистка таблиц (Обновлен порядок, добавлены новые) ---
+    console.log('Очистка таблиц (в правильном порядке)...');
     try {
-        // Сначала зависимые от PixelStepDefinition
-        await prisma.module.deleteMany();
-        await prisma.pixelOption.deleteMany();
-        // Затем сам PixelStepDefinition
-        await prisma.pixelStepDefinition.deleteMany(); // Новая модель
-        // Остальные зависимости
         await prisma.cabinetComponent.deleteMany();
-        await prisma.cabinetMaterial.deleteMany(); // Использует таблицу cabinet_materials
-        await prisma.screenTypeOption.deleteMany();
-        await prisma.screenTypeMaterial.deleteMany();
+        await prisma.pitchTypePitch.deleteMany();
+        await prisma.cabinetPlacementCabinet.deleteMany();
+        await prisma.materialCabinet.deleteMany();
+        await prisma.locationCabinet.deleteMany();
+        await prisma.locationPitch.deleteMany();
+        await prisma.locationMaterial.deleteMany();
+        await prisma.screenTypePitch.deleteMany();
+        await prisma.screenTypeLocation.deleteMany();
+        await prisma.module.deleteMany();
         await prisma.cabinet.deleteMany();
-        await prisma.pixelType.deleteMany();
+        await prisma.pitch.deleteMany();
+        await prisma.screenType.deleteMany();
+        await prisma.pitchType.deleteMany();
+        await prisma.cabinetPlacement.deleteMany();
+        await prisma.location.deleteMany();
+        await prisma.manufacturer.deleteMany();
+        await prisma.material.deleteMany();
         await prisma.componentService.deleteMany();
         await prisma.ipProtection.deleteMany();
-        await prisma.screenType.deleteMany();
-        await prisma.manufacturer.deleteMany();
-        await prisma.option.deleteMany();
-        await prisma.material.deleteMany();
+        await prisma.refreshRate.deleteMany();
+        await prisma.brightness.deleteMany();
         console.log('Очистка таблиц завершена.');
     } catch(e) { console.error("❌ Ошибка при очистке таблиц:", e); throw e; }
 
-    // --- 2. Заполнение справочников и карт ---
-    console.log('Заполнение базовых справочников...');
-    const materialMap = new Map<string, number>(); // code -> id
-    const optionMap = new Map<string, number>(); // code -> id
-    const optionNameMap = new Map<string, number>(); // name -> id (Для связи из pixel_options)
-    const manufacturerMap = new Map<string, number>(); // code -> id
-    const screenTypeMap = new Map<string, number>(); // name -> id
-    const ipCodeMap = new Map<string, number>(); // code -> id
-    const componentCodeMap = new Map<string, number>(); // code -> id
-    const pixelTypeMap = new Map<string, number>(); // type -> id (SMD -> 1)
-    // Карта для PixelStepDefinition (уникальные шаги)
-    const pixelStepDefinitionMap = new Map<string, number>(); // code -> id
+    // --- 2. Заполнение справочников и карт (Обновлено с .trim()) ---
+    console.log('Заполнение базовых справочников и создание карт ID...');
+    const materialMap = new Map<string, number>();
+    const manufacturerCodeMap = new Map<string, number>();
+    const manufacturerNameMap = new Map<string, string>(); // name -> code
+    const locationMap = new Map<string, number>(); // code -> id
+    const locationNameMap = new Map<string, string>(); // name -> code
+    const cabinetPlacementMap = new Map<string, number>();
+    const pitchTypeMap = new Map<string, number>(); // name -> id
+    const screenTypeMap = new Map<string, number>(); // code -> id
+    const pitchMap = new Map<string, number>(); // code -> id
+    const ipCodeMap = new Map<string, number>();
+    const componentCodeMap = new Map<string, number>();
     const cabinetSkuMap = new Map<string, number>(); // sku -> id
+    const refreshRateMap = new Map<number, number>();
+    const brightnessMap = new Map<number, number>();
 
     try {
         // --- Material ---
         for (const row of materialsData) {
-            const code = row.material_code ? String(row.material_code) : null;
-            if (!code) { console.warn("[Material] Пропуск: нет code"); continue; }
+            const code = row.material_code ? String(row.material_code).trim() : null;
+            if (!code) continue;
+            if (materialMap.has(code)) { console.warn(`[Material Duplicate] Код '${code}'...`); continue; }
             try {
-                const created = await prisma.material.create({ data: { code: code, name: String(row.material_name ?? '') } });
+                const created = await prisma.material.create({ data: { code: code, name: String(row.material_name ?? '').trim() } });
                 materialMap.set(created.code, created.id);
             } catch(e) { console.error(`[Material Error] '${code}'`, e); }
         }
         console.log(`  - Создано Material: ${materialMap.size}`);
 
-        // --- Option ---
-        for (const row of optionsData) {
-            const code = row.option_code ? String(row.option_code) : null;
-            const name = row.option_name ? String(row.option_name) : null;
-            if (!code || !name) { console.warn("[Option] Пропуск: нет code или name", row); continue; }
-             try {
-                // Проверяем уникальность имени перед добавлением
-                if (optionNameMap.has(name)) {
-                    console.error(`[Option Error] Дублирующееся имя опции '${name}'. Пропуск строки:`, row);
-                    continue;
-                }
-                const created = await prisma.option.create({ data: { code: code, name: name } });
-                optionMap.set(created.code, created.id);
-                optionNameMap.set(created.name, created.id); // Заполняем карту имен
-            } catch(e) { console.error(`[Option Error] Ошибка создания code:'${code}', name:'${name}'`, e); }
-        }
-        console.log(`  - Создано Option: ${optionMap.size}`);
-
         // --- Manufacturer ---
         for (const row of manufacturersData) {
-            const code = row.manufacturer_code ? String(row.manufacturer_code) : null;
-            if (!code) { console.warn("[Manufacturer] Пропуск: нет code"); continue; }
+            const code = row.manufacturer_code ? String(row.manufacturer_code).trim() : null;
+            const name = row.manufacturer_name ? String(row.manufacturer_name).trim() : null;
+            if (!code || !name) { console.warn(`[Manufacturer] Пропуск: нет code или name`, row); continue; }
+             if (manufacturerCodeMap.has(code)) { console.warn(`[Manufacturer Duplicate] Код '${code}'...`); continue; }
+             if (manufacturerNameMap.has(name)) { console.warn(`[Manufacturer Duplicate] Имя '${name}'...`); continue; }
             try {
-                const created = await prisma.manufacturer.create({ data: { code: code, name: String(row.manufacturer_name ?? '') } });
-                manufacturerMap.set(created.code, created.id);
-            } catch(e) { console.error(`[Manufacturer Error] '${code}'`, e); }
+                const created = await prisma.manufacturer.create({ data: { code: code, name: name } });
+                manufacturerCodeMap.set(created.code, created.id);
+                manufacturerNameMap.set(created.name, created.code);
+            } catch(e) { console.error(`[Manufacturer Error] '${code}' / '${name}'`, e); }
         }
-        console.log(`  - Создано Manufacturer: ${manufacturerMap.size}`);
+        console.log(`  - Создано Manufacturer: ${manufacturerCodeMap.size}`);
+
+        // --- Location ---
+        for (const row of locationData) {
+            const code = row.location_code ? String(row.location_code).trim() : null;
+            const name = row.location_name ? String(row.location_name).trim() : null;
+            if (!code || !name) continue;
+             if (locationMap.has(code)) { console.warn(`[Location Duplicate Code] Код '${code}'...`); continue; }
+             if (locationNameMap.has(name)) { console.warn(`[Location Duplicate Name] Имя '${name}'...`); continue; }
+            try {
+                const created = await prisma.location.create({ data: { code: code, name: name } });
+                locationMap.set(created.code, created.id);
+                locationNameMap.set(created.name, created.code);
+            } catch(e) { console.error(`[Location Error] '${code}'/'${name}'`, e); }
+        }
+        console.log(`  - Создано Location: ${locationMap.size}`);
+
+        // --- CabinetPlacement ---
+        for (const row of cabinetPlacementData) {
+            const code = row.cabinet_placement_code ? String(row.cabinet_placement_code).trim() : null;
+            if (!code) continue;
+             if (cabinetPlacementMap.has(code)) { console.warn(`[CabinetPlacement Duplicate] Код '${code}'...`); continue; }
+            try {
+                const created = await prisma.cabinetPlacement.create({ data: { code: code, name: String(row.cabinet_placement_name ?? '').trim() } });
+                cabinetPlacementMap.set(created.code, created.id);
+            } catch(e) { console.error(`[CabinetPlacement Error] '${code}'`, e); }
+        }
+        console.log(`  - Создано CabinetPlacement: ${cabinetPlacementMap.size}`);
+
+        // --- PitchType ---
+        for (const row of pitchTypeData) {
+            const name = row.pitch_type ? String(row.pitch_type).trim() : null;
+            if (!name) continue;
+             if (pitchTypeMap.has(name)) { console.warn(`[PitchType Duplicate] Имя '${name}'...`); continue; }
+            try {
+                const created = await prisma.pitchType.create({ data: { name: name } });
+                pitchTypeMap.set(created.name, created.id);
+            } catch(e) { console.error(`[PitchType Error] '${name}'`, e); }
+        }
+        console.log(`  - Создано PitchType: ${pitchTypeMap.size}`);
 
         // --- ScreenType ---
-        for (const row of screenTypesData) {
-            const name = row.screen_type ? String(row.screen_type) : null;
-            if (!name) { console.warn("[ScreenType] Пропуск: нет name"); continue; }
-            const brightness = safeInt(row.screen_brightness, `ScreenType ${name} brightness`);
+        for (const row of screenTypeData) {
+            const code = row.screen_type_code ? String(row.screen_type_code).trim() : null;
+            if (!code) continue;
+             if (screenTypeMap.has(code)) { console.warn(`[ScreenType Duplicate] Код '${code}'...`); continue; }
             try {
-                const created = await prisma.screenType.create({ data: { name: name, brightness: brightness } });
-                screenTypeMap.set(created.name, created.id);
-            } catch(e) { console.error(`[ScreenType Error] '${name}'`, e); }
+                const created = await prisma.screenType.create({ data: { code: code, name: String(row.screen_type ?? '').trim() } });
+                screenTypeMap.set(created.code, created.id);
+            } catch(e) { console.error(`[ScreenType Error] '${code}'`, e); }
         }
         console.log(`  - Создано ScreenType: ${screenTypeMap.size}`);
 
+        // --- Pitch ---
+        for (const row of pitchData) {
+            const code = row.pitch_code ? String(row.pitch_code).trim() : null;
+            if (!code) continue;
+             if (pitchMap.has(code)) { console.warn(`[Pitch Duplicate] Код '${code}'...`); continue; }
+            const pitchVal = safeDecimal(row.pitch, `Pitch ${code} value`);
+            const modWidth = safeInt(row.module_width, `Pitch ${code} modWidth`, false, false);
+            const modHeight = safeInt(row.module_height, `Pitch ${code} modHeight`, false, false);
+            if (pitchVal === null || modWidth === null || modHeight === null) {
+                console.warn(`[Pitch] Пропуск '${code}': неверные pitch, width или height.`); continue;
+            }
+            try {
+                const created = await prisma.pitch.create({ data: { code, pitchValue: pitchVal, moduleWidth: modWidth, moduleHeight: modHeight } });
+                pitchMap.set(created.code, created.id);
+            } catch(e) { console.error(`[Pitch Error] '${code}'`, e); }
+        }
+        console.log(`  - Создано Pitch: ${pitchMap.size}`);
+
+        // --- RefreshRate ---
+        for (const row of refreshRateData) {
+            const value = safeInt(row.refresh_rate, `RefreshRate value`, false, true);
+            if (value === null) { continue; }
+             if (refreshRateMap.has(value)) { continue; }
+            try {
+                await prisma.refreshRate.upsert({ where: { value: value }, update: {}, create: { value: value } });
+                refreshRateMap.set(value, value);
+            } catch(e) { console.error(`[RefreshRate Error] '${value}'`, e); }
+        }
+        console.log(`  - Создано/Обновлено RefreshRate: ${refreshRateMap.size}`);
+
+        // --- Brightness ---
+        for (const row of brightnessData) {
+            const value = safeInt(row.brightness, `Brightness value`, false, true);
+            if (value === null) { continue; }
+            if (brightnessMap.has(value)) { continue; }
+            try {
+                 await prisma.brightness.upsert({ where: { value: value }, update: {}, create: { value: value } });
+                brightnessMap.set(value, value);
+            } catch(e) { console.error(`[Brightness Error] '${value}'`, e); }
+        }
+        console.log(`  - Создано/Обновлено Brightness: ${brightnessMap.size}`);
+
         // --- IpProtection ---
         for (const row of ipProtectionData) {
-            const code = row.ip_code ? String(row.ip_code) : null;
-            if (!code) { console.warn("[IpProtection] Пропуск: нет code"); continue; }
+            const code = row.ip_code ? String(row.ip_code).trim() : null;
+            if (!code) continue;
+             if (ipCodeMap.has(code)) { console.warn(`[IpProtection Duplicate] Код '${code}'...`); continue; }
             try {
-                const created = await prisma.ipProtection.create({ data: {
-                    code: code, protectionSolid: String(row.protection_solid ?? ''), protectionWater: String(row.protection_water ?? '')
-                }});
+                const created = await prisma.ipProtection.create({ data: { code, protectionSolid: String(row.protection_solid ?? '').trim(), protectionWater: String(row.protection_water ?? '').trim() }});
                 ipCodeMap.set(created.code, created.id);
             } catch(e) { console.error(`[IpProtection Error] '${code}'`, e); }
         }
@@ -179,159 +286,96 @@ async function importDataFromExcel(filePath: string): Promise<void> {
 
         // --- ComponentService ---
         for (const row of componentPriceData) {
-             const code = row.component_code ? String(row.component_code) : null;
-             if (!code) { console.warn("[ComponentService] Пропуск: нет code", row); continue; }
+             const code = row.component_code ? String(row.component_code).trim() : null;
+             if (!code) continue;
+             if (componentCodeMap.has(code)) { console.warn(`[ComponentService Duplicate] Код '${code}'...`); continue; }
              const priceUsd = safeDecimal(row.price_usd, `Component ${code} price_usd`);
              const priceRub = safeDecimal(row.price_rub, `Component ${code} price_rub`);
              try {
                  const created = await prisma.componentService.create({ data: {
-                     category: row.component_category ? String(row.component_category) : null,
-                     code: code, name: String(row.component_name ?? ''), priceUsd: priceUsd, priceRub: priceRub,
+                     category: row.component_category ? String(row.component_category).trim() : null,
+                     code: code, name: String(row.component_name ?? '').trim(), priceUsd: priceUsd, priceRub: priceRub,
                  }});
                  componentCodeMap.set(created.code, created.id);
              } catch(dbError) { console.error(`[ComponentService Error] '${code}'`, dbError); }
          }
         console.log(`  - Создано ComponentService: ${componentCodeMap.size}`);
 
-        // --- PixelType ---
-        for (const row of pixelTypesData) {
-            const type = row.pixel_type ? String(row.pixel_type) : null;
-            if (!type) { console.warn("[PixelType] Пропуск: нет type.", row); continue; }
-            const frequency = safeInt(row.pixel_frequency, `PixelType ${type} frequency`);
-            try {
-                const created = await prisma.pixelType.create({ data: { type: type, frequency: frequency } });
-                pixelTypeMap.set(created.type, created.id); // Сохраняем по имени типа
-            } catch(e) {
-                 if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-                     console.warn(`[PixelType Warn] Тип '${type}' уже существует. Получаем ID.`);
-                     const existing = await prisma.pixelType.findUnique({ where: { type: type } });
-                     if (existing) pixelTypeMap.set(existing.type, existing.id);
-                 } else { console.error(`[PixelType Error] Ошибка создания '${type}'`, e); }
-            }
-        }
-        console.log(`  - Создано/Загружено PixelType: ${pixelTypeMap.size}`);
-
-        // --- PixelStepDefinition (из листа pixel_steps) ---
-        console.log(`--- Начало создания PixelStepDefinition ---`);
-        for (const row of pixelStepsData) {
-            const code = row.pixel_code ? String(row.pixel_code) : null;
-            if (!code) { console.warn("[PixelStepDefinition] Пропуск: нет pixel_code.", row); continue; }
-
-            const stepDecimal = safeDecimal(row.pixel_step, `PixelStep ${code} stepValue`);
-            if (stepDecimal === null) {
-                console.warn(`[PixelStepDefinition] Пропуск '${code}': pixel_step не является числом (${row.pixel_step}).`);
-                continue;
-            }
-
-            try {
-                const created = await prisma.pixelStepDefinition.create({
-                    data: { code: code, stepValue: stepDecimal }
-                });
-                pixelStepDefinitionMap.set(created.code, created.id);
-            } catch (e) {
-                 if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-                     console.warn(`[PixelStepDefinition Warn] Код '${code}' уже существует. Получаем ID.`);
-                     const existing = await prisma.pixelStepDefinition.findUnique({ where: { code: code } });
-                     if (existing) pixelStepDefinitionMap.set(existing.code, existing.id);
-                 } else { console.error(`[PixelStepDefinition Error] Ошибка создания '${code}'`, e); }
-            }
-        }
-        console.log(`--- Завершение создания PixelStepDefinition ---`);
-        console.log(`  - Создано/Загружено PixelStepDefinition: ${pixelStepDefinitionMap.size}`);
-
-
-        // --- PixelOption (из листа pixel_options) ---
-        console.log(`--- Начало создания PixelOption ---`);
-        let pixelOptionsCreatedCount = 0;
-        for (const row of pixelOptionsData) {
-            const pixelCode = row.pixel_code ? String(row.pixel_code) : null;
-            if (!pixelCode) { console.warn("[PixelOption] Пропуск: нет pixel_code.", row); continue; }
-
-            // Проверяем, существует ли pixelCode в PixelStepDefinition (критично для связи)
-            if (!pixelStepDefinitionMap.has(pixelCode)) {
-                console.warn(`[PixelOption] Пропуск: pixel_code '${pixelCode}' не найден в справочнике PixelStepDefinition.`, row);
-                continue;
-            }
-
-            const pixelTypeName = row.pixel_type ? String(row.pixel_type) : null;
-            const pixelTypeId = pixelTypeName ? pixelTypeMap.get(pixelTypeName) : undefined;
-            if (pixelTypeName && pixelTypeId === undefined) { console.warn(`[PixelOption] pixel_code '${pixelCode}': не найден ID для pixel_type '${pixelTypeName}'.`); }
-
-            const screenTypeName = row.screen_type ? String(row.screen_type) : null;
-            const screenTypeId = screenTypeName ? screenTypeMap.get(screenTypeName) : undefined;
-            if (screenTypeName && screenTypeId === undefined) { console.warn(`[PixelOption] pixel_code '${pixelCode}': не найден ID для screen_type '${screenTypeName}'.`); }
-
-            const moduleWidth = safeInt(row.module_width, `PixelOption ${pixelCode} module_width`, false, false);
-            const moduleHeight = safeInt(row.module_height, `PixelOption ${pixelCode} module_height`, false, false);
-            if (moduleWidth === null || moduleHeight === null) { console.warn(`[PixelOption] Пропуск '${pixelCode}': невалидные module_width/height.`); continue; }
-
-            const optionNameFromExcel = row.option_name ? String(row.option_name) : null;
-            if (optionNameFromExcel && !optionNameMap.has(optionNameFromExcel)) { console.warn(`[PixelOption] pixel_code '${pixelCode}': опция '${optionNameFromExcel}' не найдена в справочнике.`); }
-
-            const dataToCreate: Prisma.PixelOptionCreateInput = {
-                stepDefinition: { connect: { code: pixelCode } }, // Связь по УНИКАЛЬНОМУ коду
-                moduleWidth: moduleWidth,
-                moduleHeight: moduleHeight,
-                optionName: optionNameFromExcel,
-                ...(pixelTypeId !== undefined && { pixelType: { connect: { id: pixelTypeId } } }),
-                ...(screenTypeId !== undefined && { screenType: { connect: { id: screenTypeId } } }),
-            };
-
-            // console.log(`[PixelOption Debug] Попытка создания для '${pixelCode}' с данными: ${JSON.stringify(dataToCreate)}`); // Можно раскомментировать для отладки
-
-            try {
-                // ID не сохраняем, он автоинкрементный
-                await prisma.pixelOption.create({ data: dataToCreate });
-                pixelOptionsCreatedCount++;
-            } catch (e) {
-                 console.error(`[PixelOption Error] Ошибка создания для pixel_code '${pixelCode}'`, e);
-            }
-        }
-        console.log(`--- Завершение создания PixelOption ---`);
-        console.log(`  - Создано PixelOption: ${pixelOptionsCreatedCount}`);
-
         console.log('Заполнение базовых справочников завершено.');
 
 
-        // --- 3. Заполнение зависимых таблиц (Module, Cabinet) ---
+        // --- 3. Заполнение зависимых таблиц (Cabinet, Module) ---
         console.log('Заполнение зависимых таблиц...');
 
+        // --- Cabinet ---
+        let cabinetsCreatedCount = 0;
+        for (const row of cabinetsData) {
+            const cabinetSku = row.cabinet_sku ? String(row.cabinet_sku).trim() : null;
+            if (!cabinetSku) { console.warn("[Cabinet] Пропуск: нет sku.", row); continue; }
+            if (cabinetSkuMap.has(cabinetSku)) { console.warn(`[Cabinet Duplicate] SKU '${cabinetSku}'...`); continue; }
+            const priceUsd = safeDecimal(row.price_usd, `Cabinet ${cabinetSku} price_usd`);
+            const width = safeInt(row.cabinet_width, `Cabinet ${cabinetSku} width`);
+            const height = safeInt(row.cabinet_height, `Cabinet ${cabinetSku} height`);
+            const moduleWidth = safeInt(row.module_width, `Cabinet ${cabinetSku} module_width`);
+            const moduleHeight = safeInt(row.module_height, `Cabinet ${cabinetSku} module_height`);
+            const modulesCount = safeInt(row.modules_count, `Cabinet ${cabinetSku} modules_count`);
+
+            const cabinetData: Prisma.CabinetCreateInput = {
+               sku: cabinetSku, name: row.cabinet_name ? String(row.cabinet_name).trim() : null,
+               width: width, height: height,
+               moduleWidth: moduleWidth, moduleHeight: moduleHeight,
+               modulesCount: modulesCount,
+               priceUsd: priceUsd,
+            };
+
+            try {
+                const created = await prisma.cabinet.create({ data: cabinetData });
+                cabinetSkuMap.set(created.sku, created.id);
+                cabinetsCreatedCount++;
+            } catch (e) { console.error(`[Cabinet Error] Ошибка создания '${cabinetSku}'`, e); }
+        }
+        console.log(`  - Создано Cabinet: ${cabinetsCreatedCount}`);
+
+
+        // --- Module ---
         let modulesCreatedCount = 0;
         for (const row of modulesData) {
-            const moduleSku = row.module_sku ? String(row.module_sku) : null;
+            const moduleSku = row.module_sku ? String(row.module_sku).trim() : null;
             if (!moduleSku) { console.warn("[Module] Пропуск: нет sku.", row); continue; }
 
-            const screenTypeName = row.screen_type ? String(row.screen_type) : null;
-            const screenTypeId = screenTypeName ? screenTypeMap.get(screenTypeName) : null;
+            const locationName = row.location_name ? String(row.location_name).trim() : null;
+            const locationCode = locationName ? locationNameMap.get(locationName) : null;
 
-            const manufacturerCode = row.manufacturer ? String(row.manufacturer) : null;
-            const pixelCode = row.pixel_code ? String(row.pixel_code) : null; // Уникальный код шага
+            const manufacturerName = row.manufacturer_name ? String(row.manufacturer_name).trim() : null;
+            const manufacturerCode = manufacturerName ? manufacturerNameMap.get(manufacturerName) : null;
 
-            // Критичные проверки
-            if (!screenTypeId) { console.warn(`(Module ${moduleSku}) ScreenType '${screenTypeName ?? 'null'}' не найден. Пропуск.`); continue; }
-            // Проверяем наличие УНИКАЛЬНОГО pixelCode в PixelStepDefinition
-            if (!pixelCode || !pixelStepDefinitionMap.has(pixelCode)) {
-                console.warn(`(Module ${moduleSku}) PixelStepDefinition с кодом '${pixelCode ?? 'null'}' не найден. Пропуск.`);
-                continue;
+            const pitchCode = row.pitch_code ? String(row.pitch_code).trim() : null;
+            const refreshRateValue = safeInt(row.refresh_rate, `Module ${moduleSku} refresh_rate`, false, true);
+            const brightnessValue = safeInt(row.brightness, `Module ${moduleSku} brightness`, false, true);
+
+            // --- Проверки связей ---
+            if (!locationCode /* && связь обязательна */) {
+                console.warn(`(Module ${moduleSku}) Location с именем '${locationName ?? 'null'}' не найден. Пропуск/Связь не установлена.`);
+                // continue; // Раскомментируй, если связь обязательна
             }
-            if (manufacturerCode && !manufacturerMap.has(manufacturerCode)) { console.warn(`(Module ${moduleSku}) Manufacturer '${manufacturerCode}' не найден.`); }
+            if (!pitchCode || !pitchMap.has(pitchCode)) {
+                console.warn(`(Module ${moduleSku}) Pitch с кодом '${pitchCode ?? 'null'}' не найден. Пропуск.`); continue;
+            }
+            if (manufacturerName && !manufacturerCode) { console.warn(`(Module ${moduleSku}) Manufacturer с именем '${manufacturerName}' не найден.`); }
+            if (refreshRateValue !== null && !refreshRateMap.has(refreshRateValue)) { console.warn(`(Module ${moduleSku}) RefreshRate со значением '${refreshRateValue}' не найден.`); }
+            if (brightnessValue !== null && !brightnessMap.has(brightnessValue)) { console.warn(`(Module ${moduleSku}) Brightness со значением '${brightnessValue}' не найден.`); }
 
             const priceUsd = safeDecimal(row.price_usd, `Module ${moduleSku} price_usd`);
-            // Берем размеры из самого модуля
-            const moduleWidth = safeInt(row.module_width, `Module ${moduleSku} module_width`, false, false);
-            const moduleHeight = safeInt(row.module_height, `Module ${moduleSku} module_height`, false, false);
-            if (moduleWidth === null || moduleHeight === null) { console.warn(`(Module ${moduleSku}) Пропуск: невалидные module_width/height.`); continue; }
-            const moduleFrequency = safeInt(row.module_frequency, `Module ${moduleSku} frequency`);
-            const moduleBrightness = safeInt(row.module_brightness, `Module ${moduleSku} brightness`);
 
             const moduleData: Prisma.ModuleCreateInput = {
-                 sku: moduleSku, type: row.module_type ? String(row.module_type) : null,
-                 moduleWidth: moduleWidth, moduleHeight: moduleHeight, // Размеры из модуля
-                 moduleFrequency: moduleFrequency, moduleBrightness: moduleBrightness,
+                 sku: moduleSku,
+                 type: row.module_type ? String(row.module_type).trim() : null,
                  priceUsd: priceUsd,
-                 screenType: { connect: { id: screenTypeId } },
-                 stepDefinition: { connect: { code: pixelCode } }, // Связь с УНИКАЛЬНЫМ шагом
-                 ...(manufacturerCode && manufacturerMap.has(manufacturerCode) && { manufacturer: { connect: { code: manufacturerCode } } })
+                 ...(locationCode && { location: { connect: { code: locationCode } } }),
+                 pitch:      { connect: { code: pitchCode } },
+                 ...(manufacturerCode && { manufacturer: { connect: { code: manufacturerCode } } }),
+                 ...(refreshRateValue !== null && refreshRateMap.has(refreshRateValue) && { refreshRate: { connect: { value: refreshRateValue } } }),
+                 ...(brightnessValue !== null && brightnessMap.has(brightnessValue) && { brightness: { connect: { value: brightnessValue } } }),
              };
 
             try {
@@ -344,119 +388,167 @@ async function importDataFromExcel(filePath: string): Promise<void> {
             }
         }
         console.log(`  - Создано Module: ${modulesCreatedCount}`);
-
-        // --- Cabinet ---
-        let cabinetsCreatedCount = 0;
-        for (const row of cabinetsData) {
-            const cabinetSku = row.cabinet_sku ? String(row.cabinet_sku) : null;
-            if (!cabinetSku) { console.warn("[Cabinet] Пропуск: нет sku.", row); continue; }
-            const screenTypeName = row.screen_type ? String(row.screen_type) : null;
-            const screenTypeId = screenTypeName ? screenTypeMap.get(screenTypeName) : null;
-            const priceUsd = safeDecimal(row.price_usd, `Cabinet ${cabinetSku} price_usd`);
-            const width = safeInt(row.cabinet_width, `Cabinet ${cabinetSku} width`);
-            const height = safeInt(row.cabinet_height, `Cabinet ${cabinetSku} height`);
-            const moduleWidth = safeInt(row.module_width, `Cabinet ${cabinetSku} module_width`);
-            const moduleHeight = safeInt(row.module_height, `Cabinet ${cabinetSku} module_height`);
-            const modulesCount = safeInt(row.modules_count, `Cabinet ${cabinetSku} modules_count`);
-            const placement = row.cabinet_placement ? String(row.cabinet_placement) : null;
-
-            const cabinetData: Prisma.CabinetCreateInput = {
-               sku: cabinetSku, name: row.cabinet_name ? String(row.cabinet_name) : null,
-               width: width, height: height, placement: placement,
-               moduleWidth: moduleWidth, moduleHeight: moduleHeight, modulesCount: modulesCount,
-               priceUsd: priceUsd,
-               ...(screenTypeId !== null && { screenType: { connect: { id: screenTypeId } } })
-            };
-
-            try {
-                const created = await prisma.cabinet.create({ data: cabinetData });
-                cabinetSkuMap.set(created.sku, created.id);
-                cabinetsCreatedCount++;
-            } catch (e) {
-                 if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-                     console.warn(`[Cabinet Warn] Кабинет SKU '${cabinetSku}' уже существует. Пропуск.`);
-                 } else { console.error(`[Cabinet Error] Ошибка создания '${cabinetSku}'`, e); }
-            }
-        }
-        console.log(`  - Создано Cabinet: ${cabinetsCreatedCount}`);
         console.log('Заполнение зависимых таблиц завершено.');
 
-        // --- 4. Заполнение связующих таблиц ---
+
+        // --- 4. Заполнение связующих таблиц (Добавлен .trim()) ---
         console.log('Заполнение связующих таблиц...');
-        // ScreenTypeMaterial
-        for(const row of screenTypeMaterialsData) {
-            const screenTypeName = row.screen_type ? String(row.screen_type) : null;
-            const screenTypeId = screenTypeName ? screenTypeMap.get(screenTypeName) : null;
-            const materialCode = row.material_code ? String(row.material_code) : null;
-            const materialId = materialCode ? materialMap.get(materialCode) : null;
-            if (screenTypeId && materialId) {
-                try { await prisma.screenTypeMaterial.create({ data: { screenTypeId, materialId } }); }
-                catch(e) { console.error("[ScreenTypeMaterial Error]", row, e); }
-            } else { console.warn(`[ScreenTypeMaterial] Пропуск: не найден ID ScreenType ('${screenTypeName}') или Material ('${materialCode}')`, row); }
+        // ScreenTypeLocation
+        for (const row of screenTypeLocationData) {
+            const stCode = row.screen_type_code ? String(row.screen_type_code).trim() : null;
+            const locCode = row.location_code ? String(row.location_code).trim() : null;
+            if (stCode && locCode && screenTypeMap.has(stCode) && locationMap.has(locCode)) {
+                try { await prisma.screenTypeLocation.create({ data: { screenTypeCode: stCode, locationCode: locCode } }); }
+                catch(e) { if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) console.error("[ScreenTypeLocation Error]", row, e); }
+            } else { console.warn(`[ScreenTypeLocation] Пропуск: не найдены ScreenType ('${stCode}') или Location ('${locCode}')`, row); }
         }
-        // ScreenTypeOption
-        for(const row of screenTypeOptionsData) {
-            const screenTypeName = row.screen_type ? String(row.screen_type) : null;
-            const screenTypeId = screenTypeName ? screenTypeMap.get(screenTypeName) : null;
-            const optionCode = row.option_code ? String(row.option_code) : null;
-            const optionId = optionCode ? optionMap.get(optionCode) : null;
-            if (screenTypeId && optionId) {
-                 try { await prisma.screenTypeOption.create({ data: { screenTypeId, optionId } }); }
-                 catch(e) { console.error("[ScreenTypeOption Error]", row, e); }
-            } else { console.warn(`[ScreenTypeOption] Пропуск: не найден ID ScreenType ('${screenTypeName}') или Option ('${optionCode}')`, row); }
-        }
-        // CabinetMaterial (читает из cabinetOptionsData)
-        console.log(`--- Начало заполнения CabinetMaterial (из листа ${cabinetOptionsSheetName}) ---`);
-        for(const row of cabinetOptionsData) { // Используем прочитанные данные
-             const cabinetSku = row.cabinet_sku ? String(row.cabinet_sku) : null;
-             const cabinetId = cabinetSku ? cabinetSkuMap.get(cabinetSku) : null;
-             const materialCode = row.material_code ? String(row.material_code) : null; // Ожидаем material_code
-             const materialId = materialCode ? materialMap.get(materialCode) : null;
+        console.log(`  - Заполнено ScreenTypeLocation`);
 
-             if (!materialCode) {
-                 console.warn(`[CabinetMaterial] Пропуск строки в листе '${cabinetOptionsSheetName}': отсутствует material_code`, row);
-                 continue;
-             }
-
-             if (cabinetId && materialId) {
-                  try { await prisma.cabinetMaterial.create({ data: { cabinetId, materialId } }); }
-                  catch(e) { console.error(`[CabinetMaterial Error] Cabinet:'${cabinetSku}', Material:'${materialCode}'`, e); }
-             } else { console.warn(`[CabinetMaterial] Пропуск: не найден ID Cabinet ('${cabinetSku}') или Material ('${materialCode}')`, row); }
+        // ScreenTypePitch
+         for (const row of screenTypePitchData) {
+             const stCode = row.screen_type_code ? String(row.screen_type_code).trim() : null;
+             const pCode = row.pitch_code ? String(row.pitch_code).trim() : null;
+             if (stCode && pCode && screenTypeMap.has(stCode) && pitchMap.has(pCode)) {
+                 try { await prisma.screenTypePitch.create({ data: { screenTypeCode: stCode, pitchCode: pCode } }); }
+                 catch(e) { if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) console.error("[ScreenTypePitch Error]", row, e); }
+             } else { console.warn(`[ScreenTypePitch] Пропуск: не найдены ScreenType ('${stCode}') или Pitch ('${pCode}')`, row); }
          }
-         console.log(`--- Завершение заполнения CabinetMaterial ---`);
-        // CabinetComponent
+         console.log(`  - Заполнено ScreenTypePitch`);
+
+        // LocationMaterial
+         for (const row of locationMaterialsData) {
+             const locCode = row.location_code ? String(row.location_code).trim() : null;
+             const matCode = row.material_code ? String(row.material_code).trim() : null;
+             if (locCode && matCode && locationMap.has(locCode) && materialMap.has(matCode)) {
+                 try { await prisma.locationMaterial.create({ data: { locationCode: locCode, materialCode: matCode } }); }
+                 catch(e) { if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) console.error("[LocationMaterial Error]", row, e); }
+             } else { console.warn(`[LocationMaterial] Пропуск: не найдены Location ('${locCode}') или Material ('${matCode}')`, row); }
+         }
+         console.log(`  - Заполнено LocationMaterial`);
+
+        // LocationPitch
+        for (const row of locationPitchData) {
+            const locCode = row.location_code ? String(row.location_code).trim() : null;
+            const pCode = row.pitch_code ? String(row.pitch_code).trim() : null;
+            if (locCode && pCode && locationMap.has(locCode) && pitchMap.has(pCode)) {
+                try { await prisma.locationPitch.create({ data: { locationCode: locCode, pitchCode: pCode } }); }
+                catch(e) { if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) console.error("[LocationPitch Error]", row, e); }
+            } else { console.warn(`[LocationPitch] Пропуск: не найдены Location ('${locCode}') или Pitch ('${pCode}')`, row); }
+        }
+        console.log(`  - Заполнено LocationPitch`);
+
+        // LocationCabinet
+        let emptyRowsCount = 0;
+        for (const row of locationCabinetData) {
+            const locCode = row.location_code ? String(row.location_code).trim() : null;
+            const cabSku = row.cabinet_sku ? String(row.cabinet_sku).trim() : null;
+            if (!locCode || !cabSku) {
+                emptyRowsCount++;
+                continue;
+            }
+            if (locationMap.has(locCode) && cabinetSkuMap.has(cabSku)) {
+                try { await prisma.locationCabinet.create({ data: { locationCode: locCode, cabinetSku: cabSku } }); }
+                catch(e) { if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) console.error("[LocationCabinet Error]", row, e); }
+            } else { console.warn(`[LocationCabinet] Пропуск: не найдены Location ('${locCode}') или Cabinet ('${cabSku}')`, row); }
+        }
+        if (emptyRowsCount > 0) {
+            console.log(`  - Пропущено ${emptyRowsCount} пустых строк в LocationCabinet`);
+        }
+        console.log(`  - Заполнено LocationCabinet`);
+
+        // MaterialCabinet
+        for (const row of materialCabinetData) {
+            const matCode = row.material_code ? String(row.material_code).trim() : null;
+            const cabSku = row.cabinet_sku ? String(row.cabinet_sku).trim() : null;
+            
+            if (!matCode || !cabSku) {
+                console.warn(`[MaterialCabinet] Пропуск: пустые значения matCode='${matCode}', cabSku='${cabSku}'`, row);
+                continue;
+            }
+            
+            const hasMaterial = materialMap.has(matCode);
+            const hasCabinet = cabinetSkuMap.has(cabSku);
+            
+            if (!hasMaterial || !hasCabinet) {
+                console.warn(`[MaterialCabinet] Пропуск: не найдены Material (${matCode}, exists=${hasMaterial}) или Cabinet (${cabSku}, exists=${hasCabinet})`);
+                if (!hasMaterial) {
+                    console.warn(`  - Доступные материалы:`, Array.from(materialMap.keys()));
+                }
+                if (!hasCabinet) {
+                    console.warn(`  - Доступные кабинеты:`, Array.from(cabinetSkuMap.keys()));
+                }
+                continue;
+            }
+            
+            try {
+                await prisma.materialCabinet.create({ data: { materialCode: matCode, cabinetSku: cabSku } });
+            } catch(e) {
+                if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) {
+                    console.error("[MaterialCabinet Error]", row, e);
+                }
+            }
+        }
+        console.log(`  - Заполнено MaterialCabinet`);
+
+        // CabinetPlacementCabinet
+        for (const row of cabinetPlacementCabinetData) {
+            const placeCode = row.cabinet_placement_code ? String(row.cabinet_placement_code).trim() : null;
+            const cabSku = row.cabinet_sku ? String(row.cabinet_sku).trim() : null;
+            if (placeCode && cabSku && cabinetPlacementMap.has(placeCode) && cabinetSkuMap.has(cabSku)) {
+                try { await prisma.cabinetPlacementCabinet.create({ data: { cabinetPlacementCode: placeCode, cabinetSku: cabSku } }); }
+                catch(e) { if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) console.error("[CabinetPlacementCabinet Error]", row, e); }
+            } else { console.warn(`[CabinetPlacementCabinet] Пропуск: не найдены Placement ('${placeCode}') или Cabinet ('${cabSku}')`, row); }
+        }
+        console.log(`  - Заполнено CabinetPlacementCabinet`);
+
+        // PitchTypePitch
+        for (const row of pitchTypePitchData) {
+            const typeName = row.pitch_type ? String(row.pitch_type).trim() : null;
+            const pCode = row.pitch_code ? String(row.pitch_code).trim() : null;
+            if (typeName && pCode && pitchTypeMap.has(typeName) && pitchMap.has(pCode)) {
+                try { await prisma.pitchTypePitch.create({ data: { pitchTypeName: typeName, pitchCode: pCode } }); }
+                catch(e) { if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002')) console.error("[PitchTypePitch Error]", row, e); }
+            } else { console.warn(`[PitchTypePitch] Пропуск: не найдены PitchType ('${typeName}') или Pitch ('${pCode}')`, row); }
+        }
+        console.log(`  - Заполнено PitchTypePitch`);
+
+        // CabinetComponent (Используем ID, полученные при создании/поиске кабинетов)
         for(const row of cabinetComponentsData) {
-            const cabinetSku = row.cabinet_sku ? String(row.cabinet_sku) : null;
+            const cabinetSku = row.cabinet_sku ? String(row.cabinet_sku).trim() : null;
             const cabinetId = cabinetSku ? cabinetSkuMap.get(cabinetSku) : null;
-            const componentCode = row.component_code ? String(row.component_code) : null;
+            const componentCode = row.component_code ? String(row.component_code).trim() : null;
             const componentId = componentCode ? componentCodeMap.get(componentCode) : null;
             const quantity = safeInt(row.component_count, `CabinetComponent ${cabinetSku}-${componentCode} quantity`, true, false);
+
             if (!(cabinetId && componentId)) {
                  console.warn(`[CabinetComponent] Пропуск: не найден ID Cabinet ('${cabinetSku}') или Component ('${componentCode}')`, row);
                  continue;
             }
-            if (quantity === null || quantity <= 0) {
-                 console.warn(`[CabinetComponent] Пропуск: количество (${row.component_count} -> ${quantity}) не является положительным числом для cabinet ${cabinetSku}, component ${componentCode}`);
+            if (quantity === null) {
+                 console.warn(`[CabinetComponent] Пропуск: количество (${row.component_count}) не является валидным целым числом для cabinet ${cabinetSku}, component ${componentCode}`);
                  continue;
             }
             try {
-                await prisma.cabinetComponent.create({ data: { cabinetId, componentId, quantity } });
+                await prisma.cabinetComponent.create({ data: { cabinetId: cabinetId, componentId: componentId, quantity: quantity } });
             } catch (e) {
-                console.error(`[CabinetComponent Error] Ошибка создания связи для cabinet ${cabinetSku}, component ${componentCode}, quantity ${quantity}`, e);
+                 if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002'))
+                     console.error(`[CabinetComponent Error] Ошибка создания связи для cabinet ID ${cabinetId}, component ID ${componentId}, quantity ${quantity}`, e);
             }
         }
+        console.log(`  - Заполнено CabinetComponent`);
 
         console.log('Заполнение связующих таблиц завершено.');
 
     } catch (processingError) {
         console.error('❌ Критическая ошибка во время обработки данных и заполнения таблиц:', processingError);
+        throw processingError;
     }
 
     console.log('🎉 Импорт данных успешно завершен!');
 }
 
 
-// --- Основная функция запуска ---
+// --- Основная функция запуска (без изменений) ---
 async function main() {
     try {
         const excelFilePath = path.resolve(__dirname, '../data/database.xlsx');

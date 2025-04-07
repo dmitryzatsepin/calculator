@@ -13,7 +13,10 @@ import { configurePassport } from "./config/passport";
 // --- Маршруты ---
 import healthcheckRoute from "./routes/healthcheck";
 import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
 import cabinetRoutes from "./routes/cabinetRoutes";
+import cabinetMaterialRoutes from "./routes/cabinetMaterialRoutes";
+import cabinetComponentRoutes from "./routes/cabinetComponentRoutes"; 
 import componentServiceRoutes from "./routes/componentServiceRoutes";
 import ipProtectionRoutes from "./routes/ipProtectionRoutes";
 import manufacturerRoutes from "./routes/manufacturerRoutes";
@@ -21,7 +24,11 @@ import materialRoutes from "./routes/materialRoutes";
 import moduleRoutes from "./routes/moduleRoutes";
 import optionRoutes from "./routes/optionRoutes";
 import pixelStepDefinitionRoutes from "./routes/pixelStepDefinitionRoutes";
+import pixelTypeRoutes from "./routes/pixelTypeRoutes";
+import pixelOptionRoutes from "./routes/pixelOptionRoutes";
 import screenTypeRoutes from "./routes/screenTypeRoutes";
+import screenTypeMaterialRoutes from "./routes/screenTypeMaterialRoutes";
+import screenTypeOptionRoutes from "./routes/screenTypeOptionRoutes";
 //import currencyRoutes from './routes/currencyRoutes';
 
 // --- Инициализация ---
@@ -48,7 +55,10 @@ app.get(API_PREFIX, (req: Request, res: Response) => {
 // Регистрация всех роутов для сущностей
 app.use(`${API_PREFIX}/healthcheck`, healthcheckRoute);
 app.use(`${API_PREFIX}/auth`, authRoutes);
+app.use(`${API_PREFIX}/users`, userRoutes);
 app.use(`${API_PREFIX}/cabinets`, cabinetRoutes);
+app.use(`${API_PREFIX}/cabinet-materials`, cabinetMaterialRoutes);
+app.use(`${API_PREFIX}/cabinet-components`, cabinetComponentRoutes);
 app.use(`${API_PREFIX}/component-services`, componentServiceRoutes);
 app.use(`${API_PREFIX}/ip-protection`, ipProtectionRoutes);
 app.use(`${API_PREFIX}/manufacturers`, manufacturerRoutes);
@@ -56,7 +66,11 @@ app.use(`${API_PREFIX}/materials`, materialRoutes);
 app.use(`${API_PREFIX}/modules`, moduleRoutes);
 app.use(`${API_PREFIX}/options`, optionRoutes);
 app.use(`${API_PREFIX}/pixel-step-definitions`, pixelStepDefinitionRoutes);
+app.use(`${API_PREFIX}/pixel-types`, pixelTypeRoutes);
+app.use(`${API_PREFIX}/pixel-options`, pixelOptionRoutes);
 app.use(`${API_PREFIX}/screen-types`, screenTypeRoutes);
+app.use(`${API_PREFIX}/screen-type-materials`, screenTypeMaterialRoutes);
+app.use(`${API_PREFIX}/screen-type-options`, screenTypeOptionRoutes);
 // if (currencyRoutes) { app.use(`${API_PREFIX}/currencies', currencyRoutes); } // Если нужен
 
 // --- Обработка ошибок ---

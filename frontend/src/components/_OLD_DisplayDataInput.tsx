@@ -10,21 +10,27 @@ import {
   Text,
 } from "@mantine/core";
 import classes from "../styles/DisplayParameters.module.scss";
-import CalculationResults from "./CalculationResults";
+import CalculationResults from "./_OLD_CalculationResults";
 
 // --- Типы ---
 type ScreenTypeData = { name: string; material: string[]; option: string[] };
 type ProtectionOption = { code: string };
 type PixelStep = {
   id: number;
-  name: string;
-  type: string;
-  width: number;
-  height: number;
-  brightness: number;
-  refreshFreq: number;
-  location: string | string[];
-  option: string[];
+  name: string;        // Есть, строка
+  type: string | null; // Может быть null? Сделай nullable
+  width: number;       // Есть, число
+  height: number;      // Есть, число
+  brightness: number;  // Есть, число
+  refreshFreq: number; // Есть, число
+  location: string | null; // ВСЕГДА строка (имя ScreenType) или null, если связи нет
+  options: string[];   // Есть, массив строк
+  ipCode: string | null; // Есть, строка (код IP) или null
+  priceUsd: string | number | null; // Приходит как строка из Decimal, может быть null
+  screenTypeId: number; // Добавляем
+  ipCodeId: number | null; // Добавляем
+  createdAt: string; // Добавляем
+  updatedAt: string; // Добавляем
 };
 type CabinetType = {
   id: number;
@@ -41,12 +47,20 @@ type CabinetType = {
 
 // Интерфейсы для ответа API ЦБ РФ
 interface CbrValuteEntry {
+  ID: string;
+  NumCode: string;
+  CharCode: string;
+  Nominal: number;
+  Name: string;
   Value: number;
-  PreviousURL?: string;
+  Previous: number;
 }
 interface CbrApiResponse {
-  Valute?: { USD?: CbrValuteEntry };
-  PreviousURL?: string;
+  Date: string;
+  PreviousDate: string;
+  PreviousURL: string;
+  Timestamp: string;
+  Valute: { [key: string]: CbrValuteEntry };
 }
 // ---
 
@@ -86,35 +100,52 @@ const DisplayParameters = () => {
     // Загрузка локальных данных
     setLoadingScreenTypes(true);
     fetch("/api/local/screen-types")
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then((res) =>
+        res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))
+      )
       .then((data) => setScreenTypes(data?.data ?? []))
       .catch((e) => console.error("❌ screen-types:", e))
       .finally(() => setLoadingScreenTypes(false));
     setLoadingProtection(true);
     fetch("/api/local/protection")
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then((res) =>
+        res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))
+      )
       .then((data) => setProtectionOptionsAll(data?.data ?? []))
       .catch((e) => console.error("❌ protection:", e))
       .finally(() => setLoadingProtection(false));
     setLoadingSteps(true);
-    fetch("/api/local/pixel-steps")
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data) => {
-        const steps = (data?.data ?? []).map((s: PixelStep) => ({
-          ...s,
-          location: Array.isArray(s.location)
-            ? s.location
-            : typeof s.location === "string"
-            ? s.location.split(",").map((l) => l.trim())
-            : [],
-        }));
-        setPixelStepsAll(steps);
-      })
-      .catch((e) => console.error("❌ pixel-steps:", e))
-      .finally(() => setLoadingSteps(false));
+    fetch("/api/local/pixel-steps") 
+   .then(res => res.ok ? res.json() : Promise.reject(`HTTP ${res.status}`))
+   .then(data => {
+    const steps: PixelStep[] = (data?.data ?? []).map((s: Partial<PixelStep> & { priceUsd?: string | number | null }) => ({ // Используем частичный тип + ожидаем priceUsd как строку/число
+      // Устанавливаем значения по умолчанию для полей, которые могут отсутствовать в Partial
+      id: s.id ?? 0,
+      name: s.name ?? '',
+      type: s.type ?? null,
+      width: s.width ?? 0,
+      height: s.height ?? 0,
+      brightness: s.brightness ?? 0,
+      refreshFreq: s.refreshFreq ?? 0,
+      location: s.location ?? null,
+      options: s.options ?? [],
+      ipCode: s.ipCode ?? null,
+      screenTypeId: s.screenTypeId ?? 0,
+      ipCodeId: s.ipCodeId ?? null,
+      createdAt: s.createdAt ?? new Date().toISOString(), // Пример значения по умолчанию
+      updatedAt: s.updatedAt ?? new Date().toISOString(), // Пример значения по умолчанию
+      // Преобразуем priceUsd
+      priceUsd: s.priceUsd != null ? parseFloat(String(s.priceUsd)) : null
+    }));
+     setPixelStepsAll(steps);
+   })
+   .catch(e => console.error("❌ pixel-steps:", e))
+   .finally(() => setLoadingSteps(false));
     setLoadingCabinets(true);
     fetch("/api/local/cabinets")
-      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+      .then((res) =>
+        res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))
+      )
       .then((data) => {
         const cabs = (data?.data ?? []).map((c: CabinetType) => ({
           ...c,
@@ -129,112 +160,191 @@ const DisplayParameters = () => {
       .catch((e) => console.error("❌ cabinets:", e))
       .finally(() => setLoadingCabinets(false));
 
-    // Валюта
+    // --- Загрузка валюты с fallback и детальным логированием ---
     setLoadingCurrency(true);
     setCurrencyError(null);
-    fetch("/api/currency")
-      .then((res) =>
-        res.ok
-          ? (res.json() as Promise<CbrApiResponse>)
-          : Promise.reject(`HTTP ${res.status}`)
-      )
+    // 👇 ИЗМЕНЕН ТИП ВОЗВРАЩАЕМОГО ЗНАЧЕНИЯ 👇
+    const processResponse = (
+      response: Response,
+      dayLabel: string
+    ): Promise<CbrApiResponse> => {
+      if (!response.ok)
+        return Promise.reject(
+          new Error(`Ошибка HTTP (${dayLabel}): ${response.status}`)
+        );
+      return response
+        .clone()
+        .text()
+        .then((text) => {
+          // console.log(`--- RAW TEXT (${dayLabel}) ---`);
+          // console.log(text);
+          try {
+            // JSON.parse возвращает any, поэтому приводим к нашему типу
+            const data = JSON.parse(text) as CbrApiResponse;
+            console.log(
+              `📡 Ответ API ЦБ РФ (${dayLabel}, после ручного парсинга):`,
+              data
+            );
+            return data;
+          } catch (parseError) {
+            console.error(`❌ Ошибка парсинга JSON (${dayLabel}):`, parseError);
+            return Promise.reject(
+              new Error(`Ошибка парсинга JSON (${dayLabel})`)
+            );
+          }
+        });
+    };
+    fetch("/api/currency") // 1. Текущий курс
+      .then((res) => processResponse(res, "текущий"))
       .then((data) => {
-        const currentRate = data?.Valute?.USD?.Value;
-        if (typeof currentRate === "number") {
-          setExchangeRate(parseFloat(currentRate.toFixed(2)));
+        const currentRateValue = data?.Valute?.USD?.Value;
+        if (typeof currentRateValue === "number") {
+          setExchangeRate(parseFloat(currentRateValue.toFixed(2)));
           setCurrencyError(null);
+          console.log(
+            "✅ Курс USD за текущий день загружен:",
+            currentRateValue
+          );
           return null;
         } else {
-          const prevURL = data?.PreviousURL;
-          if (typeof prevURL === "string") {
-            const fullPrevURL = prevURL.startsWith("//")
-              ? `https:${prevURL}`
-              : prevURL;
-            return fetch(fullPrevURL).then((prevRes) =>
-              prevRes.ok
-                ? (prevRes.json() as Promise<CbrApiResponse>)
-                : Promise.reject(`HTTP ${prevRes.status}(prev)`)
+          console.warn(
+            "⚠️ Курс USD за текущий день не найден/не число. Попытка загрузить предыдущий..."
+          );
+          const previousURL = data?.PreviousURL;
+          if (typeof previousURL === "string") {
+            const fullPreviousURL = previousURL.startsWith("//")
+              ? `https:${previousURL}`
+              : previousURL;
+            return fetch(fullPreviousURL).then((prevRes) =>
+              processResponse(prevRes, "предыдущий")
             );
           } else {
-            throw new Error("Нет курса и ссылки на пред. день");
+            throw new Error(
+              "Курс USD не найден, ссылка на предыдущий день отсутствует."
+            );
           }
         }
       })
       .then((prevData) => {
         if (!prevData) return;
-        const prevRate = prevData?.Valute?.USD?.Value;
-        if (typeof prevRate === "number") {
-          setExchangeRate(parseFloat(prevRate.toFixed(2)));
+        const previousRateValue = prevData?.Valute?.USD?.Value;
+        if (typeof previousRateValue === "number") {
+          setExchangeRate(parseFloat(previousRateValue.toFixed(2)));
           setCurrencyError("Используется курс за предыдущий день.");
+          console.log(
+            "✅ Курс USD за предыдущий день загружен:",
+            previousRateValue
+          );
         } else {
-          throw new Error("Нет курса и за пред. день");
+          throw new Error(
+            "Курс USD не найден (или некорректен) ни за текущий, ни за предыдущий день."
+          );
         }
       })
       .catch((error) => {
-        const msg =
+        const errorMsg =
           error instanceof Error
             ? error.message
-            : `Неизвестная ошибка: ${error}`;
-        console.error("❌ Курс:", msg);
+            : "Неизвестная ошибка загрузки курса";
+        console.error("❌ Ошибка загрузки/обработки курса:", errorMsg, error);
         setExchangeRate(null);
-        setCurrencyError(msg);
+        setCurrencyError(errorMsg);
       })
       .finally(() => {
         setLoadingCurrency(false);
+        console.log("--- Загрузка курса завершена ---");
       });
   }, []);
 
-  // --- Вычисляемые данные (useMemo) ---
-  const selectedScreenData = useMemo(
-    () => screenTypes.find((t) => t.name === screenType),
-    [screenType, screenTypes]
-  );
-  const filteredProtectionOptions = useMemo(
-    () =>
-      protectionOptionsAll
-        .filter((p) => {
-          const ip = parseInt(p.code.replace("IP", ""), 10);
-          return !isNaN(ip) && ip >= 29 && ip <= 69;
-        })
-        .map((p) => ({ value: p.code, label: p.code })),
-    [protectionOptionsAll]
-  );
-  const availableMaterials = useMemo(
-    () =>
-      selectedScreenData
-        ? selectedScreenData.material
-        : [...new Set(screenTypes.flatMap((t) => t.material))],
-    [selectedScreenData, screenTypes]
-  );
-  const availableOptions = useMemo(
-    () =>
-      selectedScreenData && selectedMaterial ? selectedScreenData.option : [],
-    [selectedScreenData, selectedMaterial]
-  );
-  const filteredPixelSteps = useMemo(() => {
-    if (!selectedScreenData || !selectedMaterial) return [];
-    let steps = pixelStepsAll.filter(
-      (s) =>
-        Array.isArray(s.location) &&
-        s.location.includes(selectedScreenData.name)
+
+    // --- Вычисляемые данные (useMemo) ---
+    const selectedScreenData = useMemo(
+      () => screenTypes.find((t) => t.name === screenType),
+      [screenType, screenTypes]
     );
-    if (selectedOptions.includes("гибкий экран"))
-      steps = steps.filter((s) => s.option.includes("гибкий экран"));
-    return steps.map((s) => ({ value: s.name, label: s.name }));
-  }, [selectedScreenData, selectedMaterial, selectedOptions, pixelStepsAll]);
-  const filteredCabinets = useMemo(() => {
-    if (!selectedScreenData || !selectedPixelStep || !selectedMaterial)
-      return [];
-    return cabinetsAll
-      .filter(
-        (c) =>
-          c.location === selectedScreenData.name &&
-          c.pixelStep.includes(selectedPixelStep) &&
-          c.material.includes(selectedMaterial)
-      )
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((c) => ({ value: c.id.toString(), label: c.name }));
-  }, [selectedScreenData, selectedPixelStep, selectedMaterial, cabinetsAll]);
+    const filteredProtectionOptions = useMemo(
+      () =>
+        protectionOptionsAll
+          .filter((p) => {
+            const ip = parseInt(p.code.replace("IP", ""), 10);
+            return !isNaN(ip) && ip >= 29 && ip <= 69;
+          })
+          .map((p) => ({ value: p.code, label: p.code })),
+      [protectionOptionsAll]
+    );
+    const availableMaterials = useMemo(
+      () =>
+        selectedScreenData
+          ? selectedScreenData.material
+          : [...new Set(screenTypes.flatMap((t) => t.material))],
+      [selectedScreenData, screenTypes]
+    );
+    const availableOptions = useMemo(
+      () =>
+        selectedScreenData && selectedMaterial ? selectedScreenData.option : [],
+      [selectedScreenData, selectedMaterial]
+    );
+  
+    // --- ИЗМЕНЕННЫЙ БЛОК filteredPixelSteps ---
+    const filteredPixelSteps = useMemo(() => {
+      // Условие для возврата пустого массива, если не выбраны тип экрана или материал
+      if (!selectedScreenData || !selectedMaterial) {
+          console.log("filteredPixelSteps: Не выбран тип экрана или материал, возвращаем [].");
+          return [];
+      }
+  
+      // Фильтруем все шаги по выбранному типу экрана (location)
+      let steps = pixelStepsAll.filter(
+        (s) => s.location === selectedScreenData.name
+      );
+      console.log(`filteredPixelSteps: Найдено шагов после фильтра по location '${selectedScreenData.name}':`, steps.length);
+  
+  
+      // Применяем дополнительный фильтр, если выбрана опция "гибкий экран"
+      if (selectedOptions.includes("гибкий экран")) {
+          console.log("filteredPixelSteps: Применяем фильтр по опции 'гибкий экран'.");
+          steps = steps.filter((s) =>
+              Array.isArray(s.options) && s.options.includes("гибкий экран") // Добавлена проверка Array.isArray
+          );
+           console.log(`filteredPixelSteps: Найдено шагов после фильтра по опции:`, steps.length);
+      }
+  
+      // Логируем шаги ПЕРЕД преобразованием в {value, label}
+      console.log("filteredPixelSteps: Отфильтрованные шаги (перед map):", JSON.stringify(steps, null, 2)); // Используем JSON.stringify для детального лога
+  
+      // Преобразуем отфильтрованные шаги в формат для Select, добавляя проверку s.name
+      const selectData = steps.map((s) => {
+          const label = s.name || 'Неизвестный шаг'; // Заглушка для label
+          const value = s.name || ''; // Пустая строка для value, если name отсутствует
+          // Дополнительный лог, если имя отсутствует
+          if (!s.name) {
+              console.warn("filteredPixelSteps: Обнаружен шаг без имени (name):", s);
+          }
+          return { value, label };
+      }).filter(item => item.value !== ''); // Убираем элементы с пустым value, если они не нужны в Select
+  
+       // Логируем финальный массив данных для Select
+       console.log("filteredPixelSteps: Данные для Select:", selectData);
+  
+      return selectData;
+    }, [selectedScreenData, selectedMaterial, selectedOptions, pixelStepsAll]);
+    // --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА ---
+  
+    const filteredCabinets = useMemo(() => {
+      // ... (остальной код без изменений) ...
+      if (!selectedScreenData || !selectedPixelStep || !selectedMaterial)
+        return [];
+      return cabinetsAll
+        .filter(
+          (c) =>
+            c.location === selectedScreenData.name &&
+            Array.isArray(c.pixelStep) && c.pixelStep.includes(selectedPixelStep) && // Добавлена проверка Array.isArray
+            Array.isArray(c.material) && c.material.includes(selectedMaterial)      // Добавлена проверка Array.isArray
+        )
+        // Безопасная сортировка для name
+        .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+        .map((c) => ({ value: c.id.toString(), label: c.name || 'Без имени' })); // Добавлена заглушка для label
+    }, [selectedScreenData, selectedPixelStep, selectedMaterial, cabinetsAll]);
 
   // --- Эффекты для сброса полей ---
   useEffect(() => {
@@ -277,11 +387,24 @@ const DisplayParameters = () => {
 
   // --- Данные для CalculationResults ---
   const calculationData = useMemo(() => {
+    // Находим информацию о выбранном шаге пикселя
     const selectedStepInfo = pixelStepsAll.find(
       (step) => step.name === selectedPixelStep
     );
-    const finalModWidth = selectedStepInfo?.width ?? "-"; // Используем fallback
-    const finalModHeight = selectedStepInfo?.height ?? "-"; // Используем fallback
+
+    // Проверяем наличие данных и преобразуем их в числа
+    const moduleWidth = selectedStepInfo?.width;
+    const moduleHeight = selectedStepInfo?.height;
+
+    // Убедимся, что значения являются числами
+    const finalModWidth = typeof moduleWidth === "number" ? moduleWidth : 0;
+    const finalModHeight = typeof moduleHeight === "number" ? moduleHeight : 0;
+
+    console.log("Данные модуля перед отправкой:", {
+      width: finalModWidth,
+      height: finalModHeight,
+      rawData: selectedStepInfo,
+    });
 
     return {
       width,
@@ -327,7 +450,7 @@ const DisplayParameters = () => {
   // --- Цвет сообщения о курсе ---
   const getCurrencyMessageColor = () => {
     if (!currencyError) return "transparent";
-    if (currencyError.includes("Исп. курс за пред. день")) return "orange";
+    if (currencyError.includes("Используется курс")) return "orange";
     return "red";
   };
 
@@ -348,7 +471,7 @@ const DisplayParameters = () => {
       <Stack gap="xs" style={{ position: "relative" }}>
         <Grid>
           {/* Поля ввода */}
-          <Grid.Col span={{ base: 12, sm: 6 }}>            
+          <Grid.Col span={{ base: 12, sm: 6 }}>
             <TextInput
               label="Ширина экрана (мм)"
               type="number"
@@ -358,7 +481,7 @@ const DisplayParameters = () => {
               required
             />
           </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 6 }}>            
+          <Grid.Col span={{ base: 12, sm: 6 }}>
             <TextInput
               label="Высота экрана (мм)"
               type="number"
@@ -369,13 +492,10 @@ const DisplayParameters = () => {
             />
           </Grid.Col>
           {/* Тип экрана */}
-          <Grid.Col span={{ base: 12, sm: 4 }}>            
+          <Grid.Col span={{ base: 12, sm: 4 }}>
             <div>
-              
-              <label className={classes.checkboxGroupLabel}>
-                Тип экрана
-              </label>
-              <Stack gap={5}>               
+              <label className={classes.checkboxGroupLabel}>Тип экрана</label>
+              <Stack gap={5}>
                 {screenTypes.map((type) => (
                   <Checkbox
                     classNames={classes}
@@ -392,12 +512,10 @@ const DisplayParameters = () => {
             </div>
           </Grid.Col>
           {/* Материал */}
-          <Grid.Col span={{ base: 12, sm: 4 }}>            
-            <div>              
-              <label className={classes.checkboxGroupLabel}>
-                Материал
-              </label>
-              <Stack gap={5}>                
+          <Grid.Col span={{ base: 12, sm: 4 }}>
+            <div>
+              <label className={classes.checkboxGroupLabel}>Материал</label>
+              <Stack gap={5}>
                 {availableMaterials.map((mat) => (
                   <Checkbox
                     classNames={classes}
@@ -414,7 +532,7 @@ const DisplayParameters = () => {
             </div>
           </Grid.Col>
           {/* Степень защиты */}
-          <Grid.Col span={{ base: 12, sm: 4 }}>            
+          <Grid.Col span={{ base: 12, sm: 4 }}>
             <Select
               label="Степень защиты"
               placeholder={
@@ -430,10 +548,10 @@ const DisplayParameters = () => {
           </Grid.Col>
           {/* Доп. опции */}
           {availableOptions.length > 0 && (
-            <Grid.Col span={{ base: 12, sm: 12 }}>              
-              <Stack>                
+            <Grid.Col span={{ base: 12, sm: 12 }}>
+              <Stack>
                 <label className={classes.checkboxGroupLabel}>Опции</label>
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>                  
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
                   {availableOptions.map((option) => (
                     <Checkbox
                       classNames={classes}
@@ -450,7 +568,7 @@ const DisplayParameters = () => {
             </Grid.Col>
           )}
           {/* Шаг пикселя */}
-          <Grid.Col span={{ base: 12, sm: 12 }}>           
+          <Grid.Col span={{ base: 12, sm: 12 }}>
             <Select
               label="Шаг пикселя"
               placeholder={loadingSteps ? "Загрузка..." : "Выберите шаг"}
@@ -468,7 +586,7 @@ const DisplayParameters = () => {
             />
           </Grid.Col>
           {/* Кабинет */}
-          <Grid.Col span={{ base: 12, sm: 12 }}>            
+          <Grid.Col span={{ base: 12, sm: 12 }}>
             <Select
               label="Кабинет"
               placeholder={loadingCabinets ? "Загрузка..." : "Выберите кабинет"}
@@ -486,6 +604,7 @@ const DisplayParameters = () => {
             />
           </Grid.Col>
         </Grid>
+
         {/* Курс валют и Кнопка Рассчитать */}
         <Grid align="flex-start" mt="md">
           <Grid.Col span="content">
@@ -511,20 +630,20 @@ const DisplayParameters = () => {
                   style={{ width: "100px" }}
                   error={
                     currencyError &&
-                    !currencyError.includes("Исп. курс за пред. день")
+                    !currencyError.includes("Используется курс")
                       ? true
                       : undefined
                   }
                 />
               </div>
               {currencyError && (
-                <Text c={getCurrencyMessageColor()} size="xs" mt={2}>                 
+                <Text c={getCurrencyMessageColor()} size="xs" mt={2}>
                   {currencyError}
                 </Text>
               )}
             </Stack>
           </Grid.Col>
-          <Grid.Col span="auto">        
+          <Grid.Col span="auto">
             <Button
               fullWidth
               onClick={() => setDrawerOpened(true)}

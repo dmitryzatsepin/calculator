@@ -1,14 +1,15 @@
-import { Container, Title } from "@mantine/core";
-import DisplayDataInput from "../components/DisplayDataInput";
+import { Container, Title, Paper } from '@mantine/core';
+import CalculatorForm from '../components/CalculatorForm';
 
 const DisplayCalculator = () => {
-  console.log("Rendering DisplayCalculator");
   return (
-    <Container>
-      <Title order={2} mb="md">
-        Калькулятор
+    <Container size="lg" my="xl">
+      <Title order={1} ta="center" mb="xl">
+        Калькулятор LED Экранов
       </Title>
-      <DisplayDataInput />
+      <Paper shadow="xs" p="xl" withBorder radius="md">
+        <CalculatorForm />
+      </Paper>
     </Container>
   );
 };

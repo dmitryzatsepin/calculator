@@ -16,6 +16,7 @@
     "@mantine/core": "^7.17.0",
     "@mantine/form": "^7.17.0",
     "@mantine/hooks": "^7.17.0",
+    "@tabler/icons-react": "^3.31.0",
     "@types/xlsx": "^0.0.36",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

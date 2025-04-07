@@ -1,49 +1,34 @@
 // src/middleware/authMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 import passport from "passport";
+// ИМПОРТИРУЕМ НАШ ТИП (укажи правильный путь!)
+import { CustomUser } from "../types/express"; // <--- ДОБАВИЛИ ИМПОРТ
 
-// Определяем интерфейс для пользователя
-interface User {
-  id: number;
-  email: string;
-  role: "USER" | "ADMIN"; // Тип роли из твоей Prisma схемы
-}
+// Интерфейс User здесь больше не нужен, так как импортируем CustomUser
+// interface User { ... }
 
-// Расширяем интерфейс Request, чтобы добавить поле user
-interface RequestWithUser extends Request {
-  user?: User; // Делаем user опциональным на всякий случай
-}
-
-// Middleware для защиты роутов (проверка JWT)
-export const protect = (req: RequestWithUser, res: Response, next: NextFunction) => { // Используем RequestWithUser
+export const protect = (req: Request, res: Response, next: NextFunction) => {
   console.log('Protect middleware вызван...');
-  console.log('Authorization Header:', req.headers.authorization);
-  passport.authenticate("jwt", { session: false }, (err: Error | null, user: User | false, info: any) => {
-    console.log('Passport authenticate callback:', { err, user, info });
+  passport.authenticate("jwt", { session: false }, (err: Error | null, user: CustomUser | false, info: any) => { // Используем CustomUser в callback
     if (err || !user) {
-      console.log('Ошибка аутентификации или пользователь не найден');
-      // Не отправляем ответ здесь, если хотим кастомную обработку ошибок Passport
-      // Можно просто вызвать next(err || new Error('Unauthorized'));
       return res.status(401).json({ message: "Не авторизован" });
     }
-    console.log('Пользователь успешно аутентифицирован:', user);
-    req.user = user; // Присваиваем пользователя к req
-    next(); // Передаем управление дальше (например, к 'admin' или к контроллеру)
+    req.user = user; // Присваиваем объект типа CustomUser
+    next();
   })(req, res, next);
 };
 
-// НОВОЕ: Middleware для проверки роли администратора
-export const admin = (req: RequestWithUser, res: Response, next: NextFunction) => { // Используем RequestWithUser
+export const admin = (req: Request, res: Response, next: NextFunction) => {
     console.log('Admin middleware вызван...');
-    // Проверяем, что protect отработал и добавил req.user с нужной ролью
-    if (req.user && req.user.role === 'ADMIN') {
+    // ЯВНО ПРИВОДИМ ТИП req.user к CustomUser
+    const user = req.user as CustomUser; // <--- ЯВНОЕ ПРИВЕДЕНИЕ ТИПА
+    if (user && user.role === 'ADMIN') {
         console.log('Доступ разрешен для ADMIN');
-        next(); // Пользователь админ, пропускаем дальше
+        next();
     } else {
-        console.log('Доступ запрещен. Требуются права администратора.', { userRole: req.user?.role });
-        res.status(403); // Forbidden
-        // Создаем ошибку, чтобы ее мог поймать обработчик ошибок Express
+        console.log('Доступ запрещен. Требуются права администратора.', { userRole: user?.role });
+        res.status(403);
         const error = new Error('Доступ запрещен. Требуются права администратора.');
-        next(error); // Передаем ошибку дальше
+        next(error);
     }
 };

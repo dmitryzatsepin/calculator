@@ -48,6 +48,9 @@ docker-compose.dev.yaml
 *.bak
 *.tmp
 
+# 🚀 Excel файл (если забыл закрыть)
+~$*.xlsx
+
 # 🚀 Prisma (но сохраняем schema.prisma!)
 prisma/migrations/
 !prisma/schema.prisma
