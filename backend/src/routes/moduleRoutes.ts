@@ -1,32 +1,38 @@
-// src/routes/moduleRoutes.ts (Новый файл)
+// src/routes/moduleRoutes.ts
 import express from 'express';
-import {
-    getModules,
-    getModuleById,
-    createModule,
-    updateModule,
-    deleteModule,
-} from '../controllers/moduleController'; // Импорт функций из контроллера Module
-import { protect, admin } from '../middleware/authMiddleware'; // Импорт middleware для защиты
+// --- ИСПРАВЛЕННЫЙ ИМПОРТ ---
+// Импортируем ТОЛЬКО getAllModules (переименованную из getModules)
+import { getAllModules } from "../controllers/moduleController"; 
+// Закомментированы остальные, т.к. они не экспортируются из контроллера
+// import {
+//     getModuleById,
+//     createModule,
+//     updateModule,
+//     deleteModule,
+// } from "../controllers/moduleController";
+
+// Импортируем middleware, если нужно
+import { protect, admin } from '../middleware/authMiddleware'; // Оставляем для использования в будущем
 
 const router = express.Router();
 
-// --- Маршруты для Модулей (Modules) ---
+// --- МАРШРУТЫ ---
 
-// Коллекция ресурсов (/api/v1/modules)
-router.route('/')
-    // GET / - Получить список всех модулей (открытый доступ)
-    .get(getModules)
-    // POST / - Создать новый модуль (защищено)
-    .post(protect, admin, createModule); // Требуется аутентификация и права админа
+// GET /api/v1/modules - Получить все модули
+// Защищаем маршрут с помощью 'protect'
+router.get('/', protect, getAllModules); 
 
-// Конкретный ресурс (/api/v1/modules/:id)
-router.route('/:id')
-    // GET /:id - Получить один модуль по ID (открытый доступ)
-    .get(getModuleById)
-    // PUT /:id - Обновить модуль по ID (защищено)
-    .put(protect, admin, updateModule) // Требуется аутентификация и права админа
-    // DELETE /:id - Удалить модуль по ID (защищено)
-    .delete(protect, admin, deleteModule); // Требуется аутентификация и права админа
+// --- ЗАКОММЕНТИРОВАННЫЕ МАРШРУТЫ ДЛЯ БУДУЩЕГО ---
+// GET /api/v1/modules/:id - Получить один модуль
+// router.get('/:id', protect, getModuleById); 
+
+// POST /api/v1/modules - Создать модуль
+// router.post('/', protect, admin, createModule); 
+
+// PUT /api/v1/modules/:id - Обновить модуль
+// router.put('/:id', protect, admin, updateModule); 
+
+// DELETE /api/v1/modules/:id - Удалить модуль
+// router.delete('/:id', protect, admin, deleteModule); 
 
 export default router;

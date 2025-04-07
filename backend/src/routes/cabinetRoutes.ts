@@ -1,19 +1,32 @@
-import { Router } from "express";
-import { protect } from "../middleware/authMiddleware"; // 🔒 Защита маршрутов
-import { getCabinets, createCabinet, updateCabinet, deleteCabinet } from "../controllers/cabinetController";
+// src/routes/cabinetRoutes.ts
+import express from 'express';
+// Импортируем ТОЛЬКО getAllCabinets (переименованную из getCabinets)
+import { getAllCabinets } from "../controllers/cabinetController"; 
+// Закомментированы createCabinet, updateCabinet, deleteCabinet, так как они не экспортируются
+// import { createCabinet, updateCabinet, deleteCabinet } from "../controllers/cabinetController";
 
-const router = Router();
+// Импортируем middleware, если нужно
+import { protect, admin } from '../middleware/authMiddleware'; // Оставляем для использования в будущем
 
-// 📌 Получение всех кабинетов (🔥 Открытый доступ)
-router.get("/", getCabinets);
+const router = express.Router();
 
-// 📌 Создание нового кабинета (❗ Оставляем защиту)
-router.post("/", protect, createCabinet);
+// --- МАРШРУТЫ ---
 
-// 📌 Обновление кабинета (❗ Оставляем защиту)
-router.put("/:id", protect, updateCabinet);
+// GET /api/v1/cabinets - Получить все кабинеты
+// Защищаем маршрут с помощью 'protect'
+router.get('/', protect, getAllCabinets); 
 
-// 📌 Удаление кабинета (❗ Оставляем защиту)
-router.delete("/:id", protect, deleteCabinet);
+// --- ЗАКОММЕНТИРОВАННЫЕ МАРШРУТЫ ДЛЯ БУДУЩЕГО ---
+// GET /api/v1/cabinets/:id - Получить один кабинет
+// router.get('/:id', protect, getCabinetById); // Нужно будет раскомментировать getCabinetById в контроллере
+
+// POST /api/v1/cabinets - Создать кабинет
+// router.post('/', protect, admin, createCabinet); // Нужна роль admin
+
+// PUT /api/v1/cabinets/:id - Обновить кабинет
+// router.put('/:id', protect, admin, updateCabinet); // Нужна роль admin
+
+// DELETE /api/v1/cabinets/:id - Удалить кабинет
+// router.delete('/:id', protect, admin, deleteCabinet); // Нужна роль admin
 
 export default router;

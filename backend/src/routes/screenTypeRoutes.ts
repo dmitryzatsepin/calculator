@@ -1,37 +1,39 @@
 // src/routes/screenTypeRoutes.ts
 import express from 'express'; // Импортируем express
-import {
-    getScreenTypes,
-    // Предполагаемые имена функций для полного CRUD (нужно реализовать в контроллере)
-    createScreenType,
-    getScreenTypeById,
-    updateScreenType,
-    deleteScreenType,
-} from '../controllers/screenTypeController';
-// import { createScreenTypeSchema, updateScreenTypeSchema } from '../validators/screenTypeValidators'; // Валидаторы понадобятся в контроллере
-import { protect, admin } from '../middleware/authMiddleware'; // Защита роутов
+
+// --- ИСПРАВЛЕННЫЙ ИМПОРТ ---
+// Импортируем ТОЛЬКО getAllScreenTypes (переименованную из getScreenTypes)
+import { getAllScreenTypes } from '../controllers/screenTypeController';
+// Закомментированы остальные
+// import {
+//     createScreenType,
+//     getScreenTypeById,
+//     updateScreenType,
+//     deleteScreenType,
+// } from '../controllers/screenTypeController';
+
+// Импортируем middleware, если нужно
+import { protect, admin } from '../middleware/authMiddleware'; // Оставляем
 
 const router = express.Router(); // Используем express.Router()
 
-// Маршруты для ScreenType
+// --- МАРШРУТЫ ---
 
-// GET / - Получить все типы экранов (открытый доступ)
-router.get("/", getScreenTypes);
+// GET /api/v1/screen-types - Получить все типы экранов
+// Оставляем публичным (или добавь protect, если нужно)
+router.get("/", getAllScreenTypes);
 
-// POST / - Создать новый тип экрана (защищено)
-// ВАЖНО: Функция createScreenType должна быть реализована в screenTypeController.ts
-router.post("/", protect, admin, createScreenType);
+// --- ЗАКОММЕНТИРОВАННЫЕ МАРШРУТЫ ДЛЯ БУДУЩЕГО ---
+// POST /api/v1/screen-types - Создать новый тип экрана
+// router.post("/", protect, admin, createScreenType);
 
-// GET /:id - Получить один тип экрана по ID (открытый доступ)
-// ВАЖНО: Функция getScreenTypeById должна быть реализована в screenTypeController.ts
-router.get("/:id", getScreenTypeById);
+// GET /api/v1/screen-types/:id - Получить один тип экрана по ID
+// router.get("/:id", getScreenTypeById);
 
-// PUT /:id - Обновить тип экрана по ID (защищено)
-// ВАЖНО: Функция updateScreenType должна быть реализована в screenTypeController.ts
-router.put("/:id", protect, admin, updateScreenType);
+// PUT /api/v1/screen-types/:id - Обновить тип экрана по ID
+// router.put("/:id", protect, admin, updateScreenType);
 
-// DELETE /:id - Удалить тип экрана по ID (защищено)
-// ВАЖНО: Функция deleteScreenType должна быть реализована в screenTypeController.ts
-router.delete("/:id", protect, admin, deleteScreenType);
+// DELETE /api/v1/screen-types/:id - Удалить тип экрана по ID
+// router.delete("/:id", protect, admin, deleteScreenType);
 
 export default router;
