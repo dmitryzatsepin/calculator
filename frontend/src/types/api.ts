@@ -1,239 +1,234 @@
+// src/types/api.ts
+
 // --- Базовые Справочники ---
 
-// Совпадает с Prisma Enum Role
 export enum Role {
-    USER = 'USER',
-    ADMIN = 'ADMIN',
-  }
-  
-  // Тип для пользователя (без пароля, как приходит с API)
-  export interface User {
-    id: number;
-    email: string;
-    role: Role;
-    createdAt: string; // Prisma возвращает DateTime как строку ISO 8601
-    name: string;
-  }
-  export interface ScreenType {
-    id: number;
-    code: string;
-    name: string; 
-     createdAt: string;
-    updatedAt: string;
-  }
-
-  export interface Location {
-    id: number;
-    code: string; 
-    name: string; 
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  export interface ScreenTypeLocationRelation {
-    screenTypeCode: string;
-    locationCode: string;
-    // Важно: Вложенные объекты должны соответствовать типам Location и ScreenType
-    screenType: ScreenType; 
-    location: Location;     
-  }
-
-  // Тип для Material (соответствует Prisma модели)
-  export interface Material {
-    id: number;
-    code: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-    // Мы не будем запрашивать screenTypes и cabinets здесь напрямую
-  }
-  export interface LocationMaterialRelation {
-    locationCode: string;
-    materialCode: string;
-    location: Location;
-    material: Material;
+  USER = 'USER',
+  ADMIN = 'ADMIN',
 }
-  
-  // Тип для Option (соответствует Prisma модели)
-  export interface Option {
-    id: number;
-    code: string;
-    name: string;
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  // Тип для Manufacturer (соответствует Prisma модели)
-  export interface Manufacturer {
-    id: number;
-    code: string;
-    name:string;
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-// --- 👇 НОВЫЙ ТИП для данных, приходящих от /api/v1/screen-types ---
-// Описывает ОДИН элемент массива 'data' в ответе API
-export interface ScreenTypeFromApi extends ScreenType {
-    materials: { code: string; name: string }[]; // Упрощенный список материалов
-    options: { code: string; name: string }[];   // Упрощенный список опций
-  }
-  
-  // Тип для ВСЕГО объекта ответа от /api/v1/screen-types
-  export interface ScreenTypeListApiResponse {
-    message: string;
-    data: ScreenTypeFromApi[]; // Массив объектов типа ScreenTypeFromApi
-  }
-  
-  // Тип для IpProtection (соответствует Prisma модели)
-  export interface IpProtection {
-    id: number;
-    code: string;
-    protectionSolid: string;
-    protectionWater: string;
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  export interface IpProtectionListApiResponse {
-    message: string;
-    data: IpProtection[]; // Массив объектов типа IpProtection
-  }
-  // Тип для ComponentService (соответствует Prisma модели)
-  // Prisma Decimal приходит как строка, но лучше преобразовать в number на клиенте
-  export interface ComponentService {
+
+export interface User {
+  id: number;
+  email: string;
+  role: Role;
+  createdAt: string; 
+  name: string;
+}
+
+export interface ScreenType {
+  id: number;
+  code: string; 
+  name: string; 
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Location {
+  id: number;
+  code: string; 
+  name: string; 
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Material {
+  id: number;
+  code: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ТИПЫ RefreshRate и Brightness УДАЛЕНЫ, так как мы их не запрашиваем отдельно
+
+export interface Manufacturer {
+  id: number;
+  code: string;
+  name:string; // Убедись, что @unique есть в схеме, если нужно искать по имени
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CabinetPlacement {
+  id: number;
+  code: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Pitch {
+  id: number;
+  code: string; 
+  pitchValue: string; // Преобразован в строку на бэкенде
+  moduleWidth: number;
+  moduleHeight: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PitchType {
+  id: number;
+  name: string; // Уникальное имя ('eco', 'pro')
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IpProtection {
+  id: number;
+  code: string;
+  protectionSolid: string;
+  protectionWater: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ComponentService {
+  id: number;
+  category: string | null;
+  code: string;
+  name: string;
+  priceUsd: string | null; 
+  priceRub: string | null; 
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+// --- Основные Сущности (Зависимые) ---
+
+export interface Module {
+  id: number;
+  sku: string;
+  type: string | null;
+  priceUsd: string | null; 
+  manufacturerCode: string | null;
+  locationCode: string | null; 
+  pitchCode: string;         
+  refreshRateValue: number | null; // Значение из БД все еще есть
+  brightnessValue: number | null;  // Значение из БД все еще есть
+  createdAt: string;
+  updatedAt: string;
+
+  // Опционально: Вложенные объекты
+  manufacturer?: Manufacturer;
+  location?: Location;
+  pitch?: Pitch;
+  // refreshRate?: RefreshRate; // Связи больше нет как объекта
+  // brightness?: Brightness;  // Связи больше нет как объекта
+}
+
+// Уточненный тип Cabinet для связей
+export interface CabinetNested { 
+  id: number;
+  sku: string;
+  name: string | null;
+  width: number | null;
+  height: number | null;
+  moduleWidth: number | null;
+  moduleHeight: number | null;
+  modulesCount: number | null;
+  priceUsd: string | null; 
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Уточненный тип ComponentService для связей
+export interface ComponentServiceNested {
     id: number;
     category: string | null;
     code: string;
     name: string;
-    priceUsd: string | null; // Приходит как строка
-    priceRub: string | null; // Приходит как строка
+    priceUsd: string | null; 
+    priceRub: string | null; 
     createdAt: string;
     updatedAt: string;
-  }
-  
-  // --- Модели, связанные с Pixel ---
-  
-  // Тип для PixelStepDefinition (соответствует Prisma модели)
-  export interface PixelStepDefinition {
-    id: number;
-    code: string;
-    stepValue: string; // Приходит как строка из Decimal
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  // Тип для PixelType (соответствует Prisma модели)
-  export interface PixelType {
-    id: number;
-    type: string;
-    frequency: number | null;
-    createdAt: string;
-    updatedAt: string;
-  }
-  
-  // Тип для PixelOption (без вложенных объектов по умолчанию)
-  export interface PixelOption {
-    id: number;
-    pixelCode: string;
-    moduleWidth: number;
-    moduleHeight: number;
-    optionName: string | null;
-    stepDefinitionId?: number; // ID для связи, если не используем include
-    pixelTypeId: number | null;
-    screenTypeId: number | null;
-    createdAt: string;
-    updatedAt: string;
-    
-    // Опционально: если БУДЕМ запрашивать с include
-    // stepDefinition?: PixelStepDefinition;
-    // pixelType?: PixelType;
-    // screenType?: ScreenType;
-  }
-  
-  // --- Зависимые сущности ---
-  
-  // Тип для Module (без вложенных объектов по умолчанию)
-  export interface Module {
-    id: number;
-    sku: string;
-    type: string | null;
-    moduleWidth: number;
-    moduleHeight: number;
-    moduleFrequency: number | null;
-    moduleBrightness: number | null;
-    priceUsd: string | null; // Приходит как строка из Decimal
-    manufacturerCode: string | null;
-    screenTypeId: number;
-    pixelCode: string; // Ссылка на PixelStepDefinition
-    createdAt: string;
-    updatedAt: string;
-  
-    // Опционально: если БУДЕМ запрашивать с include
-    // manufacturer?: Manufacturer;
-    // screenType?: ScreenType;
-    // stepDefinition?: PixelStepDefinition;
-  }
-  
-  // Тип для Cabinet (без вложенных объектов по умолчанию)
-  export interface Cabinet {
-    id: number;
-    sku: string;
-    name: string | null;
-    width: number | null;
-    height: number | null;
-    placement: string | null;
-    moduleWidth: number | null;
-    moduleHeight: number | null;
-    modulesCount: number | null;
-    priceUsd: string | null; // Приходит как строка из Decimal
-    screenTypeId: number | null;
-    createdAt: string;
-    updatedAt: string;
-  
-    // Опционально: если БУДЕМ запрашивать с include
-    // screenType?: ScreenType;
-    // Мы не будем запрашивать materials и components здесь напрямую
-  }
-  
-  
-  // --- Связующие таблицы M-N ---
-  // Обычно при запросе к ним мы используем include, поэтому определим типы с вложенными объектами
-  
-  export interface ScreenTypeMaterialRelation {
-    screenTypeId: number;
-    materialId: number;
-    screenType: ScreenType; // Ожидаем вложенный объект
-    material: Material;     // Ожидаем вложенный объект
-  }
-  
-  export interface ScreenTypeOptionRelation {
-    screenTypeId: number;
-    optionId: number;
-    screenType: ScreenType; // Ожидаем вложенный объект
-    option: Option;         // Ожидаем вложенный объект
-  }
-  
-  export interface CabinetMaterialRelation {
-    cabinetId: number;
-    materialId: number;
-    cabinet: Cabinet;   // Ожидаем вложенный объект
-    material: Material; // Ожидаем вложенный объект
-  }
-  
-  export interface CabinetComponentRelation {
-    cabinetId: number;
-    componentId: number;
-    quantity: number;
-    cabinet: Cabinet;           // Ожидаем вложенный объект
-    component: ComponentService; // Ожидаем вложенный объект
-  }
-  
-  
-  // --- Типы для специфичных запросов (можно добавлять по мере необходимости) ---
-  
-  // Например, тип для запроса списка ScreenType с вложенными связями
-  export interface ScreenTypeWithRelations extends ScreenType {
-    materials: ScreenTypeMaterialRelation[];
-    options: ScreenTypeOptionRelation[];
-  }
+}
+
+export interface Cabinet {
+  id: number;
+  sku: string;
+  name: string | null;
+  width: number | null;
+  height: number | null;
+  moduleWidth: number | null;
+  moduleHeight: number | null;
+  modulesCount: number | null;
+  priceUsd: string | null; 
+  createdAt: string;
+  updatedAt: string;
+  // Опциональные связи с УТОЧНЕННЫМИ типами
+  locations?: LocationCabinetRelation[];
+  materials?: MaterialCabinetRelation[];
+  placements?: CabinetPlacementCabinetRelation[];
+  components?: CabinetComponentRelation[];
+}
+
+
+// --- Связующие таблицы M-N ---
+
+export interface ScreenTypeLocationRelation {
+  screenTypeCode: string;
+  locationCode: string;
+  screenType: ScreenType; 
+  location: Location;     
+}
+
+export interface ScreenTypePitchRelation {
+  screenTypeCode: string;
+  pitchCode: string;
+  screenType?: ScreenType; // Может быть опциональным, если include не всегда есть
+  pitch?: Pitch; 
+}
+
+export interface LocationMaterialRelation {
+  locationCode: string;
+  materialCode: string;
+  location: Location;
+  material: Material;
+}
+
+export interface LocationPitchRelation {
+  locationCode: string;
+  pitchCode: string;
+  location?: Location;
+  pitch?: Pitch; 
+}
+
+export interface LocationCabinetRelation {
+  locationCode: string;
+  cabinetSku: string;
+  location: Location;
+  cabinet: CabinetNested; 
+}
+
+export interface MaterialCabinetRelation {
+  materialCode: string;
+  cabinetSku: string;
+  material: Material;
+  cabinet: CabinetNested; 
+}
+
+export interface CabinetPlacementCabinetRelation {
+  cabinetPlacementCode: string;
+  cabinetSku: string;
+  placement: CabinetPlacement;
+  cabinet: CabinetNested; 
+}
+
+export interface PitchTypePitchRelation {
+  pitchTypeName: string;
+  pitchCode: string;
+  pitchType?: PitchType; // Может быть опциональным
+  pitch?: Pitch; 
+}
+
+export interface CabinetComponentRelation {
+  cabinetId: number;
+  componentId: number;
+  quantity: number;
+  cabinet: CabinetNested;           
+  component: ComponentServiceNested; 
+}
+
+// КОНЕЦ ФАЙЛА
