@@ -32,13 +32,10 @@ const checkRelatedCodes = async (
 // 📌 Получение всех типов экранов (Переименовано, обновлено, используется маппер)
 export const getAllScreenTypes = asyncHandler(async (req: Request, res: Response) => {
   const screenTypes = await prisma.screenType.findMany({
-    orderBy: { name: 'asc' },
-    // Убрали include для materials и options, т.к. их нет в модели
+    //orderBy: { name: 'asc' },
   });
-  // Используем хелпер для маппинга (хотя он сейчас простой)
-  const responseData = screenTypes.map(mapScreenTypeToResponse);
   // Возвращаем чистый массив
-  res.status(200).json(responseData);
+  res.status(200).json(screenTypes);
 });
 
 // -------------------------------------------------------------------- //

@@ -14,15 +14,30 @@ export enum Role {
     createdAt: string; // Prisma возвращает DateTime как строку ISO 8601
     name: string;
   }
-  // Тип для категории расчета (без пароля, как приходит с API)
-  export interface CalculationType {
+  export interface ScreenType {
     id: number;
-    name: string;
-    description: string | null;
+    code: string;
+    name: string; 
+     createdAt: string;
+    updatedAt: string;
+  }
+
+  export interface Location {
+    id: number;
+    code: string; 
+    name: string; 
     createdAt: string;
     updatedAt: string;
   }
   
+  export interface ScreenTypeLocationRelation {
+    screenTypeCode: string;
+    locationCode: string;
+    // Важно: Вложенные объекты должны соответствовать типам Location и ScreenType
+    screenType: ScreenType; 
+    location: Location;     
+  }
+
   // Тип для Material (соответствует Prisma модели)
   export interface Material {
     id: number;
@@ -32,6 +47,12 @@ export enum Role {
     updatedAt: string;
     // Мы не будем запрашивать screenTypes и cabinets здесь напрямую
   }
+  export interface LocationMaterialRelation {
+    locationCode: string;
+    materialCode: string;
+    location: Location;
+    material: Material;
+}
   
   // Тип для Option (соответствует Prisma модели)
   export interface Option {
@@ -51,16 +72,7 @@ export enum Role {
     updatedAt: string;
   }
   
-  // Тип для ScreenType (пока без связей, их будем получать отдельно)
-  export interface ScreenType {
-    id: number;
-    name: string;
-    brightness: number | null; // Может быть null
-    createdAt: string;
-    updatedAt: string;
-  }
-
-  // --- 👇 НОВЫЙ ТИП для данных, приходящих от /api/v1/screen-types ---
+// --- 👇 НОВЫЙ ТИП для данных, приходящих от /api/v1/screen-types ---
 // Описывает ОДИН элемент массива 'data' в ответе API
 export interface ScreenTypeFromApi extends ScreenType {
     materials: { code: string; name: string }[]; // Упрощенный список материалов
@@ -83,6 +95,10 @@ export interface ScreenTypeFromApi extends ScreenType {
     updatedAt: string;
   }
   
+  export interface IpProtectionListApiResponse {
+    message: string;
+    data: IpProtection[]; // Массив объектов типа IpProtection
+  }
   // Тип для ComponentService (соответствует Prisma модели)
   // Prisma Decimal приходит как строка, но лучше преобразовать в number на клиенте
   export interface ComponentService {
