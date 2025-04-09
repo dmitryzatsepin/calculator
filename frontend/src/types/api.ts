@@ -11,22 +11,22 @@ export interface User {
   id: number;
   email: string;
   role: Role;
-  createdAt: string; 
+  createdAt: string;
   name: string;
 }
 
 export interface ScreenType {
   id: number;
-  code: string; 
-  name: string; 
+  code: string;
+  name: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Location {
   id: number;
-  code: string; 
-  name: string; 
+  code: string;
+  name: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -39,12 +39,10 @@ export interface Material {
   updatedAt: string;
 }
 
-// ТИПЫ RefreshRate и Brightness УДАЛЕНЫ, так как мы их не запрашиваем отдельно
-
 export interface Manufacturer {
   id: number;
   code: string;
-  name:string; // Убедись, что @unique есть в схеме, если нужно искать по имени
+  name:string;
   createdAt: string;
   updatedAt: string;
 }
@@ -59,8 +57,8 @@ export interface CabinetPlacement {
 
 export interface Pitch {
   id: number;
-  code: string; 
-  pitchValue: string; // Преобразован в строку на бэкенде
+  code: string;
+  pitchValue: string;
   moduleWidth: number;
   moduleHeight: number;
   createdAt: string;
@@ -69,7 +67,7 @@ export interface Pitch {
 
 export interface PitchType {
   id: number;
-  name: string; // Уникальное имя ('eco', 'pro')
+  name: string; // 'eco', 'pro'
   createdAt: string;
   updatedAt: string;
 }
@@ -88,8 +86,8 @@ export interface ComponentService {
   category: string | null;
   code: string;
   name: string;
-  priceUsd: string | null; 
-  priceRub: string | null; 
+  priceUsd: string | null;
+  priceRub: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -101,25 +99,22 @@ export interface Module {
   id: number;
   sku: string;
   type: string | null;
-  priceUsd: string | null; 
+  priceUsd: string | null;
   manufacturerCode: string | null;
-  locationCode: string | null; 
-  pitchCode: string;         
-  refreshRateValue: number | null; // Значение из БД все еще есть
-  brightnessValue: number | null;  // Значение из БД все еще есть
+  locationCode: string | null;
+  pitchCode: string;
+  refreshRateValue: number | null;
+  brightnessValue: number | null;
   createdAt: string;
   updatedAt: string;
 
-  // Опционально: Вложенные объекты
   manufacturer?: Manufacturer;
   location?: Location;
   pitch?: Pitch;
-  // refreshRate?: RefreshRate; // Связи больше нет как объекта
-  // brightness?: Brightness;  // Связи больше нет как объекта
 }
 
 // Уточненный тип Cabinet для связей
-export interface CabinetNested { 
+export interface CabinetNested {
   id: number;
   sku: string;
   name: string | null;
@@ -128,7 +123,7 @@ export interface CabinetNested {
   moduleWidth: number | null;
   moduleHeight: number | null;
   modulesCount: number | null;
-  priceUsd: string | null; 
+  priceUsd: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -139,8 +134,8 @@ export interface ComponentServiceNested {
     category: string | null;
     code: string;
     name: string;
-    priceUsd: string | null; 
-    priceRub: string | null; 
+    priceUsd: string | null;
+    priceRub: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -154,10 +149,10 @@ export interface Cabinet {
   moduleWidth: number | null;
   moduleHeight: number | null;
   modulesCount: number | null;
-  priceUsd: string | null; 
+  priceUsd: string | null;
   createdAt: string;
   updatedAt: string;
-  // Опциональные связи с УТОЧНЕННЫМИ типами
+  // Опциональные связи
   locations?: LocationCabinetRelation[];
   materials?: MaterialCabinetRelation[];
   placements?: CabinetPlacementCabinetRelation[];
@@ -170,15 +165,15 @@ export interface Cabinet {
 export interface ScreenTypeLocationRelation {
   screenTypeCode: string;
   locationCode: string;
-  screenType: ScreenType; 
-  location: Location;     
+  screenType: ScreenType;
+  location: Location;
 }
 
 export interface ScreenTypePitchRelation {
   screenTypeCode: string;
   pitchCode: string;
-  screenType?: ScreenType; // Может быть опциональным, если include не всегда есть
-  pitch?: Pitch; 
+  screenType?: ScreenType;
+  pitch?: Pitch;
 }
 
 export interface LocationMaterialRelation {
@@ -192,43 +187,41 @@ export interface LocationPitchRelation {
   locationCode: string;
   pitchCode: string;
   location?: Location;
-  pitch?: Pitch; 
+  pitch?: Pitch;
 }
 
 export interface LocationCabinetRelation {
   locationCode: string;
-  cabinetSku: string;
+  cabinetSku: string; // Связь по Sku кабинета
   location: Location;
-  cabinet: CabinetNested; 
+  cabinet: CabinetNested; // Используем Nested тип
 }
 
 export interface MaterialCabinetRelation {
   materialCode: string;
-  cabinetSku: string;
+  cabinetSku: string; // Связь по Sku кабинета
   material: Material;
-  cabinet: CabinetNested; 
+  cabinet: CabinetNested; // Используем Nested тип
 }
 
 export interface CabinetPlacementCabinetRelation {
   cabinetPlacementCode: string;
   cabinetSku: string;
   placement: CabinetPlacement;
-  cabinet: CabinetNested; 
+  cabinet: CabinetNested;
 }
 
 export interface PitchTypePitchRelation {
-  pitchTypeName: string;
+  pitchTypeName: string; // Связь по имени типа ('eco', 'pro')
   pitchCode: string;
-  pitchType?: PitchType; // Может быть опциональным
-  pitch?: Pitch; 
+  pitchType?: PitchType;
+  pitch?: Pitch;
 }
 
 export interface CabinetComponentRelation {
   cabinetId: number;
   componentId: number;
   quantity: number;
-  cabinet: CabinetNested;           
-  component: ComponentServiceNested; 
+  cabinet: CabinetNested;
+  component: ComponentServiceNested;
 }
-
-// КОНЕЦ ФАЙЛА

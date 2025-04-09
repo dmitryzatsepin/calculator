@@ -126,6 +126,9 @@ importers:
       '@tabler/icons-react':
         specifier: ^3.31.0
         version: 3.31.0(react@19.1.0)
+      '@tanstack/react-query':
+        specifier: ^5.72.1
+        version: 5.72.1(react@19.1.0)
       '@types/xlsx':
         specifier: ^0.0.36
         version: 0.0.36
@@ -135,6 +138,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.1.0(react@19.1.0)
+      react-error-boundary:
+        specifier: ^5.0.0
+        version: 5.0.0(react@19.1.0)
       react-router-dom:
         specifier: ^7.2.0
         version: 7.4.1(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -827,6 +833,14 @@ packages:
 
   '@tabler/icons@3.31.0':
     resolution: {integrity: sha512-dblAdeKY3+GA1U+Q9eziZ0ooVlZMHsE8dqP0RkwvRtEsAULoKOYaCUOcJ4oW1DjWegdxk++UAt2SlQVnmeHv+g==}
+
+  '@tanstack/query-core@5.72.1':
+    resolution: {integrity: sha512-nOu0EEkZuJ0BZnYgeaEfo44+psq1jBO7/zp3KudixD4dvgOVerrhAhDEKsWx2N7MxB59mjO4r0ddP/VqWGPK+Q==}
+
+  '@tanstack/react-query@5.72.1':
+    resolution: {integrity: sha512-4UEMyRx54xj144D2nDvDIMiXSG5BrqyCJrmyNoGbymNS+VWODcBDFrmRk9p2fe12UGZ4JtKPTNuW2Jg0aisUgQ==}
+    peerDependencies:
+      react: ^18 || ^19
 
   '@tsconfig/node10@1.0.11':
     resolution: {integrity: sha512-DcRjDCujK/kCk/cUe8Xz8ZSpm8mS3mNNpta+jGCA6USEDfktlNvm1+IuZ9eTcDbNk41BHwpHHeW+N1lKCz4zOw==}
@@ -1974,6 +1988,11 @@ packages:
     peerDependencies:
       react: ^19.1.0
 
+  react-error-boundary@5.0.0:
+    resolution: {integrity: sha512-tnjAxG+IkpLephNcePNA7v6F/QpWLH8He65+DmedchDwg162JZqx4NmbXj0mlAYVVEd81OW7aFhmbsScYfiAFQ==}
+    peerDependencies:
+      react: '>=16.13.1'
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -3026,6 +3045,13 @@ snapshots:
       react: 19.1.0
 
   '@tabler/icons@3.31.0': {}
+
+  '@tanstack/query-core@5.72.1': {}
+
+  '@tanstack/react-query@5.72.1(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-core': 5.72.1
+      react: 19.1.0
 
   '@tsconfig/node10@1.0.11': {}
 
@@ -4199,6 +4225,11 @@ snapshots:
     dependencies:
       react: 19.1.0
       scheduler: 0.26.0
+
+  react-error-boundary@5.0.0(react@19.1.0):
+    dependencies:
+      '@babel/runtime': 7.27.0
+      react: 19.1.0
 
   react-is@16.13.1: {}
 

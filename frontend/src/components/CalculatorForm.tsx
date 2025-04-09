@@ -1,440 +1,356 @@
 // src/components/CalculatorForm.tsx
-import { useState, useEffect, useMemo } from 'react'; 
-import {
-  Stack,
-  Grid,
-  TextInput, 
-  Select,
-  LoadingOverlay,
-  Alert,     
-  SegmentedControl, 
-  Box, 
-  Text,      
-  Switch,
-  SimpleGrid, 
-} from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react'; 
-import { apiClient } from '../services/apiClient'; 
-import { 
-    ScreenType, Location, ScreenTypeLocationRelation, 
-    Material, LocationMaterialRelation, IpProtection,
-    PitchType, Pitch, 
-    PitchTypePitchRelation, ScreenTypePitchRelation, LocationPitchRelation 
-} from '../types/api'; 
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Stack, Grid, LoadingOverlay, Alert, Text, Button } from "@mantine/core";
+import { IconAlertCircle } from "@tabler/icons-react";
+import { apiClient } from "../services/apiClient";
+import { useQuery, QueryErrorResetBoundary } from "@tanstack/react-query";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
+// --- Компоненты ---
+import DimensionInputs from "./DimensionInputs";
+import ScreenTypeSelector from "./ScreenTypeSelector";
+import DependencySelectors from "./DependencySelectors";
+import PitchControl from "./PitchControl";
+import CabinetSelector from "./CabinetSelector";
+
+// --- Импорты типов ---
+import type {
+  ScreenTypeLocationRelation, LocationMaterialRelation, PitchTypePitchRelation, ScreenTypePitchRelation,
+  LocationPitchRelation, LocationCabinetRelation, MaterialCabinetRelation,
+} from "../types/api";
+import { ScreenType, Location, Material, IpProtection, Pitch, Cabinet } from "../types/api";
+
+// --- Функции-запросы ---
+const fetchScreenTypes = async (): Promise<ScreenType[]> => { const data = await apiClient.get<ScreenType[]>("/screen-types"); if (!Array.isArray(data)) throw new Error("Inv F: ST"); return data; };
+const fetchIpProtections = async (): Promise<IpProtection[]> => { const data = await apiClient.get<IpProtection[]>("/ip-protection"); if (!Array.isArray(data)) throw new Error("Inv F: IP"); return data; };
+const fetchPitches = async (): Promise<Pitch[]> => { const data = await apiClient.get<Pitch[]>("/pitches"); if (!Array.isArray(data)) throw new Error("Inv F: P"); return data; };
+const fetchCabinets = async (): Promise<Cabinet[]> => { const data = await apiClient.get<Cabinet[]>("/cabinets"); if (!Array.isArray(data)) throw new Error("Inv F: C"); return data; };
+const fetchStlRelations = async (): Promise<ScreenTypeLocationRelation[]> => { const data = await apiClient.get<ScreenTypeLocationRelation[]>("/screen-type-locations"); if (!Array.isArray(data)) throw new Error("Inv F: STLR"); return data; };
+const fetchLmRelations = async (): Promise<LocationMaterialRelation[]> => { const data = await apiClient.get<LocationMaterialRelation[]>("/location-materials"); if (!Array.isArray(data)) throw new Error("Inv F: LMR"); return data; };
+const fetchPtpRelations = async (): Promise<PitchTypePitchRelation[]> => { const data = await apiClient.get<PitchTypePitchRelation[]>("/pitch-type-pitches"); if (!Array.isArray(data)) throw new Error("Inv F: PTPR"); return data; };
+const fetchStpRelations = async (): Promise<ScreenTypePitchRelation[]> => { const data = await apiClient.get<ScreenTypePitchRelation[]>("/screen-type-pitches"); if (!Array.isArray(data)) throw new Error("Inv F: STPR"); return data; };
+const fetchLpRelations = async (): Promise<LocationPitchRelation[]> => { const data = await apiClient.get<LocationPitchRelation[]>("/location-pitches"); if (!Array.isArray(data)) throw new Error("Inv F: LPR"); return data; };
+const fetchLcRelations = async (): Promise<LocationCabinetRelation[]> => { const data = await apiClient.get<LocationCabinetRelation[]>("/location-cabinets"); if (!Array.isArray(data)) throw new Error("Inv F: LCR"); return data; };
+const fetchMcRelations = async (): Promise<MaterialCabinetRelation[]> => { const data = await apiClient.get<MaterialCabinetRelation[]>("/material-cabinets"); if (!Array.isArray(data)) throw new Error("Inv F: MCR"); return data; };
+
+// --- ЧИСТЫЕ ФУНКЦИИ ФИЛЬТРАЦИИ ---
+const filterLocations = (screenTypeCode: string | null, relations: ScreenTypeLocationRelation[]): Location[] => {
+    if (!screenTypeCode) return [];
+    try {
+        const screenTypeCodeLower = screenTypeCode.toLowerCase();
+        const relatedLocations = relations.filter(rel => rel.screenType?.code?.toLowerCase() === screenTypeCodeLower && rel.location).map(rel => rel.location!);
+        return Array.from(new Map(relatedLocations.map(loc => [loc.id, loc])).values());
+    } catch (error) { console.error("Error filtering locations:", error); return []; }
+};
+const filterMaterials = (locationCode: string | null, relations: LocationMaterialRelation[]): Material[] => {
+    if (!locationCode) return [];
+    try {
+        const locationCodeLower = locationCode.toLowerCase();
+        const relatedMaterials = relations.filter(rel => rel.location?.code?.toLowerCase() === locationCodeLower && rel.material).map(rel => rel.material!);
+        return Array.from(new Map(relatedMaterials.map(mat => [mat.id, mat])).values());
+    } catch (error) { console.error("Error filtering materials:", error); return []; }
+};
+const filterPitches = (screenTypeCode: string | null, locationCode: string | null, isPro: boolean, allPitches: Pitch[], ptpRelations: PitchTypePitchRelation[], stpRelations: ScreenTypePitchRelation[], lpRelations: LocationPitchRelation[]): Pitch[] => {
+    if (!screenTypeCode || !locationCode || !allPitches || !ptpRelations || !stpRelations || !lpRelations) { return []; }
+    try {
+        const targetPitchTypeName = (isPro ? "pro" : "eco").toLowerCase(); const selScreenTypeLower = screenTypeCode.toLowerCase(); const selLocationLower = locationCode.toLowerCase();
+        const allowedByScreenType = new Set(stpRelations.filter(rel => rel.screenType?.code?.toLowerCase() === selScreenTypeLower && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByScreenType.size === 0) return [];
+        const allowedByLocation = new Set(lpRelations.filter(rel => rel.location?.code?.toLowerCase() === selLocationLower && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByLocation.size === 0) return [];
+        const allowedByPitchType = new Set(ptpRelations.filter(rel => rel.pitchTypeName?.toLowerCase() === targetPitchTypeName && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByPitchType.size === 0) return [];
+        return allPitches.filter((pitch) => { const pitchCodeLower = pitch.code?.toLowerCase(); if (!pitchCodeLower) return false; return (allowedByScreenType.has(pitchCodeLower) && allowedByLocation.has(pitchCodeLower) && allowedByPitchType.has(pitchCodeLower)); });
+    } catch (error) { console.error("Error filtering pitches:", error); return []; }
+};
+const filterCabinets = (locationCode: string | null, materialCode: string | null, allCabinets: Cabinet[], lcRelations: LocationCabinetRelation[], mcRelations: MaterialCabinetRelation[]): Cabinet[] => {
+    if (!locationCode || !materialCode || !allCabinets || !lcRelations || !mcRelations) { return []; }
+    try {
+        const locationLower = locationCode.toLowerCase(); const materialLower = materialCode.toLowerCase();
+        const cabinetsByLocation = new Set<string>(); lcRelations.forEach(rel => { if (rel.location?.code?.toLowerCase() === locationLower && rel.cabinet?.sku) cabinetsByLocation.add(rel.cabinet.sku.toLowerCase()); }); if (cabinetsByLocation.size === 0) { return []; }
+        const cabinetsByMaterial = new Set<string>(); mcRelations.forEach(rel => { if (rel.material?.code?.toLowerCase() === materialLower && rel.cabinet?.sku) cabinetsByMaterial.add(rel.cabinet.sku.toLowerCase()); }); if (cabinetsByMaterial.size === 0) { return []; }
+        const finalCabinetSkus = new Set<string>(); cabinetsByLocation.forEach(cabinetSku => { if (cabinetsByMaterial.has(cabinetSku)) finalCabinetSkus.add(cabinetSku); });
+        return allCabinets.filter(cabinet => cabinet.sku && finalCabinetSkus.has(cabinet.sku.toLowerCase()));
+    } catch (error) { console.error("Error filtering cabinets:", error); return []; }
+};
+
+// --- КОМПОНЕНТ ---
 const CalculatorForm = () => {
-  // --- Состояния ---
-  const [width, setWidth] = useState<string>(''); 
-  const [height, setHeight] = useState<string>(''); 
-  const [screenTypes, setScreenTypes] = useState<ScreenType[]>([]); 
-  const [availableLocations, setAvailableLocations] = useState<Location[]>([]); 
-  const [availableMaterials, setAvailableMaterials] = useState<Material[]>([]); 
-  const [ipProtections, setIpProtections] = useState<IpProtection[]>([]); 
-  const [allPitches, setAllPitches] = useState<Pitch[]>([]);         
-  const [pitchTypePitchRelations, setPitchTypePitchRelations] = useState<PitchTypePitchRelation[]>([]); 
-  const [screenTypePitchRelations, setScreenTypePitchRelations] = useState<ScreenTypePitchRelation[]>([]); 
-  const [locationPitchRelations, setLocationPitchRelations] = useState<LocationPitchRelation[]>([]);     
+  // --- Состояния размеров ---
+  const [width, setWidth] = useState<string>("");
+  const [height, setHeight] = useState<string>("");
 
-  // --- Выбранные значения ---
-  const [selectedScreenTypeCode, setSelectedScreenTypeCode] = useState<string | null>(null); 
-  const [selectedLocationCode, setSelectedLocationCode] = useState<string | null>(null); 
-  const [selectedMaterialCode, setSelectedMaterialCode] = useState<string | null>(null); 
-  const [selectedProtectionCode, setSelectedProtectionCode] = useState<string | null>(null); 
-  const [isProPitchType, setIsProPitchType] = useState<boolean>(false); // true = pro, false = eco
-  const [selectedPitchCode, setSelectedPitchCode] = useState<string | null>(null);       
-  const [selectedRefreshRate, setSelectedRefreshRate] = useState<number | null>(null); 
-  const [selectedBrightness, setSelectedBrightness] = useState<number | null>(null);   
+  // --- Запросы ---
+  const { data: screenTypes = [], isLoading: isLoadingScreenTypes, isError: isErrorScreenTypes, error: errorScreenTypes } = useQuery<ScreenType[], Error>({ queryKey: ['screenTypes'], queryFn: fetchScreenTypes });
+  const { data: ipProtections = [], isLoading: isLoadingIpProtections, isError: isErrorIpProtections, error: errorIpProtections } = useQuery<IpProtection[], Error>({ queryKey: ['ipProtections'], queryFn: fetchIpProtections });
+  const { data: allPitches = [], isLoading: isLoadingPitches, isError: isErrorPitches, error: errorPitches } = useQuery<Pitch[], Error>({ queryKey: ['pitches'], queryFn: fetchPitches });
+  const { data: allCabinets = [], isLoading: isLoadingCabinets, isError: isErrorCabinets, error: errorCabinets } = useQuery<Cabinet[], Error>({ queryKey: ['cabinets'], queryFn: fetchCabinets });
+  const { data: stlRelations = [], isLoading: isLoadingStlRelations, isError: isErrorStlRelations, error: errorStlRelations } = useQuery<ScreenTypeLocationRelation[], Error>({ queryKey: ['stlRelations'], queryFn: fetchStlRelations });
+  const { data: lmRelations = [], isLoading: isLoadingLmRelations, isError: isErrorLmRelations, error: errorLmRelations } = useQuery<LocationMaterialRelation[], Error>({ queryKey: ['lmRelations'], queryFn: fetchLmRelations });
+  const { data: ptpRelations = [], isLoading: isLoadingPtpRelations, isError: isErrorPtpRelations, error: errorPtpRelations } = useQuery<PitchTypePitchRelation[], Error>({ queryKey: ['ptpRelations'], queryFn: fetchPtpRelations });
+  const { data: stpRelations = [], isLoading: isLoadingStpRelations, isError: isErrorStpRelations, error: errorStpRelations } = useQuery<ScreenTypePitchRelation[], Error>({ queryKey: ['stpRelations'], queryFn: fetchStpRelations });
+  const { data: lpRelations = [], isLoading: isLoadingLpRelations, isError: isErrorLpRelations, error: errorLpRelations } = useQuery<LocationPitchRelation[], Error>({ queryKey: ['lpRelations'], queryFn: fetchLpRelations });
+  const { data: lcRelations = [], isLoading: isLoadingLcRelations, isError: isErrorLcRelations, error: errorLcRelations } = useQuery<LocationCabinetRelation[], Error>({ queryKey: ['lcRelations'], queryFn: fetchLcRelations });
+  const { data: mcRelations = [], isLoading: isLoadingMcRelations, isError: isErrorMcRelations, error: errorMcRelations } = useQuery<MaterialCabinetRelation[], Error>({ queryKey: ['mcRelations'], queryFn: fetchMcRelations });
 
-  // --- Состояния загрузки ---
-  const [loadingScreenTypes, setLoadingScreenTypes] = useState<boolean>(true); 
-  const [loadingLocations, setLoadingLocations] = useState<boolean>(false);
-  const [loadingMaterials, setLoadingMaterials] = useState<boolean>(false); 
-  const [loadingProtections, setLoadingProtections] = useState<boolean>(true); 
-  const [loadingPitchesAndRelations, setLoadingPitchesAndRelations] = useState<boolean>(true); 
-  
-  // --- Состояния ошибок ---
-  const [screenTypeError, setScreenTypeError] = useState<string | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
-  const [materialError, setMaterialError] = useState<string | null>(null); 
-  const [protectionError, setProtectionError] = useState<string | null>(null); 
-  const [pitchTypeError, setPitchTypeError] = useState<string | null>(null);       
-  const [pitchError, setPitchError] = useState<string | null>(null);               
-  
-  const [initialBaseLoadComplete, setInitialBaseLoadComplete] = useState<boolean>(false); 
-  
-  // Флаги загрузки
-  const isInitialLoading = loadingScreenTypes || loadingProtections || loadingPitchesAndRelations; 
+  // --- Состояния для выбранных значений ---
+  const [selectedScreenTypeCode, setSelectedScreenTypeCode] = useState<string | null>(null);
+  const [selectedLocationCode, setSelectedLocationCode] = useState<string | null>(null);
+  const [selectedMaterialCode, setSelectedMaterialCode] = useState<string | null>(null);
+  const [selectedProtectionCode, setSelectedProtectionCode] = useState<string | null>(null);
+  const [isProPitchType, setIsProPitchType] = useState<boolean>(false);
+  const [selectedPitchCode, setSelectedPitchCode] = useState<string | null>(null);
+  const [selectedCabinetSku, setSelectedCabinetSku] = useState<string | null>(null);
 
-  // --- Загрузка ВСЕХ НЕЗАВИСИМЫХ справочников и связей Pitch ---
+  // --- Состояния для расчетных полей ---
+  const [selectedRefreshRate, setSelectedRefreshRate] = useState<number | null>(null);
+  const [selectedBrightness, setSelectedBrightness] = useState<number | null>(null);
+
+  // --- Удаляем состояния ошибок фильтрации ---
+  // const [locationError, setLocationError] = useState<string | null>(null);
+  // const [materialError, setMaterialError] = useState<string | null>(null);
+  // const [cabinetsFilterError, setCabinetsFilterError] = useState<string | null>(null);
+
+  // --- Вспомогательные рефы ---
+  const prevIsPitchControlDisabledRef = useRef<boolean | undefined>(undefined);
+  const didInitialize = useRef(false);
+
+  // --- Вычисляем общие состояния загрузки/ошибки ---
+  const isOverallLoading = isLoadingScreenTypes || isLoadingIpProtections || isLoadingPitches || isLoadingCabinets || isLoadingStlRelations || isLoadingLmRelations || isLoadingPtpRelations || isLoadingStpRelations || isLoadingLpRelations || isLoadingLcRelations || isLoadingMcRelations;
+  const allErrors = [ errorScreenTypes, errorIpProtections, errorPitches, errorCabinets, errorStlRelations, errorLmRelations, errorPtpRelations, errorStpRelations, errorLpRelations, errorLcRelations, errorMcRelations ].filter((e): e is Error => e != null);
+  const hasOverallError = isErrorScreenTypes || isErrorIpProtections || isErrorPitches || isErrorCabinets || isErrorStlRelations || isErrorLmRelations || isErrorPtpRelations || isErrorStpRelations || isErrorLpRelations || isErrorLcRelations || isErrorMcRelations;
+  const overallErrorString = allErrors.length > 0 ? "Ошибки загрузки данных: " + allErrors.map(e => e.message).join('; ') : null;
+  const isUIBlocked = isOverallLoading || hasOverallError;
+
+  // --- Вычисление производных данных (доступные опции) ---
+  const availableLocations = useMemo(() : Location[] => {
+      return filterLocations(selectedScreenTypeCode, stlRelations);
+  }, [selectedScreenTypeCode, stlRelations]);
+
+  const availableMaterials = useMemo(() : Material[] => {
+      return filterMaterials(selectedLocationCode, lmRelations);
+  }, [selectedLocationCode, lmRelations]);
+
+
+  // --- Инициализация значений по умолчанию (один раз после загрузки) ---
   useEffect(() => {
-    let isMounted = true;
-    const loadInitialData = async () => {
-        setLoadingScreenTypes(true); setLoadingProtections(true); setLoadingPitchesAndRelations(true);
-        setInitialBaseLoadComplete(false); 
-        try {
-            const [ screenTypeRes, ipProtectionRes, pitchTypeRes, pitchRes, 
-                    ptpRelationsRes, stpRelationsRes, lpRelationsRes 
-            ] = await Promise.all([
-                apiClient.get<ScreenType[]>('/screen-types'),
-                apiClient.get<IpProtection[]>('/ip-protection'),
-                apiClient.get<PitchType[]>('/pitch-types'),
-                apiClient.get<Pitch[]>('/pitches'), 
-                apiClient.get<PitchTypePitchRelation[]>('/pitch-type-pitches'),   
-                apiClient.get<ScreenTypePitchRelation[]>('/screen-type-pitches'), 
-                apiClient.get<LocationPitchRelation[]>('/location-pitches')     
-            ]);
-            if (!isMounted) return; 
+    if (!isOverallLoading && !didInitialize.current) {
+      didInitialize.current = true;
 
-            if (Array.isArray(screenTypeRes)) { setScreenTypes(screenTypeRes); if (!selectedScreenTypeCode && screenTypeRes[0]?.code) setSelectedScreenTypeCode(screenTypeRes[0].code); } 
-            else { setScreenTypeError('Format Error (ScreenType)'); }
+      let initialScreenType = selectedScreenTypeCode;
+      let initialLocation: string | null = null;
+      let initialMaterial: string | null = null;
+      let initialProtection: string | null = null;
 
-            if (Array.isArray(ipProtectionRes)) { setIpProtections(ipProtectionRes); } 
-            else { setProtectionError('Format Error (IpProtection)'); }
+      // 1. Определить и установить ScreenType
+      if (!initialScreenType && screenTypes.length > 0) {
+        const defaultScreenTypeCode = 'cabinet';
+        const defaultScreenType = screenTypes.find(st => st.code?.toLowerCase() === defaultScreenTypeCode.toLowerCase());
+        if (defaultScreenType) { initialScreenType = defaultScreenType.code; }
+        else { console.warn(`Default ST code '${defaultScreenTypeCode}' not found.`); }
+        setSelectedScreenTypeCode(initialScreenType); // Устанавливаем СРАЗУ
+      }
 
-            if (!Array.isArray(pitchTypeRes)) { setPitchTypeError('Format Error (PitchType)'); }
+      // 2. Вычислить availableLocations (используя initialScreenType) и определить Location
+      // Используем функцию фильтрации напрямую
+      const initialAvailableLocations = filterLocations(initialScreenType, stlRelations);
+      if (initialAvailableLocations.length === 1) {
+          initialLocation = initialAvailableLocations[0].code;
+          setSelectedLocationCode(initialLocation); // Устанавливаем СРАЗУ
+      }
 
-            if (Array.isArray(pitchRes)) { setAllPitches(pitchRes); } 
-            else { setPitchError('Format Error (Pitch)'); }
+      // 3. Вычислить availableMaterials (используя initialLocation) и определить Material
+      const initialAvailableMaterials = filterMaterials(initialLocation, lmRelations);
+      if (initialAvailableMaterials.length === 1) {
+          initialMaterial = initialAvailableMaterials[0].code;
+          setSelectedMaterialCode(initialMaterial); // Устанавливаем СРАЗУ
+      }
 
-            if (Array.isArray(ptpRelationsRes)) { setPitchTypePitchRelations(ptpRelationsRes); } 
-            else { setPitchError(pitchError || 'Format Error (PTP Relations)'); }
-            if (Array.isArray(stpRelationsRes)) { setScreenTypePitchRelations(stpRelationsRes); } 
-            else { setPitchError(pitchError || 'Format Error (STP Relations)'); }
-            if (Array.isArray(lpRelationsRes)) { setLocationPitchRelations(lpRelationsRes); } 
-            else { setPitchError(pitchError || 'Format Error (LP Relations)'); }
+      // 4. Определить и установить Protection (используя initialLocation)
+      if (initialLocation) {
+        const locationCodeLower = initialLocation.toLowerCase();
+        if (locationCodeLower === "indoor") initialProtection = "IP30";
+        else if (locationCodeLower === "outdoor") initialProtection = "IP65";
+        const protectionExists = ipProtections.some(p => p.code === initialProtection);
+        if (!protectionExists) initialProtection = null;
+        setSelectedProtectionCode(initialProtection);
+      }
+    }
+  // Зависит ТОЛЬКО от статуса загрузки и всех данных API
+  }, [isOverallLoading, screenTypes, stlRelations, lmRelations, ipProtections]);
 
-        } catch (error: any) { 
-            if (!isMounted) return;
-             setScreenTypeError(error.message); setProtectionError(error.message);
-             setPitchTypeError(error.message); setPitchError(error.message);
-        } 
-        finally {
-            if (isMounted) {
-                setLoadingScreenTypes(false); setLoadingProtections(false); setLoadingPitchesAndRelations(false);
-                setInitialBaseLoadComplete(true); 
-            }
+
+  // --- Установка Protection (при РУЧНОМ изменении Location) ---
+  // (Нужно, если Location не был выбран автоматически при инициализации)
+  useEffect(() => {
+    // Не запускаем во время загрузки или инициализации
+    // Запускаем, если изменилась локация ПОСЛЕ инициализации
+    if (isOverallLoading || didInitialize.current === false || isLoadingIpProtections || !selectedLocationCode) {
+        if (!selectedLocationCode && selectedProtectionCode !== null && !isOverallLoading && didInitialize.current) {
+             setSelectedProtectionCode(null); // Сброс, если локация сброшена вручную
         }
-    };
-    loadInitialData();
-    return () => { isMounted = false; };
-  }, []); 
-
-  // --- Загрузка Locations ---
-  useEffect(() => {
-     let isMounted = true;
-    if (!initialBaseLoadComplete || !selectedScreenTypeCode) {
-        setAvailableLocations([]); setSelectedLocationCode(null); 
-        setAvailableMaterials([]); setSelectedMaterialCode(null); 
-        setSelectedProtectionCode(null); 
-        setIsProPitchType(false); setSelectedPitchCode(null); // Сброс питчей
-        setLocationError(null); setMaterialError(null);
         return;
     }
-    const fetchLocationsForScreenType = async () => {
-        setLoadingLocations(true); setLocationError(null); setSelectedLocationCode(null); 
-        try {
-            const relations = await apiClient.get<ScreenTypeLocationRelation[]>('/screen-type-locations');
-             if (!isMounted) return;
-            if (!Array.isArray(relations)) { setAvailableLocations([]); setLocationError('Format Error (ST->L)'); return; }
-            const relatedLocations = relations
-              .filter(rel => rel.screenType?.code?.toLowerCase() === selectedScreenTypeCode?.toLowerCase() && rel.location)
-              .map(rel => rel.location); 
-            const uniqueLocations = Array.from(new Map(relatedLocations.map(loc => [loc.id, loc])).values());
-            setAvailableLocations(uniqueLocations); setLocationError(null); 
-            if (uniqueLocations.length === 1 && uniqueLocations[0].code) { setSelectedLocationCode(uniqueLocations[0].code); }
-        } catch (error) { 
-             if (!isMounted) return;
-            setLocationError(error instanceof Error ? error.message : 'Failed to load locations'); setAvailableLocations([]);
-        } 
-        finally { if (isMounted) setLoadingLocations(false); }
-    };
-    fetchLocationsForScreenType();
-    return () => { isMounted = false; };
-  }, [selectedScreenTypeCode, initialBaseLoadComplete]); 
 
-  // --- Загрузка Materials ---
-  useEffect(() => {
-    if (!selectedLocationCode) { 
-        setAvailableMaterials([]); setSelectedMaterialCode(null); setMaterialError(null);
-        return; 
+    let newProtectionCode: string | null = null;
+    const locationCodeLower = selectedLocationCode.toLowerCase();
+    if (locationCodeLower === "indoor") newProtectionCode = "IP30"; else if (locationCodeLower === "outdoor") newProtectionCode = "IP65";
+    const protectionExists = ipProtections.some(p => p.code === newProtectionCode);
+    if (!protectionExists) newProtectionCode = null;
+
+    if (selectedProtectionCode !== newProtectionCode) {
+      setSelectedProtectionCode(newProtectionCode);
     }
-    let isMounted = true;
-    const fetchMaterialsForLocation = async () => {
-        setLoadingMaterials(true); setMaterialError(null); setSelectedMaterialCode(null); 
-        try {
-            const relations = await apiClient.get<LocationMaterialRelation[]>('/location-materials'); 
-             if (!isMounted) return;
-            if (!Array.isArray(relations)) { setAvailableMaterials([]); setMaterialError('Format Error (L->M)'); return; }
-            const relatedMaterials = relations
-              .filter(rel => rel.location?.code?.toLowerCase() === selectedLocationCode?.toLowerCase() && rel.material)
-              .map(rel => rel.material);
-            const uniqueMaterials = Array.from(new Map(relatedMaterials.map(mat => [mat.id, mat])).values());
-            setAvailableMaterials(uniqueMaterials); setMaterialError(null);
-            if (uniqueMaterials.length === 1 && uniqueMaterials[0].code) { setSelectedMaterialCode(uniqueMaterials[0].code); }
-        } catch (error) { 
-             if (!isMounted) return;
-            setMaterialError(error instanceof Error ? error.message : 'Failed to load materials'); setAvailableMaterials([]);
-        } 
-        finally { if (isMounted) setLoadingMaterials(false); }
-    };
-    fetchMaterialsForLocation();
-    return () => { isMounted = false; };
-  }, [selectedLocationCode]); 
+  // Не зависит от selectedProtectionCode
+  }, [selectedLocationCode, ipProtections, isLoadingIpProtections, isOverallLoading]);
 
-  // --- Установка защиты по умолчанию ---
-  useEffect(() => {
-      if (loadingProtections || !selectedLocationCode || ipProtections.length === 0) {
-          if (!selectedLocationCode && !loadingProtections) setSelectedProtectionCode(null); 
-          return; 
-      }
-      let defaultProtectionCode: string | null = null;
-      const locationCodeLower = selectedLocationCode.toLowerCase(); 
-      if (locationCodeLower === 'indoor') { defaultProtectionCode = 'IP30'; } 
-      else if (locationCodeLower === 'outdoor') { defaultProtectionCode = 'IP65'; } 
-      if (defaultProtectionCode && ipProtections.some(p => p.code === defaultProtectionCode)) {
-          setSelectedProtectionCode(defaultProtectionCode);
-      } else { setSelectedProtectionCode(null); }
-  }, [selectedLocationCode, ipProtections, loadingProtections]); 
 
-  // --- Установка RefreshRate и Brightness ---
-  useEffect(() => {
-      if (isProPitchType) { setSelectedRefreshRate(3840); setSelectedBrightness(6000); } 
-      else { setSelectedRefreshRate(1920); setSelectedBrightness(800); } 
-  }, [isProPitchType]); 
-
-  // --- Обработчики ---
-  const handleScreenTypeChange = (value: string) => { 
-      setSelectedScreenTypeCode(value); 
-      setSelectedLocationCode(null); setSelectedMaterialCode(null); setSelectedProtectionCode(null); 
-      setIsProPitchType(false); setSelectedPitchCode(null); 
-      setSelectedRefreshRate(null); setSelectedBrightness(null); 
-  };
-  const handleLocationChange = (value: string | null) => { 
-      setSelectedLocationCode(value); setSelectedMaterialCode(null); 
-      setIsProPitchType(false); setSelectedPitchCode(null); 
-      setSelectedRefreshRate(null); setSelectedBrightness(null); 
-  };
-  const handleMaterialChange = (value: string | null) => { 
-      setSelectedMaterialCode(value);
-      setIsProPitchType(false); setSelectedPitchCode(null); 
-      setSelectedRefreshRate(null); setSelectedBrightness(null); 
-  };
-  const handleProtectionChange = (value: string | null) => { 
-      setSelectedProtectionCode(value);
-      setIsProPitchType(false); setSelectedPitchCode(null); 
-      setSelectedRefreshRate(null); setSelectedBrightness(null); 
-  };
-  const handlePitchTypeSwitchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      const isChecked = event.currentTarget.checked;
-      setIsProPitchType(isChecked);
-      setSelectedPitchCode(null); 
-  };
-  const handlePitchChange = (value: string | null) => { setSelectedPitchCode(value); };
-  
-  // --- Подготовка данных ---
-  const screenTypeSegments = screenTypes.map((st) => ({ value: st.code, label: st.name }));
-  const locationOptions = availableLocations.map((loc) => ({ value: loc.code, label: loc.name }));
-  const materialOptions = availableMaterials.map((mat) => ({ value: mat.code, label: mat.name })); 
-  const protectionOptions = ipProtections.map((ip) => ({ value: ip.code, label: ip.code })); 
-  // pitchTypeRadios больше не нужен
+  // --- Вычисление disabled статусов ---
+  const hasValidDimensions = width.trim() !== "" && parseFloat(width) > 0 && height.trim() !== "" && parseFloat(height) > 0;
+  // Убрали ошибки фильтрации из disabled
+  const isLocationSelectDisabled = isUIBlocked || !selectedScreenTypeCode || /*!!locationError ||*/ !hasValidDimensions;
+  const isMaterialSelectDisabled = isLocationSelectDisabled || !selectedLocationCode /*|| !!materialError*/;
+  const isProtectionSelectDisabled = isLocationSelectDisabled || isLoadingIpProtections || isErrorIpProtections;
+  const isPitchControlDisabled = isMaterialSelectDisabled || isProtectionSelectDisabled || !selectedMaterialCode || !selectedProtectionCode;
 
   // --- МЕМОИЗИРОВАННЫЙ ФИЛЬТР ПИТЧЕЙ ---
+  const filteredPitches = useMemo(() => {
+      return filterPitches(selectedScreenTypeCode, selectedLocationCode, isProPitchType, allPitches, ptpRelations, stpRelations, lpRelations);
+  }, [selectedScreenTypeCode, selectedLocationCode, isProPitchType, allPitches, ptpRelations, stpRelations, lpRelations]);
+
   const filteredPitchOptions = useMemo(() => {
-      const targetPitchTypeName = (isProPitchType ? 'pro' : 'eco').toLowerCase(); 
-      if (loadingPitchesAndRelations || !selectedScreenTypeCode || !selectedLocationCode || !targetPitchTypeName) {
-          return [];
-      }
-      const selScreenTypeLower = selectedScreenTypeCode.toLowerCase();
-      const selLocationLower = selectedLocationCode.toLowerCase();
-      
-      const allowedByScreenType = new Set(
-          screenTypePitchRelations.filter(rel => rel.screenType?.code?.toLowerCase() === selScreenTypeLower)
-              .map(rel => rel.pitchCode?.toLowerCase()).filter(Boolean) as string[]
-      );
-      const allowedByLocation = new Set(
-           locationPitchRelations.filter(rel => rel.location?.code?.toLowerCase() === selLocationLower)
-               .map(rel => rel.pitchCode?.toLowerCase()).filter(Boolean) as string[]
-       );
-        const allowedByPitchType = new Set(
-            pitchTypePitchRelations.filter(rel => rel.pitchTypeName?.toLowerCase() === targetPitchTypeName)
-                .map(rel => rel.pitchCode?.toLowerCase()).filter(Boolean) as string[]
-        );
-        
-      const filteredPitches = allPitches.filter(pitch => {
-          const pitchCodeLower = pitch.code?.toLowerCase();
-          if (!pitchCodeLower) return false; 
-          return allowedByScreenType.has(pitchCodeLower) &&
-                 allowedByLocation.has(pitchCodeLower) &&
-                 allowedByPitchType.has(pitchCodeLower);
-      });
-      return filteredPitches.map(p => ({ value: p.code, label: p.code }));
-  }, [
-      allPitches, pitchTypePitchRelations, screenTypePitchRelations, locationPitchRelations, 
-      selectedScreenTypeCode, selectedLocationCode, isProPitchType, // Зависим от флага
-      loadingPitchesAndRelations 
-  ]);
+      if (isPitchControlDisabled || isUIBlocked) return [];
+      return filteredPitches.map((p) => ({ value: p.code, label: p.code }));
+  }, [filteredPitches, isPitchControlDisabled, isUIBlocked]);
 
-  // --- Условия отображения ---
-  const showBaseForm = initialBaseLoadComplete && !screenTypeError && !protectionError && !pitchTypeError && !pitchError; 
-  const hasValidDimensions = width.trim() !== '' && height.trim() !== '';
-  const showDependentForm = showBaseForm && selectedScreenTypeCode && hasValidDimensions; 
-  const showMaterialAndProtection = showDependentForm && selectedLocationCode;
-  const showPitchFields = showMaterialAndProtection && selectedMaterialCode && selectedProtectionCode; 
+  const isPitchSelectDisabled = isPitchControlDisabled || isUIBlocked || filteredPitchOptions.length === 0;
 
+  // --- МЕМОИЗАЦИЯ: ФИЛЬТРАЦИЯ ДОСТУПНЫХ КАБИНЕТОВ ---
+  const availableCabinets = useMemo((): Cabinet[] => {
+      // Ошибки обрабатываются внутри filterCabinets
+      return filterCabinets(selectedLocationCode, selectedMaterialCode, allCabinets, lcRelations, mcRelations);
+  }, [selectedLocationCode, selectedMaterialCode, allCabinets, lcRelations, mcRelations]);
+
+  const cabinetOptions = useMemo(() => availableCabinets.map(cab => ({ value: cab.sku, label: (cab.name && cab.name.trim() !== '') ? cab.name : cab.sku })), [availableCabinets]);
+  // Убрали cabinetsFilterError
+  const isCabinetSelectDisabledFinal = isPitchControlDisabled || !selectedPitchCode || isUIBlocked || /* !!cabinetsFilterError || */ (!isOverallLoading && availableCabinets.length === 0);
+
+  // --- Установка/Сброс Rate/Brightness --- (без изменений)
+  useEffect(() => {
+    const wasDisabled = prevIsPitchControlDisabledRef.current; const isDisabledNow = isPitchControlDisabled;
+    if (!isOverallLoading) { if (wasDisabled === true && isDisabledNow === false) { const rate = isProPitchType ? 3840 : 1920; const bright = isProPitchType ? 6000 : 800; setSelectedRefreshRate(rate); setSelectedBrightness(bright); } else if (isDisabledNow === true && wasDisabled === false) { setSelectedRefreshRate(null); setSelectedBrightness(null); } }
+    prevIsPitchControlDisabledRef.current = isDisabledNow;
+  }, [isPitchControlDisabled, isProPitchType, isOverallLoading]);
+
+  // --- Обновление Rate/Brightness --- (без изменений)
+  useEffect(() => {
+    if (!isPitchControlDisabled && !isOverallLoading) { const rate = isProPitchType ? 3840 : 1920; const bright = isProPitchType ? 6000 : 800; if (selectedRefreshRate !== rate) setSelectedRefreshRate(rate); if (selectedBrightness !== bright) setSelectedBrightness(bright); }
+  }, [isProPitchType, isPitchControlDisabled, isOverallLoading, selectedRefreshRate, selectedBrightness]);
+
+  // --- Обработчики (useCallback) ---
+  // Сбрасывают ВСЕ зависимые состояния
+  const handleScreenTypeChange = useCallback((value: string | null) => {
+      setSelectedScreenTypeCode(value);
+      setSelectedLocationCode(null); setSelectedMaterialCode(null); setSelectedProtectionCode(null);
+      setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
+      setSelectedRefreshRate(null); setSelectedBrightness(null);
+      // Сбрасываем ошибки (если они еще используются)
+      // setLocationError(null); setMaterialError(null); setCabinetsFilterError(null);
+  }, []);
+
+  const handleLocationChange = useCallback((value: string | null) => {
+      setSelectedLocationCode(value);
+      setSelectedMaterialCode(null); setSelectedProtectionCode(null);
+      setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
+      // setMaterialError(null); setCabinetsFilterError(null);
+  }, []);
+
+  const handleMaterialChange = useCallback((value: string | null) => {
+      setSelectedMaterialCode(value);
+      setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
+      // setCabinetsFilterError(null);
+   }, []);
+
+   const handleProtectionChange = useCallback((value: string | null) => {
+      setSelectedProtectionCode(value);
+      setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
+      // setCabinetsFilterError(null);
+   }, []);
+
+   const handlePitchTypeSwitchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+       setIsProPitchType(event.currentTarget.checked);
+       setSelectedPitchCode(null); setSelectedCabinetSku(null);
+       // setCabinetsFilterError(null);
+   }, []);
+
+   const handlePitchChange = useCallback((value: string | null) => {
+       setSelectedPitchCode(value);
+       setSelectedCabinetSku(null);
+       // setCabinetsFilterError(null);
+   }, []);
+
+   const handleCabinetChange = useCallback((value: string | null) => { setSelectedCabinetSku(value); }, []);
+
+
+  // --- Подготовка данных для Select ---
+  const screenTypeSegments = useMemo(() => screenTypes.map((st) => ({ value: st.code, label: st.name })), [screenTypes]);
+  const locationOptions = useMemo(() => availableLocations.map((loc) => ({ value: loc.code, label: loc.name })), [availableLocations]);
+  const materialOptions = useMemo(() => availableMaterials.map((mat) => ({ value: mat.code, label: mat.name })), [availableMaterials]);
+  const protectionOptions = useMemo(() => ipProtections.map((ip) => ({ value: ip.code, label: ip.code })), [ipProtections]);
+
+  // --- JSX ---
   return (
     <Stack gap="md">
-      <LoadingOverlay 
-        visible={loadingScreenTypes || loadingProtections || loadingPitchesAndRelations || loadingLocations || loadingMaterials} 
-        overlayProps={{ radius: 'sm', blur: 2 }} 
-      />
-
-      {/* Выбор Типа Экрана */}
-      {isInitialLoading && <Text ta="center" mb="xl">Загрузка конфигурации...</Text>} 
-      {!isInitialLoading && (screenTypeError || protectionError || pitchTypeError || pitchError) && ( 
-        <Alert title="Ошибка начальной загрузки" color="red" icon={<IconAlertCircle size={16}/>} radius="sm" mb="xl">
-           {screenTypeError || protectionError || pitchTypeError || pitchError }
-        </Alert> 
-      )}
-      {!isInitialLoading && showBaseForm && screenTypes.length > 0 && ( 
-        <SegmentedControl
-            fullWidth data={screenTypeSegments} value={selectedScreenTypeCode ?? ''} 
-            onChange={handleScreenTypeChange} mb="xl" color="blue" radius="md"
-        /> 
-      )}
-      {!isInitialLoading && showBaseForm && screenTypes.length === 0 && ( 
-         <Text c="dimmed" ta="center" mb="xl">Типы экранов не найдены.</Text> 
-      )}
-      
-      {/* Поля ввода Ширина/Высота - всегда активны */}
-      {showBaseForm && (
-        <Grid>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <TextInput 
-              label="Ширина экрана (мм)" 
-              value={width} 
-              onChange={(e) => setWidth(e.currentTarget.value)} 
-              required 
-              placeholder="Введите ширину"
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, sm: 6 }}>
-            <TextInput 
-              label="Высота экрана (мм)" 
-              value={height} 
-              onChange={(e) => setHeight(e.currentTarget.value)} 
-              required 
-              placeholder="Введите высоту"
-            />
-          </Grid.Col>
-        </Grid>
-      )}
-      
-      {/* Условный Рендеринг Остальной Формы */}
-      {showDependentForm && (
-          <Box> 
-              <Grid>
-                {/* ВЫБОР МЕСТА УСТАНОВКИ */}
-                <Grid.Col span={{ base: 12, sm: 4 }}>
-                   {locationError && ( <Alert title="Ошибка локаций" color="red" icon={<IconAlertCircle size={16}/>} mb="sm" radius="sm">{locationError}</Alert> )}
-                   <Select
-                       label="Место установки"
-                       placeholder={loadingLocations ? "Загрузка..." : (availableLocations.length === 0 ? "Нет доступных" : "Выберите место")}
-                       data={locationOptions} value={selectedLocationCode} onChange={handleLocationChange} 
-                       disabled={loadingLocations || !!locationError || availableLocations.length === 0} 
-                       searchable clearable required
-                   />
-                </Grid.Col>
-
-                {/* ВЫБОР МАТЕРИАЛА */}
-                <Grid.Col span={{ base: 12, sm: 4 }}>
-                    {materialError && ( <Alert title="Ошибка материалов" color="red" icon={<IconAlertCircle size={16}/>} mb="sm" radius="sm">{materialError}</Alert> )}
-                   <Select
-                       label="Материал"
-                       placeholder={loadingMaterials ? "Загрузка..." : (availableMaterials.length === 0 ? "Нет доступных" : "Выберите материал")}
-                       data={materialOptions} value={selectedMaterialCode} 
-                       onChange={handleMaterialChange} 
-                       disabled={!selectedLocationCode || loadingMaterials || !!materialError || availableMaterials.length === 0} 
-                       searchable clearable required
-                   />
-                </Grid.Col>
-                
-                {/* ВЫБОР СТЕПЕНИ ЗАЩИТЫ */}
-                 <Grid.Col span={{ base: 12, sm: 4 }}>
-                   <Select
-                       label="Степень защиты"
-                       placeholder={loadingProtections ? "Загрузка..." : (ipProtections.length === 0 ? "Нет данных" : "Выберите степень")}
-                       data={protectionOptions} value={selectedProtectionCode} 
-                       onChange={handleProtectionChange} 
-                       disabled={!selectedLocationCode || loadingProtections || !!protectionError} 
-                       searchable clearable required
-                   />
-                 </Grid.Col>
-
-                {/* БЛОК ПИТЧА */}
-                {showPitchFields && (
-                     <Grid.Col span={12}>
-                         {pitchTypeError && ( <Alert title="Ошибка типов питчей" color="red" icon={<IconAlertCircle size={16}/>} mb="sm" radius="sm">{pitchTypeError}</Alert> )}
-                         {pitchError && ( <Alert title="Ошибка питчей/связей" color="red" icon={<IconAlertCircle size={16}/>} mb="sm" radius="sm">{pitchError}</Alert> )}
-                         
-                         <SimpleGrid cols={{ base: 1, sm: 4 }} spacing="md" mb="md">
-                             {/* 1. Тип шага пикселя (Switch) */}
-                             <Box> 
-                                  <Text size="sm" fw={500} mb={7}>Тип шага</Text>
-                                 <Switch
-                                     checked={isProPitchType}
-                                     onChange={handlePitchTypeSwitchChange}
-                                     onLabel="PRO" 
-                                     offLabel="ECO" 
-                                     size="md" 
-                                     disabled={loadingPitchesAndRelations || !!pitchTypeError} // Блокируем при загрузке/ошибке типов
-                                 />
-                             </Box>
-
-                             {/* 2. Шаг пикселя (Select) */}
-                              <Box>
-                                 <Select
-                                     label="Шаг пикселя"
-                                     placeholder={loadingPitchesAndRelations ? "Загрузка..." : (filteredPitchOptions.length === 0 ? "Нет доступных" : "Выберите шаг")}
-                                     data={filteredPitchOptions} 
-                                     value={selectedPitchCode}
-                                     onChange={handlePitchChange}
-                                     disabled={loadingPitchesAndRelations || !!pitchError || filteredPitchOptions.length === 0}
-                                     searchable clearable required
-                                 />
-                             </Box>
-
-                             {/* 3. Частота обновления */}
-                             <Box>
-                                 <TextInput
-                                     readOnly 
-                                     label="Частота, Гц"
-                                     value={selectedRefreshRate !== null ? selectedRefreshRate.toString() : '---'} 
-                                     placeholder="---"
-                                 />
-                             </Box>
-
-                             {/* 4. Яркость */}
-                             <Box>
-                                 <TextInput
-                                     readOnly 
-                                     label="Яркость, кд/м²"
-                                     value={selectedBrightness !== null ? selectedBrightness.toString() : '---'}
-                                     placeholder="---"
-                                 />
-                             </Box>
-                         </SimpleGrid>
-                     </Grid.Col>
-                )}
-                 {/* КОНЕЦ БЛОКА ПИТЧА */}
-
-                 {/* TODO: Добавить выбор Кабинета */}
-                 {/* disabled={!selectedPitchCode || ...} */}
-
-              </Grid>
-          </Box>
-      )}
+      <LoadingOverlay visible={isOverallLoading} overlayProps={{ radius: "sm", blur: 2 }} />
+      {isOverallLoading && <Text ta="center" mb="xl">Загрузка конфигурации...</Text>}
+      {!isOverallLoading && hasOverallError && (<Alert title="Ошибка загрузки данных" color="red" icon={<IconAlertCircle size={16} />} radius="sm" mb="xl">{overallErrorString}</Alert>)}
+      {!isOverallLoading && !hasOverallError && (<ScreenTypeSelector data={screenTypeSegments} value={selectedScreenTypeCode} onChange={handleScreenTypeChange} disabled={isUIBlocked}/>)}
+      <Grid>
+        <DimensionInputs width={width} height={height} onWidthChange={setWidth} onHeightChange={setHeight} disabled={isOverallLoading} />
+        <DependencySelectors
+          selectedScreenTypeCode={selectedScreenTypeCode} selectedLocationCode={selectedLocationCode} selectedMaterialCode={selectedMaterialCode} selectedProtectionCode={selectedProtectionCode} hasValidDimensions={hasValidDimensions}
+          locationOptions={locationOptions} materialOptions={materialOptions} protectionOptions={protectionOptions}
+          loadingLocations={false} loadingMaterials={false}
+          loadingBaseData={isLoadingIpProtections}
+          locationError={null} materialError={null} // Убрали передачу ошибок фильтрации
+          isLocationSelectDisabled={isLocationSelectDisabled} isMaterialSelectDisabled={isMaterialSelectDisabled} isProtectionSelectDisabled={isProtectionSelectDisabled}
+          onLocationChange={handleLocationChange} onMaterialChange={handleMaterialChange} onProtectionChange={handleProtectionChange}
+        />
+        <PitchControl
+          isProPitchType={isProPitchType} selectedPitchCode={selectedPitchCode} selectedRefreshRate={selectedRefreshRate} selectedBrightness={selectedBrightness}
+          pitchOptions={filteredPitchOptions} loadingBaseData={isOverallLoading}
+          isControlDisabled={isPitchControlDisabled} isSelectDisabled={isPitchSelectDisabled}
+          onPitchTypeChange={handlePitchTypeSwitchChange} onPitchChange={handlePitchChange}
+        />
+        <CabinetSelector
+           options={cabinetOptions} value={selectedCabinetSku} onChange={handleCabinetChange} disabled={isCabinetSelectDisabledFinal}
+           filterError={null} // Убрали передачу ошибки
+           isFiltering={false}
+           placeholderProps={{ isPreviousStepIncomplete: isPitchControlDisabled || !selectedPitchCode, isLoadingBaseData: isOverallLoading,
+           isFiltering: false, filterError: null, // Убрали передачу ошибки
+           baseDataError: overallErrorString, optionsCount: availableCabinets.length }}
+        />
+      </Grid>
     </Stack>
   );
 };
 
-export default CalculatorForm;
+// Обертка с ErrorBoundary (ИСПРАВЛЕНА!)
+const CalculatorFormWrapper = () => (
+  <QueryErrorResetBoundary>
+    {( { reset } ) => ( // Правильный синтаксис render prop
+      <ErrorBoundary
+        onReset={reset}
+        fallbackRender={({ error, resetErrorBoundary }: FallbackProps) => (
+          <Alert title="Критическая ошибка формы" color="red" radius="sm" withCloseButton onClose={resetErrorBoundary}>
+            Произошла ошибка: {error.message}
+            <Button onClick={resetErrorBoundary} variant="outline" color="red" size="xs" mt="sm">
+                Попробовать снова
+            </Button>
+          </Alert>
+        )}
+      >
+        <CalculatorForm />
+      </ErrorBoundary>
+    )}
+  </QueryErrorResetBoundary>
+);
+
+export default CalculatorFormWrapper;

@@ -17,9 +17,11 @@
     "@mantine/form": "^7.17.0",
     "@mantine/hooks": "^7.17.0",
     "@tabler/icons-react": "^3.31.0",
+    "@tanstack/react-query": "^5.72.1",
     "@types/xlsx": "^0.0.36",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-error-boundary": "^5.0.0",
     "react-router-dom": "^7.2.0",
     "sass": "^1.85.0",
     "xlsx": "^0.18.5"
