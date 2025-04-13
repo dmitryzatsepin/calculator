@@ -15,7 +15,9 @@
   },
   "pnpm": {
     "overrides": {
-      "@prisma/client": "*"
+      "@prisma/client": "*",
+      "@types/express": "5.0.1",
+      "@types/express-serve-static-core": "5.0.6"
     },
     "ignoredBuiltDependencies": [
       "esbuild",
@@ -27,7 +29,7 @@
       "@prisma/engines"
     ]
   },
-  "packageManager": "pnpm@10.5.2",
+  "packageManager": "pnpm@10.8.0",
   "dependencies": {
     "psql": "^0.0.1"
   }

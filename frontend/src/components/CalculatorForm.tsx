@@ -34,42 +34,11 @@ const fetchLcRelations = async (): Promise<LocationCabinetRelation[]> => { const
 const fetchMcRelations = async (): Promise<MaterialCabinetRelation[]> => { const data = await apiClient.get<MaterialCabinetRelation[]>("/material-cabinets"); if (!Array.isArray(data)) throw new Error("Inv F: MCR"); return data; };
 
 // --- ЧИСТЫЕ ФУНКЦИИ ФИЛЬТРАЦИИ ---
-const filterLocations = (screenTypeCode: string | null, relations: ScreenTypeLocationRelation[]): Location[] => {
-    if (!screenTypeCode) return [];
-    try {
-        const screenTypeCodeLower = screenTypeCode.toLowerCase();
-        const relatedLocations = relations.filter(rel => rel.screenType?.code?.toLowerCase() === screenTypeCodeLower && rel.location).map(rel => rel.location!);
-        return Array.from(new Map(relatedLocations.map(loc => [loc.id, loc])).values());
-    } catch (error) { console.error("Error filtering locations:", error); return []; }
-};
-const filterMaterials = (locationCode: string | null, relations: LocationMaterialRelation[]): Material[] => {
-    if (!locationCode) return [];
-    try {
-        const locationCodeLower = locationCode.toLowerCase();
-        const relatedMaterials = relations.filter(rel => rel.location?.code?.toLowerCase() === locationCodeLower && rel.material).map(rel => rel.material!);
-        return Array.from(new Map(relatedMaterials.map(mat => [mat.id, mat])).values());
-    } catch (error) { console.error("Error filtering materials:", error); return []; }
-};
-const filterPitches = (screenTypeCode: string | null, locationCode: string | null, isPro: boolean, allPitches: Pitch[], ptpRelations: PitchTypePitchRelation[], stpRelations: ScreenTypePitchRelation[], lpRelations: LocationPitchRelation[]): Pitch[] => {
-    if (!screenTypeCode || !locationCode || !allPitches || !ptpRelations || !stpRelations || !lpRelations) { return []; }
-    try {
-        const targetPitchTypeName = (isPro ? "pro" : "eco").toLowerCase(); const selScreenTypeLower = screenTypeCode.toLowerCase(); const selLocationLower = locationCode.toLowerCase();
-        const allowedByScreenType = new Set(stpRelations.filter(rel => rel.screenType?.code?.toLowerCase() === selScreenTypeLower && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByScreenType.size === 0) return [];
-        const allowedByLocation = new Set(lpRelations.filter(rel => rel.location?.code?.toLowerCase() === selLocationLower && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByLocation.size === 0) return [];
-        const allowedByPitchType = new Set(ptpRelations.filter(rel => rel.pitchTypeName?.toLowerCase() === targetPitchTypeName && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByPitchType.size === 0) return [];
-        return allPitches.filter((pitch) => { const pitchCodeLower = pitch.code?.toLowerCase(); if (!pitchCodeLower) return false; return (allowedByScreenType.has(pitchCodeLower) && allowedByLocation.has(pitchCodeLower) && allowedByPitchType.has(pitchCodeLower)); });
-    } catch (error) { console.error("Error filtering pitches:", error); return []; }
-};
-const filterCabinets = (locationCode: string | null, materialCode: string | null, allCabinets: Cabinet[], lcRelations: LocationCabinetRelation[], mcRelations: MaterialCabinetRelation[]): Cabinet[] => {
-    if (!locationCode || !materialCode || !allCabinets || !lcRelations || !mcRelations) { return []; }
-    try {
-        const locationLower = locationCode.toLowerCase(); const materialLower = materialCode.toLowerCase();
-        const cabinetsByLocation = new Set<string>(); lcRelations.forEach(rel => { if (rel.location?.code?.toLowerCase() === locationLower && rel.cabinet?.sku) cabinetsByLocation.add(rel.cabinet.sku.toLowerCase()); }); if (cabinetsByLocation.size === 0) { return []; }
-        const cabinetsByMaterial = new Set<string>(); mcRelations.forEach(rel => { if (rel.material?.code?.toLowerCase() === materialLower && rel.cabinet?.sku) cabinetsByMaterial.add(rel.cabinet.sku.toLowerCase()); }); if (cabinetsByMaterial.size === 0) { return []; }
-        const finalCabinetSkus = new Set<string>(); cabinetsByLocation.forEach(cabinetSku => { if (cabinetsByMaterial.has(cabinetSku)) finalCabinetSkus.add(cabinetSku); });
-        return allCabinets.filter(cabinet => cabinet.sku && finalCabinetSkus.has(cabinet.sku.toLowerCase()));
-    } catch (error) { console.error("Error filtering cabinets:", error); return []; }
-};
+const filterLocations = (screenTypeCode: string | null, relations: ScreenTypeLocationRelation[]): Location[] => { if (!screenTypeCode) return []; try { const screenTypeCodeLower = screenTypeCode.toLowerCase(); const relatedLocations = relations.filter(rel => rel.screenType?.code?.toLowerCase() === screenTypeCodeLower && rel.location).map(rel => rel.location!); return Array.from(new Map(relatedLocations.map(loc => [loc.id, loc])).values()); } catch (error) { console.error("Error filtering locations:", error); return []; } };
+const filterMaterials = (locationCode: string | null, relations: LocationMaterialRelation[]): Material[] => { if (!locationCode) return []; try { const locationCodeLower = locationCode.toLowerCase(); const relatedMaterials = relations.filter(rel => rel.location?.code?.toLowerCase() === locationCodeLower && rel.material).map(rel => rel.material!); return Array.from(new Map(relatedMaterials.map(mat => [mat.id, mat])).values()); } catch (error) { console.error("Error filtering materials:", error); return []; } };
+const filterPitches = (screenTypeCode: string | null, locationCode: string | null, isPro: boolean, allPitches: Pitch[], ptpRelations: PitchTypePitchRelation[], stpRelations: ScreenTypePitchRelation[], lpRelations: LocationPitchRelation[]): Pitch[] => { if (!screenTypeCode || !locationCode || !allPitches || !ptpRelations || !stpRelations || !lpRelations) { return []; } try { const targetPitchTypeName = (isPro ? "pro" : "eco").toLowerCase(); const selScreenTypeLower = screenTypeCode.toLowerCase(); const selLocationLower = locationCode.toLowerCase(); const allowedByScreenType = new Set(stpRelations.filter(rel => rel.screenType?.code?.toLowerCase() === selScreenTypeLower && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByScreenType.size === 0) return []; const allowedByLocation = new Set(lpRelations.filter(rel => rel.location?.code?.toLowerCase() === selLocationLower && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByLocation.size === 0) return []; const allowedByPitchType = new Set(ptpRelations.filter(rel => rel.pitchTypeName?.toLowerCase() === targetPitchTypeName && rel.pitch?.code).map(rel => rel.pitch!.code!.toLowerCase())); if (allowedByPitchType.size === 0) return []; return allPitches.filter((pitch) => { const pitchCodeLower = pitch.code?.toLowerCase(); if (!pitchCodeLower) return false; return (allowedByScreenType.has(pitchCodeLower) && allowedByLocation.has(pitchCodeLower) && allowedByPitchType.has(pitchCodeLower)); }); } catch (error) { console.error("Error filtering pitches:", error); return []; } };
+const filterCabinets = (locationCode: string | null, materialCode: string | null, allCabinets: Cabinet[], lcRelations: LocationCabinetRelation[], mcRelations: MaterialCabinetRelation[]): Cabinet[] => { if (!locationCode || !materialCode || !allCabinets || !lcRelations || !mcRelations) { return []; } try { const locationLower = locationCode.toLowerCase(); const materialLower = materialCode.toLowerCase(); const cabinetsByLocation = new Set<string>(); lcRelations.forEach(rel => { if (rel.location?.code?.toLowerCase() === locationLower && rel.cabinet?.sku) cabinetsByLocation.add(rel.cabinet.sku.toLowerCase()); }); if (cabinetsByLocation.size === 0) { return []; } const cabinetsByMaterial = new Set<string>(); mcRelations.forEach(rel => { if (rel.material?.code?.toLowerCase() === materialLower && rel.cabinet?.sku) cabinetsByMaterial.add(rel.cabinet.sku.toLowerCase()); }); if (cabinetsByMaterial.size === 0) { return []; } const finalCabinetSkus = new Set<string>(); cabinetsByLocation.forEach(cabinetSku => { if (cabinetsByMaterial.has(cabinetSku)) finalCabinetSkus.add(cabinetSku); }); return allCabinets.filter(cabinet => cabinet.sku && finalCabinetSkus.has(cabinet.sku.toLowerCase())); } catch (error) { console.error("Error filtering cabinets:", error); return []; } };
+
 
 // --- КОМПОНЕНТ ---
 const CalculatorForm = () => {
@@ -106,7 +75,7 @@ const CalculatorForm = () => {
   // --- Удаляем состояния ошибок фильтрации ---
   // const [locationError, setLocationError] = useState<string | null>(null);
   // const [materialError, setMaterialError] = useState<string | null>(null);
-  // const [cabinetsFilterError, setCabinetsFilterError] = useState<string | null>(null);
+  // const [cabinetsFilterError, setCabinetsFilterError] = useState<string | null>(null); // <-- УДАЛЕНО
 
   // --- Вспомогательные рефы ---
   const prevIsPitchControlDisabledRef = useRef<boolean | undefined>(undefined);
@@ -145,25 +114,24 @@ const CalculatorForm = () => {
         const defaultScreenType = screenTypes.find(st => st.code?.toLowerCase() === defaultScreenTypeCode.toLowerCase());
         if (defaultScreenType) { initialScreenType = defaultScreenType.code; }
         else { console.warn(`Default ST code '${defaultScreenTypeCode}' not found.`); }
-        setSelectedScreenTypeCode(initialScreenType); // Устанавливаем СРАЗУ
+        setSelectedScreenTypeCode(initialScreenType);
       }
 
-      // 2. Вычислить availableLocations (используя initialScreenType) и определить Location
-      // Используем функцию фильтрации напрямую
+      // 2. Вычислить availableLocations и определить Location
       const initialAvailableLocations = filterLocations(initialScreenType, stlRelations);
       if (initialAvailableLocations.length === 1) {
           initialLocation = initialAvailableLocations[0].code;
-          setSelectedLocationCode(initialLocation); // Устанавливаем СРАЗУ
+          setSelectedLocationCode(initialLocation);
       }
 
-      // 3. Вычислить availableMaterials (используя initialLocation) и определить Material
+      // 3. Вычислить availableMaterials и определить Material
       const initialAvailableMaterials = filterMaterials(initialLocation, lmRelations);
       if (initialAvailableMaterials.length === 1) {
           initialMaterial = initialAvailableMaterials[0].code;
-          setSelectedMaterialCode(initialMaterial); // Устанавливаем СРАЗУ
+          setSelectedMaterialCode(initialMaterial);
       }
 
-      // 4. Определить и установить Protection (используя initialLocation)
+      // 4. Определить и установить Protection
       if (initialLocation) {
         const locationCodeLower = initialLocation.toLowerCase();
         if (locationCodeLower === "indoor") initialProtection = "IP30";
@@ -173,42 +141,33 @@ const CalculatorForm = () => {
         setSelectedProtectionCode(initialProtection);
       }
     }
-  // Зависит ТОЛЬКО от статуса загрузки и всех данных API
   }, [isOverallLoading, screenTypes, stlRelations, lmRelations, ipProtections]);
 
 
   // --- Установка Protection (при РУЧНОМ изменении Location) ---
-  // (Нужно, если Location не был выбран автоматически при инициализации)
   useEffect(() => {
-    // Не запускаем во время загрузки или инициализации
-    // Запускаем, если изменилась локация ПОСЛЕ инициализации
     if (isOverallLoading || didInitialize.current === false || isLoadingIpProtections || !selectedLocationCode) {
-        if (!selectedLocationCode && selectedProtectionCode !== null && !isOverallLoading && didInitialize.current) {
-             setSelectedProtectionCode(null); // Сброс, если локация сброшена вручную
+        if (!selectedLocationCode && selectedProtectionCode !== null && !isOverallLoading && didInitialize.current === true) {
+             setSelectedProtectionCode(null);
         }
         return;
     }
-
     let newProtectionCode: string | null = null;
     const locationCodeLower = selectedLocationCode.toLowerCase();
     if (locationCodeLower === "indoor") newProtectionCode = "IP30"; else if (locationCodeLower === "outdoor") newProtectionCode = "IP65";
     const protectionExists = ipProtections.some(p => p.code === newProtectionCode);
     if (!protectionExists) newProtectionCode = null;
-
-    if (selectedProtectionCode !== newProtectionCode) {
-      setSelectedProtectionCode(newProtectionCode);
-    }
-  // Не зависит от selectedProtectionCode
-  }, [selectedLocationCode, ipProtections, isLoadingIpProtections, isOverallLoading]);
+    if (selectedProtectionCode !== newProtectionCode) { setSelectedProtectionCode(newProtectionCode); }
+  }, [selectedLocationCode, ipProtections, isLoadingIpProtections, isOverallLoading, selectedProtectionCode]);
 
 
   // --- Вычисление disabled статусов ---
   const hasValidDimensions = width.trim() !== "" && parseFloat(width) > 0 && height.trim() !== "" && parseFloat(height) > 0;
-  // Убрали ошибки фильтрации из disabled
-  const isLocationSelectDisabled = isUIBlocked || !selectedScreenTypeCode || /*!!locationError ||*/ !hasValidDimensions;
-  const isMaterialSelectDisabled = isLocationSelectDisabled || !selectedLocationCode /*|| !!materialError*/;
-  const isProtectionSelectDisabled = isLocationSelectDisabled || isLoadingIpProtections || isErrorIpProtections;
-  const isPitchControlDisabled = isMaterialSelectDisabled || isProtectionSelectDisabled || !selectedMaterialCode || !selectedProtectionCode;
+  const isLocationSelectDisabled = isUIBlocked || !selectedScreenTypeCode || !hasValidDimensions;
+  const isMaterialSelectDisabled = isLocationSelectDisabled || !selectedLocationCode;
+  const isProtectionSelectDisabled = isLocationSelectDisabled || !selectedLocationCode || isLoadingIpProtections || isErrorIpProtections;
+  const isPitchControlDisabled = isMaterialSelectDisabled || !selectedMaterialCode || isProtectionSelectDisabled || !selectedProtectionCode;
+
 
   // --- МЕМОИЗИРОВАННЫЙ ФИЛЬТР ПИТЧЕЙ ---
   const filteredPitches = useMemo(() => {
@@ -216,21 +175,24 @@ const CalculatorForm = () => {
   }, [selectedScreenTypeCode, selectedLocationCode, isProPitchType, allPitches, ptpRelations, stpRelations, lpRelations]);
 
   const filteredPitchOptions = useMemo(() => {
-      if (isPitchControlDisabled || isUIBlocked) return [];
+      const controlDisabled = isMaterialSelectDisabled || !selectedMaterialCode || isProtectionSelectDisabled || !selectedProtectionCode;
+      if (controlDisabled || isUIBlocked) return [];
       return filteredPitches.map((p) => ({ value: p.code, label: p.code }));
-  }, [filteredPitches, isPitchControlDisabled, isUIBlocked]);
+  }, [filteredPitches, isMaterialSelectDisabled, selectedMaterialCode, isProtectionSelectDisabled, selectedProtectionCode, isUIBlocked]);
 
-  const isPitchSelectDisabled = isPitchControlDisabled || isUIBlocked || filteredPitchOptions.length === 0;
+  // Удаляем isPitchSelectDisabled
+  // const isPitchSelectDisabled = isPitchControlDisabled || isUIBlocked || filteredPitchOptions.length === 0;
+
 
   // --- МЕМОИЗАЦИЯ: ФИЛЬТРАЦИЯ ДОСТУПНЫХ КАБИНЕТОВ ---
   const availableCabinets = useMemo((): Cabinet[] => {
-      // Ошибки обрабатываются внутри filterCabinets
       return filterCabinets(selectedLocationCode, selectedMaterialCode, allCabinets, lcRelations, mcRelations);
   }, [selectedLocationCode, selectedMaterialCode, allCabinets, lcRelations, mcRelations]);
 
   const cabinetOptions = useMemo(() => availableCabinets.map(cab => ({ value: cab.sku, label: (cab.name && cab.name.trim() !== '') ? cab.name : cab.sku })), [availableCabinets]);
-  // Убрали cabinetsFilterError
-  const isCabinetSelectDisabledFinal = isPitchControlDisabled || !selectedPitchCode || isUIBlocked || /* !!cabinetsFilterError || */ (!isOverallLoading && availableCabinets.length === 0);
+  // Удаляем isCabinetSelectDisabledFinal
+  // const isCabinetSelectDisabledFinal = isPitchControlDisabled || !selectedPitchCode || isUIBlocked || /* !!cabinetsFilterError || */ (!isOverallLoading && availableCabinets.length === 0);
+
 
   // --- Установка/Сброс Rate/Brightness --- (без изменений)
   useEffect(() => {
@@ -244,52 +206,46 @@ const CalculatorForm = () => {
     if (!isPitchControlDisabled && !isOverallLoading) { const rate = isProPitchType ? 3840 : 1920; const bright = isProPitchType ? 6000 : 800; if (selectedRefreshRate !== rate) setSelectedRefreshRate(rate); if (selectedBrightness !== bright) setSelectedBrightness(bright); }
   }, [isProPitchType, isPitchControlDisabled, isOverallLoading, selectedRefreshRate, selectedBrightness]);
 
+
   // --- Обработчики (useCallback) ---
-  // Сбрасывают ВСЕ зависимые состояния
+  // Убираем вызовы set...Error
   const handleScreenTypeChange = useCallback((value: string | null) => {
       setSelectedScreenTypeCode(value);
       setSelectedLocationCode(null); setSelectedMaterialCode(null); setSelectedProtectionCode(null);
       setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
       setSelectedRefreshRate(null); setSelectedBrightness(null);
-      // Сбрасываем ошибки (если они еще используются)
-      // setLocationError(null); setMaterialError(null); setCabinetsFilterError(null);
   }, []);
 
   const handleLocationChange = useCallback((value: string | null) => {
       setSelectedLocationCode(value);
       setSelectedMaterialCode(null); setSelectedProtectionCode(null);
       setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
-      // setMaterialError(null); setCabinetsFilterError(null);
   }, []);
 
   const handleMaterialChange = useCallback((value: string | null) => {
       setSelectedMaterialCode(value);
       setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
-      // setCabinetsFilterError(null);
    }, []);
 
    const handleProtectionChange = useCallback((value: string | null) => {
       setSelectedProtectionCode(value);
       setIsProPitchType(false); setSelectedPitchCode(null); setSelectedCabinetSku(null);
-      // setCabinetsFilterError(null);
    }, []);
 
    const handlePitchTypeSwitchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
        setIsProPitchType(event.currentTarget.checked);
        setSelectedPitchCode(null); setSelectedCabinetSku(null);
-       // setCabinetsFilterError(null);
    }, []);
 
    const handlePitchChange = useCallback((value: string | null) => {
        setSelectedPitchCode(value);
        setSelectedCabinetSku(null);
-       // setCabinetsFilterError(null);
    }, []);
 
    const handleCabinetChange = useCallback((value: string | null) => { setSelectedCabinetSku(value); }, []);
 
 
-  // --- Подготовка данных для Select ---
+  // --- Подготовка данных для Select --- (без изменений)
   const screenTypeSegments = useMemo(() => screenTypes.map((st) => ({ value: st.code, label: st.name })), [screenTypes]);
   const locationOptions = useMemo(() => availableLocations.map((loc) => ({ value: loc.code, label: loc.name })), [availableLocations]);
   const materialOptions = useMemo(() => availableMaterials.map((mat) => ({ value: mat.code, label: mat.name })), [availableMaterials]);
@@ -304,38 +260,58 @@ const CalculatorForm = () => {
       {!isOverallLoading && !hasOverallError && (<ScreenTypeSelector data={screenTypeSegments} value={selectedScreenTypeCode} onChange={handleScreenTypeChange} disabled={isUIBlocked}/>)}
       <Grid>
         <DimensionInputs width={width} height={height} onWidthChange={setWidth} onHeightChange={setHeight} disabled={isOverallLoading} />
+        {/* Передаем DependencySelectors без locationError, materialError */}
         <DependencySelectors
-          selectedScreenTypeCode={selectedScreenTypeCode} selectedLocationCode={selectedLocationCode} selectedMaterialCode={selectedMaterialCode} selectedProtectionCode={selectedProtectionCode} hasValidDimensions={hasValidDimensions}
-          locationOptions={locationOptions} materialOptions={materialOptions} protectionOptions={protectionOptions}
-          loadingLocations={false} loadingMaterials={false}
-          loadingBaseData={isLoadingIpProtections}
-          locationError={null} materialError={null} // Убрали передачу ошибок фильтрации
-          isLocationSelectDisabled={isLocationSelectDisabled} isMaterialSelectDisabled={isMaterialSelectDisabled} isProtectionSelectDisabled={isProtectionSelectDisabled}
-          onLocationChange={handleLocationChange} onMaterialChange={handleMaterialChange} onProtectionChange={handleProtectionChange}
+          isUIBlocked={isUIBlocked}
+          isLoadingIpProtections={isLoadingIpProtections}
+          isErrorIpProtections={isErrorIpProtections}
+          hasValidDimensions={hasValidDimensions}
+          selectedScreenTypeCode={selectedScreenTypeCode}
+          // selectedLocationCode НЕ ПЕРЕДАЕМ
+          currentLocationCode={selectedLocationCode}
+          currentMaterialCode={selectedMaterialCode}
+          currentProtectionCode={selectedProtectionCode}
+          locationOptions={locationOptions}
+          materialOptions={materialOptions}
+          protectionOptions={protectionOptions}
+          locationError={null} materialError={null} // Убрали
+          onLocationChange={handleLocationChange}
+          onMaterialChange={handleMaterialChange}
+          onProtectionChange={handleProtectionChange}
         />
+         {/* Передаем PitchControl без isPitchSelectDisabled */}
         <PitchControl
-          isProPitchType={isProPitchType} selectedPitchCode={selectedPitchCode} selectedRefreshRate={selectedRefreshRate} selectedBrightness={selectedBrightness}
-          pitchOptions={filteredPitchOptions} loadingBaseData={isOverallLoading}
-          isControlDisabled={isPitchControlDisabled} isSelectDisabled={isPitchSelectDisabled}
-          onPitchTypeChange={handlePitchTypeSwitchChange} onPitchChange={handlePitchChange}
+          isUIBlocked={isUIBlocked}
+          selectedMaterialCode={selectedMaterialCode}
+          selectedProtectionCode={selectedProtectionCode}
+          isProPitchType={isProPitchType}
+          selectedPitchCode={selectedPitchCode}
+          selectedRefreshRate={selectedRefreshRate}
+          selectedBrightness={selectedBrightness}
+          pitchOptions={filteredPitchOptions}
+          onPitchTypeChange={handlePitchTypeSwitchChange}
+          onPitchChange={handlePitchChange}
         />
+        {/* Передаем CabinetSelector без disabled и filterError */}
         <CabinetSelector
-           options={cabinetOptions} value={selectedCabinetSku} onChange={handleCabinetChange} disabled={isCabinetSelectDisabledFinal}
-           filterError={null} // Убрали передачу ошибки
-           isFiltering={false}
-           placeholderProps={{ isPreviousStepIncomplete: isPitchControlDisabled || !selectedPitchCode, isLoadingBaseData: isOverallLoading,
-           isFiltering: false, filterError: null, // Убрали передачу ошибки
-           baseDataError: overallErrorString, optionsCount: availableCabinets.length }}
+           isUIBlocked={isUIBlocked}
+           overallErrorString={overallErrorString}
+           selectedPitchCode={selectedPitchCode}
+           selectedMaterialCode={selectedMaterialCode}
+           value={selectedCabinetSku}
+           options={cabinetOptions}
+           filterError={null} // Убрали
+           onChange={handleCabinetChange}
         />
       </Grid>
     </Stack>
   );
 };
 
-// Обертка с ErrorBoundary (ИСПРАВЛЕНА!)
+// Обертка с ErrorBoundary (ТОЧНО ИСПРАВЛЕНА!)
 const CalculatorFormWrapper = () => (
   <QueryErrorResetBoundary>
-    {( { reset } ) => ( // Правильный синтаксис render prop
+    {( { reset } ) => ( // ПРАВИЛЬНЫЙ СИНТАКСИС RENDER PROP
       <ErrorBoundary
         onReset={reset}
         fallbackRender={({ error, resetErrorBoundary }: FallbackProps) => (

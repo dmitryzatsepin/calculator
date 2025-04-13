@@ -1,3 +1,4 @@
+//backend/src/config/passport.ts
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import { PrismaClient } from "@prisma/client";
 import passport, { PassportStatic } from "passport";

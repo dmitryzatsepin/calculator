@@ -1,248 +1,254 @@
 // src/server.ts
-import express, { Request, Response, NextFunction, Application } from "express"; 
-import http from 'http';
+import express, { Request, Response, NextFunction, Application } from "express";
+import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import passport from "passport";
+import bodyParser from "body-parser";
+import expressPlayground from "graphql-playground-middleware-express";
 
-// --- Конфигурация и Библиотеки ---
-import { prisma } from './lib/prisma';
-import { configurePassport } from "./config/passport"; // Убедись, что путь верный
+// --- GraphQL, Prisma и Зависимости для Контекста ---
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@apollo/server/express4";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import { schema } from "./graphql/schema";
+import { prisma } from "./lib/prisma";
+import { GraphQLContext } from "./graphql/builder";
+import { validateSchema } from "graphql";
+import jwt from 'jsonwebtoken';
+import { User as PrismaUser } from '@prisma/client';
 
-// --- Маршруты ---
-import healthcheckRoute from "./routes/healthcheck";
-import authRoutes from "./routes/authRoutes";
-import userRoutes from "./routes/userRoutes"; 
-import cabinetRoutes from "./routes/cabinetRoutes";
-import cabinetComponentRoutes from "./routes/cabinetComponentRoutes"; 
-import componentServiceRoutes from "./routes/componentServiceRoutes";
-import ipProtectionRoutes from "./routes/ipProtectionRoutes";
-import manufacturerRoutes from "./routes/manufacturerRoutes";
-import materialRoutes from "./routes/materialRoutes";
-import moduleRoutes from "./routes/moduleRoutes";
-import screenTypeRoutes from "./routes/screenTypeRoutes";
-import locationRoutes from "./routes/locationRoutes"; 
-import cabinetPlacementRoutes from "./routes/cabinetPlacementRoutes"; 
-import pitchRoutes from "./routes/pitchRoutes"; 
-import pitchTypeRoutes from "./routes/pitchTypeRoutes"; 
-import refreshRateRoutes from "./routes/refreshRateRoutes"; 
-import brightnessRoutes from "./routes/brightnessRoutes"; 
-import screenTypeLocationRoutes from "./routes/screenTypeLocationRoutes"; 
-import screenTypePitchRoutes from "./routes/screenTypePitchRoutes"; 
-import locationMaterialRoutes from "./routes/locationMaterialRoutes"; 
-import locationPitchRoutes from "./routes/locationPitchRoutes"; 
-import locationCabinetRoutes from "./routes/locationCabinetRoutes"; 
-import materialCabinetRoutes from "./routes/materialCabinetRoutes"; 
-import cabinetPlacementCabinetRoutes from "./routes/cabinetPlacementCabinetRoutes"; 
-import pitchTypePitchRoutes from "./routes/pitchTypePitchRoutes"; 
-//import currencyRoutes from './routes/currencyRoutes';
 
 // --- Инициализация ---
-dotenv.config(); 
-const app: Application = express(); 
-const API_PREFIX = process.env.API_PREFIX || '/api/v1'; 
-//console.log('[DEBUG] App created.'); // Лог 1
+dotenv.config();
+const app: Application = express();
+let httpServer: http.Server;
 
-// --- Основные Middleware ---
-try {
-    app.use(cors()); 
-    app.use(helmet()); 
-    app.use(express.json()); 
-    app.use(morgan("dev")); 
-    //console.log('[DEBUG] Basic middleware applied.'); // Лог 2
-    app.use(passport.initialize()); 
-    //console.log('[DEBUG] Passport initialized.'); // Лог 3
-    configurePassport(passport); // Конфигурируем стратегии Passport
-    //console.log('[DEBUG] Passport configured.'); // Лог 4
-} catch (middlewareError: any) {
-    console.error('[DEBUG] ОШИБКА ПРИ НАСТРОЙКЕ БАЗОВЫХ MIDDLEWARE ИЛИ PASSPORT:', middlewareError);
-    process.exit(1); // Выходим, если основная настройка не удалась
-}
+const GRAPHQL_PATH = '/api/v1';
+const PLAYGROUND_PATH = '/playground';
+const HEALTHCHECK_PATH = '/health';
 
-// --- Регистрация Маршрутов API ---
-//console.log(`[DEBUG] Registering routes with prefix: ${API_PREFIX}`);
-try {
-    app.get(API_PREFIX, (req: Request, res: Response) => {
-        res.status(200).json({ message: 'Calculator API is running!' });
-    });
 
-    // --- Подключение всех роутов ---
-    // Добавим console.log перед каждым app.use для роута
-    //console.log('[DEBUG] Registering: /healthcheck');
-    app.use(`${API_PREFIX}/healthcheck`, healthcheckRoute);
-    //console.log('[DEBUG] Registering: /auth');
-    app.use(`${API_PREFIX}/auth`, authRoutes);
-    //console.log('[DEBUG] Registering: /users');
-    app.use(`${API_PREFIX}/users`, userRoutes); 
-    //console.log('[DEBUG] Registering: /cabinets');
-    app.use(`${API_PREFIX}/cabinets`, cabinetRoutes);
-    //console.log('[DEBUG] Registering: /cabinet-components');
-    app.use(`${API_PREFIX}/cabinet-components`, cabinetComponentRoutes);
-    //console.log('[DEBUG] Registering: /component-services');
-    app.use(`${API_PREFIX}/component-services`, componentServiceRoutes);
-    //console.log('[DEBUG] Registering: /ip-protection');
-    app.use(`${API_PREFIX}/ip-protection`, ipProtectionRoutes); 
-    //console.log('[DEBUG] Registering: /manufacturers');
-    app.use(`${API_PREFIX}/manufacturers`, manufacturerRoutes);
-    //console.log('[DEBUG] Registering: /materials');
-    app.use(`${API_PREFIX}/materials`, materialRoutes);
-    //console.log('[DEBUG] Registering: /modules');
-    app.use(`${API_PREFIX}/modules`, moduleRoutes);
-    //console.log('[DEBUG] Registering: /screen-types');
-    app.use(`${API_PREFIX}/screen-types`, screenTypeRoutes); 
-    //console.log('[DEBUG] Registering: /locations');
-    app.use(`${API_PREFIX}/locations`, locationRoutes); 
-    //console.log('[DEBUG] Registering: /cabinet-placements');
-    app.use(`${API_PREFIX}/cabinet-placements`, cabinetPlacementRoutes); 
-    //console.log('[DEBUG] Registering: /pitches');
-    app.use(`${API_PREFIX}/pitches`, pitchRoutes); 
-    //console.log('[DEBUG] Registering: /pitch-types');
-    app.use(`${API_PREFIX}/pitch-types`, pitchTypeRoutes); 
-    //console.log('[DEBUG] Registering: /refresh-rates');
-    app.use(`${API_PREFIX}/refresh-rates`, refreshRateRoutes); 
-    //console.log('[DEBUG] Registering: /brightness-values');
-    app.use(`${API_PREFIX}/brightness-values`, brightnessRoutes); 
-    //console.log('[DEBUG] Registering: /screen-type-locations');
-    app.use(`${API_PREFIX}/screen-type-locations`, screenTypeLocationRoutes); 
-    //console.log('[DEBUG] Registering: /screen-type-pitches');
-    app.use(`${API_PREFIX}/screen-type-pitches`, screenTypePitchRoutes); 
-    //console.log('[DEBUG] Registering: /location-materials');
-    app.use(`${API_PREFIX}/location-materials`, locationMaterialRoutes); 
-    //console.log('[DEBUG] Registering: /location-pitches');
-    app.use(`${API_PREFIX}/location-pitches`, locationPitchRoutes); 
-    //console.log('[DEBUG] Registering: /location-cabinets');
-    app.use(`${API_PREFIX}/location-cabinets`, locationCabinetRoutes); 
-    //console.log('[DEBUG] Registering: /material-cabinets');
-    app.use(`${API_PREFIX}/material-cabinets`, materialCabinetRoutes); 
-    //console.log('[DEBUG] Registering: /cabinet-placement-cabinets');
-    app.use(`${API_PREFIX}/cabinet-placement-cabinets`, cabinetPlacementCabinetRoutes); 
-    //console.log('[DEBUG] Registering: /pitch-type-pitches');
-    app.use(`${API_PREFIX}/pitch-type-pitches`, pitchTypePitchRoutes); 
-    // if (currencyRoutes) { app.use(`${API_PREFIX}/currencies', currencyRoutes); } 
-    //console.log('[DEBUG] Routes registered successfully.'); // Лог 5 (успешная регистрация)
-} catch (routeError: any) {
-    console.error('[DEBUG] ОШИБКА ПРИ РЕГИСТРАЦИИ РОУТОВ:', routeError); 
+async function startServer() {
+  console.log("🚀 Initializing server...");
+
+  // 1. Проверка подключения к Prisma
+  try {
+    await prisma.$connect();
+    console.log("✅ Prisma connected successfully");
+  } catch (prismaError) {
+    console.error("❌ Prisma connection error:", prismaError);
     process.exit(1);
-}
-
-// --- Обработка ошибок ---
-try {
-    // Middleware для обработки не найденных роутов (404) 
-    app.use((req: Request, res: Response, next: NextFunction) => {
-        const error = new Error(`Маршрут не найден - ${req.originalUrl}`);
-        res.status(404);
-        next(error); // Передаем ошибку дальше
-    });
-
-    // Основной обработчик ошибок 
-    app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-        console.error(`[ERROR HANDLER] ${err.message}\n${err.stack}`); // Изменим префикс лога
-        const statusCode = res.statusCode === 200 ? 500 : res.statusCode; // Если статус не был изменен ранее (например, в 404), ставим 500
-        res.status(statusCode);
-        res.json({
-            message: statusCode === 500 ? "Internal Server Error" : err.message, // Не показываем детали для 500
-            stack: process.env.NODE_ENV === 'production' ? '🥞' : err.stack,
-        });
-    });
-    //console.log('[DEBUG] Error handlers registered.'); // Лог 6
-} catch (errorHandlerError: any) {
-     console.error('[DEBUG] ОШИБКА ПРИ РЕГИСТРАЦИИ ОБРАБОТЧИКОВ ОШИБОК:', errorHandlerError);
-     process.exit(1);
-}
-
-
-// --- Запуск Сервера и Корректное Завершение ---
-const PORT = process.env.PORT || 5000;
-let server: http.Server; // Объявляем переменную server здесь
-try {
-    //console.log(`[DEBUG] Attempting to listen on port ${PORT}...`); // Лог 7
-    server = http.createServer(app).listen(PORT, () => {
-        //console.log('[DEBUG] Server.listen callback executed.'); // Лог 8
-        console.log(`🚀 Backend server started successfully.`);
-        console.log(`   Listening on: http://localhost:${PORT}`);
-        console.log(`   API Root: http://localhost:${PORT}${API_PREFIX}`);
-    });
-
-    // Обработчик ошибок самого http сервера (например, EADDRINUSE)
-    server.on('error', (error: NodeJS.ErrnoException) => { 
-       console.error('[DEBUG] HTTP Server Error:', error);
-       if (error.syscall !== 'listen') { throw error; } // Перебрасываем, если не ошибка listen
-       switch (error.code) {
-           case 'EACCES':
-               console.error(`[FATAL] Port ${PORT} requires elevated privileges`);
-               process.exit(1);
-               break;
-           case 'EADDRINUSE':
-               console.error(`[FATAL] Port ${PORT} is already in use`);
-               process.exit(1);
-               break;
-           default:
-               throw error;
-       }
-    });
-    //console.log('[DEBUG] Server.listen called, waiting for callback or error...'); // Лог 9
-
-} catch (listenError: any) {
-    console.error('[DEBUG] ОШИБКА ПРИ ВЫЗОВЕ server.listen:', listenError); 
-    process.exit(1);
-}
-
-// Функция корректного завершения
-const gracefulShutdown = async (signal: string) => {
-  console.log(`\n🔌 Received ${signal}. Starting graceful shutdown...`);
-  console.log("   Closing HTTP server...");
-  // Убедимся, что server был инициализирован перед вызовом close
-  if (server) { 
-      server.close(async (err) => {
-          if (err) {
-              console.error('   [Error] closing server:', err);
-              process.exit(1);
-          }
-          console.log('   ✅ HTTP server closed.');
-          try {
-              console.log('   Disconnecting Prisma...');
-              await prisma.$disconnect(); 
-              console.log('   ✅ Prisma connection closed.');
-              process.exit(0); 
-          } catch (dbErr) {
-              console.error('   [Error] disconnecting Prisma:', dbErr);
-              process.exit(1);
-          }
-      });
-  } else {
-      console.warn("   Server was not initialized, exiting directly.");
-      process.exit(0);
   }
 
-  setTimeout(() => {
-    console.error('   [Timeout] Could not close connections in time, forcing shutdown.');
-    process.exit(1);
-  }, 15000); 
-};
-
-// Обработчики сигналов завершения
-process.on('SIGINT', () => gracefulShutdown('SIGINT')); 
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM')); 
-
-// Обработка критических ошибок процесса
-process.on('uncaughtException', (error, origin) => {
-  console.error(`\n💥 UNCAUGHT EXCEPTION! Origin: ${origin}`);
-  console.error(error);
-  console.error('   Shutting down application...');
-  // Принудительно завершаем, так как состояние непредсказуемо
-  process.exit(1); 
-});
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('\n💥 UNHANDLED REJECTION!');
-  console.error('   Reason:', reason);
-  // console.error('   Promise:', promise); // Promise может быть большим, логируем по необходимости
-  console.error('   Shutting down application...');
-  if (server) {
-      server.close(() => { process.exit(1); });
-      setTimeout(() => process.exit(1), 2000); 
-  } else {
+  // 2. Валидация схемы GraphQL
+  try {
+    const schemaValidationErrors = validateSchema(schema);
+    if (schemaValidationErrors.length > 0) {
+      console.error(
+        "❌ GraphQL schema validation errors:",
+        schemaValidationErrors
+      );
       process.exit(1);
+    }
+    console.log("✅ GraphQL schema validated successfully");
+  } catch (schemaError) {
+    console.error("❌ GraphQL schema validation failed:", schemaError);
+    process.exit(1);
   }
+
+  // 3. Создание HTTP сервера
+  httpServer = http.createServer(app);
+
+  // 4. Настройка Apollo Server
+  console.log("🚀 Setting up Apollo Server...");
+  const apolloServer = new ApolloServer<GraphQLContext>({
+    schema,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    introspection: true,
+  });
+  await apolloServer.start();
+  console.log("✅ Apollo Server started successfully");
+
+  // 5. Middleware (Применяем ДО специфичных роутов GraphQL/Playground)
+  app.use(
+    cors({/* ... */})
+  );
+  app.use(morgan("dev")); 
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+  console.log('✅ Basic middleware applied');
+
+  // 6. GraphQL Endpoint (Применяем нужные middleware только для него)
+  app.use(
+    '/api/v1',
+    cors<cors.CorsRequest>(),
+    bodyParser.json({ limit: '10mb' }),
+    expressMiddleware(apolloServer, {
+        context: async ({ req }): Promise<GraphQLContext> => {
+            let currentUser: PrismaUser | null = null;
+            const authHeader = req.headers.authorization;
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                const token = authHeader.split(' ')[1];
+                try {
+                    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: number; [key: string]: any };
+                    if (decoded && typeof decoded.id === 'number') {
+                        // Ищем пользователя в базе данных по ID из токена
+                        currentUser = await prisma.user.findUnique({
+                            where: { id: decoded.id },
+                        });
+                        if (!currentUser) {
+                             console.warn(`[AUTH CONTEXT] User ID ${decoded.id} from token not found in DB.`);
+                        } else {
+                             console.log(`[AUTH CONTEXT] Authenticated user: ${currentUser.email}`);
+                        }
+                    }
+                } catch (err) {
+                    // Ошибки верификации (невалидный, истекший, неверная подпись)
+                    console.warn(`[AUTH CONTEXT] JWT verification error: ${(err as Error).message}`);
+                    currentUser = null;
+                }
+            } else {
+                //console.log('[AUTH CONTEXT] No Bearer token found in Authorization header.');
+            }
+
+            // Возвращаем объект контекста
+            return {
+                prisma, 
+                currentUser,
+                auth: authHeader || null
+            };
+        },
+    })
+);
+console.log(`✅ GraphQL endpoint configured at /api/v1`);
+
+  // 7. GraphQL Playground Endpoint
+  app.get(
+    "/playground",
+    expressPlayground({ endpoint: "/api/v1" })
+  );
+  console.log(`✅ GraphQL Playground available at /playground`);
+  app.use(helmet());
+  console.log("✅ Helmet applied globally (excluding /api/v1, /playground)");
+
+  // 8. Healthcheck и корневой роут
+  app.get("/", (req: Request, res: Response) => {
+    res
+      .status(200)
+      .json({
+        status: "OK",
+        message: "API is running",
+        endpoints: {
+          graphql: GRAPHQL_PATH,
+          playground: PLAYGROUND_PATH,
+          healthcheck: HEALTHCHECK_PATH,
+        },
+      });
+  });
+  app.get("/health", async (req: Request, res: Response) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      res
+        .status(200)
+        .json({
+          status: "healthy",
+          database: "connected",
+          uptime: process.uptime(),
+        });
+    } catch (error) {
+      res
+        .status(500)
+        .json({
+          status: "unhealthy",
+          database: "disconnected",
+          error: error instanceof Error ? error.message : "Unknown error",
+          uptime: process.uptime(),
+        });
+    }
+  });
+  console.log("✅ Other routes registered");
+
+  // 9. Обработка ошибок
+  console.log("🚀 Registering error handlers...");
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    console.warn(
+      `[404 HANDLER] Route not found: ${req.method} ${req.originalUrl}`
+    );
+    res.status(404).json({ error: "Not Found" });
+  });
+  // Обработчик 500 - Самый последний middleware
+  app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    if (res.headersSent) return next(err);
+    console.error(`[500 HANDLER] Error for ${req.method} ${req.path}`, err);
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: process.env.NODE_ENV !== "production" ? err.message : undefined,
+    });
+  });
+  console.log("✅ Error handlers registered.");
+
+  // 10. Запуск сервера
+  const PORT = process.env.PORT || 5000;
+  await new Promise<void>((resolve) =>
+    httpServer.listen({ port: PORT }, resolve)
+  );
+  console.log(`
+    🚀 Server ready at: http://localhost:${PORT}
+    🎯 GraphQL Playground: http://localhost:${PORT}/playground
+    ⚡ GraphQL endpoint: http://localhost:${PORT}/api/v1
+    ❤️  Healthcheck: http://localhost:${PORT}/health
+    `);
+}
+
+// --- Graceful shutdown (без изменений) ---
+async function gracefulShutdown(signal: string) {
+  console.log(`\n🔌 Received ${signal}. Shutting down gracefully...`);
+  try {
+    if (httpServer) {
+      await new Promise<void>((resolve, reject) => {
+        const t = setTimeout(
+          () => reject(new Error("HTTP close timeout")),
+          10000
+        );
+        httpServer.close((err) => {
+          clearTimeout(t);
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+      console.log("✅ HTTP server closed");
+    }
+    console.log("   Disconnecting Prisma...");
+    await prisma.$disconnect();
+    console.log("✅ Prisma disconnected");
+    process.exit(0);
+  } catch (error) {
+    console.error("❌ Shutdown failed:", error);
+    process.exit(1);
+  } finally {
+    setTimeout(() => process.exit(1), 15000).unref();
+  }
+}
+
+// --- Обработчики сигналов ---
+const signals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
+signals.forEach((signal) => {
+  process.on(signal, () => gracefulShutdown(signal));
+});
+process.on("uncaughtException", (error) => {
+  console.error("💥 Uncaught Exception:", error);
+  gracefulShutdown("uncaughtException").catch(() => {});
+  setTimeout(() => process.exit(1), 5000).unref();
+});
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("💥 Unhandled Rejection at:", promise, "reason:", reason);
+  gracefulShutdown("unhandledRejection").catch(() => {});
+  setTimeout(() => process.exit(1), 5000).unref();
+});
+
+// --- Запуск ---
+startServer().catch((error) => {
+  console.error("💥 Failed to start server:", error);
+  process.exit(1);
 });
