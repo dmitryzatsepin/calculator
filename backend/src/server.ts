@@ -83,7 +83,7 @@ async function startServer() {
   app.use(
     '/api/v1',
     cors<cors.CorsRequest>(),
-    bodyParser.json({ limit: '10mb' }),
+    express.json({ limit: '10mb' }),
     expressMiddleware(apolloServer, {
         context: async ({ req }): Promise<GraphQLContext> => {
             let currentUser: PrismaUser | null = null;

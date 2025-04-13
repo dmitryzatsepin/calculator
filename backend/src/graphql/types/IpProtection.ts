@@ -1,13 +1,12 @@
+// src/graphql/types/IpProtection.ts
 import { builder } from '../builder';
 
-builder.prismaNode('IpProtection', {
-  id: { field: 'id' },
+export const IpProtectionObjectRef = builder.prismaObject('IpProtection', {
   fields: (t) => ({
+    id: t.exposeID('id'),
     code: t.exposeString('code'),
     protectionSolid: t.exposeString('protectionSolid'),
     protectionWater: t.exposeString('protectionWater'),
     active: t.exposeBoolean('active'),
-    createdAt: t.expose('createdAt', { type: 'DateTime' }),
-    updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
   }),
 });

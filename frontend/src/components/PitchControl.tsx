@@ -6,10 +6,10 @@ type SelectOption = { value: string; label: string; };
 
 interface PitchControlProps {
   // Базовые статусы
-  isUIBlocked: boolean; // Общая загрузка или ошибка API
-  // Выбранные значения родительских элементов
-  selectedMaterialCode: string | null;
+    selectedMaterialCode: string | null;
   selectedProtectionCode: string | null;
+  isUIBlocked: boolean;
+  disabled?: boolean;
 
   // Текущие значения этого блока
   isProPitchType: boolean;

@@ -30,6 +30,8 @@ import './types/User';
 // Импортируем запросы
 import './queries/screenTypeQueries';
 import './queries/locationQueries';
+import './queries/materialQueries';
+import './queries/ipProtectionQueries';
 import './queries/itemQueries';
 import './queries/cabinetQueries';
 import './queries/moduleQueries';
