@@ -14,6 +14,8 @@ import MaterialSelect from "./inputs/MaterialSelect";
 import IpProtectionSelect from "./inputs/IpProtectionSelect";
 import BrightnessSelect from './inputs/BrightnessSelect';
 import RefreshRateSelect from './inputs/RefreshRateSelect';
+import SensorCheckboxGroup from './inputs/SensorCheckboxGroup';
+import ControlTypeCheckboxGroup from './inputs/ControlTypeCheckboxGroup';
 
 // --- Импорт Контекста ---
 import { useCalculatorContext } from '../context/CalculatorContext';
@@ -33,6 +35,8 @@ const CalculatorForm = () => {
     selectedProtectionCode,
     selectedBrightnessCode,
     selectedRefreshRateCode,
+    selectedSensorCodes,
+    selectedControlTypeCodes,
     widthMm,
     heightMm,
     // Функции для обновления
@@ -42,6 +46,8 @@ const CalculatorForm = () => {
     setSelectedProtectionCode,
     setSelectedBrightnessCode,
     setSelectedRefreshRateCode,
+    setSelectedSensorCodes,
+    setSelectedControlTypeCodes,
     setWidthMm,
     setHeightMm,
     // Подготовленные данные для UI
@@ -51,6 +57,8 @@ const CalculatorForm = () => {
     protectionOptions,
     brightnessOptions,
     refreshRateOptions,
+    sensorOptions,
+    controlTypeOptions,
   } = useCalculatorContext();
 
   // --- Обработчики (вызывают функции из контекста) ---
@@ -77,6 +85,14 @@ const CalculatorForm = () => {
   const handleRefreshRateChange = useCallback((value: string | null) => {
     setSelectedRefreshRateCode(value);
   }, [setSelectedRefreshRateCode]);
+
+  const handleSensorChange = useCallback((value: string[]) => {
+    setSelectedSensorCodes(value);
+  }, [setSelectedSensorCodes]);
+
+  const handleControlTypeChange = useCallback((value: string[]) => {
+    setSelectedControlTypeCodes(value);
+  }, [setSelectedControlTypeCodes]);
 
   // --- JSX ---
   return (
@@ -157,6 +173,24 @@ const CalculatorForm = () => {
                            placeholder="Авто / Выберите частоту" // Можно указать, что есть автовыбор
                        />
                   </Grid.Col>
+                  <Grid.Col span={12} mt="sm"> {/* Занимает всю ширину, небольшой отступ сверху */}
+                       <SensorCheckboxGroup
+                           options={sensorOptions}
+                           value={selectedSensorCodes}
+                           onChange={handleSensorChange}
+                           // Блокируем только во время общей загрузки или если опций нет
+                           disabled={isLoading || sensorOptions.length === 0}
+                       />
+                  </Grid.Col>
+                  <Grid.Col span={12} mt="sm"> {/* Занимает всю ширину, небольшой отступ */}
+                       <ControlTypeCheckboxGroup
+                           options={controlTypeOptions}
+                           value={selectedControlTypeCodes}
+                           onChange={handleControlTypeChange}
+                           // Блокируем только во время общей загрузки или если опций нет
+                           disabled={isLoading || controlTypeOptions.length === 0}
+                       />
+                  </Grid.Col>
               </Grid>
 
                {/* Блок отладки (использует значения из контекста) */}
@@ -170,6 +204,8 @@ const CalculatorForm = () => {
                         {selectedProtectionCode && (<Text size="sm">Защита IP: {selectedProtectionCode}</Text>)}
                         {selectedBrightnessCode && (<Text size="sm">Яркость: {selectedBrightnessCode} ({brightnessOptions.find(o => o.value === selectedBrightnessCode)?.label})</Text>)}
                         {selectedRefreshRateCode && (<Text size="sm">Частота: {selectedRefreshRateCode} ({refreshRateOptions.find(o => o.value === selectedRefreshRateCode)?.label})</Text>)}
+                        {selectedSensorCodes.length > 0 && (<Text size="sm">Сенсоры: {selectedSensorCodes.join(', ')}</Text>)}
+                        {selectedControlTypeCodes.length > 0 && (<Text size="sm">Типы управления: {selectedControlTypeCodes.join(', ')}</Text>)}
                     </Stack>
                )}
           </>
