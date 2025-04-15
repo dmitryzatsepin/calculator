@@ -5,12 +5,15 @@ import { IconAlertCircle } from "@tabler/icons-react";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
+
 // --- Импорт Компонентов ---
 import DimensionInputs from "./inputs/DimensionInputs";
 import ScreenTypeSelector from "./inputs/ScreenTypeSelector";
 import LocationSelect from "./inputs/LocationSelect";
 import MaterialSelect from "./inputs/MaterialSelect";
 import IpProtectionSelect from "./inputs/IpProtectionSelect";
+import BrightnessSelect from './inputs/BrightnessSelect';
+import RefreshRateSelect from './inputs/RefreshRateSelect';
 
 // --- Импорт Контекста ---
 import { useCalculatorContext } from '../context/CalculatorContext';
@@ -28,6 +31,8 @@ const CalculatorForm = () => {
     selectedLocationCode,
     selectedMaterialCode,
     selectedProtectionCode,
+    selectedBrightnessCode,
+    selectedRefreshRateCode,
     widthMm,
     heightMm,
     // Функции для обновления
@@ -35,6 +40,8 @@ const CalculatorForm = () => {
     setSelectedLocationCode,
     setSelectedMaterialCode,
     setSelectedProtectionCode,
+    setSelectedBrightnessCode,
+    setSelectedRefreshRateCode,
     setWidthMm,
     setHeightMm,
     // Подготовленные данные для UI
@@ -42,6 +49,8 @@ const CalculatorForm = () => {
     locationOptions,
     materialOptions,
     protectionOptions,
+    brightnessOptions,
+    refreshRateOptions,
   } = useCalculatorContext();
 
   // --- Обработчики (вызывают функции из контекста) ---
@@ -60,6 +69,14 @@ const CalculatorForm = () => {
   const handleProtectionChange = useCallback((value: string | null) => {
     setSelectedProtectionCode(value);
   }, [setSelectedProtectionCode]);
+
+  const handleBrightnessChange = useCallback((value: string | null) => {
+    setSelectedBrightnessCode(value);
+  }, [setSelectedBrightnessCode]);
+
+  const handleRefreshRateChange = useCallback((value: string | null) => {
+    setSelectedRefreshRateCode(value);
+  }, [setSelectedRefreshRateCode]);
 
   // --- JSX ---
   return (
@@ -116,6 +133,30 @@ const CalculatorForm = () => {
                            required
                        />
                   </Grid.Col>
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                       <BrightnessSelect
+                           options={brightnessOptions}
+                           value={selectedBrightnessCode}
+                           onChange={handleBrightnessChange}
+                           // Блокируем, пока не выбрана IP защита (или пока нет опций)
+                           disabled={isLoading || !selectedProtectionCode || brightnessOptions.length === 0}
+                           // Поля пока не обязательные
+                           required={false}
+                           placeholder="Авто / Выберите яркость" // Можно указать, что есть автовыбор
+                       />
+                  </Grid.Col>
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                       <RefreshRateSelect
+                           options={refreshRateOptions}
+                           value={selectedRefreshRateCode}
+                           onChange={handleRefreshRateChange}
+                           // Блокируем, пока не выбрана IP защита (или пока нет опций)
+                           disabled={isLoading || !selectedProtectionCode || refreshRateOptions.length === 0}
+                           // Поля пока не обязательные
+                           required={false}
+                           placeholder="Авто / Выберите частоту" // Можно указать, что есть автовыбор
+                       />
+                  </Grid.Col>
               </Grid>
 
                {/* Блок отладки (использует значения из контекста) */}
@@ -127,6 +168,8 @@ const CalculatorForm = () => {
                         {selectedLocationCode && (<Text size="sm">Расположение: {selectedLocationCode}</Text>)}
                         {selectedMaterialCode && (<Text size="sm">Материал: {selectedMaterialCode}</Text>)}
                         {selectedProtectionCode && (<Text size="sm">Защита IP: {selectedProtectionCode}</Text>)}
+                        {selectedBrightnessCode && (<Text size="sm">Яркость: {selectedBrightnessCode} ({brightnessOptions.find(o => o.value === selectedBrightnessCode)?.label})</Text>)}
+                        {selectedRefreshRateCode && (<Text size="sm">Частота: {selectedRefreshRateCode} ({refreshRateOptions.find(o => o.value === selectedRefreshRateCode)?.label})</Text>)}
                     </Stack>
                )}
           </>

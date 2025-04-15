@@ -35,6 +35,33 @@ import './queries/ipProtectionQueries';
 import './queries/itemQueries';
 import './queries/cabinetQueries';
 import './queries/moduleQueries';
+
+
+// Импортируем типы (убедитесь, что Brightness.ts и RefreshRate.ts уже импортированы)
+import './types/Location';
+// ... (другие существующие импорты типов) ...
+import './types/Brightness';      // <--- Убедитесь, что есть
+import './types/RefreshRate';     // <--- Убедитесь, что есть
+import './types/ScreenType';
+// ...
+
+import './types/Item';
+import './types/CabinetItemComponent';
+import './types/Cabinet';
+//import './types/ModuleItemComponent';
+import './types/Module';
+import './types/User';
+
+// Импортируем запросы
+import './queries/screenTypeQueries';
+import './queries/locationQueries';
+import './queries/materialQueries';
+import './queries/ipProtectionQueries';
+import './queries/itemQueries';
+import './queries/cabinetQueries';
+import './queries/moduleQueries';
+import './queries/brightnessQueries';   // <--- Добавлено
+import './queries/refreshRateQueries';  // <--- Добавлено
 import './queries/pitchQueries';
 
 // Импортируем мутации

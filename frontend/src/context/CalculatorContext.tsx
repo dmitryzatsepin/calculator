@@ -18,6 +18,8 @@ import type {
   Location as GqlLocation,
   Material as GqlMaterial,
   IpProtection as GqlIpProtection,
+  Brightness as GqlBrightness,
+  RefreshRate as GqlRefreshRate,
   Maybe,
 } from "../generated/graphql/graphql";
 
@@ -41,10 +43,28 @@ const MaterialFields = gql`
     active
   }
 `;
+const BrightnessFields = gql`
+  fragment BrightnessFields on Brightness {
+    id
+    code
+    value
+    active
+  }
+`;
+const RefreshRateFields = gql`
+  fragment RefreshRateFields on RefreshRate {
+    id
+    code
+    value
+    active
+  }
+`;
 
 const GET_INITIAL_DATA = gql`
   ${LocationFields}
   ${MaterialFields}
+  ${BrightnessFields}
+  ${RefreshRateFields}
 
   query GetInitialData {
     screenTypes(onlyActive: true) {
@@ -58,11 +78,16 @@ const GET_INITIAL_DATA = gql`
     materials {
       ...MaterialFields
     }
-    # Используем ipProtections как в схеме GraphQL
     ipProtections(onlyActive: true) {
       id
       code
-      # active // Если нужно поле active, добавь его здесь и в тип ниже
+      # active
+    }
+    brightnesses(onlyActive: true) {
+      ...BrightnessFields
+    }
+    refreshRates(onlyActive: true) {
+      ...RefreshRateFields
     }
   }
 `;
@@ -72,8 +97,9 @@ type InitialDataQueryResult = {
   screenTypes: Maybe<Array<Maybe<Pick<GqlScreenType, "id" | "code" | "name">>>>;
   locations: Maybe<Array<Maybe<GqlLocation>>>;
   materials: Maybe<Array<Maybe<GqlMaterial>>>;
-  // Используем ipProtections и тип Pick<GqlIpProtection, "id" | "code">
   ipProtections: Maybe<Array<Maybe<Pick<GqlIpProtection, "id" | "code">>>>;
+  brightnesses: Maybe<Array<Maybe<GqlBrightness>>>;
+  refreshRates: Maybe<Array<Maybe<GqlRefreshRate>>>;
 };
 
 // --- Функция-запрос ---
@@ -88,8 +114,9 @@ const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
       screenTypes: data?.screenTypes ?? [],
       locations: data?.locations ?? [],
       materials: data?.materials ?? [],
-      // Извлекаем ipProtections
       ipProtections: data?.ipProtections ?? [],
+      brightnesses: data?.brightnesses ?? [],
+      refreshRates: data?.refreshRates ?? [],
     };
   } catch (error) {
     console.error("Error fetching initial data (Context):", error);
@@ -113,28 +140,34 @@ interface CalculatorContextProps {
   )[];
   locations: (GqlLocation | null | undefined)[];
   materials: (GqlMaterial | null | undefined)[];
-  // Тип для ipProtections соответствует типу в InitialDataQueryResult
   ipProtections: (Pick<GqlIpProtection, "id" | "code"> | null | undefined)[];
+  brightnesses: (GqlBrightness | null | undefined)[];
+  refreshRates: (GqlRefreshRate | null | undefined)[];
   // Состояния выбора
   selectedScreenTypeCode: string | null;
   selectedLocationCode: string | null;
   selectedMaterialCode: string | null;
-  selectedProtectionCode: string | null; // <-- Добавлено для исправления TS2561
+  selectedProtectionCode: string | null;
+  selectedBrightnessCode: string | null;
+  selectedRefreshRateCode: string | null;
   widthMm: string | number;
   heightMm: string | number;
   // Функции для обновления состояний
   setSelectedScreenTypeCode: (code: string | null) => void;
   setSelectedLocationCode: (code: string | null) => void;
   setSelectedMaterialCode: (code: string | null) => void;
-  setSelectedProtectionCode: (code: string | null) => void; // <-- Добавлено для исправления TS2561
+  setSelectedProtectionCode: (code: string | null) => void;
+  setSelectedBrightnessCode: (code: string | null) => void;
+  setSelectedRefreshRateCode: (code: string | null) => void;
   setWidthMm: (value: string | number) => void;
   setHeightMm: (value: string | number) => void;
   // Мемоизированные опции для селекторов
   screenTypeSegments: SegmentData[];
   locationOptions: SegmentData[];
   materialOptions: SegmentData[];
-  protectionOptions: SegmentData[]; // <-- Добавлено для исправления TS2561 и TS6133
-  // Функция сброса (для ErrorBoundary)
+  protectionOptions: SegmentData[];
+  brightnessOptions: SegmentData[];
+  refreshRateOptions: SegmentData[];
   resetQuery: () => void;
 }
 
@@ -148,24 +181,31 @@ const CalculatorContext = createContext<CalculatorContextProps>({
   locations: [],
   materials: [],
   ipProtections: [],
+  brightnesses: [],
+  refreshRates: [],
   // Состояния выбора
   selectedScreenTypeCode: null,
   selectedLocationCode: null,
   selectedMaterialCode: null,
-  selectedProtectionCode: null, // <-- Добавлено для исправления TS2561 (исправлена ошибка из лога)
-  // Значения ширины и высоты
+  selectedProtectionCode: null,
+  selectedBrightnessCode: null,
+  selectedRefreshRateCode: null,
   widthMm: "",
   heightMm: "",
   setSelectedScreenTypeCode: () => {},
   setSelectedLocationCode: () => {},
   setSelectedMaterialCode: () => {},
-  setSelectedProtectionCode: () => {}, // <-- Добавлено для исправления TS2561
+  setSelectedProtectionCode: () => {},
+  setSelectedBrightnessCode: () => {},
+  setSelectedRefreshRateCode: () => {},
   setWidthMm: () => {},
   setHeightMm: () => {},
   screenTypeSegments: [],
   locationOptions: [],
   materialOptions: [],
-  protectionOptions: [], // <-- Добавлено для исправления TS2561 и TS6133
+  protectionOptions: [],
+  brightnessOptions: [],
+  refreshRateOptions: [],
   resetQuery: () => {},
 });
 
@@ -185,6 +225,8 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const [selectedProtectionCode, setSelectedProtectionCodeState] = useState<
     string | null
   >(null);
+  const [selectedBrightnessCode, setSelectedBrightnessCodeState] = useState<string | null>(null);
+  const [selectedRefreshRateCode, setSelectedRefreshRateCodeState] = useState<string | null>(null);
 
   // Запрос данных
   const { data, isLoading, isError, error, refetch } = useQuery<
@@ -203,6 +245,8 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const gqlMaterials = data?.materials ?? [];
   // Используем ipProtections
   const gqlIpProtections = data?.ipProtections ?? [];
+  const gqlBrightnessValues = data?.brightnesses ?? [];
+  const gqlRefreshRates = data?.refreshRates ?? [];
 
   // Установка ScreenType по умолчанию
   useEffect(() => {
@@ -214,13 +258,11 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       const defaultCode = "cabinet";
       const defaultScreenType = screenTypes.find(
         (st) =>
-          // Добавлена проверка st?.code
           st?.code?.toLowerCase() === defaultCode.toLowerCase()
       );
       if (defaultScreenType?.code) {
         setSelectedScreenTypeCodeState(defaultScreenType.code);
       } else {
-        // Можно установить первый доступный, если дефолтный не найден
         const firstAvailable = screenTypes.find((st) => !!st?.code);
         if (firstAvailable?.code) {
           setSelectedScreenTypeCodeState(firstAvailable.code);
@@ -269,12 +311,9 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
         codeLower.includes("уличн") ||
         nameLower.includes("уличн")
       ) {
-        // Ищем IP65, если он есть в списке
         const foundIp = gqlIpProtections.find((ip) => ip?.code === "IP65");
-        newProtectionCode = foundIp?.code ?? null; // Устанавливаем IP65, если найден, иначе null
+        newProtectionCode = foundIp?.code ?? null;
       }
-      // Если ни indoor ни outdoor не определились, newProtectionCode останется null
-      // Если нужный IP (IP30/IP65) не был загружен, newProtectionCode также будет null
     }
     // Обновляем состояние, только если значение изменилось
     if (selectedProtectionCode !== newProtectionCode) {
@@ -284,12 +323,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedProtectionCodeState(newProtectionCode);
       // TODO: Здесь все еще нужен сброс зависимых состояний (Pitch, Cabinet...)
     }
-  }, [
-    selectedLocationCode,
-    gqlIpProtections,
-    gqlLocations,
-    isLoading,
-  ]);
+  }, [selectedLocationCode, gqlIpProtections, gqlLocations, isLoading]);
 
   // Подготовка данных для селекторов
   const screenTypeSegments = useMemo((): SegmentData[] => {
@@ -339,6 +373,42 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       .map((ip) => ({ value: ip.code, label: ip.code }));
   }, [gqlIpProtections]);
 
+  // Вычисляем опции для яркости
+  const brightnessOptions = useMemo((): SegmentData[] => {
+    if (!Array.isArray(gqlBrightnessValues)) return [];
+    return gqlBrightnessValues
+      .filter(
+        // Убеждаемся, что есть code, value и active=true
+        (br): br is GqlBrightness & { code: string; value: number; active: true } =>
+          !!br?.code && typeof br.value === 'number' && br.active === true
+      )
+      // Сортируем по числовому значению яркости
+      .sort((a, b) => a.value - b.value)
+      // Формируем массив для Select
+      .map((br) => ({
+        value: br.code,
+        label: `${br.value} nit` // Добавляем единицу измерения
+      }));
+  }, [gqlBrightnessValues]); // Зависимость от загруженных данных
+
+  // Вычисляем опции для частоты обновления
+  const refreshRateOptions = useMemo((): SegmentData[] => {
+    if (!Array.isArray(gqlRefreshRates)) return [];
+    return gqlRefreshRates
+      .filter(
+        // Убеждаемся, что есть code, value и active=true
+        (rr): rr is GqlRefreshRate & { code: string; value: number; active: true } =>
+          !!rr?.code && typeof rr.value === 'number' && rr.active === true
+      )
+      // Сортируем по числовому значению частоты
+      .sort((a, b) => a.value - b.value)
+      // Формируем массив для Select
+      .map((rr) => ({
+        value: rr.code,
+        label: `${rr.value} Hz` // Добавляем единицу измерения
+      }));
+  }, [gqlRefreshRates]); // Зависимость от загруженных данны
+
   // Функции для обновления состояния с логикой сброса зависимостей
   const setSelectedScreenTypeCode = useCallback(
     (value: string | null) => {
@@ -347,11 +417,12 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedScreenTypeCodeState(value);
       setSelectedLocationCodeState(null);
       setSelectedMaterialCodeState(null);
-      setSelectedProtectionCodeState(null); // Сбрасываем Protection
-      // TODO: Сбросить остальные: Pitch, Cabinet...
+      setSelectedProtectionCodeState(null);
+      setSelectedBrightnessCodeState(null);
+      setSelectedRefreshRateCodeState(null);
     },
     [selectedScreenTypeCode]
-  ); // Добавлена зависимость для сравнения
+  ); 
 
   const setSelectedLocationCode = useCallback(
     (value: string | null) => {
@@ -360,30 +431,50 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedLocationCodeState(value);
       setSelectedMaterialCodeState(null);
       // Protection пересчитается в useEffect, но другие зависимости нужно сбросить
-      // TODO: Сбросить остальные: Pitch, Cabinet...
+      setSelectedBrightnessCodeState(null);
+      setSelectedRefreshRateCodeState(null);
     },
     [selectedLocationCode]
-  ); // Добавлена зависимость для сравнения
+  );
 
   const setSelectedMaterialCode = useCallback(
     (value: string | null) => {
       if (selectedMaterialCode === value) return; // Предотвращаем лишние обновления
       console.log("(Context) Selected Material Code:", value);
       setSelectedMaterialCodeState(value);
+      setSelectedBrightnessCodeState(null);
+      setSelectedRefreshRateCodeState(null);
       // TODO: Сбросить остальные: Pitch, Cabinet...
     },
     [selectedMaterialCode]
-  ); // Добавлена зависимость для сравнения
+  );
 
   const setSelectedProtectionCode = useCallback(
     (value: string | null): void => {
       if (selectedProtectionCode === value) return; // Предотвращаем лишние обновления
       console.log("(Context) Selected Protection Code:", value);
       setSelectedProtectionCodeState(value);
+      setSelectedBrightnessCodeState(null);
+      setSelectedRefreshRateCodeState(null);
       // TODO: Сбросить Pitch, Cabinet...
     },
     [selectedProtectionCode]
-  ); // Добавлена зависимость для сравнения
+  );
+  const setSelectedBrightnessCode = useCallback((value: string | null) => {
+    if (selectedBrightnessCode === value) return;
+    console.log("(Context) Selected Brightness Code:", value);
+    setSelectedBrightnessCodeState(value);
+    // TODO: Сбросить зависимые состояния (например, Cabinet, Module...), если они есть
+  }, 
+  [selectedBrightnessCode]);
+
+const setSelectedRefreshRateCode = useCallback((value: string | null) => {
+  if (selectedRefreshRateCode === value) return;
+  console.log("(Context) Selected Refresh Rate Code:", value);
+  setSelectedRefreshRateCodeState(value);
+  // TODO: Сбросить зависимые состояния (например, Cabinet, Module...), если они есть
+}, 
+[selectedRefreshRateCode]);
 
   // Функция для ErrorBoundary
   const resetQuery = useCallback(() => {
@@ -401,22 +492,30 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     locations: gqlLocations,
     materials: gqlMaterials,
     ipProtections: gqlIpProtections,
+    brightnesses: gqlBrightnessValues,
+    refreshRates: gqlRefreshRates,
     selectedScreenTypeCode,
     selectedLocationCode,
     selectedMaterialCode,
-    selectedProtectionCode, // <-- Добавлено для исправления TS2561
+    selectedProtectionCode,
+    selectedBrightnessCode,
+    selectedRefreshRateCode,
     widthMm,
     heightMm,
     setSelectedScreenTypeCode,
     setSelectedLocationCode,
     setSelectedMaterialCode,
-    setSelectedProtectionCode, // <-- Добавлено для исправления TS2561
+    setSelectedProtectionCode,
+    setSelectedBrightnessCode,
+    setSelectedRefreshRateCode,
     setWidthMm,
     setHeightMm,
     screenTypeSegments,
     locationOptions,
     materialOptions,
-    protectionOptions, // <-- Добавлено для исправления TS2561 и TS6133
+    protectionOptions,
+    brightnessOptions,
+    refreshRateOptions,
     resetQuery,
   };
 
