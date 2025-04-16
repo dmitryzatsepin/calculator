@@ -16,6 +16,7 @@ import BrightnessSelect from './inputs/BrightnessSelect';
 import RefreshRateSelect from './inputs/RefreshRateSelect';
 import SensorCheckboxGroup from './inputs/SensorCheckboxGroup';
 import ControlTypeCheckboxGroup from './inputs/ControlTypeCheckboxGroup';
+import ModuleSelect from './inputs/ModuleSelect';
 
 // --- Импорт Контекста ---
 import { useCalculatorContext } from '../context/CalculatorContext';
@@ -37,6 +38,7 @@ const CalculatorForm = () => {
     selectedRefreshRateCode,
     selectedSensorCodes,
     selectedControlTypeCodes,
+    selectedModuleCode,
     widthMm,
     heightMm,
     // Функции для обновления
@@ -48,6 +50,7 @@ const CalculatorForm = () => {
     setSelectedRefreshRateCode,
     setSelectedSensorCodes,
     setSelectedControlTypeCodes,
+    setSelectedModuleCode,
     setWidthMm,
     setHeightMm,
     // Подготовленные данные для UI
@@ -59,6 +62,7 @@ const CalculatorForm = () => {
     refreshRateOptions,
     sensorOptions,
     controlTypeOptions,
+    moduleOptions,
   } = useCalculatorContext();
 
   // --- Обработчики (вызывают функции из контекста) ---
@@ -93,6 +97,10 @@ const CalculatorForm = () => {
   const handleControlTypeChange = useCallback((value: string[]) => {
     setSelectedControlTypeCodes(value);
   }, [setSelectedControlTypeCodes]);
+
+  const handleModuleChange = useCallback((value: string | null) => {
+    setSelectedModuleCode(value);
+  }, [setSelectedModuleCode]);
 
   // --- JSX ---
   return (
@@ -191,6 +199,23 @@ const CalculatorForm = () => {
                            disabled={isLoading || controlTypeOptions.length === 0}
                        />
                   </Grid.Col>
+                  <Grid.Col span={12} mt="md"> {/* Отступ побольше перед основным выбором */}
+                       <ModuleSelect
+                           options={moduleOptions}
+                           value={selectedModuleCode}
+                           onChange={handleModuleChange}
+                           // Блокируем, пока не выбраны типы управления (или пока нет опций)
+                           // TODO: Усложнить логику disabled, когда будут все зависимые поля (питч и т.д.)
+                           disabled={
+                            isLoading ||
+                            !selectedLocationCode ||
+                            !selectedBrightnessCode ||
+                            !selectedRefreshRateCode ||
+                            moduleOptions.length === 0
+                        }
+                           required={true} // Выбор модуля обязателен
+                       />
+                  </Grid.Col>
               </Grid>
 
                {/* Блок отладки (использует значения из контекста) */}
@@ -206,6 +231,7 @@ const CalculatorForm = () => {
                         {selectedRefreshRateCode && (<Text size="sm">Частота: {selectedRefreshRateCode} ({refreshRateOptions.find(o => o.value === selectedRefreshRateCode)?.label})</Text>)}
                         {selectedSensorCodes.length > 0 && (<Text size="sm">Сенсоры: {selectedSensorCodes.join(', ')}</Text>)}
                         {selectedControlTypeCodes.length > 0 && (<Text size="sm">Типы управления: {selectedControlTypeCodes.join(', ')}</Text>)}
+                        {selectedModuleCode && (<Text size="sm">Модуль: {selectedModuleCode} ({moduleOptions.find(o => o.value === selectedModuleCode)?.label})</Text>)}
                     </Stack>
                )}
           </>

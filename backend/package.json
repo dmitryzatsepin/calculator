@@ -11,7 +11,7 @@
     "prisma:migrate": "prisma migrate",
     "prisma:generate": "prisma generate",
     "prisma:reset": "prisma migrate reset",
-    "db:seed": "tsx prisma/seed/index.ts",
+    "prisma:seed": "tsx prisma/seed/index.ts",
     "clean": "rm -rf dist",
     "postinstall": "prisma generate",
     "db:push": "prisma db push --force-reset"

@@ -22,11 +22,13 @@ import type {
   RefreshRate as GqlRefreshRate,
   Sensor as GqlSensor,
   ControlType as GqlControlType,
+  Module as GqlModule,
   Maybe,
 } from "../generated/graphql/graphql";
 
 // Тип для опций Mantine
 type SegmentData = { label: string; value: string };
+type SelectOption = { label: string; value: string };
 
 // --- GraphQL Запрос ---
 const LocationFields = gql`
@@ -77,13 +79,24 @@ const ControlTypeFields = gql`
     active
   }
 `;
+const ModuleOptionFields = gql`
+  fragment ModuleOptionFields on Module {
+    id
+    code
+    sku
+    name
+    active
+  }
+`;
+
 const GET_INITIAL_DATA = gql`
   ${LocationFields}
   ${MaterialFields}
   ${BrightnessFields}
   ${RefreshRateFields}
   ${SensorFields}
-  ${ControlTypeFields} 
+  ${ControlTypeFields}
+  ${ModuleOptionFields} 
 
   query GetInitialData {
     screenTypes(onlyActive: true) {
@@ -114,7 +127,11 @@ const GET_INITIAL_DATA = gql`
     controlTypes(onlyActive: true) {
       ...ControlTypeFields
     }
+    moduleOptions(onlyActive: true) {
+      ...ModuleOptionFields
+    }
   }
+    
 `;
 
 // --- Тип для ответа GraphQL ---
@@ -127,6 +144,7 @@ type InitialDataQueryResult = {
   refreshRates: Maybe<Array<Maybe<GqlRefreshRate>>>;
   sensors: Maybe<Array<Maybe<GqlSensor>>>;
   controlTypes: Maybe<Array<Maybe<GqlControlType>>>;
+  moduleOptions: Maybe<Array<Maybe<GqlModule>>>;
 };
 
 // --- Функция-запрос ---
@@ -146,6 +164,7 @@ const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
       refreshRates: data?.refreshRates ?? [],
       sensors: data?.sensors ?? [],
       controlTypes: data?.controlTypes ?? [],
+      moduleOptions: data?.moduleOptions ?? [],
     };
   } catch (error) {
     console.error("Error fetching initial data (Context):", error);
@@ -174,6 +193,7 @@ interface CalculatorContextProps {
   refreshRates: (GqlRefreshRate | null | undefined)[];
   sensors: (GqlSensor | null | undefined)[];
   controlTypes: (GqlControlType | null | undefined)[];
+  modules: (GqlModule | null | undefined)[];
   // Состояния выбора
   selectedScreenTypeCode: string | null;
   selectedLocationCode: string | null;
@@ -182,7 +202,8 @@ interface CalculatorContextProps {
   selectedBrightnessCode: string | null;
   selectedRefreshRateCode: string | null;
   selectedControlTypeCodes: string[];  
-  selectedSensorCodes: string[]; 
+  selectedSensorCodes: string[];
+  selectedModuleCode: string | null;
   widthMm: string | number;
   heightMm: string | number;
   // Функции для обновления состояний
@@ -196,6 +217,7 @@ interface CalculatorContextProps {
   setSelectedControlTypeCodes: (codes: string[]) => void;
   setWidthMm: (value: string | number) => void;
   setHeightMm: (value: string | number) => void;
+  setSelectedModuleCode: (code: string | null) => void;
   // Мемоизированные опции для селекторов
   screenTypeSegments: SegmentData[];
   locationOptions: SegmentData[];
@@ -205,6 +227,7 @@ interface CalculatorContextProps {
   refreshRateOptions: SegmentData[];
   sensorOptions: SegmentData[];
   controlTypeOptions: SegmentData[];
+  moduleOptions: SelectOption[];
   resetQuery: () => void;
 }
 
@@ -222,6 +245,7 @@ const CalculatorContext = createContext<CalculatorContextProps>({
   refreshRates: [],
   sensors: [],
   controlTypes: [],
+  modules: [],
   // Состояния выбора
   selectedScreenTypeCode: null,
   selectedLocationCode: null,
@@ -231,6 +255,7 @@ const CalculatorContext = createContext<CalculatorContextProps>({
   selectedRefreshRateCode: null,
   selectedSensorCodes: [],
   selectedControlTypeCodes: [],
+  selectedModuleCode: null,
   widthMm: "",
   heightMm: "",
   setSelectedScreenTypeCode: () => {},
@@ -241,6 +266,7 @@ const CalculatorContext = createContext<CalculatorContextProps>({
   setSelectedRefreshRateCode: () => {},
   setSelectedSensorCodes: () => {},
   setSelectedControlTypeCodes: () => {},
+  setSelectedModuleCode: () => {},
   setWidthMm: () => {},
   setHeightMm: () => {},
   screenTypeSegments: [],
@@ -251,6 +277,7 @@ const CalculatorContext = createContext<CalculatorContextProps>({
   refreshRateOptions: [],
   sensorOptions: [],
   controlTypeOptions: [],
+  moduleOptions: [],
   resetQuery: () => {},
 });
 
@@ -274,6 +301,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const [selectedRefreshRateCode, setSelectedRefreshRateCodeState] = useState<string | null>(null);
   const [selectedSensorCodes, setSelectedSensorCodesState] = useState<string[]>([]);
   const [selectedControlTypeCodes, setSelectedControlTypeCodesState] = useState<string[]>([]);
+  const [selectedModuleCode, setSelectedModuleCodeState] = useState<string | null>(null);
  
   // Запрос данных
   const { data, isLoading, isError, error, refetch } = useQuery<
@@ -290,12 +318,14 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const screenTypes = data?.screenTypes ?? [];
   const gqlLocations = data?.locations ?? [];
   const gqlMaterials = data?.materials ?? [];
+  const gqlModules = data?.moduleOptions ?? [];
   // Используем ipProtections
   const gqlIpProtections = data?.ipProtections ?? [];
   const gqlBrightnessValues = data?.brightnesses ?? [];
   const gqlRefreshRates = data?.refreshRates ?? [];
   const gqlSensors = data?.sensors ?? [];
   const gqlControlTypes = data?.controlTypes ?? [];
+
 
   // Установка ScreenType по умолчанию
   useEffect(() => {
@@ -494,6 +524,27 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       }));
   }, [gqlControlTypes]);
 
+  const moduleOptions = useMemo((): SelectOption[] => {
+    if (!Array.isArray(gqlModules)) return [];
+
+    // TODO: Здесь будет ЛОГИКА ФИЛЬТРАЦИИ gqlModules на основе
+    // selectedPitchCode, selectedLocationCode, selectedIpProtectionCode и т.д.
+    // Пока просто возвращаем все активные модули.
+    const filteredModules = gqlModules.filter(
+      (m): m is GqlModule & { code: string; active: true } =>
+        !!m?.code && m.active === true
+    );
+    return filteredModules.map((m) => {
+      // Явно обращаемся к полям. TS должен "видеть" name, sku, code, т.к. m больше не null/undefined
+      // и мы работаем с типом GqlModule (теоретически)
+      const labelValue = m.name ?? m.sku ?? m.code ?? 'Неизвестный модуль';
+      return {
+          value: m.code, // code точно есть (проверено в filter)
+          label: labelValue
+      };
+  });
+}, [gqlModules /*, зависимости фильтрации */]);
+
   // Функции для обновления состояния с логикой сброса зависимостей
   const setSelectedScreenTypeCode = useCallback(
     (value: string | null) => {
@@ -507,6 +558,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedRefreshRateCodeState(null);
       setSelectedSensorCodesState([]);
       setSelectedControlTypeCodesState([]);
+      setSelectedModuleCodeState(null);
     },
     [selectedScreenTypeCode]
   ); 
@@ -520,6 +572,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       // Protection пересчитается в useEffect, но другие зависимости нужно сбросить
       setSelectedBrightnessCodeState(null);
       setSelectedRefreshRateCodeState(null);
+      setSelectedModuleCodeState(null);
     },
     [selectedLocationCode]
   );
@@ -531,6 +584,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedMaterialCodeState(value);
       setSelectedBrightnessCodeState(null);
       setSelectedRefreshRateCodeState(null);
+      setSelectedModuleCodeState(null);
       // TODO: Сбросить остальные: Pitch, Cabinet...
     },
     [selectedMaterialCode]
@@ -543,6 +597,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedProtectionCodeState(value);
       setSelectedBrightnessCodeState(null);
       setSelectedRefreshRateCodeState(null);
+      setSelectedModuleCodeState(null);
       // TODO: Сбросить Pitch, Cabinet...
     },
     [selectedProtectionCode]
@@ -551,6 +606,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     if (selectedBrightnessCode === value) return;
     console.log("(Context) Selected Brightness Code:", value);
     setSelectedBrightnessCodeState(value);
+    setSelectedModuleCodeState(null);
     // TODO: Сбросить зависимые состояния (например, Cabinet, Module...), если они есть
   }, 
   [selectedBrightnessCode]);
@@ -567,6 +623,7 @@ const setSelectedSensorCodes = useCallback((value: string[]) => {
   // value - это новый массив выбранных кодов от Checkbox.Group
   console.log("(Context) Selected Sensor Codes:", value);
   setSelectedSensorCodesState(value);
+  setSelectedModuleCodeState(null);
   // Т.к. сенсоры пока ни на что не влияют, другие состояния не сбрасываем
 }, [] // Нет зависимостей, т.к. просто устанавливаем новое значение
 );
@@ -578,6 +635,13 @@ const setSelectedControlTypeCodes = useCallback((value: string[]) => {
   // Т.к. типы управления пока ни на что не влияют, другие состояния не сбрасываем
 }, [] // Нет зависимостей
 );
+
+const setSelectedModuleCode = useCallback((value: string | null) => {
+  if (selectedModuleCode === value) return; // Предотвращаем лишние обновления
+  console.log("(Context) Selected Module Code:", value);
+  setSelectedModuleCodeState(value);
+  // TODO: Сбросить зависимые состояния (например, Cabinet...)
+}, [selectedModuleCode]);
 
   // Функция для ErrorBoundary
   const resetQuery = useCallback(() => {
@@ -599,6 +663,7 @@ const setSelectedControlTypeCodes = useCallback((value: string[]) => {
     refreshRates: gqlRefreshRates,
     sensors: gqlSensors,
     controlTypes: gqlControlTypes,
+    modules: gqlModules,
     // Состояния выбора
     selectedScreenTypeCode,
     selectedLocationCode,
@@ -608,6 +673,7 @@ const setSelectedControlTypeCodes = useCallback((value: string[]) => {
     selectedRefreshRateCode,
     selectedSensorCodes,
     selectedControlTypeCodes,
+    selectedModuleCode,
     widthMm,
     heightMm,
     // Функции для обновления состояния
@@ -618,7 +684,8 @@ const setSelectedControlTypeCodes = useCallback((value: string[]) => {
     setSelectedBrightnessCode,
     setSelectedRefreshRateCode,
     setSelectedSensorCodes,
-    setSelectedControlTypeCodes, 
+    setSelectedControlTypeCodes,
+    setSelectedModuleCode, 
     setWidthMm,
     setHeightMm,
     // Мемоизированные опции для селекторов
@@ -630,6 +697,7 @@ const setSelectedControlTypeCodes = useCallback((value: string[]) => {
     refreshRateOptions,
     sensorOptions,
     controlTypeOptions,
+    moduleOptions,
     resetQuery,
   };
 

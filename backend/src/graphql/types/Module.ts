@@ -41,6 +41,7 @@ builder.prismaNode('Module', {
   fields: (t) => ({
     code: t.exposeString('code'),
     sku: t.exposeString('sku', { nullable: true }),
+    name: t.exposeString('name', { nullable: true }),
     moduleOption: t.exposeString('moduleOption', { nullable: true }),
     active: t.exposeBoolean('active'),
     createdAt: t.expose('createdAt', { type: 'DateTime' }),
