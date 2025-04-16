@@ -1,10 +1,26 @@
 // src/graphql/queries/cabinetQueries.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Для WhereInput
+import { Prisma } from '@prisma/client'; // Для WhereInput и Decimal
+
+// --- НОВЫЙ ТИП ДЛЯ ФИЛЬТРОВ КАБИНЕТОВ ---
+// Создадим Input тип для группировки фильтров
+const CabinetFilterInput = builder.inputType('CabinetFilterInput', {
+    fields: (t) => ({
+        locationCode: t.string({ required: false }),
+        materialCode: t.string({ required: false }),
+        pitchCode:    t.string({ required: false }),
+        moduleCode:   t.string({ required: false }), // Нужен для связи по размерам
+        // Можно добавить и другие фильтры если нужно
+        // widthMm: t.int({ required: false }),
+        // heightMm: t.int({ required: false }),
+    }),
+});
+// -------------------------------------
 
 builder.queryFields((t) => ({
 
-  // --- ЗАПРОС: Получить список кабинетов ---
+  // --- ЗАПРОС: Получить список всех кабинетов ---
+  // (Оставляем как есть)
   cabinets: t.prismaField({
     type: ['Cabinet'], // Возвращает массив Кабинетов
     description: 'Получить список всех кабинетов.',
@@ -31,6 +47,7 @@ builder.queryFields((t) => ({
 
 
   // --- ЗАПРОС: Получить один кабинет по коду ---
+  // (Оставляем как есть)
   cabinetByCode: t.prismaField({
     type: 'Cabinet', // Возвращает один Кабинет
     nullable: true,  // Может вернуть null, если не найден
@@ -50,7 +67,8 @@ builder.queryFields((t) => ({
   }), // --- Конец запроса cabinetByCode ---
 
 
-  // --- СУЩЕСТВУЮЩИЙ ЗАПРОС: Кабинеты по шагу пикселя (остается без изменений) ---
+  // --- СУЩЕСТВУЮЩИЙ ЗАПРОС: Кабинеты по шагу пикселя ---
+  // (Оставляем как есть, но возможно, его логику стоит перенести в cabinetOptions)
   cabinetsByPitch: t.prismaField({
       type: ['Cabinet'],
       args: {
@@ -130,6 +148,85 @@ builder.queryFields((t) => ({
               distinct: ['code'] // Убедимся, что кабинеты не дублируются, если связи сложные
           });
       }
-  }) // --- Конец запроса cabinetsByPitch ---
+  }), // --- Конец запроса cabinetsByPitch ---
+
+  // --- НОВЫЙ ЗАПРОС ДЛЯ ВЫПАДАЮЩЕГО СПИСКА КАБИНЕТОВ ---
+  cabinetOptions: t.prismaField({
+    type: ['Cabinet'], // Возвращает массив кабинетов
+    description: 'Получить отфильтрованный список кабинетов для выбора.',
+    args: {
+        filters: t.arg({ type: CabinetFilterInput, required: false }), // Принимаем объект с фильтрами
+        onlyActive: t.arg.boolean({ defaultValue: true, required: false }),
+    },
+    resolve: async (query, _parent, args, ctx) => {
+        const { filters, onlyActive } = args;
+        console.log('[cabinetOptions] Fetching with filters:', JSON.stringify(filters));
+
+        // Собираем базовые условия
+        const where: Prisma.CabinetWhereInput = {
+            active: onlyActive ?? undefined,
+        };
+
+        // Применяем фильтры, если они переданы
+        if (filters) {
+            if (filters.locationCode) {
+                where.locations = { some: { locationCode: filters.locationCode } };
+            }
+            if (filters.materialCode) {
+                where.materials = { some: { materialCode: filters.materialCode } };
+            }
+            if (filters.pitchCode) {
+                where.pitches = { some: { pitchCode: filters.pitchCode } };
+            }
+
+            // --- Фильтрация по совместимости размеров с выбранным модулем ---
+            if (filters.moduleCode) {
+                // 1. Находим размер(ы) выбранного модуля
+                const moduleSizes = await ctx.prisma.moduleSize.findMany({
+                    where: { modules: { some: { moduleCode: filters.moduleCode } }, active: true },
+                    select: { code: true }
+                });
+                const moduleSizeCodes = moduleSizes.map(ms => ms.code);
+
+                if (moduleSizeCodes.length > 0) {
+                    // 2. Находим размеры кабинетов, совместимые с размерами модуля
+                    const compatibleCabinetSizes = await ctx.prisma.cabinetSize.findMany({
+                        where: {
+                            moduleSizes: { some: { moduleSizeCode: { in: moduleSizeCodes } } },
+                            active: true
+                        },
+                        select: { code: true }
+                    });
+                    const compatibleCabinetSizeCodes = compatibleCabinetSizes.map(cs => cs.code);
+
+                    if (compatibleCabinetSizeCodes.length > 0) {
+                        // 3. Добавляем условие к основному запросу кабинетов
+                        // У Кабинета должна быть связь хотя бы с одним из совместимых CabinetSize
+                        where.sizes = { some: { cabinetSizeCode: { in: compatibleCabinetSizeCodes } } };
+                    } else {
+                        // Если не найдено совместимых размеров кабинетов, возвращаем пустой результат
+                        console.log(`[cabinetOptions] No compatible cabinet sizes found for module ${filters.moduleCode}`);
+                        return [];
+                    }
+                } else {
+                     // Если у модуля нет размеров, это странно, но тоже вернем пустой результат
+                     console.log(`[cabinetOptions] No module sizes found for module ${filters.moduleCode}`);
+                     return [];
+                }
+            }
+            // --- Конец фильтрации по размерам ---
+        }
+
+        console.log(`[cabinetOptions] Final where clause:`, JSON.stringify(where));
+        return ctx.prisma.cabinet.findMany({
+            ...query, // ВАЖНО: для выборки code, name, sku
+            where,
+            orderBy: [
+                { name: 'asc' }, // Сортируем по имени или SKU
+                { sku: 'asc' },
+            ]
+        });
+    }
+  }) // --- Конец запроса cabinetOptions ---
 
 })); // --- Конец builder.queryFields ---

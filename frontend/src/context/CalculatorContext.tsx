@@ -15,6 +15,7 @@ import { graphQLClient } from "../services/graphqlClient";
 // --- Импорты типов ---
 import type {
   ScreenType as GqlScreenType,
+  Option as GqlOption,
   Location as GqlLocation,
   Material as GqlMaterial,
   IpProtection as GqlIpProtection,
@@ -22,82 +23,50 @@ import type {
   RefreshRate as GqlRefreshRate,
   Sensor as GqlSensor,
   ControlType as GqlControlType,
-  Module as GqlModule,
   Pitch as GqlPitch,
+  Module as GqlModule,
+  Cabinet as GqlCabinet,
+  CabinetFilterInput,
   Maybe,
 } from "../generated/graphql/graphql";
 
-// Тип для опций Mantine
+// Типы для опций UI
 type SegmentData = { label: string; value: string };
 type SelectOption = { label: string; value: string };
 
-// --- GraphQL Запрос ---
+// --- GraphQL Фрагменты ---
+const OptionFields = gql`
+  fragment OptionFields on Option { id code name active }
+`;
 const LocationFields = gql`
-  fragment LocationFields on Location {
-    id
-    code
-    name
-    active
-  }
+  fragment LocationFields on Location { id code name active }
 `;
 const MaterialFields = gql`
-  fragment MaterialFields on Material {
-    id
-    code
-    name
-    active
-  }
+  fragment MaterialFields on Material { id code name active }
 `;
 const BrightnessFields = gql`
-  fragment BrightnessFields on Brightness {
-    id
-    code
-    value
-    active
-  }
+  fragment BrightnessFields on Brightness { id code value active }
 `;
 const RefreshRateFields = gql`
-  fragment RefreshRateFields on RefreshRate {
-    id
-    code
-    value
-    active
-  }
+  fragment RefreshRateFields on RefreshRate { id code value active }
 `;
 const SensorFields = gql`
-  fragment SensorFields on Sensor {
-    id
-    code
-    name
-    active
-  }
+  fragment SensorFields on Sensor { id code name active }
 `;
 const ControlTypeFields = gql`
-  fragment ControlTypeFields on ControlType {
-    id
-    code
-    name
-    active
-  }
+  fragment ControlTypeFields on ControlType { id code name active }
 `;
 const ModuleOptionFields = gql`
-  fragment ModuleOptionFields on Module {
-    id
-    code
-    sku
-    name
-    active
-  }
+  fragment ModuleOptionFields on Module { id code sku name active }
 `;
 const PitchFields = gql`
-  fragment PitchFields on Pitch {
-    id
-    code # Нужен для value селекта
-    pitchValue # Числовое значение, нужно для label
-    active
-  }
+  fragment PitchFields on Pitch { id code pitchValue active }
+`;
+const CabinetOptionFields = gql`
+  fragment CabinetOptionFields on Cabinet { id code sku name active }
 `;
 
+// --- GraphQL Запросы ---
 const GET_INITIAL_DATA = gql`
   ${LocationFields}
   ${MaterialFields}
@@ -109,45 +78,38 @@ const GET_INITIAL_DATA = gql`
   ${PitchFields}
 
   query GetInitialData {
-    screenTypes(onlyActive: true) {
-      id
-      code
-      name
-    }
-    locations {
-      ...LocationFields
-    }
-    materials {
-      ...MaterialFields
-    }
-    ipProtections(onlyActive: true) {
-      id
-      code
-      # active
-    }
-    brightnesses(onlyActive: true) {
-      ...BrightnessFields
-    }
-    refreshRates(onlyActive: true) {
-      ...RefreshRateFields
-    }
-    sensors(onlyActive: true) {
-      ...SensorFields
-    }
-    controlTypes(onlyActive: true) {
-      ...ControlTypeFields
-    }
-    moduleOptions(onlyActive: true) {
-      ...ModuleOptionFields
-    }
-    pitches(onlyActive: true) {
-      ...PitchFields
-    }
+    screenTypes(onlyActive: true) { id code name }
+    locations { ...LocationFields }
+    materials { ...MaterialFields }
+    ipProtections(onlyActive: true) { id code }
+    brightnesses(onlyActive: true) { ...BrightnessFields }
+    refreshRates(onlyActive: true) { ...RefreshRateFields }
+    sensors(onlyActive: true) { ...SensorFields }
+    controlTypes(onlyActive: true) { ...ControlTypeFields }
+    moduleOptions(onlyActive: true) { ...ModuleOptionFields }
+    pitches(onlyActive: true) { ...PitchFields }
   }
-    
 `;
 
-// --- Тип для ответа GraphQL ---
+const GET_CABINET_OPTIONS = gql`
+  ${CabinetOptionFields}
+  query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {
+    cabinetOptions(filters: $filters, onlyActive: $onlyActive) {
+      ...CabinetOptionFields
+    }
+  }
+`;
+
+const GET_SCREEN_TYPE_OPTIONS = gql`
+  ${OptionFields}
+  query GetScreenTypeOptions($screenTypeCode: String!, $onlyActive: Boolean) {
+    optionsByScreenType(screenTypeCode: $screenTypeCode, onlyActive: $onlyActive) {
+      ...OptionFields
+    }
+  }
+`;
+
+// --- Типы для ответов GraphQL ---
 type InitialDataQueryResult = {
   screenTypes: Maybe<Array<Maybe<Pick<GqlScreenType, "id" | "code" | "name">>>>;
   locations: Maybe<Array<Maybe<GqlLocation>>>;
@@ -161,7 +123,15 @@ type InitialDataQueryResult = {
   pitches: Maybe<Array<Maybe<Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'>>>>;
 };
 
-// --- Функция-запрос ---
+type CabinetOptionsQueryResult = {
+  cabinetOptions: Maybe<Array<Maybe<Pick<GqlCabinet, 'id' | 'code' | 'sku' | 'name' | 'active'>>>>;
+};
+
+type ScreenTypeOptionsQueryResult = {
+  optionsByScreenType: Maybe<Array<Maybe<Pick<GqlOption, 'id' | 'code' | 'name' | 'active'>>>>;
+};
+
+// --- Функция-запрос (Начальные данные) ---
 const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
   console.log("Fetching initial data (Context)...");
   try {
@@ -191,16 +161,11 @@ const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
 
 // --- Интерфейс для значения Контекста ---
 interface CalculatorContextProps {
-  // Статусы загрузки/ошибки
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  // Загруженные данные
-  screenTypes: (
-    | Pick<GqlScreenType, "id" | "code" | "name">
-    | null
-    | undefined
-  )[];
+  // Начальные данные
+  screenTypes: (Pick<GqlScreenType, "id" | "code" | "name"> | null | undefined)[];
   locations: (GqlLocation | null | undefined)[];
   materials: (GqlMaterial | null | undefined)[];
   ipProtections: (Pick<GqlIpProtection, "id" | "code"> | null | undefined)[];
@@ -208,23 +173,39 @@ interface CalculatorContextProps {
   refreshRates: (GqlRefreshRate | null | undefined)[];
   sensors: (GqlSensor | null | undefined)[];
   controlTypes: (GqlControlType | null | undefined)[];
-  modules: (GqlModule | null | undefined)[];
   pitches: (Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'> | null | undefined)[];
+  modules: (GqlModule | null | undefined)[];
+  // Динамические данные и статус
+  optionsQueryResult: {
+      data: (Pick<GqlOption, 'id' | 'code' | 'name' | 'active'> | null | undefined)[];
+      isLoading: boolean;
+      isError: boolean;
+      error: Error | null;
+  };
+  cabinetQueryResult: {
+    data: (Pick<GqlCabinet, 'id' | 'code' | 'sku' | 'name' | 'active'> | null | undefined)[];
+    isLoading: boolean;
+    isError: boolean;
+    error: Error | null;
+  };
   // Состояния выбора
   selectedScreenTypeCode: string | null;
+  isFlexSelected: boolean;
   selectedLocationCode: string | null;
   selectedMaterialCode: string | null;
   selectedProtectionCode: string | null;
   selectedBrightnessCode: string | null;
   selectedRefreshRateCode: string | null;
-  selectedControlTypeCodes: string[];  
   selectedSensorCodes: string[];
-  selectedModuleCode: string | null;
+  selectedControlTypeCodes: string[];
   selectedPitchCode: string | null;
+  selectedModuleCode: string | null;
+  selectedCabinetCode: string | null;
   widthMm: string | number;
   heightMm: string | number;
-  // Функции для обновления состояний
+  // Функции обновления
   setSelectedScreenTypeCode: (code: string | null) => void;
+  setIsFlexSelected: (selected: boolean) => void;
   setSelectedLocationCode: (code: string | null) => void;
   setSelectedMaterialCode: (code: string | null) => void;
   setSelectedProtectionCode: (code: string | null) => void;
@@ -234,104 +215,59 @@ interface CalculatorContextProps {
   setSelectedControlTypeCodes: (codes: string[]) => void;
   setSelectedPitchCode: (code: string | null) => void;
   setSelectedModuleCode: (code: string | null) => void;
+  setSelectedCabinetCode: (code: string | null) => void;
   setWidthMm: (value: string | number) => void;
   setHeightMm: (value: string | number) => void;
-  
-  // Мемоизированные опции для селекторов
+  // Опции и флаги для UI
   screenTypeSegments: SegmentData[];
-  locationOptions: SegmentData[];
-  materialOptions: SegmentData[];
-  protectionOptions: SegmentData[];
-  brightnessOptions: SegmentData[];
-  refreshRateOptions: SegmentData[];
+  isFlexOptionAvailable: boolean;
+  locationOptions: SelectOption[];
+  materialOptions: SelectOption[];
+  protectionOptions: SelectOption[];
+  brightnessOptions: SelectOption[];
+  refreshRateOptions: SelectOption[];
   sensorOptions: SegmentData[];
   controlTypeOptions: SegmentData[];
-  moduleOptions: SelectOption[];
   pitchOptions: SelectOption[];
+  moduleOptions: SelectOption[];
+  cabinetOptions: SelectOption[];
+  // Сброс
   resetQuery: () => void;
 }
 
 // --- Создание Контекста ---
-// Предоставляем начальные значения по умолчанию (они будут переопределены Provider'ом)
 const CalculatorContext = createContext<CalculatorContextProps>({
-  isLoading: true,
-  isError: false,
-  error: null,
-  screenTypes: [],
-  locations: [],
-  materials: [],
-  ipProtections: [],
-  brightnesses: [],
-  refreshRates: [],
-  sensors: [],
-  controlTypes: [],
-  modules: [],
-  pitches: [],
-  // Состояния выбора
-  selectedScreenTypeCode: null,
-  selectedLocationCode: null,
-  selectedMaterialCode: null,
-  selectedProtectionCode: null,
-  selectedBrightnessCode: null,
-  selectedRefreshRateCode: null,
-  selectedSensorCodes: [],
-  selectedControlTypeCodes: [],
-  selectedModuleCode: null,
-  selectedPitchCode: null,
-  widthMm: "",
-  heightMm: "",
-  setSelectedScreenTypeCode: () => {},
-  setSelectedLocationCode: () => {},
-  setSelectedMaterialCode: () => {},
-  setSelectedProtectionCode: () => {},
-  setSelectedBrightnessCode: () => {},
-  setSelectedRefreshRateCode: () => {},
-  setSelectedSensorCodes: () => {},
-  setSelectedControlTypeCodes: () => {},
-  setSelectedModuleCode: () => {},
-  setSelectedPitchCode: () => {},
-  setWidthMm: () => {},
-  setHeightMm: () => {},
-  screenTypeSegments: [],
-  locationOptions: [],
-  materialOptions: [],
-  protectionOptions: [],
-  brightnessOptions: [],
-  refreshRateOptions: [],
-  sensorOptions: [],
-  controlTypeOptions: [],
-  moduleOptions: [],
-  pitchOptions: [],
+  isLoading: true, isError: false, error: null,
+  screenTypes: [], locations: [], materials: [], ipProtections: [], brightnesses: [], refreshRates: [], sensors: [], controlTypes: [], pitches: [], modules: [],
+  optionsQueryResult: { data: [], isLoading: false, isError: false, error: null },
+  cabinetQueryResult: { data: [], isLoading: false, isError: false, error: null },
+  selectedScreenTypeCode: null, isFlexSelected: false, selectedLocationCode: null, selectedMaterialCode: null, selectedProtectionCode: null, selectedBrightnessCode: null, selectedRefreshRateCode: null, selectedSensorCodes: [], selectedControlTypeCodes: [], selectedPitchCode: null, selectedModuleCode: null, selectedCabinetCode: null, widthMm: "", heightMm: "",
+  setSelectedScreenTypeCode: () => {}, setIsFlexSelected: () => {}, setSelectedLocationCode: () => {}, setSelectedMaterialCode: () => {}, setSelectedProtectionCode: () => {}, setSelectedBrightnessCode: () => {}, setSelectedRefreshRateCode: () => {}, setSelectedSensorCodes: () => {}, setSelectedControlTypeCodes: () => {}, setSelectedPitchCode: () => {}, setSelectedModuleCode: () => {}, setSelectedCabinetCode: () => {}, setWidthMm: () => {}, setHeightMm: () => {},
+  screenTypeSegments: [], isFlexOptionAvailable: false, locationOptions: [], materialOptions: [], protectionOptions: [], brightnessOptions: [], refreshRateOptions: [], sensorOptions: [], controlTypeOptions: [], pitchOptions: [], moduleOptions: [], cabinetOptions: [],
   resetQuery: () => {},
 });
 
 // --- Компонент Провайдера Контекста ---
 export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<
-    string | null
-  >(null);
-  const [widthMm, setWidthMm] = useState<string | number>("");
-  const [heightMm, setHeightMm] = useState<string | number>("");
-  const [selectedLocationCode, setSelectedLocationCodeState] = useState<
-    string | null
-  >(null);
-  const [selectedMaterialCode, setSelectedMaterialCodeState] = useState<
-    string | null
-  >(null);
-  const [selectedProtectionCode, setSelectedProtectionCodeState] = useState<
-    string | null
-  >(null);
+  // --- Состояния выбора ---
+  const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<string | null>(null);
+  const [widthMm, setWidthMmState] = useState<string | number>("");
+  const [heightMm, setHeightMmState] = useState<string | number>("");
+  const [selectedLocationCode, setSelectedLocationCodeState] = useState<string | null>(null);
+  const [selectedMaterialCode, setSelectedMaterialCodeState] = useState<string | null>(null);
+  const [selectedProtectionCode, setSelectedProtectionCodeState] = useState<string | null>(null);
   const [selectedBrightnessCode, setSelectedBrightnessCodeState] = useState<string | null>(null);
   const [selectedRefreshRateCode, setSelectedRefreshRateCodeState] = useState<string | null>(null);
   const [selectedSensorCodes, setSelectedSensorCodesState] = useState<string[]>([]);
   const [selectedControlTypeCodes, setSelectedControlTypeCodesState] = useState<string[]>([]);
-  const [selectedModuleCode, setSelectedModuleCodeState] = useState<string | null>(null);
   const [selectedPitchCode, setSelectedPitchCodeState] = useState<string | null>(null);
- 
-  // Запрос данных
-  const { data, isLoading, isError, error, refetch } = useQuery<
-    InitialDataQueryResult,
-    Error
+  const [selectedModuleCode, setSelectedModuleCodeState] = useState<string | null>(null);
+  const [selectedCabinetCode, setSelectedCabinetCodeState] = useState<string | null>(null);
+  const [isFlexSelected, setIsFlexSelectedState] = useState<boolean>(false);
+
+  // --- Запрос начальных данных ---
+  const { data: initialData, isLoading: isLoadingInitial, isError: isErrorInitial, error: errorInitial, refetch: refetchInitial } = useQuery<
+    InitialDataQueryResult, Error
   >({
     queryKey: ["calculatorInitialData"],
     queryFn: fetchInitialData,
@@ -339,428 +275,239 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     refetchOnWindowFocus: false,
   });
 
-  // Извлечение данных
-  const screenTypes = data?.screenTypes ?? [];
-  const gqlLocations = data?.locations ?? [];
-  const gqlMaterials = data?.materials ?? [];
-  const gqlModules = data?.moduleOptions ?? [];
-  // Используем ipProtections
-  const gqlIpProtections = data?.ipProtections ?? [];
-  const gqlBrightnessValues = data?.brightnesses ?? [];
-  const gqlRefreshRates = data?.refreshRates ?? [];
-  const gqlSensors = data?.sensors ?? [];
-  const gqlControlTypes = data?.controlTypes ?? [];
-  const gqlPitches = data?.pitches ?? [];
+  // Извлечение начальных данных
+  const screenTypes = initialData?.screenTypes ?? [];
+  const gqlLocations = initialData?.locations ?? [];
+  const gqlMaterials = initialData?.materials ?? [];
+  const gqlIpProtections = initialData?.ipProtections ?? [];
+  const gqlBrightnessValues = initialData?.brightnesses ?? [];
+  const gqlRefreshRates = initialData?.refreshRates ?? [];
+  const gqlSensors = initialData?.sensors ?? [];
+  const gqlControlTypes = initialData?.controlTypes ?? [];
+  const gqlPitches = initialData?.pitches ?? [];
+  const gqlModules = initialData?.moduleOptions ?? [];
 
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ОПЦИЙ ---
+  const enabledOptionsQuery = !!selectedScreenTypeCode;
+  const {
+      data: optionsData,
+      isLoading: isLoadingOptions,
+      isError: isErrorOptions,
+      error: errorOptions,
+      refetch: refetchOptions
+  } = useQuery<ScreenTypeOptionsQueryResult, Error>({
+      queryKey: ['screenTypeOptions', selectedScreenTypeCode],
+      queryFn: async () => {
+          console.log(`[Options Query] Fetching options for screen type: ${selectedScreenTypeCode}`);
+          if (!selectedScreenTypeCode) throw new Error("Screen type code is required to fetch options.");
+          const variables = { screenTypeCode: selectedScreenTypeCode, onlyActive: true };
+          return graphQLClient.request<ScreenTypeOptionsQueryResult>(GET_SCREEN_TYPE_OPTIONS, variables);
+      },
+      enabled: enabledOptionsQuery,
+      staleTime: 1000 * 60 * 15,
+      refetchOnWindowFocus: false,
+  });
+  const availableOptions = optionsData?.optionsByScreenType ?? [];
 
-  // Установка ScreenType по умолчанию
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС КАБИНЕТОВ ---
+  const cabinetScreenTypeCode = 'cabinet';
+  const isCabinetScreenTypeSelected = selectedScreenTypeCode === cabinetScreenTypeCode;
+  const areCabinetDepsSelected = !!(selectedLocationCode && selectedMaterialCode && selectedPitchCode && selectedModuleCode);
+  const enabledCabinetQuery = isCabinetScreenTypeSelected && areCabinetDepsSelected;
+  const {
+      data: cabinetData,
+      isLoading: isLoadingCabinets,
+      isError: isErrorCabinets,
+      error: errorCabinets,
+      refetch: refetchCabinets
+  } = useQuery<CabinetOptionsQueryResult, Error>({
+      queryKey: ['cabinetOptions', selectedLocationCode, selectedMaterialCode, selectedPitchCode, selectedModuleCode],
+      queryFn: async () => {
+          console.log('[Cabinet Query] Fetching cabinet options...');
+          const variables: { filters: CabinetFilterInput, onlyActive: boolean } = {
+              filters: {
+                  locationCode: selectedLocationCode || undefined,
+                  materialCode: selectedMaterialCode || undefined,
+                  pitchCode: selectedPitchCode || undefined,
+                  moduleCode: selectedModuleCode || undefined
+              },
+              onlyActive: true
+          };
+          return graphQLClient.request<CabinetOptionsQueryResult>(GET_CABINET_OPTIONS, variables);
+      },
+      enabled: enabledCabinetQuery,
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
+  });
+  const gqlCabinets = cabinetData?.cabinetOptions ?? [];
+
+  // --- Эффекты ---
   useEffect(() => {
-    if (
-      !isLoading &&
-      screenTypes.length > 0 &&
-      selectedScreenTypeCode === null
-    ) {
+    if (!isLoadingInitial && screenTypes.length > 0 && selectedScreenTypeCode === null) {
       const defaultCode = "cabinet";
-      const defaultScreenType = screenTypes.find(
-        (st) =>
-          st?.code?.toLowerCase() === defaultCode.toLowerCase()
-      );
-      if (defaultScreenType?.code) {
-        setSelectedScreenTypeCodeState(defaultScreenType.code);
-      } else {
+      const defaultScreenType = screenTypes.find((st) => st?.code?.toLowerCase() === defaultCode.toLowerCase());
+      if (defaultScreenType?.code) setSelectedScreenTypeCodeState(defaultScreenType.code);
+      else {
         const firstAvailable = screenTypes.find((st) => !!st?.code);
         if (firstAvailable?.code) {
           setSelectedScreenTypeCodeState(firstAvailable.code);
-          console.warn(
-            `Default ScreenType code '${defaultCode}' not found. Using first available: ${firstAvailable.code}`
-          );
-        } else {
-          console.warn(
-            `Default ScreenType code '${defaultCode}' not found, and no other types available.`
-          );
-        }
+          console.warn(`Default ScreenType code '${defaultCode}' not found. Using first available: ${firstAvailable.code}`);
+        } else console.warn(`Default ScreenType code '${defaultCode}' not found, and no other types available.`);
       }
     }
-  }, [isLoading, screenTypes, selectedScreenTypeCode]);
+  }, [isLoadingInitial, screenTypes, selectedScreenTypeCode]);
 
-  // Установка/сброс Protection на основе Location
   useEffect(() => {
-    if (isLoading || !selectedLocationCode) {
-      if (!selectedLocationCode && selectedProtectionCode !== null) {
-        console.log("(Context) Resetting Protection because Location is null");
-        setSelectedProtectionCodeState(null);
-        // TODO: Здесь все еще нужен сброс зависимых состояний (Pitch, Cabinet...)
-      }
+    if (isLoadingInitial || !selectedLocationCode) {
+      if (!selectedLocationCode && selectedProtectionCode !== null) setSelectedProtectionCodeState(null);
       return;
     }
-
     let newProtectionCode: string | null = null;
-    const selectedLocation = gqlLocations.find(
-      (loc) => loc?.code === selectedLocationCode
-    );
-
+    const selectedLocation = gqlLocations.find((loc) => loc?.code === selectedLocationCode);
     if (selectedLocation) {
       const codeLower = selectedLocation?.code?.toLowerCase() ?? "";
       const nameLower = selectedLocation?.name?.toLowerCase() ?? "";
-      if (
-        codeLower.includes("indoor") ||
-        nameLower.includes("indoor") ||
-        codeLower.includes("внутр") ||
-        nameLower.includes("внутр")
-      ) {
-        const foundIp = gqlIpProtections.find((ip) => ip?.code === "IP30");
-        newProtectionCode = foundIp?.code ?? null;
-      } else if (
-        codeLower.includes("outdoor") ||
-        nameLower.includes("outdoor") ||
-        codeLower.includes("уличн") ||
-        nameLower.includes("уличн")
-      ) {
-        const foundIp = gqlIpProtections.find((ip) => ip?.code === "IP65");
-        newProtectionCode = foundIp?.code ?? null;
+      if (codeLower.includes("indoor") || nameLower.includes("indoor") || codeLower.includes("внутр") || nameLower.includes("внутр")) {
+        newProtectionCode = gqlIpProtections.find((ip) => ip?.code === "IP30")?.code ?? null;
+      } else if (codeLower.includes("outdoor") || nameLower.includes("outdoor") || codeLower.includes("уличн") || codeLower.includes("уличн")) {
+        newProtectionCode = gqlIpProtections.find((ip) => ip?.code === "IP65")?.code ?? null;
       }
     }
-    // Обновляем состояние, только если значение изменилось
-    if (selectedProtectionCode !== newProtectionCode) {
-      console.log(
-        `(Context) Setting Protection based on Location '${selectedLocationCode}': ${newProtectionCode}`
-      );
-      setSelectedProtectionCodeState(newProtectionCode);
-      // TODO: Здесь все еще нужен сброс зависимых состояний (Pitch, Cabinet...)
-    }
-  }, [selectedLocationCode, gqlIpProtections, gqlLocations, isLoading]);
+    if (selectedProtectionCode !== newProtectionCode) setSelectedProtectionCodeState(newProtectionCode);
+  }, [selectedLocationCode, gqlIpProtections, gqlLocations, isLoadingInitial]);
 
-  // Подготовка данных для селекторов
+  useEffect(() => {
+    if (selectedCabinetCode !== null && (!enabledCabinetQuery || cabinetData !== undefined)) {
+         setSelectedCabinetCodeState(null);
+    }
+  }, [enabledCabinetQuery, cabinetData, selectedCabinetCode]);
+
+  useEffect(() => {
+    if (selectedScreenTypeCode !== undefined) { // Сброс опции при смене типа экрана
+        setIsFlexSelectedState(false);
+    }
+  }, [selectedScreenTypeCode]);
+
+  // --- Подготовка данных для селекторов (useMemo) ---
   const screenTypeSegments = useMemo((): SegmentData[] => {
     if (!Array.isArray(screenTypes)) return [];
     return screenTypes
-      .filter(
-        (
-          st
-        ): st is Pick<GqlScreenType, "id" | "code" | "name"> & {
-          code: string;
-        } => !!st?.code
-      )
+      .filter((st): st is Pick<GqlScreenType, "id" | "code" | "name"> & { code: string; } => !!st?.code)
       .map((st) => ({ value: st.code, label: st.name ?? st.code }));
   }, [screenTypes]);
 
-  const locationOptions = useMemo((): SegmentData[] => {
-    // TODO: Фильтрация по selectedScreenTypeCode
+  const locationOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlLocations)) return [];
     return gqlLocations
-      .filter(
-        (loc): loc is GqlLocation & { code: string; active: true } =>
-          !!loc?.code && loc.active === true
-      )
+      .filter((loc): loc is GqlLocation & { code: string; active: true } => !!loc?.code && loc.active === true)
       .map((loc) => ({ value: loc.code, label: loc.name ?? loc.code }));
-  }, [gqlLocations /*, selectedScreenTypeCode*/]);
+  }, [gqlLocations]);
 
-  const materialOptions = useMemo((): SegmentData[] => {
-    // TODO: Фильтрация по selectedLocationCode
+  const materialOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlMaterials)) return [];
     return gqlMaterials
-      .filter(
-        (mat): mat is GqlMaterial & { code: string; active: true } =>
-          !!mat?.code && mat.active === true
-      )
+      .filter((mat): mat is GqlMaterial & { code: string; active: true } => !!mat?.code && mat.active === true)
       .map((mat) => ({ value: mat.code, label: mat.name ?? mat.code }));
-  }, [gqlMaterials /*, selectedLocationCode*/]);
+  }, [gqlMaterials]);
 
-  // Вычисляем опции для защиты
-  const protectionOptions = useMemo((): SegmentData[] => {
+  const protectionOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlIpProtections)) return [];
     return gqlIpProtections
-      .filter(
-        (ip): ip is Pick<GqlIpProtection, "id" | "code"> & { code: string } =>
-          !!ip?.code
-      )
-      .sort((a, b) => a.code.localeCompare(b.code)) // Сортировка
+      .filter((ip): ip is Pick<GqlIpProtection, "id" | "code"> & { code: string } => !!ip?.code)
+      .sort((a, b) => a.code.localeCompare(b.code))
       .map((ip) => ({ value: ip.code, label: ip.code }));
   }, [gqlIpProtections]);
 
-  // Вычисляем опции для яркости
-  const brightnessOptions = useMemo((): SegmentData[] => {
+  const brightnessOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlBrightnessValues)) return [];
     return gqlBrightnessValues
-      .filter(
-        // Убеждаемся, что есть code, value и active=true
-        (br): br is GqlBrightness & { code: string; value: number; active: true } =>
-          !!br?.code && typeof br.value === 'number' && br.active === true
-      )
-      // Сортируем по числовому значению яркости
+      .filter((br): br is GqlBrightness & { code: string; value: number; active: true } => !!br?.code && typeof br.value === 'number' && br.active === true)
       .sort((a, b) => a.value - b.value)
-      // Формируем массив для Select
-      .map((br) => ({
-        value: br.code,
-        label: `${br.value} nit` // Добавляем единицу измерения
-      }));
-  }, [gqlBrightnessValues]); // Зависимость от загруженных данных
+      .map((br) => ({ value: br.code, label: `${br.value} nit` }));
+  }, [gqlBrightnessValues]);
 
-  // Вычисляем опции для частоты обновления
-  const refreshRateOptions = useMemo((): SegmentData[] => {
+  const refreshRateOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlRefreshRates)) return [];
     return gqlRefreshRates
-      .filter(
-        // Убеждаемся, что есть code, value и active=true
-        (rr): rr is GqlRefreshRate & { code: string; value: number; active: true } =>
-          !!rr?.code && typeof rr.value === 'number' && rr.active === true
-      )
-      // Сортируем по числовому значению частоты
+      .filter((rr): rr is GqlRefreshRate & { code: string; value: number; active: true } => !!rr?.code && typeof rr.value === 'number' && rr.active === true)
       .sort((a, b) => a.value - b.value)
-      // Формируем массив для Select
-      .map((rr) => ({
-        value: rr.code,
-        label: `${rr.value} Hz` // Добавляем единицу измерения
-      }));
+      .map((rr) => ({ value: rr.code, label: `${rr.value} Hz` }));
   }, [gqlRefreshRates]);
 
-  // Вычисляем опции для сенсоров
   const sensorOptions = useMemo((): SegmentData[] => {
     if (!Array.isArray(gqlSensors)) return [];
     return gqlSensors
-      .filter(
-        // Убеждаемся, что есть code, name и active=true
-        (s): s is GqlSensor & { code: string; name: string; active: true } =>
-          !!s?.code && !!s.name && s.active === true
-      )
-      // Сортируем по имени для консистентности
+      .filter((s): s is GqlSensor & { code: string; name: string; active: true } => !!s?.code && !!s.name && s.active === true)
       .sort((a, b) => a.name.localeCompare(b.name))
-      // Формируем массив для CheckboxGroup
-      .map((s) => ({
-        value: s.code, // Используем code как value
-        label: s.name  // Используем name как label
-      }));
-  }, [gqlSensors]);// Зависимость от загруженных данны
+      .map((s) => ({ value: s.code, label: s.name }));
+  }, [gqlSensors]);
 
-  // Вычисляем опции для типов управления
   const controlTypeOptions = useMemo((): SegmentData[] => {
     if (!Array.isArray(gqlControlTypes)) return [];
     return gqlControlTypes
-      .filter(
-        // Убеждаемся, что есть code, name и active=true
-        (ct): ct is GqlControlType & { code: string; name: string; active: true } =>
-          !!ct?.code && !!ct.name && ct.active === true
-      )
-      // Сортируем по имени
+      .filter((ct): ct is GqlControlType & { code: string; name: string; active: true } => !!ct?.code && !!ct.name && ct.active === true)
       .sort((a, b) => a.name.localeCompare(b.name))
-      // Формируем массив для CheckboxGroup
-      .map((ct) => ({
-        value: ct.code, // Используем code как value
-        label: ct.name  // Используем name как label
-      }));
+      .map((ct) => ({ value: ct.code, label: ct.name }));
   }, [gqlControlTypes]);
+
+  const pitchOptions = useMemo((): SelectOption[] => {
+    if (!Array.isArray(gqlPitches)) return [];
+    return gqlPitches
+      .filter((p): p is Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'> & { code: string; pitchValue: number; active: true } => !!p && p.active === true && !!p.code && typeof p.pitchValue === 'number')
+      .map((p) => ({ value: p.code, label: `${p.pitchValue} мм` }));
+  }, [gqlPitches]);
 
   const moduleOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlModules)) return [];
-
-    // TODO: Здесь будет ЛОГИКА ФИЛЬТРАЦИИ gqlModules на основе
-    // selectedPitchCode, selectedLocationCode, selectedIpProtectionCode и т.д.
-    // Пока просто возвращаем все активные модули.
-    const filteredModules = gqlModules.filter(
-      (m): m is GqlModule & { code: string; active: true } =>
-        !!m?.code && m.active === true
-    );
-    return filteredModules.map((m) => {
-      // Явно обращаемся к полям. TS должен "видеть" name, sku, code, т.к. m больше не null/undefined
-      // и мы работаем с типом GqlModule (теоретически)
-      const labelValue = m.name ?? m.sku ?? m.code ?? 'Неизвестный модуль';
-      return {
-          value: m.code, // code точно есть (проверено в filter)
-          label: labelValue
-      };
-  });
-}, [gqlModules /*, зависимости фильтрации */]);
-
-// Вычисляем опции для шага пикселя
-const pitchOptions = useMemo((): SelectOption[] => {
-  if (!Array.isArray(gqlPitches)) return [];
-  // Фильтруем null/undefined и неактивные
-  return gqlPitches
-    .filter(
-      (p): p is Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'> & { code: string; pitchValue: number; active: true } =>
-        !!p && p.active === true && !!p.code && typeof p.pitchValue === 'number'
-    )
-    // Сортировка уже есть на бэкенде (orderBy: { pitchValue: 'asc' })
-    .map((p) => ({
-      value: p.code, // Используем code как value
-      label: `${p.pitchValue} мм` // Формируем label со значением и "мм"
+    const filteredModules = gqlModules.filter((m): m is GqlModule & { code: string; active: true } => !!m?.code && m.active === true);
+    return filteredModules.map((m) => ({
+        value: m.code,
+        label: m.name ?? m.sku ?? m.code ?? 'Неизвестный модуль'
     }));
-}, [gqlPitches]);
+  }, [gqlModules]);
 
-  // Функции для обновления состояния с логикой сброса зависимостей
-  const setSelectedScreenTypeCode = useCallback(
-    (value: string | null) => {
-      if (selectedScreenTypeCode === value) return; // Предотвращаем лишние обновления
-      console.log("(Context) Selected Screen Type Code:", value);
-      setSelectedScreenTypeCodeState(value);
-      setSelectedLocationCodeState(null);
-      setSelectedMaterialCodeState(null);
-      setSelectedProtectionCodeState(null);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedSensorCodesState([]);
-      setSelectedControlTypeCodesState([]);
-      setSelectedModuleCodeState(null);
-      setSelectedPitchCodeState(null);
-    },
-    [selectedScreenTypeCode]
-  ); 
+  const cabinetOptions = useMemo((): SelectOption[] => {
+      if (!Array.isArray(gqlCabinets)) return [];
+      return gqlCabinets
+          .filter((c): c is Pick<GqlCabinet, 'id' | 'code' | 'sku' | 'name' | 'active'> & { code: string } => !!c?.code)
+          .map((c) => ({
+              value: c.code,
+              label: c.name ?? c.sku ?? c.code ?? 'Неизвестный кабинет'
+          }));
+  }, [gqlCabinets]);
 
-  const setSelectedLocationCode = useCallback(
-    (value: string | null) => {
-      if (selectedLocationCode === value) return; // Предотвращаем лишние обновления
-      console.log("(Context) Selected Location Code:", value);
-      setSelectedLocationCodeState(value);
-      setSelectedMaterialCodeState(null);
-      // Protection пересчитается в useEffect, но другие зависимости нужно сбросить
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedModuleCodeState(null);
-      setSelectedPitchCodeState(null);
-    },
-    [selectedLocationCode]
-  );
+  const isFlexOptionAvailable = useMemo((): boolean => {
+    return availableOptions.some(opt => opt?.code === 'flex');
+  }, [availableOptions]);
 
-  const setSelectedMaterialCode = useCallback(
-    (value: string | null) => {
-      if (selectedMaterialCode === value) return; // Предотвращаем лишние обновления
-      console.log("(Context) Selected Material Code:", value);
-      setSelectedMaterialCodeState(value);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedModuleCodeState(null);
-      setSelectedPitchCodeState(null);
-      // TODO: Сбросить остальные: Pitch, Cabinet...
-    },
-    [selectedMaterialCode]
-  );
+  // --- Функции для обновления состояния (useCallback) ---
+  const setSelectedScreenTypeCode = useCallback((value: string | null) => { if (selectedScreenTypeCode === value) return; setSelectedScreenTypeCodeState(value); setSelectedLocationCodeState(null); setSelectedMaterialCodeState(null); setSelectedProtectionCodeState(null); setSelectedBrightnessCodeState(null); setSelectedRefreshRateCodeState(null); setSelectedSensorCodesState([]); setSelectedControlTypeCodesState([]); setSelectedPitchCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); setIsFlexSelectedState(false); }, [selectedScreenTypeCode]);
+  const setSelectedLocationCode = useCallback((value: string | null) => { if (selectedLocationCode === value) return; setSelectedLocationCodeState(value); setSelectedMaterialCodeState(null); setSelectedBrightnessCodeState(null); setSelectedRefreshRateCodeState(null); setSelectedPitchCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, [selectedLocationCode]);
+  const setSelectedMaterialCode = useCallback((value: string | null) => { if (selectedMaterialCode === value) return; setSelectedMaterialCodeState(value); setSelectedBrightnessCodeState(null); setSelectedRefreshRateCodeState(null); setSelectedPitchCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, [selectedMaterialCode]);
+  const setSelectedProtectionCode = useCallback((value: string | null): void => { if (selectedProtectionCode === value) return; setSelectedProtectionCodeState(value); setSelectedBrightnessCodeState(null); setSelectedRefreshRateCodeState(null); setSelectedPitchCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, [selectedProtectionCode]);
+  const setSelectedBrightnessCode = useCallback((value: string | null) => { if (selectedBrightnessCode === value) return; setSelectedBrightnessCodeState(value); setSelectedPitchCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, [selectedBrightnessCode]);
+  const setSelectedRefreshRateCode = useCallback((value: string | null) => { if (selectedRefreshRateCode === value) return; setSelectedRefreshRateCodeState(value); setSelectedPitchCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, [selectedRefreshRateCode]);
+  const setSelectedSensorCodes = useCallback((value: string[]) => { setSelectedSensorCodesState(value); }, []);
+  const setSelectedControlTypeCodes = useCallback((value: string[]) => { setSelectedControlTypeCodesState(value); }, []);
+  const setSelectedPitchCode = useCallback((value: string | null) => { if (selectedPitchCode === value) return; setSelectedPitchCodeState(value); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, [selectedPitchCode]);
+  const setSelectedModuleCode = useCallback((value: string | null) => { if (selectedModuleCode === value) return; setSelectedModuleCodeState(value); setSelectedCabinetCodeState(null); }, [selectedModuleCode]);
+  const setSelectedCabinetCode = useCallback((value: string | null) => { if (selectedCabinetCode === value) return; setSelectedCabinetCodeState(value); }, [selectedCabinetCode]);
+  const setIsFlexSelected = useCallback((selected: boolean) => { setIsFlexSelectedState(selected); }, []);
+  const setWidthMm = useCallback((value: string | number) => { setWidthMmState(value); }, []);
+  const setHeightMm = useCallback((value: string | number) => { setHeightMmState(value); }, []);
 
-  const setSelectedProtectionCode = useCallback(
-    (value: string | null): void => {
-      if (selectedProtectionCode === value) return; // Предотвращаем лишние обновления
-      console.log("(Context) Selected Protection Code:", value);
-      setSelectedProtectionCodeState(value);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedModuleCodeState(null);
-      setSelectedPitchCodeState(null);
-      // TODO: Сбросить Pitch, Cabinet...
-    },
-    [selectedProtectionCode]
-  );
-  const setSelectedBrightnessCode = useCallback((value: string | null) => {
-    if (selectedBrightnessCode === value) return;
-    console.log("(Context) Selected Brightness Code:", value);
-    setSelectedBrightnessCodeState(value);
-    setSelectedModuleCodeState(null);
-    setSelectedPitchCodeState(null);
-    // TODO: Сбросить зависимые состояния (например, Cabinet, Module...), если они есть
-  }, 
-  [selectedBrightnessCode]);
+  // Функция сброса
+  const resetQuery = useCallback(() => { refetchInitial(); refetchCabinets(); refetchOptions(); }, [refetchInitial, refetchCabinets, refetchOptions]);
 
-const setSelectedRefreshRateCode = useCallback((value: string | null) => {
-  if (selectedRefreshRateCode === value) return;
-  console.log("(Context) Selected Refresh Rate Code:", value);
-  setSelectedRefreshRateCodeState(value);
-  setSelectedModuleCodeState(null);
-  setSelectedPitchCodeState(null);
-  // TODO: Сбросить зависимые состояния (например, Cabinet, Module...), если они есть
-}, 
-[selectedRefreshRateCode]);
-
-const setSelectedSensorCodes = useCallback((value: string[]) => {
-  // value - это новый массив выбранных кодов от Checkbox.Group
-  console.log("(Context) Selected Sensor Codes:", value);
-  setSelectedSensorCodesState(value);
-  setSelectedModuleCodeState(null);
-  // Т.к. сенсоры пока ни на что не влияют, другие состояния не сбрасываем
-}, [] // Нет зависимостей, т.к. просто устанавливаем новое значение
-);
-
-const setSelectedControlTypeCodes = useCallback((value: string[]) => {
-  // value - это новый массив выбранных кодов от Checkbox.Group
-  console.log("(Context) Selected Control Type Codes:", value);
-  setSelectedControlTypeCodesState(value);
-  // Т.к. типы управления пока ни на что не влияют, другие состояния не сбрасываем
-}, [] // Нет зависимостей
-);
-
-const setSelectedPitchCode = useCallback((value: string | null) => {
-  if (selectedPitchCode === value) return;
-  console.log("(Context) Selected Pitch Code:", value);
-  setSelectedPitchCodeState(value);
-  setSelectedModuleCodeState(value);
-  // Сброс зависимых состояний: Модуль и Кабинет
-  setSelectedModuleCodeState(null);
-  // TODO: Сбросить Cabinet...
-}, [selectedPitchCode]);
-
-const setSelectedModuleCode = useCallback((value: string | null) => {
-  if (selectedModuleCode === value) return; // Предотвращаем лишние обновления
-  console.log("(Context) Selected Module Code:", value);
-  setSelectedModuleCodeState(value);
-  // TODO: Сбросить зависимые состояния (например, Cabinet...)
-}, [selectedModuleCode]);
-
-  // Функция для ErrorBoundary
-  const resetQuery = useCallback(() => {
-    // Можно добавить сброс состояний перед перезапросом
-    refetch();
-  }, [refetch]);
-
-  // Формируем значение контекста
-  // Не оборачиваем в useMemo для максимального сохранения исходной структуры
+  // --- Формируем значение контекста ---
   const contextValue: CalculatorContextProps = {
-    isLoading,
-    isError,
-    error,
-    screenTypes,
-    locations: gqlLocations,
-    materials: gqlMaterials,
-    ipProtections: gqlIpProtections,
-    brightnesses: gqlBrightnessValues,
-    refreshRates: gqlRefreshRates,
-    sensors: gqlSensors,
-    controlTypes: gqlControlTypes,
-    pitches: gqlPitches,
-    modules: gqlModules,
-    // Состояния выбора
-    selectedScreenTypeCode,
-    selectedLocationCode,
-    selectedMaterialCode,
-    selectedProtectionCode,
-    selectedBrightnessCode,
-    selectedRefreshRateCode,
-    selectedSensorCodes,
-    selectedControlTypeCodes,
-    selectedPitchCode,
-    selectedModuleCode,
-    widthMm,
-    heightMm,
-    // Функции для обновления состояния
-    setSelectedScreenTypeCode,
-    setSelectedLocationCode,
-    setSelectedMaterialCode,
-    setSelectedProtectionCode,
-    setSelectedBrightnessCode,
-    setSelectedRefreshRateCode,
-    setSelectedSensorCodes,
-    setSelectedControlTypeCodes,
-    setSelectedPitchCode,
-    setSelectedModuleCode, 
-    setWidthMm,
-    setHeightMm,
-    // Мемоизированные опции для селекторов
-    screenTypeSegments,
-    locationOptions,
-    materialOptions,
-    protectionOptions,
-    brightnessOptions,
-    refreshRateOptions,
-    sensorOptions,
-    controlTypeOptions,
-    pitchOptions,
-    moduleOptions,
+    isLoading: isLoadingInitial, isError: isErrorInitial, error: errorInitial,
+    screenTypes, locations: gqlLocations, materials: gqlMaterials, ipProtections: gqlIpProtections, brightnesses: gqlBrightnessValues, refreshRates: gqlRefreshRates, sensors: gqlSensors, controlTypes: gqlControlTypes, pitches: gqlPitches, modules: gqlModules,
+    optionsQueryResult: { data: availableOptions, isLoading: isLoadingOptions, isError: isErrorOptions, error: errorOptions },
+    cabinetQueryResult: { data: gqlCabinets, isLoading: isLoadingCabinets, isError: isErrorCabinets, error: errorCabinets },
+    selectedScreenTypeCode, isFlexSelected, selectedLocationCode, selectedMaterialCode, selectedProtectionCode, selectedBrightnessCode, selectedRefreshRateCode, selectedSensorCodes, selectedControlTypeCodes, selectedPitchCode, selectedModuleCode, selectedCabinetCode, widthMm, heightMm,
+    setSelectedScreenTypeCode, setIsFlexSelected, setSelectedLocationCode, setSelectedMaterialCode, setSelectedProtectionCode, setSelectedBrightnessCode, setSelectedRefreshRateCode, setSelectedSensorCodes, setSelectedControlTypeCodes, setSelectedPitchCode, setSelectedModuleCode, setSelectedCabinetCode, setWidthMm, setHeightMm,
+    screenTypeSegments, isFlexOptionAvailable, locationOptions, materialOptions, protectionOptions, brightnessOptions, refreshRateOptions, sensorOptions, controlTypeOptions, pitchOptions, moduleOptions, cabinetOptions,
     resetQuery,
   };
 
@@ -771,13 +518,11 @@ const setSelectedModuleCode = useCallback((value: string | null) => {
   );
 };
 
-// --- Кастомный хук для использования Контекста ---
+// --- Кастомный хук ---
 export const useCalculatorContext = () => {
   const context = useContext(CalculatorContext);
   if (context === undefined) {
-    throw new Error(
-      "useCalculatorContext must be used within a CalculatorProvider"
-    );
+    throw new Error("useCalculatorContext must be used within a CalculatorProvider");
   }
   return context;
 };

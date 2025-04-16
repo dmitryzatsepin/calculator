@@ -19,6 +19,7 @@ import './types/CabinetSize';
 import './types/ItemCategory';
 import './types/ItemSubcategory';
 import './types/ScreenType';
+import './types/Option';
 import './types/Item'; // Включает ItemPrice
 import './types/CabinetItemComponent';
 import './types/Cabinet'; // Включает CabinetPrice
@@ -27,6 +28,7 @@ import './types/User';
 
 // Импортируем запросы
 import './queries/screenTypeQueries';
+import './queries/optionQueries';
 import './queries/locationQueries';
 import './queries/materialQueries';
 import './queries/ipProtectionQueries';

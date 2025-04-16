@@ -1,10 +1,9 @@
 // src/components/CalculatorForm.tsx
-import { useCallback } from "react";
-import { Stack, LoadingOverlay, Grid, Alert, Text, Button } from "@mantine/core";
+import { useCallback, useEffect } from "react"; // <-- Добавлен useEffect
+import { Stack, LoadingOverlay, Grid, Alert, Text, Button, Loader } from "@mantine/core";
 import { IconAlertCircle } from "@tabler/icons-react";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-
 
 // --- Импорт Компонентов ---
 import DimensionInputs from "./inputs/DimensionInputs";
@@ -18,19 +17,19 @@ import SensorCheckboxGroup from './inputs/SensorCheckboxGroup';
 import ControlTypeCheckboxGroup from './inputs/ControlTypeCheckboxGroup';
 import PitchSelect from './inputs/PitchSelect';
 import ModuleSelect from './inputs/ModuleSelect';
+import CabinetSelect from './inputs/CabinetSelect';
+import FlexOptionSwitch from './inputs/FlexOptionSwitch';
 
 // --- Импорт Контекста ---
 import { useCalculatorContext } from '../context/CalculatorContext';
 
 // --- КОМПОНЕНТ ---
 const CalculatorForm = () => {
-    // --- Получаем данные из контекста ---
+  // --- Получаем данные из контекста ---
   const {
-    // Статусы
-    isLoading,
-    isError,
-    error,
-    // Состояния выбора
+    isLoading: isLoadingInitial,
+    isError: isErrorInitial,
+    error: errorInitial,
     selectedScreenTypeCode,
     selectedLocationCode,
     selectedMaterialCode,
@@ -41,9 +40,12 @@ const CalculatorForm = () => {
     selectedControlTypeCodes,
     selectedPitchCode,
     selectedModuleCode,
+    selectedCabinetCode,
+    isFlexSelected,
     widthMm,
     heightMm,
-    // Функции для обновления
+    cabinetQueryResult,
+    optionsQueryResult, // Получаем весь объект для опций
     setSelectedScreenTypeCode,
     setSelectedLocationCode,
     setSelectedMaterialCode,
@@ -54,9 +56,10 @@ const CalculatorForm = () => {
     setSelectedControlTypeCodes,
     setSelectedPitchCode,
     setSelectedModuleCode,
+    setSelectedCabinetCode,
+    setIsFlexSelected,
     setWidthMm,
     setHeightMm,
-    // Подготовленные данные для UI
     screenTypeSegments,
     locationOptions,
     materialOptions,
@@ -67,66 +70,82 @@ const CalculatorForm = () => {
     controlTypeOptions,
     pitchOptions,
     moduleOptions,
+    cabinetOptions,
+    isFlexOptionAvailable,
   } = useCalculatorContext();
 
-  // --- Обработчики (вызывают функции из контекста) ---
-  const handleScreenTypeChange = useCallback((value: string) => {
-    setSelectedScreenTypeCode(value);
-  }, [setSelectedScreenTypeCode]);
+  // Достаем статус и ошибки для динамических запросов
+  const { isLoading: isLoadingCabinets, isError: isErrorCabinets, error: errorCabinets } = cabinetQueryResult;
+  // ИСПРАВЛЕНО: Деструктурируем нужные поля из optionsQueryResult
+  const { data: optionsData, isLoading: isLoadingOptions, isError: isErrorOptions, error: errorOptions } = optionsQueryResult;
 
-  const handleLocationChange = useCallback((value: string | null) => {
-    setSelectedLocationCode(value);
-  }, [setSelectedLocationCode]);
+  // Определяем, нужно ли показывать секцию кабинетов
+  const cabinetScreenTypeCode = 'cabinet';
+  const showCabinetSection = selectedScreenTypeCode === cabinetScreenTypeCode;
 
-  const handleMaterialChange = useCallback((value: string | null) => {
-    setSelectedMaterialCode(value);
-  }, [setSelectedMaterialCode]);
+   // --- ОТЛАДКА ОПЦИЙ (добавлено для проверки) ---
+  useEffect(() => {
+      if (selectedScreenTypeCode) {
+          console.log('Options Debug:', {
+              selectedScreenTypeCode,
+              isLoadingOptions,
+              isErrorOptions, // Теперь эта переменная объявлена
+              errorOptions: errorOptions?.message, // Теперь эта переменная объявлена
+              availableOptionsData: optionsData, // Теперь эта переменная объявлена
+              isFlexOptionAvailable
+          });
+      }
+  }, [selectedScreenTypeCode, optionsQueryResult, isFlexOptionAvailable]);
+  // ---------------------
 
-  const handleProtectionChange = useCallback((value: string | null) => {
-    setSelectedProtectionCode(value);
-  }, [setSelectedProtectionCode]);
-
-  const handleBrightnessChange = useCallback((value: string | null) => {
-    setSelectedBrightnessCode(value);
-  }, [setSelectedBrightnessCode]);
-
-  const handleRefreshRateChange = useCallback((value: string | null) => {
-    setSelectedRefreshRateCode(value);
-  }, [setSelectedRefreshRateCode]);
-
-  const handleSensorChange = useCallback((value: string[]) => {
-    setSelectedSensorCodes(value);
-  }, [setSelectedSensorCodes]);
-
-  const handleControlTypeChange = useCallback((value: string[]) => {
-    setSelectedControlTypeCodes(value);
-  }, [setSelectedControlTypeCodes]);
-
-  const handlePitchChange = useCallback((value: string | null) => {
-    setSelectedPitchCode(value);
-  }, [setSelectedPitchCode]);
-
-  const handleModuleChange = useCallback((value: string | null) => {
-    setSelectedModuleCode(value);
-  }, [setSelectedModuleCode]);
+  // --- Обработчики ---
+  const handleScreenTypeChange = useCallback((value: string | null) => { setSelectedScreenTypeCode(value); }, [setSelectedScreenTypeCode]);
+  const handleLocationChange = useCallback((value: string | null) => { setSelectedLocationCode(value); }, [setSelectedLocationCode]);
+  const handleMaterialChange = useCallback((value: string | null) => { setSelectedMaterialCode(value); }, [setSelectedMaterialCode]);
+  const handleProtectionChange = useCallback((value: string | null) => { setSelectedProtectionCode(value); }, [setSelectedProtectionCode]);
+  const handleBrightnessChange = useCallback((value: string | null) => { setSelectedBrightnessCode(value); }, [setSelectedBrightnessCode]);
+  const handleRefreshRateChange = useCallback((value: string | null) => { setSelectedRefreshRateCode(value); }, [setSelectedRefreshRateCode]);
+  const handleSensorChange = useCallback((value: string[]) => { setSelectedSensorCodes(value); }, [setSelectedSensorCodes]);
+  const handleControlTypeChange = useCallback((value: string[]) => { setSelectedControlTypeCodes(value); }, [setSelectedControlTypeCodes]);
+  const handlePitchChange = useCallback((value: string | null) => { setSelectedPitchCode(value); }, [setSelectedPitchCode]);
+  const handleModuleChange = useCallback((value: string | null) => { setSelectedModuleCode(value); }, [setSelectedModuleCode]);
+  const handleCabinetChange = useCallback((value: string | null) => { setSelectedCabinetCode(value); }, [setSelectedCabinetCode]);
+  const handleFlexChange = useCallback((checked: boolean) => { setIsFlexSelected(checked); }, [setIsFlexSelected]);
 
   // --- JSX ---
   return (
     <Stack gap="md">
-      <LoadingOverlay visible={isLoading} overlayProps={{ radius: "sm", blur: 2 }} />
-      {isLoading && <Text ta="center">Загрузка конфигурации...</Text>}
-      {!isLoading && isError && ( <Alert title="Ошибка загрузки данных" color="red" icon={<IconAlertCircle size={16} />} radius="sm"> {error?.message ?? "Не удалось загрузить данные."} </Alert> )}
+      <LoadingOverlay
+          visible={isLoadingInitial}
+          overlayProps={{ radius: "sm", blur: 2 }}
+          loaderProps={{ children: <Loader /> }}
+      />
+      {isLoadingInitial && <Text ta="center">Загрузка конфигурации...</Text>}
+      {!isLoadingInitial && isErrorInitial && ( <Alert title="Ошибка загрузки данных" color="red" icon={<IconAlertCircle size={16} />} radius="sm"> {errorInitial?.message ?? "Не удалось загрузить данные."} </Alert> )}
 
-      {/* Отображаем форму только после загрузки и без ошибок */}
-      {!isLoading && !isError && (
+      {!isLoadingInitial && !isErrorInitial && (
           <>
-              {/* --- Используем дочерние компоненты --- */}
               <ScreenTypeSelector
                   data={screenTypeSegments}
                   value={selectedScreenTypeCode}
                   onChange={handleScreenTypeChange}
-                  disabled={isLoading}
+                  disabled={isLoadingInitial}
               />
+
+              {/* --- УСЛОВНЫЙ РЕНДЕРИНГ ОПЦИИ FLEX --- */}
+               {/* Показываем лоадер, если опция доступна, но грузится */}
+              {isLoadingOptions && isFlexOptionAvailable && <Loader size="xs" mt="sm" />}
+              {/* Показываем ошибку, если она была */}
+              {isErrorOptions && isFlexOptionAvailable && <Text c="red" size="xs">Ошибка загрузки опций: {errorOptions?.message}</Text>}
+              {/* Показываем свитч, если опция доступна И НЕ идет загрузка И НЕТ ошибки */}
+              {isFlexOptionAvailable && !isLoadingOptions && !isErrorOptions && (
+                <FlexOptionSwitch
+                    checked={isFlexSelected}
+                    onChange={handleFlexChange}
+                    disabled={selectedScreenTypeCode === cabinetScreenTypeCode}
+                />
+              )}
+              {/* ------------------------------------- */}
 
               <Grid>
                   <DimensionInputs
@@ -134,14 +153,14 @@ const CalculatorForm = () => {
                       height={heightMm}
                       onWidthChange={setWidthMm}
                       onHeightChange={setHeightMm}
-                      disabled={isLoading}
+                      disabled={isLoadingInitial}
                   />
                   <Grid.Col span={{ base: 12, md: 6 }}>
                        <LocationSelect
                            options={locationOptions}
                            value={selectedLocationCode}
                            onChange={handleLocationChange}
-                           disabled={isLoading || !selectedScreenTypeCode || locationOptions.length === 0}
+                           disabled={isLoadingInitial || !selectedScreenTypeCode || locationOptions.length === 0}
                            required
                        />
                   </Grid.Col>
@@ -150,7 +169,7 @@ const CalculatorForm = () => {
                           options={materialOptions}
                           value={selectedMaterialCode}
                           onChange={handleMaterialChange}
-                          disabled={isLoading || !selectedLocationCode || materialOptions.length === 0}
+                          disabled={isLoadingInitial || !selectedLocationCode || materialOptions.length === 0}
                           required
                       />
                   </Grid.Col>
@@ -159,9 +178,7 @@ const CalculatorForm = () => {
                            options={protectionOptions}
                            value={selectedProtectionCode}
                            onChange={handleProtectionChange}
-                           // IP зависит от локации, так что блокируем, пока локация не выбрана
-                           disabled={isLoading || !selectedLocationCode || protectionOptions.length === 0}
-                           // Возможно, не required, т.к. может быть авто-выбор
+                           disabled={isLoadingInitial || !selectedLocationCode || protectionOptions.length === 0}
                            required
                        />
                   </Grid.Col>
@@ -170,11 +187,9 @@ const CalculatorForm = () => {
                            options={brightnessOptions}
                            value={selectedBrightnessCode}
                            onChange={handleBrightnessChange}
-                           // Блокируем, пока не выбрана IP защита (или пока нет опций)
-                           disabled={isLoading || !selectedProtectionCode || brightnessOptions.length === 0}
-                           // Поля пока не обязательные
+                           disabled={isLoadingInitial || !selectedProtectionCode || brightnessOptions.length === 0}
                            required={false}
-                           placeholder="Авто / Выберите яркость" // Можно указать, что есть автовыбор
+                           placeholder="Авто / Выберите яркость"
                        />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, md: 6 }}>
@@ -182,29 +197,25 @@ const CalculatorForm = () => {
                            options={refreshRateOptions}
                            value={selectedRefreshRateCode}
                            onChange={handleRefreshRateChange}
-                           // Блокируем, пока не выбрана IP защита (или пока нет опций)
-                           disabled={isLoading || !selectedProtectionCode || refreshRateOptions.length === 0}
-                           // Поля пока не обязательные
+                           disabled={isLoadingInitial || !selectedProtectionCode || refreshRateOptions.length === 0}
                            required={false}
-                           placeholder="Авто / Выберите частоту" // Можно указать, что есть автовыбор
+                           placeholder="Авто / Выберите частоту"
                        />
                   </Grid.Col>
-                  <Grid.Col span={12} mt="sm"> {/* Занимает всю ширину, небольшой отступ сверху */}
+                  <Grid.Col span={12} mt="sm">
                        <SensorCheckboxGroup
                            options={sensorOptions}
                            value={selectedSensorCodes}
                            onChange={handleSensorChange}
-                           // Блокируем только во время общей загрузки или если опций нет
-                           disabled={isLoading || sensorOptions.length === 0}
+                           disabled={isLoadingInitial || sensorOptions.length === 0}
                        />
                   </Grid.Col>
-                  <Grid.Col span={12} mt="sm"> {/* Занимает всю ширину, небольшой отступ */}
+                  <Grid.Col span={12} mt="sm">
                        <ControlTypeCheckboxGroup
                            options={controlTypeOptions}
                            value={selectedControlTypeCodes}
                            onChange={handleControlTypeChange}
-                           // Блокируем только во время общей загрузки или если опций нет
-                           disabled={isLoading || controlTypeOptions.length === 0}
+                           disabled={isLoadingInitial || controlTypeOptions.length === 0}
                        />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, md: 6 }} mt="md">
@@ -212,17 +223,8 @@ const CalculatorForm = () => {
                           options={pitchOptions}
                           value={selectedPitchCode}
                           onChange={handlePitchChange}
-                          // Блокируем, пока не выбраны Расположение, IP, Яркость, Частота
-                          // (или пока нет опций или идет загрузка)
-                          disabled={
-                              isLoading ||
-                              !selectedLocationCode ||
-                              !selectedProtectionCode || // Зависит от IP
-                              !selectedBrightnessCode ||
-                              !selectedRefreshRateCode ||
-                              pitchOptions.length === 0
-                          }
-                          required={true} // Шаг пикселя обязателен
+                          disabled={ isLoadingInitial || !selectedLocationCode || !selectedProtectionCode || !selectedBrightnessCode || !selectedRefreshRateCode || pitchOptions.length === 0 }
+                          required={true}
                       />
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, md: 6 }} mt="md">
@@ -230,25 +232,31 @@ const CalculatorForm = () => {
                            options={moduleOptions}
                            value={selectedModuleCode}
                            onChange={handleModuleChange}
-                           // ИЗМЕНЕНО: Блокируем, пока не выбраны Расположение, Яркость, Частота И ШАГ ПИКСЕЛЯ
-                           disabled={
-                               isLoading ||
-                               !selectedLocationCode ||
-                               !selectedBrightnessCode ||
-                               !selectedRefreshRateCode ||
-                               !selectedPitchCode ||
-                               moduleOptions.length === 0
-                           }
+                           disabled={ isLoadingInitial || !selectedLocationCode || !selectedBrightnessCode || !selectedRefreshRateCode || !selectedPitchCode || moduleOptions.length === 0 }
                            required={true}
                        />
                   </Grid.Col>
+                  {showCabinetSection && (
+                      <Grid.Col span={12} mt="md">
+                           <CabinetSelect
+                               options={cabinetOptions}
+                               value={selectedCabinetCode}
+                               onChange={handleCabinetChange}
+                               loading={isLoadingCabinets}
+                               disabled={ !selectedLocationCode || !selectedMaterialCode || !selectedPitchCode || !selectedModuleCode || isLoadingCabinets }
+                               required={true}
+                           />
+                           {isErrorCabinets && ( <Text c="red" size="sm" mt="xs"> Ошибка загрузки кабинетов: {errorCabinets?.message ?? 'Неизвестная ошибка'} </Text> )}
+                      </Grid.Col>
+                  )}
               </Grid>
 
-               {/* Блок отладки (использует значения из контекста) */}
-               {(selectedScreenTypeCode || widthMm || heightMm || selectedLocationCode || selectedMaterialCode) && (
+               {/* --- Блок отладки --- */}
+               {(selectedScreenTypeCode || widthMm || heightMm || selectedLocationCode || selectedMaterialCode || selectedProtectionCode || selectedBrightnessCode || selectedRefreshRateCode || selectedSensorCodes.length > 0 || selectedControlTypeCodes.length > 0 || selectedPitchCode || selectedModuleCode || (showCabinetSection && selectedCabinetCode) || isFlexSelected ) && (
                     <Stack gap={0} mt="xs" p="xs" style={{ border: '1px dashed #ccc', borderRadius: '4px' }}>
                         <Text size="xs" c="dimmed">Отладка:</Text>
                         {selectedScreenTypeCode && (<Text size="sm">Выбран тип: {selectedScreenTypeCode}</Text>)}
+                        {isFlexOptionAvailable && (<Text size="sm">Гибкий экран: {isFlexSelected ? 'Да' : 'Нет'}</Text>)}
                         {(widthMm || heightMm) && (<Text size="sm">Размеры: {widthMm || '?'} x {heightMm || '?'} мм</Text>)}
                         {selectedLocationCode && (<Text size="sm">Расположение: {selectedLocationCode}</Text>)}
                         {selectedMaterialCode && (<Text size="sm">Материал: {selectedMaterialCode}</Text>)}
@@ -259,6 +267,7 @@ const CalculatorForm = () => {
                         {selectedControlTypeCodes.length > 0 && (<Text size="sm">Типы управления: {selectedControlTypeCodes.join(', ')}</Text>)}
                         {selectedPitchCode && (<Text size="sm">Шаг пикселя: {selectedPitchCode} ({pitchOptions.find(o => o.value === selectedPitchCode)?.label})</Text>)}
                         {selectedModuleCode && (<Text size="sm">Модуль: {selectedModuleCode} ({moduleOptions.find(o => o.value === selectedModuleCode)?.label})</Text>)}
+                        {showCabinetSection && selectedCabinetCode && (<Text size="sm">Кабинет: {selectedCabinetCode} ({cabinetOptions.find(o => o.value === selectedCabinetCode)?.label})</Text>)}
                     </Stack>
                )}
           </>
@@ -282,7 +291,6 @@ const CalculatorFormWrapper = () => (
           </Alert>
         )}
       >
-        {/* CalculatorForm сам получит все из контекста, т.к. он внутри Provider'а (в main.tsx) */}
         <CalculatorForm />
       </ErrorBoundary>
     )}
