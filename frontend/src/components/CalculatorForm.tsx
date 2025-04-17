@@ -19,6 +19,8 @@ import PitchSelect from './inputs/PitchSelect';
 import ModuleSelect from './inputs/ModuleSelect';
 import CabinetSelect from './inputs/CabinetSelect';
 import FlexOptionSwitch from './inputs/FlexOptionSwitch';
+import DollarRateInput from './inputs/DollarRateInput';
+import CalculateButton from './inputs/CalculateButton';
 
 // --- Импорт Контекста ---
 import { useCalculatorContext } from '../context/CalculatorContext';
@@ -42,10 +44,13 @@ const CalculatorForm = () => {
     selectedModuleCode,
     selectedCabinetCode,
     isFlexSelected,
+    dollarRate,
+    isCalculating,
     widthMm,
     heightMm,
+
     cabinetQueryResult,
-    optionsQueryResult, // Получаем весь объект для опций
+    optionsQueryResult,
     setSelectedScreenTypeCode,
     setSelectedLocationCode,
     setSelectedMaterialCode,
@@ -58,8 +63,11 @@ const CalculatorForm = () => {
     setSelectedModuleCode,
     setSelectedCabinetCode,
     setIsFlexSelected,
+    setDollarRate,
+    performCalculation,
     setWidthMm,
     setHeightMm,
+
     screenTypeSegments,
     locationOptions,
     materialOptions,
@@ -72,6 +80,7 @@ const CalculatorForm = () => {
     moduleOptions,
     cabinetOptions,
     isFlexOptionAvailable,
+    isCalculationReady,
   } = useCalculatorContext();
 
   // Достаем статус и ошибки для динамических запросов
@@ -111,6 +120,10 @@ const CalculatorForm = () => {
   const handleModuleChange = useCallback((value: string | null) => { setSelectedModuleCode(value); }, [setSelectedModuleCode]);
   const handleCabinetChange = useCallback((value: string | null) => { setSelectedCabinetCode(value); }, [setSelectedCabinetCode]);
   const handleFlexChange = useCallback((checked: boolean) => { setIsFlexSelected(checked); }, [setIsFlexSelected]);
+  const handleDollarRateChange = useCallback((value: number | string) => {
+    setDollarRate(value);
+  }, [setDollarRate]);
+  const handleCalculateClick = useCallback(() => { performCalculation(); }, [performCalculation]);
 
   // --- JSX ---
   return (
@@ -250,6 +263,17 @@ const CalculatorForm = () => {
                       </Grid.Col>
                   )}
               </Grid>
+              <DollarRateInput
+                  value={dollarRate}
+                  onChange={handleDollarRateChange}
+                  disabled={isLoadingInitial} 
+                  required={true}
+              />
+              <CalculateButton
+                  onClick={handleCalculateClick}
+                  loading={isCalculating} // Показываем лоадер во время расчета
+                  disabled={!isCalculationReady} // Блокируем, если не все обязательные поля заполнены
+              />
 
                {/* --- Блок отладки --- */}
                {(selectedScreenTypeCode || widthMm || heightMm || selectedLocationCode || selectedMaterialCode || selectedProtectionCode || selectedBrightnessCode || selectedRefreshRateCode || selectedSensorCodes.length > 0 || selectedControlTypeCodes.length > 0 || selectedPitchCode || selectedModuleCode || (showCabinetSection && selectedCabinetCode) || isFlexSelected ) && (
@@ -268,6 +292,7 @@ const CalculatorForm = () => {
                         {selectedPitchCode && (<Text size="sm">Шаг пикселя: {selectedPitchCode} ({pitchOptions.find(o => o.value === selectedPitchCode)?.label})</Text>)}
                         {selectedModuleCode && (<Text size="sm">Модуль: {selectedModuleCode} ({moduleOptions.find(o => o.value === selectedModuleCode)?.label})</Text>)}
                         {showCabinetSection && selectedCabinetCode && (<Text size="sm">Кабинет: {selectedCabinetCode} ({cabinetOptions.find(o => o.value === selectedCabinetCode)?.label})</Text>)}
+                        <Text size="sm">Курс $: {dollarRate || 'Не задан'}</Text>
                     </Stack>
                )}
           </>
