@@ -1,5 +1,6 @@
 // src/components/inputs/DollarRateInput.tsx
-import { NumberInput, Loader } from '@mantine/core';
+import { NumberInput, Loader, NumberInputProps, rem } from '@mantine/core';
+import { IconCurrencyDollar } from '@tabler/icons-react';
 
 interface DollarRateInputProps {
     value: number | string;                  // Текущее значение курса
@@ -9,6 +10,8 @@ interface DollarRateInputProps {
     label?: string;
     placeholder?: string;
     required?: boolean;
+    size?: NumberInputProps['size'];
+    style?: React.CSSProperties;
 }
 
 const DollarRateInput = ({
@@ -16,16 +19,20 @@ const DollarRateInput = ({
     onChange,
     disabled = false,
     loading = false,
-    label = "Курс доллара",
+    label = "Курс",
     placeholder = "Введите курс...",
-    required = true, // Курс скорее всего обязателен
+    required = true,
+    size,
+    style,
 }: DollarRateInputProps) => {
 
     const getPlaceholder = () => {
-        if (loading) return "Загрузка курса...";
+        if (loading) return "Загрузка ...";
         return placeholder;
     };
 
+    const icon = <IconCurrencyDollar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />;
+    
     return (
         <NumberInput
             label={label}
@@ -36,13 +43,15 @@ const DollarRateInput = ({
             required={required}
             // Настройки для валюты
             allowDecimal
-            decimalScale={2} // Позволяем до 4 знаков после запятой
-            step={0.01}      // Шаг изменения кнопками
-            min={0}          // Минимальное значение
-            hideControls     // Скрываем стрелки +/- по умолчанию
-            rightSection={loading ? <Loader size="xs" /> : null} // Индикатор загрузки
-            rightSectionWidth={loading ? 30 : 0} // Резервируем место под лоадер
-            // Возможно, понадобится маска или форматирование
+            decimalScale={2}
+            step={0.01}
+            min={0}
+            leftSection={icon}
+            leftSectionWidth={36}
+            rightSection={loading ? <Loader size="xs" /> : null}
+            rightSectionWidth={loading ? 36 : 0}
+            size={size}
+            style={style}
         />
     );
 };
