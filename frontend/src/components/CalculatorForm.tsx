@@ -329,17 +329,21 @@ const CalculatorForm = () => {
                 />
               )}
             </Grid.Col>
-
+            <Grid.Col span={{ base: 12, md: 4 }} mt="md">
+              <PitchSelect
+                options={pitchOptions}
+                value={selectedPitchCode}
+                onChange={handlePitchChange}
+                disabled={ isLoadingInitial || !selectedLocationCode || !selectedProtectionCode || pitchOptions.length === 0 }
+                required={true}
+              />
+            </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <BrightnessSelect
                 options={brightnessOptions}
                 value={selectedBrightnessCode}
                 onChange={handleBrightnessChange}
-                disabled={
-                  isLoadingInitial ||
-                  !selectedProtectionCode ||
-                  brightnessOptions.length === 0
-                }
+                disabled={isLoadingInitial || !selectedProtectionCode}
                 required={false}
                 placeholder="Авто / Выберите яркость"
               />
@@ -349,29 +353,9 @@ const CalculatorForm = () => {
                 options={refreshRateOptions}
                 value={selectedRefreshRateCode}
                 onChange={handleRefreshRateChange}
-                disabled={
-                  isLoadingInitial ||
-                  !selectedProtectionCode ||
-                  refreshRateOptions.length === 0
-                }
+                disabled={isLoadingInitial || !selectedProtectionCode}
                 required={false}
                 placeholder="Авто / Выберите частоту"
-              />
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 4 }} mt="md">
-              <PitchSelect
-                options={pitchOptions}
-                value={selectedPitchCode}
-                onChange={handlePitchChange}
-                disabled={
-                  isLoadingInitial ||
-                  !selectedLocationCode ||
-                  !selectedProtectionCode ||
-                  !selectedBrightnessCode ||
-                  !selectedRefreshRateCode ||
-                  pitchOptions.length === 0
-                }
-                required={true}
               />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }} mt="md">

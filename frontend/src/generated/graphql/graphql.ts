@@ -233,7 +233,8 @@ export type Material = Node & {
 export type Module = Node & {
   __typename?: 'Module';
   active?: Maybe<Scalars['Boolean']['output']>;
-  brightnesses?: Maybe<Array<Brightness>>;
+  /** Связи модуля с доступными значениями яркости. */
+  brightnesses?: Maybe<Array<ModuleBrightness>>;
   categories?: Maybe<Array<ItemCategory>>;
   code?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['DateTime']['output']>;
@@ -246,7 +247,8 @@ export type Module = Node & {
   options?: Maybe<Array<Option>>;
   pitches?: Maybe<Array<Pitch>>;
   price?: Maybe<ModulePrice>;
-  refreshRates?: Maybe<Array<RefreshRate>>;
+  /** Связи модуля с доступными значениями частоты обновления. */
+  refreshRates?: Maybe<Array<ModuleRefreshRate>>;
   sizes?: Maybe<Array<ModuleSize>>;
   sku?: Maybe<Scalars['String']['output']>;
   subcategories?: Maybe<Array<ItemSubcategory>>;
@@ -259,6 +261,19 @@ export type ModuleItemsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ModuleBrightness = {
+  __typename?: 'ModuleBrightness';
+  brightnessCode?: Maybe<Scalars['String']['output']>;
+  moduleCode?: Maybe<Scalars['String']['output']>;
+};
+
+export type ModuleFilterInput = {
+  brightnessCode?: InputMaybe<Scalars['String']['input']>;
+  locationCode?: InputMaybe<Scalars['String']['input']>;
+  pitchCode?: InputMaybe<Scalars['String']['input']>;
+  refreshRateCode?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ModuleItemComponent = {
@@ -285,6 +300,12 @@ export type ModulePrice = Node & {
   moduleCode?: Maybe<Scalars['String']['output']>;
   priceRub?: Maybe<Scalars['Float']['output']>;
   priceUsd?: Maybe<Scalars['Float']['output']>;
+};
+
+export type ModuleRefreshRate = {
+  __typename?: 'ModuleRefreshRate';
+  moduleCode?: Maybe<Scalars['String']['output']>;
+  refreshRateCode?: Maybe<Scalars['String']['output']>;
 };
 
 export type ModuleSize = Node & {
@@ -394,6 +415,8 @@ export type Query = {
   cabinetsByPitch?: Maybe<Array<Cabinet>>;
   /** Получить список всех доступных типов управления. */
   controlTypes?: Maybe<Array<ControlType>>;
+  /** Получить текущий курс доллара США от ЦБ РФ (с поиском предыдущего рабочего дня). */
+  getCurrentDollarRate?: Maybe<Scalars['Float']['output']>;
   /** Получить одну степень IP-защиты по ее коду. */
   ipProtectionByCode?: Maybe<IpProtection>;
   /** Получить список всех степеней IP-защиты. */
@@ -409,13 +432,16 @@ export type Query = {
   /** Получить список всех материалов. */
   materials?: Maybe<Array<Material>>;
   moduleByCode?: Maybe<Module>;
-  /** Получить список модулей, подходящих для выбора в калькуляторе. */
+  /** Получить отфильтрованный список модулей для выбора. */
   moduleOptions?: Maybe<Array<Module>>;
-  modules?: Maybe<QueryModulesConnection>;
   node?: Maybe<Node>;
   nodes: Array<Maybe<Node>>;
+  /** Получить список опций, доступных для указанного типа экрана. */
+  optionsByScreenType?: Maybe<Array<Option>>;
   /** Получить один шаг пикселя по его коду. */
   pitchByCode?: Maybe<Pitch>;
+  /** Получить доступные шаги пикселя для модулей, подходящих под указанное расположение. */
+  pitchOptionsByLocation?: Maybe<Array<Pitch>>;
   /** Получить список всех шагов пикселя. */
   pitches?: Maybe<Array<Pitch>>;
   /** Получить список всех значений частоты обновления. */
@@ -509,15 +535,7 @@ export type QueryModuleByCodeArgs = {
 
 
 export type QueryModuleOptionsArgs = {
-  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
-};
-
-
-export type QueryModulesArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
+  filters?: InputMaybe<ModuleFilterInput>;
   onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -532,8 +550,20 @@ export type QueryNodesArgs = {
 };
 
 
+export type QueryOptionsByScreenTypeArgs = {
+  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
+  screenTypeCode: Scalars['String']['input'];
+};
+
+
 export type QueryPitchByCodeArgs = {
   code: Scalars['String']['input'];
+};
+
+
+export type QueryPitchOptionsByLocationArgs = {
+  locationCode: Scalars['String']['input'];
+  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -571,18 +601,6 @@ export type QueryItemsConnectionEdge = {
   __typename?: 'QueryItemsConnectionEdge';
   cursor: Scalars['String']['output'];
   node?: Maybe<Item>;
-};
-
-export type QueryModulesConnection = {
-  __typename?: 'QueryModulesConnection';
-  edges?: Maybe<Array<Maybe<QueryModulesConnectionEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type QueryModulesConnectionEdge = {
-  __typename?: 'QueryModulesConnectionEdge';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<Module>;
 };
 
 export type RefreshRate = Node & {
@@ -653,9 +671,13 @@ export type User = {
   role?: Maybe<Role>;
 };
 
+export type OptionFieldsFragment = { __typename?: 'Option', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'OptionFieldsFragment' };
+
 export type LocationFieldsFragment = { __typename?: 'Location', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'LocationFieldsFragment' };
 
 export type MaterialFieldsFragment = { __typename?: 'Material', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'MaterialFieldsFragment' };
+
+export type PitchFieldsFragment = { __typename?: 'Pitch', id: string, code?: string | null, pitchValue?: number | null, active?: boolean | null } & { ' $fragmentName'?: 'PitchFieldsFragment' };
 
 export type BrightnessFieldsFragment = { __typename?: 'Brightness', id: string, code?: string | null, value?: number | null, active?: boolean | null } & { ' $fragmentName'?: 'BrightnessFieldsFragment' };
 
@@ -665,9 +687,7 @@ export type SensorFieldsFragment = { __typename?: 'Sensor', id: string, code?: s
 
 export type ControlTypeFieldsFragment = { __typename?: 'ControlType', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'ControlTypeFieldsFragment' };
 
-export type ModuleOptionFieldsFragment = { __typename?: 'Module', id: string, code?: string | null, sku?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'ModuleOptionFieldsFragment' };
-
-export type PitchFieldsFragment = { __typename?: 'Pitch', id: string, code?: string | null, pitchValue?: number | null, active?: boolean | null } & { ' $fragmentName'?: 'PitchFieldsFragment' };
+export type ModuleOptionFieldsFragment = { __typename?: 'Module', id: string, code?: string | null, sku?: string | null, name?: string | null, active?: boolean | null, brightnesses?: Array<{ __typename?: 'ModuleBrightness', brightnessCode?: string | null }> | null, refreshRates?: Array<{ __typename?: 'ModuleRefreshRate', refreshRateCode?: string | null }> | null } & { ' $fragmentName'?: 'ModuleOptionFieldsFragment' };
 
 export type CabinetOptionFieldsFragment = { __typename?: 'Cabinet', id: string, code?: string | null, sku?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'CabinetOptionFieldsFragment' };
 
@@ -695,9 +715,39 @@ export type GetInitialDataQuery = { __typename?: 'Query', screenTypes?: Array<{ 
   )> | null, moduleOptions?: Array<(
     { __typename?: 'Module' }
     & { ' $fragmentRefs'?: { 'ModuleOptionFieldsFragment': ModuleOptionFieldsFragment } }
-  )> | null, pitches?: Array<(
+  )> | null };
+
+export type GetScreenTypeOptionsQueryVariables = Exact<{
+  screenTypeCode: Scalars['String']['input'];
+  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GetScreenTypeOptionsQuery = { __typename?: 'Query', optionsByScreenType?: Array<(
+    { __typename?: 'Option' }
+    & { ' $fragmentRefs'?: { 'OptionFieldsFragment': OptionFieldsFragment } }
+  )> | null };
+
+export type GetPitchOptionsByLocationQueryVariables = Exact<{
+  locationCode: Scalars['String']['input'];
+  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GetPitchOptionsByLocationQuery = { __typename?: 'Query', pitchOptionsByLocation?: Array<(
     { __typename?: 'Pitch' }
     & { ' $fragmentRefs'?: { 'PitchFieldsFragment': PitchFieldsFragment } }
+  )> | null };
+
+export type GetModuleOptionsQueryVariables = Exact<{
+  filters?: InputMaybe<ModuleFilterInput>;
+  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GetModuleOptionsQuery = { __typename?: 'Query', moduleOptions?: Array<(
+    { __typename?: 'Module' }
+    & { ' $fragmentRefs'?: { 'ModuleOptionFieldsFragment': ModuleOptionFieldsFragment } }
   )> | null };
 
 export type GetCabinetOptionsQueryVariables = Exact<{
@@ -711,14 +761,24 @@ export type GetCabinetOptionsQuery = { __typename?: 'Query', cabinetOptions?: Ar
     & { ' $fragmentRefs'?: { 'CabinetOptionFieldsFragment': CabinetOptionFieldsFragment } }
   )> | null };
 
+export type GetDollarRateQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetDollarRateQuery = { __typename?: 'Query', getCurrentDollarRate?: number | null };
+
+export const OptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Option"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<OptionFieldsFragment, unknown>;
 export const LocationFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<LocationFieldsFragment, unknown>;
 export const MaterialFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MaterialFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Material"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<MaterialFieldsFragment, unknown>;
+export const PitchFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PitchFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Pitch"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"pitchValue"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<PitchFieldsFragment, unknown>;
 export const BrightnessFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BrightnessFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Brightness"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<BrightnessFieldsFragment, unknown>;
 export const RefreshRateFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RefreshRateFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RefreshRate"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<RefreshRateFieldsFragment, unknown>;
 export const SensorFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<SensorFieldsFragment, unknown>;
 export const ControlTypeFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ControlTypeFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ControlType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<ControlTypeFieldsFragment, unknown>;
-export const ModuleOptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ModuleOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Module"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<ModuleOptionFieldsFragment, unknown>;
-export const PitchFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PitchFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Pitch"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"pitchValue"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<PitchFieldsFragment, unknown>;
+export const ModuleOptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ModuleOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Module"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"brightnesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"brightnessCode"}}]}},{"kind":"Field","name":{"kind":"Name","value":"refreshRates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshRateCode"}}]}}]}}]} as unknown as DocumentNode<ModuleOptionFieldsFragment, unknown>;
 export const CabinetOptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"CabinetOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Cabinet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<CabinetOptionFieldsFragment, unknown>;
-export const GetInitialDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetInitialData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"screenTypes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"locations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"materials"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MaterialFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ipProtections"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}},{"kind":"Field","name":{"kind":"Name","value":"brightnesses"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"BrightnessFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"refreshRates"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"RefreshRateFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"sensors"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SensorFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"controlTypes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ControlTypeFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"moduleOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ModuleOptionFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pitches"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PitchFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MaterialFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Material"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BrightnessFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Brightness"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RefreshRateFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RefreshRate"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ControlTypeFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ControlType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ModuleOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Module"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PitchFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Pitch"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"pitchValue"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetInitialDataQuery, GetInitialDataQueryVariables>;
+export const GetInitialDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetInitialData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"screenTypes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"locations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"materials"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MaterialFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ipProtections"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}},{"kind":"Field","name":{"kind":"Name","value":"brightnesses"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"BrightnessFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"refreshRates"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"RefreshRateFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"sensors"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SensorFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"controlTypes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ControlTypeFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"moduleOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ModuleOptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MaterialFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Material"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BrightnessFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Brightness"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RefreshRateFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RefreshRate"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ControlTypeFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ControlType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ModuleOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Module"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"brightnesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"brightnessCode"}}]}},{"kind":"Field","name":{"kind":"Name","value":"refreshRates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshRateCode"}}]}}]}}]} as unknown as DocumentNode<GetInitialDataQuery, GetInitialDataQueryVariables>;
+export const GetScreenTypeOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetScreenTypeOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"screenTypeCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"optionsByScreenType"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"screenTypeCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"screenTypeCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Option"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetScreenTypeOptionsQuery, GetScreenTypeOptionsQueryVariables>;
+export const GetPitchOptionsByLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPitchOptionsByLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pitchOptionsByLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"locationCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PitchFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PitchFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Pitch"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"pitchValue"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetPitchOptionsByLocationQuery, GetPitchOptionsByLocationQueryVariables>;
+export const GetModuleOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetModuleOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ModuleFilterInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"moduleOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ModuleOptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ModuleOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Module"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"brightnesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"brightnessCode"}}]}},{"kind":"Field","name":{"kind":"Name","value":"refreshRates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshRateCode"}}]}}]}}]} as unknown as DocumentNode<GetModuleOptionsQuery, GetModuleOptionsQueryVariables>;
 export const GetCabinetOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCabinetOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CabinetFilterInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cabinetOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"CabinetOptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"CabinetOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Cabinet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetCabinetOptionsQuery, GetCabinetOptionsQueryVariables>;
+export const GetDollarRateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDollarRate"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getCurrentDollarRate"}}]}}]} as unknown as DocumentNode<GetDollarRateQuery, GetDollarRateQueryVariables>;

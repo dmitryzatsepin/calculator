@@ -24,14 +24,17 @@ import type {
   Sensor as GqlSensor,
   ControlType as GqlControlType,
   Pitch as GqlPitch,
+  GetPitchOptionsByLocationQuery,
   Module as GqlModule,
+  GetModuleOptionsQuery,
   Cabinet as GqlCabinet,
   CabinetFilterInput,
+  ModuleFilterInput,
   Maybe,
+  
 } from "../generated/graphql/graphql";
 
 // Типы для опций UI
-type SegmentData = { label: string; value: string };
 type SelectOption = { label: string; value: string };
 
 // --- GraphQL Фрагменты ---
@@ -59,6 +62,16 @@ const MaterialFields = gql`
     active
   }
 `;
+
+const PitchFields = gql`
+  fragment PitchFields on Pitch {
+    id
+    code
+    pitchValue
+    active
+  }
+`;
+
 const BrightnessFields = gql`
   fragment BrightnessFields on Brightness {
     id
@@ -98,16 +111,15 @@ const ModuleOptionFields = gql`
     sku
     name
     active
+    brightnesses {
+      brightnessCode
+    }
+    refreshRates {
+      refreshRateCode
+    }
   }
 `;
-const PitchFields = gql`
-  fragment PitchFields on Pitch {
-    id
-    code
-    pitchValue
-    active
-  }
-`;
+
 const CabinetOptionFields = gql`
   fragment CabinetOptionFields on Cabinet {
     id
@@ -127,7 +139,7 @@ const GET_INITIAL_DATA = gql`
   ${SensorFields}
   ${ControlTypeFields}
   ${ModuleOptionFields}
-  ${PitchFields}
+
   query GetInitialData {
     screenTypes(onlyActive: true) {
       id
@@ -159,19 +171,9 @@ const GET_INITIAL_DATA = gql`
     moduleOptions(onlyActive: true) {
       ...ModuleOptionFields
     }
-    pitches(onlyActive: true) {
-      ...PitchFields
-    }
   }
 `;
-const GET_CABINET_OPTIONS = gql`
-  ${CabinetOptionFields}
-  query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {
-    cabinetOptions(filters: $filters, onlyActive: $onlyActive) {
-      ...CabinetOptionFields
-    }
-  }
-`;
+
 const GET_SCREEN_TYPE_OPTIONS = gql`
   ${OptionFields}
   query GetScreenTypeOptions($screenTypeCode: String!, $onlyActive: Boolean) {
@@ -183,6 +185,35 @@ const GET_SCREEN_TYPE_OPTIONS = gql`
     }
   }
 `;
+
+const GET_PITCH_OPTIONS_BY_LOCATION = gql`
+  ${PitchFields}
+  query GetPitchOptionsByLocation($locationCode: String!, $onlyActive: Boolean) {
+    pitchOptionsByLocation(locationCode: $locationCode, onlyActive: $onlyActive) {
+      ...PitchFields
+    }
+  }
+`;
+
+const GET_MODULE_OPTIONS = gql`
+  ${ModuleOptionFields}
+  # Определяем запрос с переменными
+  query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {
+    moduleOptions(filters: $filters, onlyActive: $onlyActive) {
+      ...ModuleOptionFields
+    }
+  }
+`;
+
+const GET_CABINET_OPTIONS = gql`
+  ${CabinetOptionFields}
+  query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {
+    cabinetOptions(filters: $filters, onlyActive: $onlyActive) {
+      ...CabinetOptionFields
+    }
+  }
+`;
+
 const GET_DOLLAR_RATE = gql`
   query GetDollarRate {
     getCurrentDollarRate
@@ -199,21 +230,20 @@ type InitialDataQueryResult = {
   refreshRates: Maybe<Array<Maybe<GqlRefreshRate>>>;
   sensors: Maybe<Array<Maybe<GqlSensor>>>;
   controlTypes: Maybe<Array<Maybe<GqlControlType>>>;
-  moduleOptions: Maybe<Array<Maybe<GqlModule>>>;
-  pitches: Maybe<
-    Array<Maybe<Pick<GqlPitch, "id" | "code" | "pitchValue" | "active">>>
-  >;
 };
-type CabinetOptionsQueryResult = {
-  cabinetOptions: Maybe<
-    Array<Maybe<Pick<GqlCabinet, "id" | "code" | "sku" | "name" | "active">>>
-  >;
-};
+
 type ScreenTypeOptionsQueryResult = {
   optionsByScreenType: Maybe<
     Array<Maybe<Pick<GqlOption, "id" | "code" | "name" | "active">>>
   >;
 };
+
+type CabinetOptionsQueryResult = {
+  cabinetOptions: Maybe<
+    Array<Maybe<Pick<GqlCabinet, "id" | "code" | "sku" | "name" | "active">>>
+  >;
+};
+
 type DollarRateQueryResult = {
   getCurrentDollarRate: Maybe<number>;
 };
@@ -235,8 +265,6 @@ const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
       refreshRates: data?.refreshRates ?? [],
       sensors: data?.sensors ?? [],
       controlTypes: data?.controlTypes ?? [],
-      moduleOptions: data?.moduleOptions ?? [],
-      pitches: data?.pitches ?? [],
     };
   } catch (error) {
     console.error("Error fetching initial data (Context):", error);
@@ -263,12 +291,6 @@ interface CalculatorContextProps {
   refreshRates: (GqlRefreshRate | null | undefined)[];
   sensors: (GqlSensor | null | undefined)[];
   controlTypes: (GqlControlType | null | undefined)[];
-  pitches: (
-    | Pick<GqlPitch, "id" | "code" | "pitchValue" | "active">
-    | null
-    | undefined
-  )[];
-  modules: (GqlModule | null | undefined)[];
   optionsQueryResult: {
     data: (
       | Pick<GqlOption, "id" | "code" | "name" | "active">
@@ -279,6 +301,19 @@ interface CalculatorContextProps {
     isError: boolean;
     error: Error | null;
   };
+  pitchQueryResult: {
+    data: (Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'> | null | undefined)[];
+    isLoading: boolean;
+    isError: boolean;
+    error: Error | null;
+  };
+  moduleQueryResult: {
+    data: (GqlModule | null | undefined)[];
+    isLoading: boolean;
+    isError: boolean;
+    error: Error | null;
+  };
+
   cabinetQueryResult: {
     data: (
       | Pick<GqlCabinet, "id" | "code" | "sku" | "name" | "active">
@@ -322,15 +357,15 @@ interface CalculatorContextProps {
   setWidthMm: (value: string | number) => void;
   setHeightMm: (value: string | number) => void;
   performCalculation: () => void;
-  screenTypeSegments: SegmentData[];
+  screenTypeSegments: SelectOption[];
   isFlexOptionAvailable: boolean;
   locationOptions: SelectOption[];
   materialOptions: SelectOption[];
   protectionOptions: SelectOption[];
   brightnessOptions: SelectOption[];
   refreshRateOptions: SelectOption[];
-  sensorOptions: SegmentData[];
-  controlTypeOptions: SegmentData[];
+  sensorOptions: SelectOption[];
+  controlTypeOptions: SelectOption[];
   pitchOptions: SelectOption[];
   moduleOptions: SelectOption[];
   cabinetOptions: SelectOption[];
@@ -351,9 +386,19 @@ const CalculatorContext = createContext<CalculatorContextProps>({
   refreshRates: [],
   sensors: [],
   controlTypes: [],
-  pitches: [],
-  modules: [],
   optionsQueryResult: {
+    data: [],
+    isLoading: false,
+    isError: false,
+    error: null,
+  },
+  pitchQueryResult: {
+    data: [],
+    isLoading: false,
+    isError: false,
+    error: null,
+  },
+  moduleQueryResult: {
     data: [],
     isLoading: false,
     isError: false,
@@ -416,7 +461,7 @@ const CalculatorContext = createContext<CalculatorContextProps>({
 
 // --- Компонент Провайдера Контекста ---
 export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
-  // --- Состояния выбора ---
+
   const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<
     string | null
   >(null);
@@ -477,8 +522,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const gqlRefreshRates = initialData?.refreshRates ?? [];
   const gqlSensors = initialData?.sensors ?? [];
   const gqlControlTypes = initialData?.controlTypes ?? [];
-  const gqlPitches = initialData?.pitches ?? [];
-  const gqlModules = initialData?.moduleOptions ?? [];
 
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС ОПЦИЙ ---
   const enabledOptionsQuery = !!selectedScreenTypeCode;
@@ -506,6 +549,70 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     refetchOnWindowFocus: false,
   });
   const availableOptions = optionsData?.optionsByScreenType ?? [];
+
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ПИТЧЕЙ ---
+  // Запрос активен, если выбрана Локация
+  const enabledPitchQuery = !!selectedLocationCode;
+
+  const {
+      data: pitchData,
+      isLoading: isLoadingPitches,
+      isError: isErrorPitches,
+      error: errorPitches,
+      refetch: refetchPitches
+  } = useQuery<GetPitchOptionsByLocationQuery, Error>({
+      queryKey: ['pitchOptions', selectedLocationCode],
+      queryFn: async () => {
+          console.log(`[Pitch Query] Fetching pitch options for location: ${selectedLocationCode}`);
+          if (!selectedLocationCode) throw new Error("Location code is required to fetch pitches.");
+          const variables = { locationCode: selectedLocationCode, onlyActive: true };
+          return graphQLClient.request<GetPitchOptionsByLocationQuery>(GET_PITCH_OPTIONS_BY_LOCATION, variables);
+      },
+      enabled: enabledPitchQuery,
+      staleTime: 1000 * 60 * 10,
+      refetchOnWindowFocus: false,
+  });
+  // Извлекаем ОТФИЛЬТРОВАННЫЕ питчи
+  const gqlFilteredPitches = pitchData?.pitchOptionsByLocation ?? [];
+
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС МОДУЛЕЙ (НОВЫЙ) ---
+  // Запрос активен, если выбраны Локация И Питч (основные фильтры для модулей)
+  const areModuleDepsSelected = !!(selectedLocationCode && selectedPitchCode);
+  const enabledModuleQuery = areModuleDepsSelected;
+
+  const {
+    data: moduleData,
+    isLoading: isLoadingModules,
+    isError: isErrorModules,
+    error: errorModules,
+    refetch: refetchModules,
+  } = useQuery<GetModuleOptionsQuery, Error>({
+    queryKey: ['moduleOptions', selectedLocationCode, selectedPitchCode],
+    queryFn: async () => {
+        console.log('[Module Query] Fetching module options with filters:', {
+            locationCode: selectedLocationCode,
+            pitchCode: selectedPitchCode,
+        });
+        const variables: { filters: ModuleFilterInput; onlyActive: boolean } = {
+            filters: {
+                locationCode: selectedLocationCode || undefined,
+                pitchCode: selectedPitchCode || undefined,
+                brightnessCode: selectedBrightnessCode || undefined,
+                refreshRateCode: selectedRefreshRateCode || undefined,
+            },
+            onlyActive: true,
+        };
+        return graphQLClient.request<GetModuleOptionsQuery>(
+          GET_MODULE_OPTIONS,
+          variables
+      );
+  },
+  enabled: enabledModuleQuery,
+  staleTime: 1000 * 60 * 5,
+  refetchOnWindowFocus: false,
+});
+const gqlFilteredModules = moduleData?.moduleOptions ?? [];
+
 
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС КАБИНЕТОВ ---
   const cabinetScreenTypeCode = "cabinet";
@@ -597,6 +704,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [isLoadingInitial, screenTypes, selectedScreenTypeCode]);
+
   useEffect(() => {
     if (isLoadingInitial || !selectedLocationCode) {
       if (!selectedLocationCode && selectedProtectionCode !== null)
@@ -630,16 +738,33 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     if (selectedProtectionCode !== newProtectionCode)
       setSelectedProtectionCodeState(newProtectionCode);
   }, [selectedLocationCode, gqlIpProtections, gqlLocations, isLoadingInitial]);
-  // useEffect(() => {
-  //   if (
-  //     selectedCabinetCode !== null &&
-  //     (!enabledCabinetQuery || cabinetData !== undefined)
-  //   )
-  //     setSelectedCabinetCodeState(null);
-  // }, [enabledCabinetQuery, cabinetData, selectedCabinetCode]);
+
   useEffect(() => {
     if (selectedScreenTypeCode !== undefined) setIsFlexSelectedState(false);
   }, [selectedScreenTypeCode]);
+
+  useEffect(() => {
+    // Сбрасываем питч, если изменилась локация (и питч был выбран)
+    // Перезапрос питчей произойдет автоматически из-за изменения queryKey
+    if (selectedPitchCode !== null) {
+         console.log('[Pitch Effect] Resetting selected pitch due to location change.');
+         setSelectedPitchCodeState(null);
+    }
+  }, [selectedLocationCode]);
+
+  useEffect(() => {
+    // Сбрасываем, если запрос стал неактивным или пришли новые данные
+    if (
+      selectedModuleCode !== null &&
+      (!enabledModuleQuery || moduleData !== undefined)
+    ) {
+      console.log(
+        "[Module Effect] Resetting selected module due to dependency change or query disabling/refetch."
+      );
+      setSelectedModuleCodeState(null);
+    }
+  }, [enabledModuleQuery, moduleData, selectedModuleCode]);
+
   useEffect(() => {
     if (dollarRateData?.getCurrentDollarRate && dollarRate === "")
       setDollarRateState(dollarRateData.getCurrentDollarRate);
@@ -648,7 +773,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   }, [dollarRateData, dollarRate, isErrorDollarRate, errorDollarRate]);
 
   // --- Подготовка данных для селекторов (useMemo) ---
-  const screenTypeSegments = useMemo((): SegmentData[] => {
+  const screenTypeSegments = useMemo((): SelectOption[] => {
     if (!Array.isArray(screenTypes)) return [];
     return screenTypes
       .filter(
@@ -660,6 +785,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       )
       .map((st) => ({ value: st.code, label: st.name ?? st.code }));
   }, [screenTypes]);
+
   const locationOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlLocations)) return [];
     return gqlLocations
@@ -669,6 +795,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       )
       .map((loc) => ({ value: loc.code, label: loc.name ?? loc.code }));
   }, [gqlLocations]);
+
   const materialOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlMaterials)) return [];
     return gqlMaterials
@@ -678,6 +805,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       )
       .map((mat) => ({ value: mat.code, label: mat.name ?? mat.code }));
   }, [gqlMaterials]);
+
   const protectionOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlIpProtections)) return [];
     return gqlIpProtections
@@ -688,37 +816,69 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       .sort((a, b) => a.code.localeCompare(b.code))
       .map((ip) => ({ value: ip.code, label: ip.code }));
   }, [gqlIpProtections]);
+
+  const pitchOptions = useMemo((): SelectOption[] => {
+    if (!Array.isArray(gqlFilteredPitches)) {
+      return [];
+    }
+
+    const result: SelectOption[] = [];
+    for (const p of gqlFilteredPitches) {
+        const pitch = p as Pick<GqlPitch, 'code' | 'pitchValue'>;
+        if (pitch && typeof pitch.code === 'string' && pitch.code !== '' && typeof pitch.pitchValue === 'number') {
+            result.push({
+                value: pitch.code,
+                label: `${pitch.pitchValue} мм`
+            });
+        }
+    }
+     result.sort((a, b) => {
+        const pitchA = gqlFilteredPitches.find(p => (p as GqlPitch)?.code === a.value) as GqlPitch | undefined;
+        const pitchB = (gqlFilteredPitches.find(p => (p as GqlPitch)?.code === b.value) as GqlPitch)?.pitchValue ?? 0;
+        return Number(pitchA) - Number(pitchB);
+     });
+    return result;
+  }, [gqlFilteredPitches]); 
+
   const brightnessOptions = useMemo((): SelectOption[] => {
-    if (!Array.isArray(gqlBrightnessValues)) return [];
+    const availableBrightnessCodes = new Set<string>();
+    gqlFilteredModules
+        .filter((m): m is GqlModule => !!m)
+        .forEach((module: GqlModule) => {
+          module.brightnesses?.forEach((brLink: any) => {
+              if (brLink?.brightnessCode) {
+                  availableBrightnessCodes.add(brLink.brightnessCode);
+              }
+          });
+      });
     return gqlBrightnessValues
-      .filter(
-        (
-          br
-        ): br is GqlBrightness & {
-          code: string;
-          value: number;
-          active: true;
-        } => !!br?.code && typeof br.value === "number" && br.active === true
-      )
-      .sort((a, b) => a.value - b.value)
-      .map((br) => ({ value: br.code, label: `${br.value} nit` }));
-  }, [gqlBrightnessValues]);
-  const refreshRateOptions = useMemo((): SelectOption[] => {
-    if (!Array.isArray(gqlRefreshRates)) return [];
-    return gqlRefreshRates
-      .filter(
-        (
-          rr
-        ): rr is GqlRefreshRate & {
-          code: string;
-          value: number;
-          active: true;
-        } => !!rr?.code && typeof rr.value === "number" && rr.active === true
+        .filter((br): br is GqlBrightness & { code: string; value: number; active: true } =>
+            !!br?.code && typeof br.value === 'number' && br.active === true && availableBrightnessCodes.has(br.code)
+        )
+        .sort((a, b) => a.value - b.value)
+        .map((br) => ({ value: br.code, label: `${br.value} nit` }));
+}, [gqlFilteredModules, gqlBrightnessValues]);
+
+const refreshRateOptions = useMemo((): SelectOption[] => {
+  const availableRefreshRateCodes = new Set<string>();
+  gqlFilteredModules
+      .filter((m): m is GqlModule => !!m)
+      .forEach((module: GqlModule) => {
+       module.refreshRates?.forEach((rrLink: any) => {
+           if (rrLink?.refreshRateCode) {
+               availableRefreshRateCodes.add(rrLink.refreshRateCode);
+           }
+       });
+   });
+   return gqlRefreshRates
+      .filter((rr): rr is GqlRefreshRate & { code: string; value: number; active: true } =>
+          !!rr?.code && typeof rr.value === 'number' && rr.active === true && availableRefreshRateCodes.has(rr.code)
       )
       .sort((a, b) => a.value - b.value)
       .map((rr) => ({ value: rr.code, label: `${rr.value} Hz` }));
-  }, [gqlRefreshRates]);
-  const sensorOptions = useMemo((): SegmentData[] => {
+}, [gqlFilteredModules, gqlRefreshRates]);
+
+  const sensorOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlSensors)) return [];
     return gqlSensors
       .filter(
@@ -728,7 +888,8 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((s) => ({ value: s.code, label: s.name }));
   }, [gqlSensors]);
-  const controlTypeOptions = useMemo((): SegmentData[] => {
+
+  const controlTypeOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlControlTypes)) return [];
     return gqlControlTypes
       .filter(
@@ -743,35 +904,17 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((ct) => ({ value: ct.code, label: ct.name }));
   }, [gqlControlTypes]);
-  const pitchOptions = useMemo((): SelectOption[] => {
-    if (!Array.isArray(gqlPitches)) return [];
-    return gqlPitches
-      .filter(
-        (
-          p
-        ): p is Pick<GqlPitch, "id" | "code" | "pitchValue" | "active"> & {
-          code: string;
-          pitchValue: number;
-          active: true;
-        } =>
-          !!p &&
-          p.active === true &&
-          !!p.code &&
-          typeof p.pitchValue === "number"
-      )
-      .map((p) => ({ value: p.code, label: `${p.pitchValue} мм` }));
-  }, [gqlPitches]);
+
   const moduleOptions = useMemo((): SelectOption[] => {
-    if (!Array.isArray(gqlModules)) return [];
-    const filteredModules = gqlModules.filter(
-      (m): m is GqlModule & { code: string; active: true } =>
-        !!m?.code && m.active === true
-    );
-    return filteredModules.map((m) => ({
-      value: m.code,
-      label: m.name ?? m.sku ?? m.code ?? "Неизвестный модуль",
-    }));
-  }, [gqlModules]);
+    if (!Array.isArray(gqlFilteredModules)) return [];
+    return gqlFilteredModules
+      .filter((m): m is GqlModule & { code: string } => !!(m as GqlModule)?.code)
+      .map((m) => ({
+        value: m.code,
+        label: m.name ?? m.sku ?? m.code ?? "Неизвестный модуль",
+      }));
+  }, [gqlFilteredModules]);
+
   const cabinetOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlCabinets)) return [];
     return gqlCabinets
@@ -787,11 +930,13 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
         label: c.name ?? c.sku ?? c.code ?? "Неизвестный кабинет",
       }));
   }, [gqlCabinets]);
-  const isFlexOptionAvailable = useMemo(
-    (): boolean => availableOptions.some((opt) => opt?.code === "flex"),
-    [availableOptions]
-  );
+
+  const isFlexOptionAvailable = useMemo((): boolean => {
+    return availableOptions.some((opt) => opt?.code === "flex");
+  }, [availableOptions]);
+
   const isCalculationReady = useMemo((): boolean => {
+    // ... (логика с отладкой, как была исправлена ранее) ...
     const widthValue = Number(widthMm);
     const heightValue = Number(heightMm);
     const rateValue = Number(dollarRate);
@@ -799,7 +944,9 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     const checkWidth = !isNaN(widthValue) && widthValue > 0;
     const checkHeight = !isNaN(heightValue) && heightValue > 0;
     const checkLocation = !!selectedLocationCode;
-    const checkMaterial = !!selectedMaterialCode;
+    const checkMaterial =
+      selectedScreenTypeCode !== cabinetScreenTypeCode ||
+      !!selectedMaterialCode;
     const checkProtection = !!selectedProtectionCode;
     const checkPitch = !!selectedPitchCode;
     const checkModule = !!selectedModuleCode;
@@ -818,40 +965,27 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       checkModule &&
       checkCabinet &&
       checkRate;
-    console.log("Calculation Ready Check:", {
-      checkScreenType,
-      checkWidth,
-      widthMm,
-      checkHeight,
-      heightMm,
-      checkLocation,
-      checkMaterial,
-      checkProtection,
-      checkPitch,
-      checkModule,
-      checkCabinet:
-        checkCabinet +
-        ` (type: ${selectedScreenTypeCode}, code: ${selectedCabinetCode})`,
-      checkRate,
-      dollarRate,
-      checkCalculating,
-      requiredFieldsFilled,
-      isCalculationReady: requiredFieldsFilled && checkCalculating,
-    });
+      console.log('Calculation Ready Check:', {
+        checkScreenType,
+        checkWidth, widthMm,
+        checkHeight, heightMm,
+        checkLocation, selectedLocationCode,
+        checkMaterial, selectedMaterialCode,
+        checkProtection, selectedProtectionCode,
+        checkPitch, selectedPitchCode,
+        checkModule, selectedModuleCode,
+        checkCabinet, selectedCabinetCode,
+        checkRate, dollarRate,
+        checkCalculating,
+        requiredFieldsFilled,
+        isCalculationReady: requiredFieldsFilled && checkCalculating
+    })
     return requiredFieldsFilled && checkCalculating;
   }, [
-    selectedScreenTypeCode,
-    widthMm,
-    heightMm,
-    selectedLocationCode,
-    selectedMaterialCode,
-    selectedProtectionCode,
-    selectedPitchCode,
-    selectedModuleCode,
-    selectedCabinetCode,
-    dollarRate,
-    isCalculating,
-    cabinetScreenTypeCode,
+    selectedScreenTypeCode, widthMm, heightMm, selectedLocationCode,
+    selectedMaterialCode, selectedProtectionCode, selectedPitchCode,
+    selectedModuleCode, selectedCabinetCode, dollarRate, isCalculating,
+    cabinetScreenTypeCode
   ]);
 
   // --- Функции для обновления состояния (useCallback) ---
@@ -972,8 +1106,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const setHeightMm = useCallback((value: string | number) => {
     setHeightMmState(value);
   }, []);
-
-  // --- ЗАПУСК РАСЧЕТА ---
   const performCalculation = useCallback(async () => {
     if (!isCalculationReady) {
       console.warn("Calculation prerequisites not met.");
@@ -1025,13 +1157,13 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isFlexSelected,
     dollarRate,
   ]);
-
-  // Функция сброса
   const resetQuery = useCallback(() => {
     refetchInitial();
+    refetchPitches();
     refetchCabinets();
     refetchOptions();
-  }, [refetchInitial, refetchCabinets, refetchOptions]);
+    refetchModules();
+  }, [refetchInitial, refetchPitches, refetchModules, refetchCabinets, refetchOptions]);
 
   // --- Формируем значение контекста ---
   const contextValue: CalculatorContextProps = {
@@ -1046,13 +1178,23 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     refreshRates: gqlRefreshRates,
     sensors: gqlSensors,
     controlTypes: gqlControlTypes,
-    pitches: gqlPitches,
-    modules: gqlModules,
     optionsQueryResult: {
       data: availableOptions,
       isLoading: isLoadingOptions,
       isError: isErrorOptions,
       error: errorOptions,
+    },
+    pitchQueryResult: {
+      data: gqlFilteredPitches as (Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'> | null | undefined)[],
+      isLoading: isLoadingPitches,
+      isError: isErrorPitches,
+      error: errorPitches,
+    },
+    moduleQueryResult: {
+      data: gqlFilteredModules as (GqlModule | null | undefined)[],
+      isLoading: isLoadingModules,
+      isError: isErrorModules,
+      error: errorModules,
     },
     cabinetQueryResult: {
       data: gqlCabinets,

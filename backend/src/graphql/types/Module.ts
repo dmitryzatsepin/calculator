@@ -1,18 +1,16 @@
 // src/graphql/types/Module.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Импорт для Decimal
+import { Prisma } from '@prisma/client'; // Импорт для Decimal и WhereInput
 
  // Определяем тип ModulePrice
 const ModulePriceRelay = builder.prismaNode('ModulePrice', {
     id: { field: 'moduleCode' },
     fields: (t) => ({
         moduleCode: t.exposeString('moduleCode'),
-        // --- ИСПРАВЛЕНО: Используем t.field для priceUsd ---
         priceUsd: t.field({
             type: 'Float', nullable: true, select: { priceUsd: true },
             resolve: (parent) => parent.priceUsd ? parent.priceUsd.toNumber() : null
         }),
-        // --- ИСПРАВЛЕНО: Используем t.field для priceRub ---
         priceRub: t.field({
             type: 'Float', nullable: true, select: { priceRub: true },
             resolve: (parent) => parent.priceRub ? parent.priceRub.toNumber() : null
@@ -20,18 +18,35 @@ const ModulePriceRelay = builder.prismaNode('ModulePrice', {
     }),
 });
 
- // Определяем тип ModuleItemComponent (аналогично CabinetItemComponent)
- // --- ИЗМЕНЕНО: Используем prismaObject ---
+ // Определяем тип ModuleItemComponent
 builder.prismaObject('ModuleItemComponent', {
-    // ID не определяем
     fields: (t) => ({
         quantity: t.exposeInt('quantity'),
         item: t.prismaField({
             type: 'Item',
-            resolve: (query, parent, args, ctx) =>
+            resolve: (query, parent, _args, ctx) => // _args обычно не нужен здесь
                 ctx.prisma.item.findUniqueOrThrow({ ...query, where: { code: parent.itemCode } })
         }),
-        // module: t.prismaField({ type: 'Module', ... }) // Обратная связь
+    })
+});
+
+// Определяем тип для связующей модели ModuleBrightness
+builder.prismaObject('ModuleBrightness', {
+    fields: (t) => ({
+      moduleCode: t.exposeString('moduleCode'),
+      brightnessCode: t.exposeString('brightnessCode'),
+      // Можно добавить связь на Brightness, если нужно получить его value
+      // brightness: t.relation('brightness')
+    })
+});
+
+// Определяем тип для связующей модели ModuleRefreshRate
+builder.prismaObject('ModuleRefreshRate', {
+    fields: (t) => ({
+      moduleCode: t.exposeString('moduleCode'),
+      refreshRateCode: t.exposeString('refreshRateCode'),
+      // Можно добавить связь на RefreshRate, если нужно получить его value
+      // refreshRate: t.relation('refreshRate')
     })
 });
 
@@ -50,81 +65,106 @@ builder.prismaNode('Module', {
     // --- Связи M-N ---
     categories: t.prismaField({
         type: ['ItemCategory'],
-         resolve: async (query, parent, args, ctx) => {
+         resolve: async (query, parent, _args, ctx) => {
             const relations = await ctx.prisma.moduleCategory.findMany({ where: { moduleCode: parent.code }, select: { categoryCode: true } });
-            return ctx.prisma.itemCategory.findMany({ ...query, where: { code: { in: relations.map(r => r.categoryCode) } } });
+            const categoryCodes = relations.map(r => r.categoryCode);
+            if (categoryCodes.length === 0) return [];
+            return ctx.prisma.itemCategory.findMany({ ...query, where: { code: { in: categoryCodes } } });
         }
     }),
     subcategories: t.prismaField({
         type: ['ItemSubcategory'],
-         resolve: async (query, parent, args, ctx) => {
+         resolve: async (query, parent, _args, ctx) => {
             const relations = await ctx.prisma.moduleSubcategory.findMany({ where: { moduleCode: parent.code }, select: { subcategoryCode: true } });
-            return ctx.prisma.itemSubcategory.findMany({ ...query, where: { code: { in: relations.map(r => r.subcategoryCode) } } });
+            const subcategoryCodes = relations.map(r => r.subcategoryCode);
+             if (subcategoryCodes.length === 0) return [];
+            return ctx.prisma.itemSubcategory.findMany({ ...query, where: { code: { in: subcategoryCodes } } });
         }
     }),
     locations: t.prismaField({
          type: ['Location'],
-         resolve: async (query, parent, args, ctx) => {
+         resolve: async (query, parent, _args, ctx) => {
             const relations = await ctx.prisma.moduleLocation.findMany({ where: { moduleCode: parent.code }, select: { locationCode: true } });
-            return ctx.prisma.location.findMany({ ...query, where: { code: { in: relations.map(r => r.locationCode) } } });
+            const locationCodes = relations.map(r => r.locationCode);
+             if (locationCodes.length === 0) return [];
+            return ctx.prisma.location.findMany({ ...query, where: { code: { in: locationCodes } } });
         }
     }),
+
+    // --- ИЗМЕНЕНО: Связь с Частотой через промежуточную модель ---
      refreshRates: t.prismaField({
-         type: ['RefreshRate'],
-         resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.moduleRefreshRate.findMany({ where: { moduleCode: parent.code }, select: { refreshRateCode: true } });
-            return ctx.prisma.refreshRate.findMany({ ...query, where: { code: { in: relations.map(r => r.refreshRateCode) } } });
+         type: ['ModuleRefreshRate'], // <-- ИЗМЕНЕН ТИП
+         description: "Связи модуля с доступными значениями частоты обновления.",
+         resolve: async (query, parent, _args, ctx) => {
+            return ctx.prisma.moduleRefreshRate.findMany({
+                ...query, // Pothos/GraphQL запросят только нужные поля (refreshRateCode)
+                where: { moduleCode: parent.code }
+            });
         }
     }),
+
+    // --- ИЗМЕНЕНО: Связь с Яркостью через промежуточную модель ---
      brightnesses: t.prismaField({
-         type: ['Brightness'],
-         resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.moduleBrightness.findMany({ where: { moduleCode: parent.code }, select: { brightnessCode: true } });
-            return ctx.prisma.brightness.findMany({ ...query, where: { code: { in: relations.map(r => r.brightnessCode) } } });
+         type: ['ModuleBrightness'], // <-- ИЗМЕНЕН ТИП
+         description: "Связи модуля с доступными значениями яркости.",
+         resolve: async (query, parent, _args, ctx) => {
+            return ctx.prisma.moduleBrightness.findMany({
+                ...query, // Pothos/GraphQL запросят только нужные поля (brightnessCode)
+                where: { moduleCode: parent.code }
+            });
         }
     }),
+
      sizes: t.prismaField({
          type: ['ModuleSize'],
-         resolve: async (query, parent, args, ctx) => {
+         resolve: async (query, parent, _args, ctx) => {
             const relations = await ctx.prisma.moduleModuleSize.findMany({ where: { moduleCode: parent.code }, select: { moduleSizeCode: true } });
-            return ctx.prisma.moduleSize.findMany({ ...query, where: { code: { in: relations.map(r => r.moduleSizeCode) } } });
+            const moduleSizeCodes = relations.map(r => r.moduleSizeCode);
+            if (moduleSizeCodes.length === 0) return [];
+            return ctx.prisma.moduleSize.findMany({ ...query, where: { code: { in: moduleSizeCodes } } });
         }
     }),
      pitches: t.prismaField({
          type: ['Pitch'],
-         resolve: async (query, parent, args, ctx) => {
+         resolve: async (query, parent, _args, ctx) => {
             const relations = await ctx.prisma.modulePitch.findMany({ where: { moduleCode: parent.code }, select: { pitchCode: true } });
-            return ctx.prisma.pitch.findMany({ ...query, where: { code: { in: relations.map(r => r.pitchCode) } } });
+            const pitchCodes = relations.map(r => r.pitchCode);
+             if (pitchCodes.length === 0) return [];
+            return ctx.prisma.pitch.findMany({ ...query, where: { code: { in: pitchCodes } } });
         }
     }),
      manufacturers: t.prismaField({
          type: ['Manufacturer'],
-         resolve: async (query, parent, args, ctx) => {
+         resolve: async (query, parent, _args, ctx) => {
             const relations = await ctx.prisma.moduleManufacturer.findMany({ where: { moduleCode: parent.code }, select: { manufacturerCode: true } });
-            return ctx.prisma.manufacturer.findMany({ ...query, where: { code: { in: relations.map(r => r.manufacturerCode) } } });
+            const manufacturerCodes = relations.map(r => r.manufacturerCode);
+             if (manufacturerCodes.length === 0) return [];
+            return ctx.prisma.manufacturer.findMany({ ...query, where: { code: { in: manufacturerCodes } } });
         }
     }),
      options: t.prismaField({
          type: ['Option'],
-         resolve: async (query, parent, args, ctx) => {
+         resolve: async (query, parent, _args, ctx) => {
             const relations = await ctx.prisma.moduleOption.findMany({ where: { moduleCode: parent.code }, select: { optionCode: true } });
-            return ctx.prisma.option.findMany({ ...query, where: { code: { in: relations.map(r => r.optionCode) } } });
+            const optionCodes = relations.map(r => r.optionCode);
+            if (optionCodes.length === 0) return [];
+            return ctx.prisma.option.findMany({ ...query, where: { code: { in: optionCodes } } });
         }
     }),
 
     // Компоненты модуля (ModuleItemComponent)
      items: t.prismaConnection({
-        type: 'ModuleItemComponent', // Ссылка на тип ModuleItemComponent
-        cursor: 'moduleCode_itemCode',
-        resolve: (query, parent, args, ctx) =>
+        type: 'ModuleItemComponent',
+        cursor: 'moduleCode_itemCode', // Используем композитный ключ как курсор
+        resolve: (query, parent, _args, ctx) => // _args для пагинации (first, after, etc.)
             ctx.prisma.moduleItemComponent.findMany({ ...query, where: { moduleCode: parent.code } })
     }),
 
     // Цена модуля (ModulePrice)
      price: t.prismaField({
-        type: 'ModulePrice', // Ссылка на тип ModulePrice
+        type: 'ModulePrice',
         nullable: true,
-        resolve: (query, parent, args, ctx) => ctx.prisma.modulePrice.findUnique({
+        resolve: (query, parent, _args, ctx) => ctx.prisma.modulePrice.findUnique({
              ...query,
              where: { moduleCode: parent.code }
          })

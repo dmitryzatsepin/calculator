@@ -2,21 +2,19 @@
 import { builder } from '../builder';
 
 builder.queryFields((t) => ({
-  // Запрос для получения списка Pitch
   pitches: t.prismaField({
-    type: ['Pitch'], // Возвращает массив Pitch
+    type: ['Pitch'],
     description: 'Получить список всех шагов пикселя.',
-    args: { // Добавляем аргумент для фильтрации
+    args: {
       onlyActive: t.arg.boolean({ defaultValue: true, description: 'Вернуть только активные?' })
     },
-    resolve: async (query, parent, args, ctx, info) => {
+    resolve: async (query, _parent, args, ctx) => {
       return ctx.prisma.pitch.findMany({
          ...query,
          where: {
              active: args.onlyActive ?? undefined
          },
          orderBy: {
-             // Сортируем по числовому значению шага
              pitchValue: 'asc'
          }
       });
@@ -31,11 +29,55 @@ builder.queryFields((t) => ({
       args: {
           code: t.arg.string({ required: true, description: 'Уникальный код шага (например, P3.91)' })
       },
-      resolve: async (query, parent, args, ctx, info) => {
+      resolve: async (query, _parent, args, ctx) => {
           return ctx.prisma.pitch.findUnique({
               ...query,
               where: { code: args.code }
           });
       }
+  }),
+
+  // --- Получить Pitch опции по Location ---
+  pitchOptionsByLocation: t.prismaField({
+    type: ['Pitch'],
+    description: 'Получить доступные шаги пикселя для модулей, подходящих под указанное расположение.',
+    args: {
+        locationCode: t.arg.string({ required: true, description: 'Код расположения (Location)' }),
+        onlyActive: t.arg.boolean({ defaultValue: true, required: false, description: 'Учитывать только активные модули и питчи?'})
+    },
+    resolve: async (query, _parent, args, ctx) => {
+        const { locationCode, onlyActive } = args;
+        console.log(`[pitchOptionsByLocation] Fetching pitches for location: ${locationCode}`);
+
+        const pitchCodeRelations = await ctx.prisma.modulePitch.findMany({
+            where: {
+                module: {
+                    active: onlyActive ?? undefined,
+                    locations: { some: { locationCode: locationCode } }
+                }
+            },
+            select: { pitchCode: true },
+            distinct: ['pitchCode']
+        });
+
+        const availablePitchCodes = pitchCodeRelations.map(p => p.pitchCode);
+
+        if (availablePitchCodes.length === 0) {
+             console.log(`[pitchOptionsByLocation] No relevant pitches found for location: ${locationCode}`);
+            return [];
+        }
+        console.log(`[pitchOptionsByLocation] Found relevant pitch codes:`, availablePitchCodes);
+
+        return ctx.prisma.pitch.findMany({
+            ...query,
+            where: {
+                code: { in: availablePitchCodes },
+                active: onlyActive ?? undefined
+            },
+            orderBy: {
+                pitchValue: 'asc'
+            }
+        });
+    }
   })
 }));

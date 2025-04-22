@@ -14,30 +14,40 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "\n  fragment OptionFields on Option {\n    id\n    code\n    name\n    active\n  }\n": typeof types.OptionFieldsFragmentDoc,
     "\n  fragment LocationFields on Location {\n    id\n    code\n    name\n    active\n  }\n": typeof types.LocationFieldsFragmentDoc,
     "\n  fragment MaterialFields on Material {\n    id\n    code\n    name\n    active\n  }\n": typeof types.MaterialFieldsFragmentDoc,
+    "\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n": typeof types.PitchFieldsFragmentDoc,
     "\n  fragment BrightnessFields on Brightness {\n    id\n    code\n    value\n    active\n  }\n": typeof types.BrightnessFieldsFragmentDoc,
     "\n  fragment RefreshRateFields on RefreshRate {\n    id\n    code\n    value\n    active\n  }\n": typeof types.RefreshRateFieldsFragmentDoc,
     "\n  fragment SensorFields on Sensor {\n    id\n    code\n    name\n    active\n  }\n": typeof types.SensorFieldsFragmentDoc,
     "\n  fragment ControlTypeFields on ControlType {\n    id\n    code\n    name\n    active\n  }\n": typeof types.ControlTypeFieldsFragmentDoc,
-    "\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n  }\n": typeof types.ModuleOptionFieldsFragmentDoc,
-    "\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n": typeof types.PitchFieldsFragmentDoc,
+    "\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n    brightnesses {\n      brightnessCode\n    }\n    refreshRates {\n      refreshRateCode\n    }\n  }\n": typeof types.ModuleOptionFieldsFragmentDoc,
     "\n  fragment CabinetOptionFields on Cabinet {\n    id\n    code\n    sku\n    name\n    active\n  }\n": typeof types.CabinetOptionFieldsFragmentDoc,
-    "\n  \n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) { id code name }\n    locations { ...LocationFields }\n    materials { ...MaterialFields }\n    ipProtections(onlyActive: true) { id code }\n    brightnesses(onlyActive: true) { ...BrightnessFields }\n    refreshRates(onlyActive: true) { ...RefreshRateFields }\n    sensors(onlyActive: true) { ...SensorFields }\n    controlTypes(onlyActive: true) { ...ControlTypeFields }\n    moduleOptions(onlyActive: true) { ...ModuleOptionFields }\n    pitches(onlyActive: true) { ...PitchFields }\n  }\n": typeof types.GetInitialDataDocument,
+    "\n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) {\n      id\n      code\n      name\n    }\n    locations {\n      ...LocationFields\n    }\n    materials {\n      ...MaterialFields\n    }\n    ipProtections(onlyActive: true) {\n      id\n      code\n    }\n    brightnesses(onlyActive: true) {\n      ...BrightnessFields\n    }\n    refreshRates(onlyActive: true) {\n      ...RefreshRateFields\n    }\n    sensors(onlyActive: true) {\n      ...SensorFields\n    }\n    controlTypes(onlyActive: true) {\n      ...ControlTypeFields\n    }\n    moduleOptions(onlyActive: true) {\n      ...ModuleOptionFields\n    }\n  }\n": typeof types.GetInitialDataDocument,
+    "\n  \n  query GetScreenTypeOptions($screenTypeCode: String!, $onlyActive: Boolean) {\n    optionsByScreenType(\n      screenTypeCode: $screenTypeCode\n      onlyActive: $onlyActive\n    ) {\n      ...OptionFields\n    }\n  }\n": typeof types.GetScreenTypeOptionsDocument,
+    "\n  \n  query GetPitchOptionsByLocation($locationCode: String!, $onlyActive: Boolean) {\n    pitchOptionsByLocation(locationCode: $locationCode, onlyActive: $onlyActive) {\n      ...PitchFields\n    }\n  }\n": typeof types.GetPitchOptionsByLocationDocument,
+    "\n  \n  # Определяем запрос с переменными\n  query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {\n    moduleOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...ModuleOptionFields\n    }\n  }\n": typeof types.GetModuleOptionsDocument,
     "\n  \n  query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {\n    cabinetOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...CabinetOptionFields\n    }\n  }\n": typeof types.GetCabinetOptionsDocument,
+    "\n  query GetDollarRate {\n    getCurrentDollarRate\n  }\n": typeof types.GetDollarRateDocument,
 };
 const documents: Documents = {
+    "\n  fragment OptionFields on Option {\n    id\n    code\n    name\n    active\n  }\n": types.OptionFieldsFragmentDoc,
     "\n  fragment LocationFields on Location {\n    id\n    code\n    name\n    active\n  }\n": types.LocationFieldsFragmentDoc,
     "\n  fragment MaterialFields on Material {\n    id\n    code\n    name\n    active\n  }\n": types.MaterialFieldsFragmentDoc,
+    "\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n": types.PitchFieldsFragmentDoc,
     "\n  fragment BrightnessFields on Brightness {\n    id\n    code\n    value\n    active\n  }\n": types.BrightnessFieldsFragmentDoc,
     "\n  fragment RefreshRateFields on RefreshRate {\n    id\n    code\n    value\n    active\n  }\n": types.RefreshRateFieldsFragmentDoc,
     "\n  fragment SensorFields on Sensor {\n    id\n    code\n    name\n    active\n  }\n": types.SensorFieldsFragmentDoc,
     "\n  fragment ControlTypeFields on ControlType {\n    id\n    code\n    name\n    active\n  }\n": types.ControlTypeFieldsFragmentDoc,
-    "\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n  }\n": types.ModuleOptionFieldsFragmentDoc,
-    "\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n": types.PitchFieldsFragmentDoc,
+    "\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n    brightnesses {\n      brightnessCode\n    }\n    refreshRates {\n      refreshRateCode\n    }\n  }\n": types.ModuleOptionFieldsFragmentDoc,
     "\n  fragment CabinetOptionFields on Cabinet {\n    id\n    code\n    sku\n    name\n    active\n  }\n": types.CabinetOptionFieldsFragmentDoc,
-    "\n  \n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) { id code name }\n    locations { ...LocationFields }\n    materials { ...MaterialFields }\n    ipProtections(onlyActive: true) { id code }\n    brightnesses(onlyActive: true) { ...BrightnessFields }\n    refreshRates(onlyActive: true) { ...RefreshRateFields }\n    sensors(onlyActive: true) { ...SensorFields }\n    controlTypes(onlyActive: true) { ...ControlTypeFields }\n    moduleOptions(onlyActive: true) { ...ModuleOptionFields }\n    pitches(onlyActive: true) { ...PitchFields }\n  }\n": types.GetInitialDataDocument,
+    "\n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) {\n      id\n      code\n      name\n    }\n    locations {\n      ...LocationFields\n    }\n    materials {\n      ...MaterialFields\n    }\n    ipProtections(onlyActive: true) {\n      id\n      code\n    }\n    brightnesses(onlyActive: true) {\n      ...BrightnessFields\n    }\n    refreshRates(onlyActive: true) {\n      ...RefreshRateFields\n    }\n    sensors(onlyActive: true) {\n      ...SensorFields\n    }\n    controlTypes(onlyActive: true) {\n      ...ControlTypeFields\n    }\n    moduleOptions(onlyActive: true) {\n      ...ModuleOptionFields\n    }\n  }\n": types.GetInitialDataDocument,
+    "\n  \n  query GetScreenTypeOptions($screenTypeCode: String!, $onlyActive: Boolean) {\n    optionsByScreenType(\n      screenTypeCode: $screenTypeCode\n      onlyActive: $onlyActive\n    ) {\n      ...OptionFields\n    }\n  }\n": types.GetScreenTypeOptionsDocument,
+    "\n  \n  query GetPitchOptionsByLocation($locationCode: String!, $onlyActive: Boolean) {\n    pitchOptionsByLocation(locationCode: $locationCode, onlyActive: $onlyActive) {\n      ...PitchFields\n    }\n  }\n": types.GetPitchOptionsByLocationDocument,
+    "\n  \n  # Определяем запрос с переменными\n  query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {\n    moduleOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...ModuleOptionFields\n    }\n  }\n": types.GetModuleOptionsDocument,
     "\n  \n  query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {\n    cabinetOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...CabinetOptionFields\n    }\n  }\n": types.GetCabinetOptionsDocument,
+    "\n  query GetDollarRate {\n    getCurrentDollarRate\n  }\n": types.GetDollarRateDocument,
 };
 
 /**
@@ -57,11 +67,19 @@ export function gql(source: string): unknown;
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function gql(source: "\n  fragment OptionFields on Option {\n    id\n    code\n    name\n    active\n  }\n"): (typeof documents)["\n  fragment OptionFields on Option {\n    id\n    code\n    name\n    active\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function gql(source: "\n  fragment LocationFields on Location {\n    id\n    code\n    name\n    active\n  }\n"): (typeof documents)["\n  fragment LocationFields on Location {\n    id\n    code\n    name\n    active\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  fragment MaterialFields on Material {\n    id\n    code\n    name\n    active\n  }\n"): (typeof documents)["\n  fragment MaterialFields on Material {\n    id\n    code\n    name\n    active\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n"): (typeof documents)["\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -81,11 +99,7 @@ export function gql(source: "\n  fragment ControlTypeFields on ControlType {\n  
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n  }\n"): (typeof documents)["\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n  }\n"];
-/**
- * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function gql(source: "\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n"): (typeof documents)["\n  fragment PitchFields on Pitch {\n    id\n    code\n    pitchValue\n    active\n  }\n"];
+export function gql(source: "\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n    brightnesses {\n      brightnessCode\n    }\n    refreshRates {\n      refreshRateCode\n    }\n  }\n"): (typeof documents)["\n  fragment ModuleOptionFields on Module {\n    id\n    code\n    sku\n    name\n    active\n    brightnesses {\n      brightnessCode\n    }\n    refreshRates {\n      refreshRateCode\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -93,11 +107,27 @@ export function gql(source: "\n  fragment CabinetOptionFields on Cabinet {\n    
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function gql(source: "\n  \n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) { id code name }\n    locations { ...LocationFields }\n    materials { ...MaterialFields }\n    ipProtections(onlyActive: true) { id code }\n    brightnesses(onlyActive: true) { ...BrightnessFields }\n    refreshRates(onlyActive: true) { ...RefreshRateFields }\n    sensors(onlyActive: true) { ...SensorFields }\n    controlTypes(onlyActive: true) { ...ControlTypeFields }\n    moduleOptions(onlyActive: true) { ...ModuleOptionFields }\n    pitches(onlyActive: true) { ...PitchFields }\n  }\n"): (typeof documents)["\n  \n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) { id code name }\n    locations { ...LocationFields }\n    materials { ...MaterialFields }\n    ipProtections(onlyActive: true) { id code }\n    brightnesses(onlyActive: true) { ...BrightnessFields }\n    refreshRates(onlyActive: true) { ...RefreshRateFields }\n    sensors(onlyActive: true) { ...SensorFields }\n    controlTypes(onlyActive: true) { ...ControlTypeFields }\n    moduleOptions(onlyActive: true) { ...ModuleOptionFields }\n    pitches(onlyActive: true) { ...PitchFields }\n  }\n"];
+export function gql(source: "\n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) {\n      id\n      code\n      name\n    }\n    locations {\n      ...LocationFields\n    }\n    materials {\n      ...MaterialFields\n    }\n    ipProtections(onlyActive: true) {\n      id\n      code\n    }\n    brightnesses(onlyActive: true) {\n      ...BrightnessFields\n    }\n    refreshRates(onlyActive: true) {\n      ...RefreshRateFields\n    }\n    sensors(onlyActive: true) {\n      ...SensorFields\n    }\n    controlTypes(onlyActive: true) {\n      ...ControlTypeFields\n    }\n    moduleOptions(onlyActive: true) {\n      ...ModuleOptionFields\n    }\n  }\n"): (typeof documents)["\n  \n  \n  \n  \n  \n  \n  \n\n  query GetInitialData {\n    screenTypes(onlyActive: true) {\n      id\n      code\n      name\n    }\n    locations {\n      ...LocationFields\n    }\n    materials {\n      ...MaterialFields\n    }\n    ipProtections(onlyActive: true) {\n      id\n      code\n    }\n    brightnesses(onlyActive: true) {\n      ...BrightnessFields\n    }\n    refreshRates(onlyActive: true) {\n      ...RefreshRateFields\n    }\n    sensors(onlyActive: true) {\n      ...SensorFields\n    }\n    controlTypes(onlyActive: true) {\n      ...ControlTypeFields\n    }\n    moduleOptions(onlyActive: true) {\n      ...ModuleOptionFields\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  \n  query GetScreenTypeOptions($screenTypeCode: String!, $onlyActive: Boolean) {\n    optionsByScreenType(\n      screenTypeCode: $screenTypeCode\n      onlyActive: $onlyActive\n    ) {\n      ...OptionFields\n    }\n  }\n"): (typeof documents)["\n  \n  query GetScreenTypeOptions($screenTypeCode: String!, $onlyActive: Boolean) {\n    optionsByScreenType(\n      screenTypeCode: $screenTypeCode\n      onlyActive: $onlyActive\n    ) {\n      ...OptionFields\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  \n  query GetPitchOptionsByLocation($locationCode: String!, $onlyActive: Boolean) {\n    pitchOptionsByLocation(locationCode: $locationCode, onlyActive: $onlyActive) {\n      ...PitchFields\n    }\n  }\n"): (typeof documents)["\n  \n  query GetPitchOptionsByLocation($locationCode: String!, $onlyActive: Boolean) {\n    pitchOptionsByLocation(locationCode: $locationCode, onlyActive: $onlyActive) {\n      ...PitchFields\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  \n  # Определяем запрос с переменными\n  query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {\n    moduleOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...ModuleOptionFields\n    }\n  }\n"): (typeof documents)["\n  \n  # Определяем запрос с переменными\n  query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {\n    moduleOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...ModuleOptionFields\n    }\n  }\n"];
 /**
  * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function gql(source: "\n  \n  query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {\n    cabinetOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...CabinetOptionFields\n    }\n  }\n"): (typeof documents)["\n  \n  query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {\n    cabinetOptions(filters: $filters, onlyActive: $onlyActive) {\n      ...CabinetOptionFields\n    }\n  }\n"];
+/**
+ * The gql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function gql(source: "\n  query GetDollarRate {\n    getCurrentDollarRate\n  }\n"): (typeof documents)["\n  query GetDollarRate {\n    getCurrentDollarRate\n  }\n"];
 
 export function gql(source: string) {
   return (documents as any)[source] ?? {};
