@@ -58,8 +58,10 @@ const CalculatorForm = () => {
     isLoadingDollarRate,
     widthMm,
     heightMm,
-    cabinetQueryResult,
     optionsQueryResult,
+    pitchQueryResult,
+    moduleQueryResult,
+    cabinetQueryResult,
     setSelectedScreenTypeCode,
     setSelectedLocationCode,
     setSelectedMaterialCode,
@@ -90,18 +92,33 @@ const CalculatorForm = () => {
     isFlexOptionAvailable,
     isCalculationReady,
   } = useCalculatorContext();
-
-  const {
-    isLoading: isLoadingCabinets,
-    isError: isErrorCabinets,
-    error: errorCabinets,
-  } = cabinetQueryResult;
+  
   const {
     data: optionsData,
     isLoading: isLoadingOptions,
     isError: isErrorOptions,
     error: errorOptions,
   } = optionsQueryResult;
+
+  const { 
+    isLoading: isLoadingPitches, 
+    isError: isErrorPitches, 
+    error: errorPitches 
+  } = pitchQueryResult;
+  
+  const { 
+    isLoading: 
+    isLoadingModules, 
+    isError: isErrorModules, 
+    error: errorModules 
+  } = moduleQueryResult;
+
+  const {
+    isLoading: isLoadingCabinets,
+    isError: isErrorCabinets,
+    error: errorCabinets,
+  } = cabinetQueryResult;
+  
   const cabinetScreenTypeCode = "cabinet";
   const showCabinetSection = selectedScreenTypeCode === cabinetScreenTypeCode;
 
@@ -335,8 +352,15 @@ const CalculatorForm = () => {
                 value={selectedPitchCode}
                 onChange={handlePitchChange}
                 disabled={ isLoadingInitial || !selectedLocationCode || !selectedProtectionCode || pitchOptions.length === 0 }
+                loading={isLoadingPitches}
                 required={true}
+                placeholder={!selectedLocationCode ? "Сначала выберите расположение" : (isLoadingPitches ? "Загрузка..." : "Выберите шаг пикселя")}
               />
+              {isErrorPitches && (
+                  <Text c="red" size="sm" mt="xs">
+                      Ошибка загрузки шагов пикселя: {errorPitches?.message ?? 'Неизвестная ошибка'}
+                  </Text>
+              )}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <BrightnessSelect
@@ -371,8 +395,14 @@ const CalculatorForm = () => {
                   !selectedPitchCode ||
                   moduleOptions.length === 0
                 }
+                loading={isLoadingModules}
                 required={true}
               />
+              {isErrorModules && (
+                  <Text c="red" size="sm" mt="xs">
+                      Ошибка загрузки модулей: {errorModules?.message ?? 'Неизвестная ошибка'}
+                  </Text>
+              )}
             </Grid.Col>
 
             {/* Правая колонка: либо Кабинет (если нужно), либо пустая */}

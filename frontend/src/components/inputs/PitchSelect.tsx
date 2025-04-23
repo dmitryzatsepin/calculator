@@ -1,5 +1,5 @@
 // src/components/inputs/PitchSelect.tsx
-import { Select } from '@mantine/core';
+import { Select, Loader, SelectProps } from '@mantine/core';
 
 // Тип для опции в выпадающем списке
 type SelectOption = { label: string; value: string }; // value будет кодом шага (pitch.code)
@@ -12,7 +12,9 @@ interface PitchSelectProps {
     disabled?: boolean;                     // Флаг блокировки компонента
     required?: boolean;                     // Обязательно ли поле для заполнения
     label?: string;                         // Заголовок поля
-    placeholder?: string;                   // Текст-подсказка внутри поля
+    placeholder?: string;
+    loading?: boolean;
+    size?: SelectProps['size'];                     // Текст-подсказка внутри поля
 }
 
 const PitchSelect = ({
@@ -22,7 +24,9 @@ const PitchSelect = ({
     disabled = false,
     required = false, // Шаг пикселя, вероятно, будет обязательным
     label = "Шаг пикселя", // Дефолтный лейбл
-    placeholder = "Выберите шаг" // Дефолтный плейсхолдер
+    placeholder = "Выберите шаг",
+    loading = false,
+    size,
 }: PitchSelectProps) => {
     return (
         <Select
@@ -37,6 +41,9 @@ const PitchSelect = ({
             required={required}
             nothingFoundMessage="Нет доступных шагов пикселя"
             limit={100} // Ограничение для производительности
+            rightSection={loading ? <Loader size="xs" /> : null}
+            rightSectionWidth={loading ? 36 : 0}
+            size={size}
         />
     );
 };
