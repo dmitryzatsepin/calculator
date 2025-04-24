@@ -315,7 +315,7 @@ model Module {
   id           Int      @id @default(autoincrement())
   code         String   @unique @map("module_code")
   sku          String?  @unique @map("module_sku")
-  name         String?  @map("module_name")
+  name         String  @map("module_name")
   moduleOption String?  @map("module_option")
   active       Boolean  @default(true) @map("active")
   createdAt    DateTime @default(now())

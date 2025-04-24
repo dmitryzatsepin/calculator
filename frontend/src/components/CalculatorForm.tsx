@@ -60,6 +60,8 @@ const CalculatorForm = () => {
     heightMm,
     optionsQueryResult,
     pitchQueryResult,
+    refreshRateQueryResult,
+    brightnessQueryResult,
     moduleQueryResult,
     cabinetQueryResult,
     setSelectedScreenTypeCode,
@@ -92,7 +94,7 @@ const CalculatorForm = () => {
     isFlexOptionAvailable,
     isCalculationReady,
   } = useCalculatorContext();
-  
+
   const {
     data: optionsData,
     isLoading: isLoadingOptions,
@@ -100,17 +102,28 @@ const CalculatorForm = () => {
     error: errorOptions,
   } = optionsQueryResult;
 
-  const { 
-    isLoading: isLoadingPitches, 
-    isError: isErrorPitches, 
-    error: errorPitches 
+  const {
+    isLoading: isLoadingPitches,
+    isError: isErrorPitches,
+    error: errorPitches,
   } = pitchQueryResult;
-  
-  const { 
-    isLoading: 
-    isLoadingModules, 
-    isError: isErrorModules, 
-    error: errorModules 
+
+  const {
+    isLoading: isLoadingRefreshRates,
+    isError: isErrorRefreshRates,
+    error: errorRefreshRates,
+  } = refreshRateQueryResult;
+
+  const {
+    isLoading: isLoadingBrightnesses,
+    isError: isErrorBrightnesses,
+    error: errorBrightnesses,
+  } = brightnessQueryResult;
+
+  const {
+    isLoading: isLoadingModules,
+    isError: isErrorModules,
+    error: errorModules,
   } = moduleQueryResult;
 
   const {
@@ -118,7 +131,7 @@ const CalculatorForm = () => {
     isError: isErrorCabinets,
     error: errorCabinets,
   } = cabinetQueryResult;
-  
+
   const cabinetScreenTypeCode = "cabinet";
   const showCabinetSection = selectedScreenTypeCode === cabinetScreenTypeCode;
 
@@ -351,57 +364,69 @@ const CalculatorForm = () => {
                 options={pitchOptions}
                 value={selectedPitchCode}
                 onChange={handlePitchChange}
-                disabled={ isLoadingInitial || !selectedLocationCode || !selectedProtectionCode || pitchOptions.length === 0 }
+                disabled={
+                  isLoadingInitial ||
+                  !selectedLocationCode ||
+                  !selectedProtectionCode ||
+                  (showCabinetSection && !selectedMaterialCode) ||
+                  isLoadingPitches ||
+                  pitchOptions.length === 0
+                }
                 loading={isLoadingPitches}
                 required={true}
-                placeholder={!selectedLocationCode ? "Сначала выберите расположение" : (isLoadingPitches ? "Загрузка..." : "Выберите шаг пикселя")}
+                placeholder={
+                  !selectedLocationCode
+                    ? "Сначала выберите расположение"
+                    : isLoadingPitches
+                    ? "Загрузка..."
+                    : "Выберите шаг пикселя"
+                }
               />
               {isErrorPitches && (
-                  <Text c="red" size="sm" mt="xs">
-                      Ошибка загрузки шагов пикселя: {errorPitches?.message ?? 'Неизвестная ошибка'}
-                  </Text>
+                <Text c="red" size="sm" mt="xs">
+                  Ошибка загрузки шагов пикселя:{" "}
+                  {errorPitches?.message ?? "Неизвестная ошибка"}
+                </Text>
               )}
-            </Grid.Col>
-            <Grid.Col span={{ base: 12, md: 4 }} mt="md">
-              <BrightnessSelect
-                options={brightnessOptions}
-                value={selectedBrightnessCode}
-                onChange={handleBrightnessChange}
-                disabled={isLoadingInitial || !selectedProtectionCode}
-                required={false}
-                placeholder="Авто / Выберите яркость"
-              />
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <RefreshRateSelect
                 options={refreshRateOptions}
                 value={selectedRefreshRateCode}
                 onChange={handleRefreshRateChange}
-                disabled={isLoadingInitial || !selectedProtectionCode}
+                disabled={isLoadingInitial || !selectedPitchCode || isLoadingRefreshRates}
+                loading={isLoadingRefreshRates}
                 required={false}
-                placeholder="Авто / Выберите частоту"
+                placeholder={!selectedPitchCode ? "Выберите шаг пикселя" : (isLoadingRefreshRates ? "Загрузка..." : "Авто / Выберите частоту")}
               />
+              {isErrorRefreshRates && ( <Text c="red" size="sm" mt="xs">Ошибка загрузки частоты: {errorRefreshRates?.message}</Text> )}
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 4 }} mt="md">
+              <BrightnessSelect
+                options={brightnessOptions}
+                value={selectedBrightnessCode}
+                onChange={handleBrightnessChange}
+                disabled={isLoadingInitial || !selectedPitchCode || isLoadingBrightnesses}
+                loading={isLoadingBrightnesses}
+                required={false}
+                placeholder={!selectedPitchCode ? "Выберите шаг пикселя" : (isLoadingBrightnesses ? "Загрузка..." : "Авто / Выберите яркость")}
+              />
+              {isErrorBrightnesses && ( <Text c="red" size="sm" mt="xs">Ошибка загрузки яркости: {errorBrightnesses?.message}</Text> )}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }} mt="md">
               <ModuleSelect
                 options={moduleOptions}
                 value={selectedModuleCode}
                 onChange={handleModuleChange}
-                disabled={
-                  isLoadingInitial ||
-                  !selectedLocationCode ||
-                  !selectedBrightnessCode ||
-                  !selectedRefreshRateCode ||
-                  !selectedPitchCode ||
-                  moduleOptions.length === 0
-                }
+                disabled={ isLoadingInitial || !selectedLocationCode || !selectedPitchCode || !selectedBrightnessCode || !selectedRefreshRateCode || isLoadingModules || moduleOptions.length === 0 }
                 loading={isLoadingModules}
                 required={true}
               />
               {isErrorModules && (
-                  <Text c="red" size="sm" mt="xs">
-                      Ошибка загрузки модулей: {errorModules?.message ?? 'Неизвестная ошибка'}
-                  </Text>
+                <Text c="red" size="sm" mt="xs">
+                  Ошибка загрузки модулей:{" "}
+                  {errorModules?.message ?? "Неизвестная ошибка"}
+                </Text>
               )}
             </Grid.Col>
 
@@ -436,24 +461,29 @@ const CalculatorForm = () => {
               <Grid.Col span={{ base: 0, md: 6 }} />
             )}
             <Grid.Col span={12} mt="md">
-                      <Group grow preventGrowOverflow={false} align="flex-end" wrap="nowrap">
-                          <DollarRateInput
-                              value={dollarRate}
-                              onChange={handleDollarRateChange}
-                              disabled={isLoadingInitial}
-                              loading={isLoadingDollarRate}
-                              required={true}
-                              size="sm" // Задаем размер
-                              style={{ flexBasis: '150px', flexGrow: 0 }} // Ограничиваем ширину
-                          />
-                          <CalculateButton
-                              onClick={handleCalculateClick}
-                              loading={isCalculating}
-                              disabled={!isCalculationReady}
-                              size="sm" // Задаем ТОТ ЖЕ размер
-                          />
-                      </Group>
-                  </Grid.Col>
+              <Group
+                grow
+                preventGrowOverflow={false}
+                align="flex-end"
+                wrap="nowrap"
+              >
+                <DollarRateInput
+                  value={dollarRate}
+                  onChange={handleDollarRateChange}
+                  disabled={isLoadingInitial}
+                  loading={isLoadingDollarRate}
+                  required={true}
+                  size="sm" // Задаем размер
+                  style={{ flexBasis: "150px", flexGrow: 0 }} // Ограничиваем ширину
+                />
+                <CalculateButton
+                  onClick={handleCalculateClick}
+                  loading={isCalculating}
+                  disabled={!isCalculationReady}
+                  size="sm" // Задаем ТОТ ЖЕ размер
+                />
+              </Group>
+            </Grid.Col>
           </Grid>
           {/* --- КОНЕЦ ОСНОВНОЙ СЕТКИ --- */}
 

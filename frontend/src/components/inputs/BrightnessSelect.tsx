@@ -1,18 +1,20 @@
 // src/components/inputs/BrightnessSelect.tsx
-import { Select } from '@mantine/core';
+import { Select, Loader, SelectProps } from '@mantine/core';
 
 // Опция для Mantine Select
 type SelectOption = { label: string; value: string };
 
 // Пропсы компонента
 interface BrightnessSelectProps {
-    options: SelectOption[];                // Список доступных значений яркости
-    value: string | null;                   // Текущий выбранный код яркости (например, 'BRIGHT800')
-    onChange: (value: string | null) => void; // Функция для обновления значения в контексте
-    disabled?: boolean;                     // Флаг блокировки компонента
-    required?: boolean;                     // Обязательно ли поле для заполнения
-    label?: string;                         // Заголовок поля
-    placeholder?: string;                   // Текст-подсказка внутри поля
+    options: SelectOption[];
+    value: string | null;
+    onChange: (value: string | null) => void;
+    disabled?: boolean;
+    required?: boolean;
+    label?: string;
+    placeholder?: string;
+    loading?: boolean;
+    size?: SelectProps['size'];
 }
 
 const BrightnessSelect = ({
@@ -21,21 +23,35 @@ const BrightnessSelect = ({
     onChange,
     disabled = false,
     required = false,
-    label = "Яркость", // Дефолтный лейбл
-    placeholder = "Выберите яркость" // Дефолтный плейсхолдер
+    label = "Яркость",
+    placeholder = "Авто / Выберите яркость",
+    loading = false, // <-- Получаем
+    size, // <-- Получаем
 }: BrightnessSelectProps) => {
+
+    const getPlaceholder = () => {
+        if (loading) return "Загрузка...";
+        if (disabled && !loading) return "Выберите параметры выше";
+        if (!options.length && !loading && !disabled) return "Нет доступных опций";
+        return placeholder;
+    };
+
     return (
         <Select
             label={label}
-            placeholder={placeholder}
-            data={options} // Используем переданные опции
-            value={value} // Используем переданное значение
-            onChange={onChange} // Вызываем переданный обработчик
-            disabled={disabled || options.length === 0} // Блокируем, если нет опций или передан disabled
-            clearable // Разрешаем очистку значения
-            searchable // Разрешаем поиск по опциям
-            required={required} // Устанавливаем обязательность
-            nothingFoundMessage="Нет доступных опций" // Сообщение при отсутствии опций
+            placeholder={getPlaceholder()}
+            data={options}
+            value={value}
+            onChange={onChange}
+            disabled={disabled || loading || (options.length === 0 && !loading)}
+            clearable
+            searchable
+            required={required}
+            nothingFoundMessage="Нет доступных опций"
+            limit={100}
+            rightSection={loading ? <Loader size="xs" /> : null} // <-- Добавлен лоадер
+            rightSectionWidth={loading ? 36 : 0}
+            size={size} // <-- Передаем size
         />
     );
 };

@@ -25,13 +25,14 @@ import type {
   ControlType as GqlControlType,
   Pitch as GqlPitch,
   GetPitchOptionsByLocationQuery,
+  GetFilteredRefreshRateOptionsQuery,
+  GetFilteredBrightnessOptionsQuery,
   Module as GqlModule,
   GetModuleOptionsQuery,
   Cabinet as GqlCabinet,
   CabinetFilterInput,
   ModuleFilterInput,
   Maybe,
-  
 } from "../generated/graphql/graphql";
 
 // Типы для опций UI
@@ -119,7 +120,6 @@ const ModuleOptionFields = gql`
     }
   }
 `;
-
 const CabinetOptionFields = gql`
   fragment CabinetOptionFields on Cabinet {
     id
@@ -134,11 +134,8 @@ const CabinetOptionFields = gql`
 const GET_INITIAL_DATA = gql`
   ${LocationFields}
   ${MaterialFields}
-  ${BrightnessFields}
-  ${RefreshRateFields}
   ${SensorFields}
   ${ControlTypeFields}
-  ${ModuleOptionFields}
 
   query GetInitialData {
     screenTypes(onlyActive: true) {
@@ -156,20 +153,11 @@ const GET_INITIAL_DATA = gql`
       id
       code
     }
-    brightnesses(onlyActive: true) {
-      ...BrightnessFields
-    }
-    refreshRates(onlyActive: true) {
-      ...RefreshRateFields
-    }
     sensors(onlyActive: true) {
       ...SensorFields
     }
     controlTypes(onlyActive: true) {
       ...ControlTypeFields
-    }
-    moduleOptions(onlyActive: true) {
-      ...ModuleOptionFields
     }
   }
 `;
@@ -188,9 +176,51 @@ const GET_SCREEN_TYPE_OPTIONS = gql`
 
 const GET_PITCH_OPTIONS_BY_LOCATION = gql`
   ${PitchFields}
-  query GetPitchOptionsByLocation($locationCode: String!, $onlyActive: Boolean) {
-    pitchOptionsByLocation(locationCode: $locationCode, onlyActive: $onlyActive) {
+  query GetPitchOptionsByLocation(
+    $locationCode: String!
+    $onlyActive: Boolean
+  ) {
+    pitchOptionsByLocation(
+      locationCode: $locationCode
+      onlyActive: $onlyActive
+    ) {
       ...PitchFields
+    }
+  }
+`;
+
+const GET_FILTERED_REFRESH_RATE_OPTIONS = gql`
+  ${RefreshRateFields}
+  query GetFilteredRefreshRateOptions(
+    $locationCode: String!
+    $pitchCode: String!
+    $onlyActive: Boolean
+  ) {
+    getFilteredRefreshRateOptions(
+      locationCode: $locationCode
+      pitchCode: $pitchCode
+      onlyActive: $onlyActive
+    ) {
+      ...RefreshRateFields
+    }
+  }
+`;
+
+const GET_FILTERED_BRIGHTNESS_OPTIONS = gql`
+  ${BrightnessFields}
+  query GetFilteredBrightnessOptions(
+    $locationCode: String!
+    $pitchCode: String!
+    $onlyActive: Boolean
+  ) {
+    # Предполагаем, что запрос на бэкенде называется так же, как для RefreshRate, но для Brightness
+    # Если вы его назвали иначе (например, brightnessOptionsByPitch), исправьте здесь
+    getFilteredBrightnessOptions(
+      locationCode: $locationCode
+      pitchCode: $pitchCode
+      onlyActive: $onlyActive
+    ) {
+      ...BrightnessFields
     }
   }
 `;
@@ -226,8 +256,6 @@ type InitialDataQueryResult = {
   locations: Maybe<Array<Maybe<GqlLocation>>>;
   materials: Maybe<Array<Maybe<GqlMaterial>>>;
   ipProtections: Maybe<Array<Maybe<Pick<GqlIpProtection, "id" | "code">>>>;
-  brightnesses: Maybe<Array<Maybe<GqlBrightness>>>;
-  refreshRates: Maybe<Array<Maybe<GqlRefreshRate>>>;
   sensors: Maybe<Array<Maybe<GqlSensor>>>;
   controlTypes: Maybe<Array<Maybe<GqlControlType>>>;
 };
@@ -261,8 +289,6 @@ const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
       locations: data?.locations ?? [],
       materials: data?.materials ?? [],
       ipProtections: data?.ipProtections ?? [],
-      brightnesses: data?.brightnesses ?? [],
-      refreshRates: data?.refreshRates ?? [],
       sensors: data?.sensors ?? [],
       controlTypes: data?.controlTypes ?? [],
     };
@@ -287,8 +313,6 @@ interface CalculatorContextProps {
   locations: (GqlLocation | null | undefined)[];
   materials: (GqlMaterial | null | undefined)[];
   ipProtections: (Pick<GqlIpProtection, "id" | "code"> | null | undefined)[];
-  brightnesses: (GqlBrightness | null | undefined)[];
-  refreshRates: (GqlRefreshRate | null | undefined)[];
   sensors: (GqlSensor | null | undefined)[];
   controlTypes: (GqlControlType | null | undefined)[];
   optionsQueryResult: {
@@ -302,7 +326,31 @@ interface CalculatorContextProps {
     error: Error | null;
   };
   pitchQueryResult: {
-    data: (Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'> | null | undefined)[];
+    data: (
+      | Pick<GqlPitch, "id" | "code" | "pitchValue" | "active">
+      | null
+      | undefined
+    )[];
+    isLoading: boolean;
+    isError: boolean;
+    error: Error | null;
+  };
+  refreshRateQueryResult: {
+    data: (
+      | Pick<GqlRefreshRate, "id" | "code" | "value" | "active">
+      | null
+      | undefined
+    )[];
+    isLoading: boolean;
+    isError: boolean;
+    error: Error | null;
+  };
+  brightnessQueryResult: {
+    data: (
+      | Pick<GqlBrightness, "id" | "code" | "value" | "active">
+      | null
+      | undefined
+    )[];
     isLoading: boolean;
     isError: boolean;
     error: Error | null;
@@ -332,10 +380,10 @@ interface CalculatorContextProps {
   selectedMaterialCode: string | null;
   selectedProtectionCode: string | null;
   selectedBrightnessCode: string | null;
-  selectedRefreshRateCode: string | null;
   selectedSensorCodes: string[];
   selectedControlTypeCodes: string[];
   selectedPitchCode: string | null;
+  selectedRefreshRateCode: string | null;
   selectedModuleCode: string | null;
   selectedCabinetCode: string | null;
   dollarRate: number | string;
@@ -347,10 +395,10 @@ interface CalculatorContextProps {
   setSelectedMaterialCode: (code: string | null) => void;
   setSelectedProtectionCode: (code: string | null) => void;
   setSelectedBrightnessCode: (code: string | null) => void;
-  setSelectedRefreshRateCode: (code: string | null) => void;
   setSelectedSensorCodes: (codes: string[]) => void;
   setSelectedControlTypeCodes: (codes: string[]) => void;
   setSelectedPitchCode: (code: string | null) => void;
+  setSelectedRefreshRateCode: (code: string | null) => void;
   setSelectedModuleCode: (code: string | null) => void;
   setSelectedCabinetCode: (code: string | null) => void;
   setDollarRate: (rate: number | string) => void;
@@ -363,10 +411,10 @@ interface CalculatorContextProps {
   materialOptions: SelectOption[];
   protectionOptions: SelectOption[];
   brightnessOptions: SelectOption[];
-  refreshRateOptions: SelectOption[];
   sensorOptions: SelectOption[];
   controlTypeOptions: SelectOption[];
   pitchOptions: SelectOption[];
+  refreshRateOptions: SelectOption[];
   moduleOptions: SelectOption[];
   cabinetOptions: SelectOption[];
   isCalculationReady: boolean;
@@ -382,8 +430,18 @@ const CalculatorContext = createContext<CalculatorContextProps>({
   locations: [],
   materials: [],
   ipProtections: [],
-  brightnesses: [],
-  refreshRates: [],
+  refreshRateQueryResult: {
+    data: [],
+    isLoading: false,
+    isError: false,
+    error: null,
+  },
+  brightnessQueryResult: {
+    data: [],
+    isLoading: false,
+    isError: false,
+    error: null,
+  },
   sensors: [],
   controlTypes: [],
   optionsQueryResult: {
@@ -461,7 +519,6 @@ const CalculatorContext = createContext<CalculatorContextProps>({
 
 // --- Компонент Провайдера Контекста ---
 export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
-
   const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<
     string | null
   >(null);
@@ -518,8 +575,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const gqlLocations = initialData?.locations ?? [];
   const gqlMaterials = initialData?.materials ?? [];
   const gqlIpProtections = initialData?.ipProtections ?? [];
-  const gqlBrightnessValues = initialData?.brightnesses ?? [];
-  const gqlRefreshRates = initialData?.refreshRates ?? [];
   const gqlSensors = initialData?.sensors ?? [];
   const gqlControlTypes = initialData?.controlTypes ?? [];
 
@@ -555,29 +610,119 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const enabledPitchQuery = !!selectedLocationCode;
 
   const {
-      data: pitchData,
-      isLoading: isLoadingPitches,
-      isError: isErrorPitches,
-      error: errorPitches,
-      refetch: refetchPitches
+    data: pitchData,
+    isLoading: isLoadingPitches,
+    isError: isErrorPitches,
+    error: errorPitches,
+    refetch: refetchPitches,
   } = useQuery<GetPitchOptionsByLocationQuery, Error>({
-      queryKey: ['pitchOptions', selectedLocationCode],
-      queryFn: async () => {
-          console.log(`[Pitch Query] Fetching pitch options for location: ${selectedLocationCode}`);
-          if (!selectedLocationCode) throw new Error("Location code is required to fetch pitches.");
-          const variables = { locationCode: selectedLocationCode, onlyActive: true };
-          return graphQLClient.request<GetPitchOptionsByLocationQuery>(GET_PITCH_OPTIONS_BY_LOCATION, variables);
-      },
-      enabled: enabledPitchQuery,
-      staleTime: 1000 * 60 * 10,
-      refetchOnWindowFocus: false,
+    queryKey: ["pitchOptions", selectedLocationCode],
+    queryFn: async () => {
+      console.log(
+        `[Pitch Query] Fetching pitch options for location: ${selectedLocationCode}`
+      );
+      if (!selectedLocationCode)
+        throw new Error("Location code is required to fetch pitches.");
+      const variables = {
+        locationCode: selectedLocationCode,
+        onlyActive: true,
+      };
+      return graphQLClient.request<GetPitchOptionsByLocationQuery>(
+        GET_PITCH_OPTIONS_BY_LOCATION,
+        variables
+      );
+    },
+    enabled: enabledPitchQuery,
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
   });
   // Извлекаем ОТФИЛЬТРОВАННЫЕ питчи
   const gqlFilteredPitches = pitchData?.pitchOptionsByLocation ?? [];
 
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЯРКОСТИ (НОВЫЙ) ---
+  // Активен, если выбраны Локация И Питч
+  const areBrightnessDepsSelected = !!(
+    selectedLocationCode && selectedPitchCode
+  );
+  const enabledBrightnessQuery = areBrightnessDepsSelected;
+
+  const {
+    data: brightnessData,
+    isLoading: isLoadingBrightnesses,
+    isError: isErrorBrightnesses,
+    error: errorBrightnesses,
+    refetch: refetchBrightnesses,
+  } = useQuery<GetFilteredBrightnessOptionsQuery, Error>({
+    queryKey: ["brightnessOptions", selectedLocationCode, selectedPitchCode],
+    queryFn: async () => {
+      console.log(
+        `[Brightness Query] Fetching brightness for location: ${selectedLocationCode}, pitch: ${selectedPitchCode}`
+      );
+      if (!selectedLocationCode || !selectedPitchCode)
+        throw new Error("Location and Pitch codes are required.");
+      const variables = {
+        locationCode: selectedLocationCode,
+        pitchCode: selectedPitchCode,
+        onlyActive: true,
+      };
+      return graphQLClient.request<GetFilteredBrightnessOptionsQuery>(
+        GET_FILTERED_BRIGHTNESS_OPTIONS,
+        variables
+      );
+    },
+    enabled: enabledBrightnessQuery,
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+  });
+  const gqlFilteredBrightnesses =
+    brightnessData?.getFilteredBrightnessOptions ?? [];
+
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЧАСТОТЫ ОБНОВЛЕНИЯ (НОВЫЙ) ---
+  const areRefreshRateDepsSelected = !!(
+    selectedLocationCode && selectedPitchCode
+  );
+  const enabledRefreshRateQuery = areRefreshRateDepsSelected;
+
+  const {
+    data: refreshRateData,
+    isLoading: isLoadingRefreshRates,
+    isError: isErrorRefreshRates,
+    error: errorRefreshRates,
+    refetch: refetchRefreshRates,
+  } = useQuery<GetFilteredRefreshRateOptionsQuery, Error>({
+    // Используем сгенерированный тип
+    queryKey: ["refreshRateOptions", selectedLocationCode, selectedPitchCode],
+    queryFn: async () => {
+      console.log(
+        `[Refresh Rate Query] Fetching refresh rates for location: ${selectedLocationCode}, pitch: ${selectedPitchCode}`
+      );
+      if (!selectedLocationCode || !selectedPitchCode)
+        throw new Error("Location and Pitch codes are required.");
+      const variables = {
+        locationCode: selectedLocationCode,
+        pitchCode: selectedPitchCode,
+        onlyActive: true,
+      };
+      return graphQLClient.request<GetFilteredRefreshRateOptionsQuery>(
+        GET_FILTERED_REFRESH_RATE_OPTIONS,
+        variables
+      );
+    },
+    enabled: enabledRefreshRateQuery,
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false,
+  });
+  const gqlFilteredRefreshRates =
+    refreshRateData?.getFilteredRefreshRateOptions ?? [];
+
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС МОДУЛЕЙ (НОВЫЙ) ---
   // Запрос активен, если выбраны Локация И Питч (основные фильтры для модулей)
-  const areModuleDepsSelected = !!(selectedLocationCode && selectedPitchCode);
+  const areModuleDepsSelected = !!(
+    selectedLocationCode &&
+    selectedPitchCode &&
+    selectedBrightnessCode &&
+    selectedRefreshRateCode
+  );
   const enabledModuleQuery = areModuleDepsSelected;
 
   const {
@@ -587,32 +732,39 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     error: errorModules,
     refetch: refetchModules,
   } = useQuery<GetModuleOptionsQuery, Error>({
-    queryKey: ['moduleOptions', selectedLocationCode, selectedPitchCode],
+    queryKey: [
+      "moduleOptions",
+      selectedLocationCode,
+      selectedPitchCode,
+      selectedBrightnessCode,
+      selectedRefreshRateCode,
+    ],
     queryFn: async () => {
-        console.log('[Module Query] Fetching module options with filters:', {
-            locationCode: selectedLocationCode,
-            pitchCode: selectedPitchCode,
-        });
-        const variables: { filters: ModuleFilterInput; onlyActive: boolean } = {
-            filters: {
-                locationCode: selectedLocationCode || undefined,
-                pitchCode: selectedPitchCode || undefined,
-                brightnessCode: selectedBrightnessCode || undefined,
-                refreshRateCode: selectedRefreshRateCode || undefined,
-            },
-            onlyActive: true,
-        };
-        return graphQLClient.request<GetModuleOptionsQuery>(
-          GET_MODULE_OPTIONS,
-          variables
+      console.log("[Module Query] Fetching module options with filters:", {
+        locationCode: selectedLocationCode,
+        pitchCode: selectedPitchCode,
+        refreshRateCode: selectedRefreshRateCode,
+        brightnessCode: selectedBrightnessCode,
+      });
+      const variables: { filters: ModuleFilterInput; onlyActive: boolean } = {
+        filters: {
+          locationCode: selectedLocationCode || undefined,
+          pitchCode: selectedPitchCode || undefined,
+          brightnessCode: selectedBrightnessCode || undefined,
+          refreshRateCode: selectedRefreshRateCode || undefined,
+        },
+        onlyActive: true,
+      };
+      return graphQLClient.request<GetModuleOptionsQuery>(
+        GET_MODULE_OPTIONS,
+        variables
       );
-  },
-  enabled: enabledModuleQuery,
-  staleTime: 1000 * 60 * 5,
-  refetchOnWindowFocus: false,
-});
-const gqlFilteredModules = moduleData?.moduleOptions ?? [];
-
+    },
+    enabled: enabledModuleQuery,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+  const gqlFilteredModules = moduleData?.moduleOptions ?? [];
 
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС КАБИНЕТОВ ---
   const cabinetScreenTypeCode = "cabinet";
@@ -747,10 +899,86 @@ const gqlFilteredModules = moduleData?.moduleOptions ?? [];
     // Сбрасываем питч, если изменилась локация (и питч был выбран)
     // Перезапрос питчей произойдет автоматически из-за изменения queryKey
     if (selectedPitchCode !== null) {
-         console.log('[Pitch Effect] Resetting selected pitch due to location change.');
-         setSelectedPitchCodeState(null);
+      console.log(
+        "[Pitch Effect] Resetting selected pitch due to location change."
+      );
+      setSelectedPitchCodeState(null);
     }
   }, [selectedLocationCode]);
+
+  useEffect(() => {
+    // Если пришли новые отфильтрованные опции И текущий выбор сброшен (null) И запрос не грузится
+    if (
+      gqlFilteredRefreshRates.length > 0 &&
+      selectedRefreshRateCode === null &&
+      !isLoadingRefreshRates
+    ) {
+      // Находим опцию с минимальным значением 'value' (сортировка по value уже есть с бэкенда)
+      const defaultRefreshRate = [...gqlFilteredRefreshRates]
+        .filter(
+          (
+            rr: any // Используем any и проверку
+          ) => !!rr && typeof rr.value === "number" && !!rr.code
+        )
+        .sort((a: any, b: any) => (a?.value ?? 0) - (b?.value ?? 0))[0]; // Сортируем с any
+
+      // Приводим к any для доступа к полям
+      const defaultRateObj = defaultRefreshRate as any;
+
+      if (defaultRateObj) {
+        console.log(
+          `[Refresh Rate Effect] Setting default refresh rate: ${defaultRateObj.code} (${defaultRateObj.value} Hz)`
+        );
+        setSelectedRefreshRateCodeState(defaultRateObj.code);
+      }
+    } else if (
+      gqlFilteredRefreshRates.length === 0 &&
+      selectedRefreshRateCode !== null &&
+      !isLoadingRefreshRates
+    ) {
+      console.log(
+        `[Refresh Rate Effect] Resetting refresh rate as no options are available.`
+      );
+      setSelectedRefreshRateCodeState(null);
+    }
+  }, [gqlFilteredRefreshRates, selectedRefreshRateCode, isLoadingRefreshRates]);
+
+  // --- НОВЫЙ useEffect: Установка дефолтной Яркости ---
+  useEffect(() => {
+    // Используем gqlFilteredBrightnesses
+    if (
+      gqlFilteredBrightnesses.length > 0 &&
+      selectedBrightnessCode === null &&
+      !isLoadingBrightnesses
+    ) {
+      // Находим опцию с минимальным значением 'value'
+      const defaultBrightness = [...gqlFilteredBrightnesses] // Копируем
+        .filter(
+          (
+            br: any // <-- any + проверка
+          ) => !!br && typeof br.value === "number" && !!br.code
+        )
+        .sort((a: any, b: any) => (a?.value ?? 0) - (b?.value ?? 0))[0]; // <-- any для sort
+
+      const defaultBrightnessObj = defaultBrightness as any; // <-- any для доступа
+
+      if (defaultBrightnessObj) {
+        console.log(
+          `[Brightness Effect] Setting default brightness: ${defaultBrightnessObj.code} (${defaultBrightnessObj.value} nit)`
+        );
+        setSelectedBrightnessCodeState(defaultBrightnessObj.code);
+      }
+    } else if (
+      gqlFilteredBrightnesses.length === 0 &&
+      selectedBrightnessCode !== null &&
+      !isLoadingBrightnesses
+    ) {
+      console.log(
+        `[Brightness Effect] Resetting brightness as no options are available.`
+      );
+      setSelectedBrightnessCodeState(null);
+    }
+  }, [gqlFilteredBrightnesses, selectedBrightnessCode, isLoadingBrightnesses]);
 
   useEffect(() => {
     // Сбрасываем, если запрос стал неактивным или пришли новые данные
@@ -818,65 +1046,75 @@ const gqlFilteredModules = moduleData?.moduleOptions ?? [];
   }, [gqlIpProtections]);
 
   const pitchOptions = useMemo((): SelectOption[] => {
-    if (!Array.isArray(gqlFilteredPitches)) {
-      return [];
-    }
-
+    if (!Array.isArray(gqlFilteredPitches)) return [];
     const result: SelectOption[] = [];
     for (const p of gqlFilteredPitches) {
-        const pitch = p as Pick<GqlPitch, 'code' | 'pitchValue'>;
-        if (pitch && typeof pitch.code === 'string' && pitch.code !== '' && typeof pitch.pitchValue === 'number') {
-            result.push({
-                value: pitch.code,
-                label: `${pitch.pitchValue} мм`
-            });
-        }
+      const pitch = p as Pick<GqlPitch, "code" | "pitchValue">;
+      if (
+        pitch &&
+        typeof pitch.code === "string" &&
+        pitch.code !== "" &&
+        typeof pitch.pitchValue === "number"
+      ) {
+        result.push({ value: pitch.code, label: `${pitch.pitchValue} мм` });
+      }
     }
-     result.sort((a, b) => {
-        const pitchA = gqlFilteredPitches.find(p => (p as GqlPitch)?.code === a.value) as GqlPitch | undefined;
-        const pitchB = (gqlFilteredPitches.find(p => (p as GqlPitch)?.code === b.value) as GqlPitch)?.pitchValue ?? 0;
-        return Number(pitchA) - Number(pitchB);
-     });
+    result.sort((a, b) => {
+      const pitchAObj = gqlFilteredPitches.find(
+        (p) => (p as GqlPitch)?.code === a.value
+      );
+      const pitchBObj = gqlFilteredPitches.find(
+        (p) => (p as GqlPitch)?.code === b.value
+      );
+      const valueA = Number((pitchAObj as GqlPitch)?.pitchValue ?? 0);
+      const valueB = Number((pitchBObj as GqlPitch)?.pitchValue ?? 0);
+      return valueA - valueB;
+    });
     return result;
-  }, [gqlFilteredPitches]); 
+  }, [gqlFilteredPitches]);
 
   const brightnessOptions = useMemo((): SelectOption[] => {
-    const availableBrightnessCodes = new Set<string>();
-    gqlFilteredModules
-        .filter((m): m is GqlModule => !!m)
-        .forEach((module: GqlModule) => {
-          module.brightnesses?.forEach((brLink: any) => {
-              if (brLink?.brightnessCode) {
-                  availableBrightnessCodes.add(brLink.brightnessCode);
-              }
-          });
-      });
-    return gqlBrightnessValues
-        .filter((br): br is GqlBrightness & { code: string; value: number; active: true } =>
-            !!br?.code && typeof br.value === 'number' && br.active === true && availableBrightnessCodes.has(br.code)
+    // Работаем с результатом ДИНАМИЧЕСКОГО запроса gqlFilteredBrightnesses
+    if (!Array.isArray(gqlFilteredBrightnesses)) return [];
+    return (
+      gqlFilteredBrightnesses
+        .filter(
+          (
+            br: any
+          ): br is Pick<GqlBrightness, "id" | "code" | "value" | "active"> & {
+            code: string;
+            value: number;
+          } => !!br?.code && typeof br.value === "number"
         )
-        .sort((a, b) => a.value - b.value)
-        .map((br) => ({ value: br.code, label: `${br.value} nit` }));
-}, [gqlFilteredModules, gqlBrightnessValues]);
+        // Сортировка уже на бэкенде
+        .map((br: any) => ({
+          value: br.code ?? "",
+          label: `${br.value ?? "?"} nit`,
+        }))
+    );
+  }, [gqlFilteredBrightnesses]);
 
-const refreshRateOptions = useMemo((): SelectOption[] => {
-  const availableRefreshRateCodes = new Set<string>();
-  gqlFilteredModules
-      .filter((m): m is GqlModule => !!m)
-      .forEach((module: GqlModule) => {
-       module.refreshRates?.forEach((rrLink: any) => {
-           if (rrLink?.refreshRateCode) {
-               availableRefreshRateCodes.add(rrLink.refreshRateCode);
-           }
-       });
-   });
-   return gqlRefreshRates
-      .filter((rr): rr is GqlRefreshRate & { code: string; value: number; active: true } =>
-          !!rr?.code && typeof rr.value === 'number' && rr.active === true && availableRefreshRateCodes.has(rr.code)
-      )
-      .sort((a, b) => a.value - b.value)
-      .map((rr) => ({ value: rr.code, label: `${rr.value} Hz` }));
-}, [gqlFilteredModules, gqlRefreshRates]);
+  const refreshRateOptions = useMemo((): SelectOption[] => {
+    // Работаем с результатом ДИНАМИЧЕСКОГО запроса gqlFilteredRefreshRates
+    if (!Array.isArray(gqlFilteredRefreshRates)) return [];
+    return (
+      gqlFilteredRefreshRates
+        // Фильтруем null/undefined и проверяем поля
+        .filter(
+          (
+            rr: any
+          ): rr is Pick<GqlRefreshRate, "id" | "code" | "value" | "active"> & {
+            code: string;
+            value: number;
+          } => !!rr?.code && typeof rr.value === "number"
+        )
+        // Сортировка уже на бэкенде
+        .map((rr: any) => ({
+          value: rr.code ?? "",
+          label: `${rr.value ?? "?"} Hz`,
+        }))
+    );
+  }, [gqlFilteredRefreshRates]);
 
   const sensorOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlSensors)) return [];
@@ -908,9 +1146,11 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
   const moduleOptions = useMemo((): SelectOption[] => {
     if (!Array.isArray(gqlFilteredModules)) return [];
     return gqlFilteredModules
-      .filter((m): m is GqlModule & { code: string } => !!(m as GqlModule)?.code)
-      .map((m) => ({
-        value: m.code,
+      .filter(
+        (m): m is GqlModule & { code: string } => !!(m as GqlModule)?.code
+      )
+      .map((m: any) => ({
+        value: m.code ?? "",
         label: m.name ?? m.sku ?? m.code ?? "Неизвестный модуль",
       }));
   }, [gqlFilteredModules]);
@@ -965,27 +1205,44 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
       checkModule &&
       checkCabinet &&
       checkRate;
-      console.log('Calculation Ready Check:', {
-        checkScreenType,
-        checkWidth, widthMm,
-        checkHeight, heightMm,
-        checkLocation, selectedLocationCode,
-        checkMaterial, selectedMaterialCode,
-        checkProtection, selectedProtectionCode,
-        checkPitch, selectedPitchCode,
-        checkModule, selectedModuleCode,
-        checkCabinet, selectedCabinetCode,
-        checkRate, dollarRate,
-        checkCalculating,
-        requiredFieldsFilled,
-        isCalculationReady: requiredFieldsFilled && checkCalculating
-    })
+    console.log("Calculation Ready Check:", {
+      checkScreenType,
+      checkWidth,
+      widthMm,
+      checkHeight,
+      heightMm,
+      checkLocation,
+      selectedLocationCode,
+      checkMaterial,
+      selectedMaterialCode,
+      checkProtection,
+      selectedProtectionCode,
+      checkPitch,
+      selectedPitchCode,
+      checkModule,
+      selectedModuleCode,
+      checkCabinet,
+      selectedCabinetCode,
+      checkRate,
+      dollarRate,
+      checkCalculating,
+      requiredFieldsFilled,
+      isCalculationReady: requiredFieldsFilled && checkCalculating,
+    });
     return requiredFieldsFilled && checkCalculating;
   }, [
-    selectedScreenTypeCode, widthMm, heightMm, selectedLocationCode,
-    selectedMaterialCode, selectedProtectionCode, selectedPitchCode,
-    selectedModuleCode, selectedCabinetCode, dollarRate, isCalculating,
-    cabinetScreenTypeCode
+    selectedScreenTypeCode,
+    widthMm,
+    heightMm,
+    selectedLocationCode,
+    selectedMaterialCode,
+    selectedProtectionCode,
+    selectedPitchCode,
+    selectedModuleCode,
+    selectedCabinetCode,
+    dollarRate,
+    isCalculating,
+    cabinetScreenTypeCode,
   ]);
 
   // --- Функции для обновления состояния (useCallback) ---
@@ -1026,8 +1283,6 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
       setSelectedMaterialCodeState(value);
       setSelectedBrightnessCodeState(null);
       setSelectedRefreshRateCodeState(null);
-      setSelectedPitchCodeState(null);
-      setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
     },
     [selectedMaterialCode]
@@ -1048,7 +1303,6 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
     (value: string | null) => {
       if (selectedBrightnessCode === value) return;
       setSelectedBrightnessCodeState(value);
-      setSelectedPitchCodeState(null);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
     },
@@ -1058,7 +1312,6 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
     (value: string | null) => {
       if (selectedRefreshRateCode === value) return;
       setSelectedRefreshRateCodeState(value);
-      setSelectedPitchCodeState(null);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
     },
@@ -1160,10 +1413,20 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
   const resetQuery = useCallback(() => {
     refetchInitial();
     refetchPitches();
+    refetchRefreshRates();
+    refetchBrightnesses();
     refetchCabinets();
     refetchOptions();
     refetchModules();
-  }, [refetchInitial, refetchPitches, refetchModules, refetchCabinets, refetchOptions]);
+  }, [
+    refetchInitial,
+    refetchPitches,
+    refetchRefreshRates,
+    refetchBrightnesses,
+    refetchModules,
+    refetchCabinets,
+    refetchOptions,
+  ]);
 
   // --- Формируем значение контекста ---
   const contextValue: CalculatorContextProps = {
@@ -1174,8 +1437,6 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
     locations: gqlLocations,
     materials: gqlMaterials,
     ipProtections: gqlIpProtections,
-    brightnesses: gqlBrightnessValues,
-    refreshRates: gqlRefreshRates,
     sensors: gqlSensors,
     controlTypes: gqlControlTypes,
     optionsQueryResult: {
@@ -1185,10 +1446,30 @@ const refreshRateOptions = useMemo((): SelectOption[] => {
       error: errorOptions,
     },
     pitchQueryResult: {
-      data: gqlFilteredPitches as (Pick<GqlPitch, 'id' | 'code' | 'pitchValue' | 'active'> | null | undefined)[],
+      data: gqlFilteredPitches as (
+        | Pick<GqlPitch, "id" | "code" | "pitchValue" | "active">
+        | null
+        | undefined
+      )[],
       isLoading: isLoadingPitches,
       isError: isErrorPitches,
       error: errorPitches,
+    },
+    refreshRateQueryResult: {
+      data: gqlFilteredRefreshRates as (
+        | Pick<GqlRefreshRate, "id" | "code" | "value" | "active">
+        | null
+        | undefined
+      )[],
+      isLoading: isLoadingRefreshRates,
+      isError: isErrorRefreshRates,
+      error: errorRefreshRates,
+    },
+    brightnessQueryResult: {
+      data: gqlFilteredBrightnesses as any,
+      isLoading: isLoadingBrightnesses,
+      isError: isErrorBrightnesses,
+      error: errorBrightnesses,
     },
     moduleQueryResult: {
       data: gqlFilteredModules as (GqlModule | null | undefined)[],
