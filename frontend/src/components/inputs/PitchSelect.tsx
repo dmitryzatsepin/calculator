@@ -42,7 +42,6 @@ const PitchSelect = ({
             nothingFoundMessage="Нет доступных шагов пикселя"
             limit={100} // Ограничение для производительности
             rightSection={loading ? <Loader size="xs" /> : null}
-            rightSectionWidth={loading ? 36 : 0}
             size={size}
         />
     );

@@ -25,8 +25,8 @@ const BrightnessSelect = ({
     required = false,
     label = "Яркость",
     placeholder = "Авто / Выберите яркость",
-    loading = false, // <-- Получаем
-    size, // <-- Получаем
+    loading = false,
+    size,
 }: BrightnessSelectProps) => {
 
     const getPlaceholder = () => {
@@ -49,9 +49,8 @@ const BrightnessSelect = ({
             required={required}
             nothingFoundMessage="Нет доступных опций"
             limit={100}
-            rightSection={loading ? <Loader size="xs" /> : null} // <-- Добавлен лоадер
-            rightSectionWidth={loading ? 36 : 0}
-            size={size} // <-- Передаем size
+            rightSection={loading ? <Loader size="xs" /> : null}
+            size={size}
         />
     );
 };

@@ -21,15 +21,15 @@ const CabinetSelect = ({
     value,
     onChange,
     disabled = false,
-    required = true, // Кабинет, скорее всего, обязателен, если секция видима
-    loading = false, // Индикатор загрузки
+    required = true,
+    loading = false,
     label = "Кабинет",
     placeholder = "Выберите кабинет"
 }: CabinetSelectProps) => {
 
     const getPlaceholder = () => {
         if (loading) return "Загрузка кабинетов...";
-        if (disabled && !loading) return "Выберите параметры выше"; // Подсказка, если заблокирован НЕ из-за загрузки
+        if (disabled && !loading) return "Выберите параметры выше";
         if (!options.length && !loading && !disabled) return "Нет подходящих кабинетов";
         return placeholder;
     };
@@ -41,13 +41,13 @@ const CabinetSelect = ({
             data={options}
             value={value}
             onChange={onChange}
-            disabled={disabled || loading || (options.length === 0 && !loading)} // Блокируем при загрузке, disabled или если опций нет (и не идет загрузка)
+            disabled={disabled || loading || (options.length === 0 && !loading)}
             clearable
-            searchable // Полезно для поиска по SKU или имени
+            searchable
             required={required}
             nothingFoundMessage="Нет подходящих кабинетов"
             limit={100}
-            rightSection={loading ? <Loader size="xs" /> : null} // Показываем лоадер прямо в поле
+            rightSection={loading ? <Loader size="xs" /> : null}
         />
     );
 };

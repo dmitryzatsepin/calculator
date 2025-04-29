@@ -48,9 +48,8 @@ const RefreshRateSelect = ({
       required={required}
       nothingFoundMessage="Нет доступных опций"
       limit={100}
-      rightSection={loading ? <Loader size="xs" /> : null} // <-- Добавлен лоадер
-      rightSectionWidth={loading ? 36 : 0}
-      size={size} // <-- Передаем size
+      rightSection={loading ? <Loader size="xs" /> : null}
+      size={size}
     />
   );
 };

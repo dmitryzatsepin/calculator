@@ -42,7 +42,6 @@ const ModuleSelect = ({
             nothingFoundMessage="Нет подходящих модулей" // Сообщение при отсутствии опций
             limit={100}
             rightSection={loading ? <Loader size="xs" /> : null} // <-- Добавлен лоадер
-            rightSectionWidth={loading ? 36 : 0} // <-- Увеличено место
             size={size} // <-- Передаем size
         />
     );

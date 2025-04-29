@@ -4,13 +4,14 @@ import { Prisma } from '@prisma/client';
 
 builder.queryFields((t) => ({
 
-  // --- НОВЫЙ/ОБНОВЛЕННЫЙ ЗАПРОС: Получить опции Brightness по Location и Pitch ---
-  getFilteredBrightnessOptions: t.prismaField({ // <-- Убедитесь, что имя совпадает с GET_FILTERED_BRIGHTNESS_OPTIONS
+
+  getFilteredBrightnessOptions: t.prismaField({
     type: ['Brightness'],
     description: 'Получить доступные значения яркости для модулей, подходящих под расположение и шаг пикселя.',
     args: {
         locationCode: t.arg.string({ required: true }),
         pitchCode: t.arg.string({ required: true }),
+        refreshRateCode: t.arg.string({ required: true }),
         onlyActive: t.arg.boolean({ defaultValue: true, required: false })
     },
     resolve: async (query, _parent, args, ctx) => {
@@ -24,7 +25,8 @@ builder.queryFields((t) => ({
                 module: {
                     active: onlyActive ?? undefined,
                     locations: { some: { locationCode: locationCode } },
-                    pitches: { some: { pitchCode: pitchCode } }
+                    pitches: { some: { pitchCode: pitchCode } },
+                    refreshRates: { some: { refreshRateCode: args.refreshRateCode } }
                 },
                 brightness: { active: onlyActive ?? undefined } // Условие на активность самой яркости
             },
@@ -45,14 +47,9 @@ builder.queryFields((t) => ({
             ...query,
             where: {
                 code: { in: availableBrightnessCodes },
-                // 'active' уже учтен выше
             },
             orderBy: { value: 'asc' }
         });
     }
-  }), // --- Конец getFilteredBrightnessOptions ---
-
-  // Старый запрос 'brightnesses', если он был, можно оставить или удалить
-  // brightnesses: t.prismaField({ /* ... */ }),
-
+  }),
 }));

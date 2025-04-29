@@ -211,13 +211,13 @@ const GET_FILTERED_BRIGHTNESS_OPTIONS = gql`
   query GetFilteredBrightnessOptions(
     $locationCode: String!
     $pitchCode: String!
+    $refreshRateCode: String!,
     $onlyActive: Boolean
   ) {
-    # Предполагаем, что запрос на бэкенде называется так же, как для RefreshRate, но для Brightness
-    # Если вы его назвали иначе (например, brightnessOptionsByPitch), исправьте здесь
     getFilteredBrightnessOptions(
       locationCode: $locationCode
       pitchCode: $pitchCode
+      refreshRateCode: $refreshRateCode
       onlyActive: $onlyActive
     ) {
       ...BrightnessFields
@@ -642,7 +642,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЯРКОСТИ (НОВЫЙ) ---
   // Активен, если выбраны Локация И Питч
   const areBrightnessDepsSelected = !!(
-    selectedLocationCode && selectedPitchCode
+    selectedLocationCode && selectedPitchCode && selectedRefreshRateCode
   );
   const enabledBrightnessQuery = areBrightnessDepsSelected;
 
@@ -653,16 +653,19 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     error: errorBrightnesses,
     refetch: refetchBrightnesses,
   } = useQuery<GetFilteredBrightnessOptionsQuery, Error>({
-    queryKey: ["brightnessOptions", selectedLocationCode, selectedPitchCode],
+    queryKey: ['brightnessOptions', selectedLocationCode, selectedPitchCode, selectedRefreshRateCode],
     queryFn: async () => {
-      console.log(
-        `[Brightness Query] Fetching brightness for location: ${selectedLocationCode}, pitch: ${selectedPitchCode}`
-      );
-      if (!selectedLocationCode || !selectedPitchCode)
+      console.log(`[Brightness Query] 
+        Fetching brightness for location: ${selectedLocationCode}, 
+        pitch: ${selectedPitchCode}, 
+        refreshRate: ${selectedRefreshRateCode}
+      `);
+      if (!selectedLocationCode || !selectedPitchCode || !selectedRefreshRateCode)
         throw new Error("Location and Pitch codes are required.");
       const variables = {
         locationCode: selectedLocationCode,
         pitchCode: selectedPitchCode,
+        refreshRateCode: selectedRefreshRateCode,
         onlyActive: true,
       };
       return graphQLClient.request<GetFilteredBrightnessOptionsQuery>(
@@ -674,8 +677,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });
-  const gqlFilteredBrightnesses =
-    brightnessData?.getFilteredBrightnessOptions ?? [];
+  const gqlFilteredBrightnesses = brightnessData?.getFilteredBrightnessOptions ?? [];
 
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЧАСТОТЫ ОБНОВЛЕНИЯ (НОВЫЙ) ---
   const areRefreshRateDepsSelected = !!(
@@ -982,16 +984,13 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     // Сбрасываем, если запрос стал неактивным или пришли новые данные
-    if (
-      selectedModuleCode !== null &&
-      (!enabledModuleQuery || moduleData !== undefined)
-    ) {
+    if (selectedModuleCode !== null && !enabledModuleQuery) {
       console.log(
         "[Module Effect] Resetting selected module due to dependency change or query disabling/refetch."
       );
       setSelectedModuleCodeState(null);
     }
-  }, [enabledModuleQuery, moduleData, selectedModuleCode]);
+  }, [enabledModuleQuery]);
 
   useEffect(() => {
     if (dollarRateData?.getCurrentDollarRate && dollarRate === "")
@@ -1302,6 +1301,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const setSelectedBrightnessCode = useCallback(
     (value: string | null) => {
       if (selectedBrightnessCode === value) return;
+      console.log("(Context) Selected Brightness Code:", value);
       setSelectedBrightnessCodeState(value);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
@@ -1311,7 +1311,9 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const setSelectedRefreshRateCode = useCallback(
     (value: string | null) => {
       if (selectedRefreshRateCode === value) return;
+      console.log("(Context) Selected Refresh Rate Code:", value);
       setSelectedRefreshRateCodeState(value);
+      setSelectedBrightnessCodeState(null);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
     },
@@ -1326,7 +1328,10 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const setSelectedPitchCode = useCallback(
     (value: string | null) => {
       if (selectedPitchCode === value) return;
+      console.log("(Context) Selected Pitch Code:", value);
       setSelectedPitchCodeState(value);
+      setSelectedBrightnessCodeState(null);
+      setSelectedRefreshRateCodeState(null);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
     },
