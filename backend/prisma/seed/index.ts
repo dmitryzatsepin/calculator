@@ -5,11 +5,11 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 // Импортируем наши модули сидинга
-import { clearDatabase } from './clearDatabase';
+import { clearDatabase } from '../seed/clearDatabase';
 import { createIdMaps } from './config'; // Импортируем функцию создания карт
-import { seedReferences } from './seedReferences';
-import { seedEntities } from './seedEntities';
-import { seedRelations } from './seedRelations';
+import { seedReferences } from '../seed/seedReferences';
+import { seedEntities } from '../seed/seedEntities';
+import { seedRelations } from '../seed/seedRelations';
 
 const prisma = new PrismaClient();
 

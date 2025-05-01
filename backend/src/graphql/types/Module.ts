@@ -87,39 +87,20 @@ builder.prismaNode('Module', {
         }
     }),
 
-    // --- ИЗМЕНЕНО: Связь с Частотой через промежуточную модель ---
-     refreshRates: t.prismaField({
-         type: ['ModuleRefreshRate'],
-         description: "Связи модуля с доступными значениями частоты обновления.",
-         resolve: async (query, parent, _args, ctx) => {
-            return ctx.prisma.moduleRefreshRate.findMany({
-                ...query,
-                where: { moduleCode: parent.code }
-            });
-        }
-    }),
+    sizes: t.relation('sizes', 
+        { query: { where: { size: { active: true } } }
+      }),
+      items: t.prismaConnection({
+          type: 'ModuleItemComponent',
+          cursor: 'moduleCode_itemCode',
+          resolve: (query, parent, _args, ctx) =>
+              ctx.prisma.moduleItemComponent.findMany({ ...query, where: { moduleCode: parent.code } })
+      }),
 
-    // --- ИЗМЕНЕНО: Связь с Яркостью через промежуточную модель ---
-     brightnesses: t.prismaField({
-         type: ['ModuleBrightness'], // <-- ИЗМЕНЕН ТИП
-         description: "Связи модуля с доступными значениями яркости.",
-         resolve: async (query, parent, _args, ctx) => {
-            return ctx.prisma.moduleBrightness.findMany({
-                ...query,
-                where: { moduleCode: parent.code }
-            });
-        }
-    }),
+    // Связь с Яркостью через промежуточную модель ---
+    brightnesses: t.relation('brightnesses'),
+    refreshRates: t.relation('refreshRates'),
 
-     sizes: t.prismaField({
-         type: ['ModuleSize'],
-         resolve: async (query, parent, _args, ctx) => {
-            const relations = await ctx.prisma.moduleModuleSize.findMany({ where: { moduleCode: parent.code }, select: { moduleSizeCode: true } });
-            const moduleSizeCodes = relations.map(r => r.moduleSizeCode);
-            if (moduleSizeCodes.length === 0) return [];
-            return ctx.prisma.moduleSize.findMany({ ...query, where: { code: { in: moduleSizeCodes } } });
-        }
-    }),
      pitches: t.prismaField({
          type: ['Pitch'],
          resolve: async (query, parent, _args, ctx) => {
@@ -146,14 +127,6 @@ builder.prismaNode('Module', {
             if (optionCodes.length === 0) return [];
             return ctx.prisma.option.findMany({ ...query, where: { code: { in: optionCodes } } });
         }
-    }),
-
-    // Компоненты модуля (ModuleItemComponent)
-     items: t.prismaConnection({
-        type: 'ModuleItemComponent',
-        cursor: 'moduleCode_itemCode',
-        resolve: (query, parent, _args, ctx) =>
-            ctx.prisma.moduleItemComponent.findMany({ ...query, where: { moduleCode: parent.code } })
     }),
 
     // Цена модуля (ModulePrice)

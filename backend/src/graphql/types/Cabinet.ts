@@ -24,6 +24,15 @@ builder.prismaNode('Cabinet', {
     code: t.exposeString('code'),
     sku: t.exposeString('sku', { nullable: true }),
     name: t.exposeString('name', { nullable: true }),
+    sizes: t.relation('sizes', {
+        query: {
+            where: {
+                size: {
+                    active: true
+                }
+            }
+        }
+    }),
     active: t.exposeBoolean('active'),
     createdAt: t.expose('createdAt', { type: 'DateTime' }),
     updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
@@ -62,13 +71,6 @@ builder.prismaNode('Cabinet', {
         resolve: async (query, parent, args, ctx) => {
             const relations = await ctx.prisma.cabinetMaterial.findMany({ where: { cabinetCode: parent.code }, select: { materialCode: true } });
             return ctx.prisma.material.findMany({ ...query, where: { code: { in: relations.map(r => r.materialCode) } } });
-        }
-    }),
-    sizes: t.prismaField({
-        type: ['CabinetSize'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetCabinetSize.findMany({ where: { cabinetCode: parent.code }, select: { cabinetSizeCode: true } });
-            return ctx.prisma.cabinetSize.findMany({ ...query, where: { code: { in: relations.map(r => r.cabinetSizeCode) } } });
         }
     }),
     pitches: t.prismaField({

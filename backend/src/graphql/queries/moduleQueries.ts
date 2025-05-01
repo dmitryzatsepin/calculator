@@ -77,4 +77,72 @@ builder.queryFields((t) => ({
         });
     }
   }),
+
+  // --- НОВЫЙ ЗАПРОС: Получить ДЕТАЛИ Модуля по коду ---
+  moduleDetails: t.prismaField({
+    type: 'Module',
+    nullable: true,
+    description: 'Получить подробную информацию о модуле по его коду, включая размеры и компоненты.',
+    args: {
+      code: t.arg.string({ required: true, description: 'Уникальный код модуля' }),
+    },
+    resolve: async (query, _parent, args, ctx) => {
+        const codeArg = args.code as string;
+
+        console.log(`[moduleDetails] Fetching details for module code: ${codeArg}`);
+
+        const module = await ctx.prisma.module.findUnique({
+            select: {
+                id: true,
+                code: true,
+                sku: true,
+                name: true,
+                moduleOption: true,
+                active: true,
+                createdAt: true,
+                updatedAt: true,
+
+                // Связь с размерами (Module -> ModuleModuleSize -> ModuleSize)
+                sizes: {
+                    select: {
+                        size: {
+                            select: {
+                                width: true,
+                                height: true,
+                            }
+                        }
+                    },
+                    where: { size: { active: true } },
+                    take: 1
+                },
+
+                // Связь с компонентами (Module -> ModuleItemComponent -> Item)
+                items: {
+                    select: {
+                        quantity: true,
+                        item: {
+                            select: {
+                                code: true,
+                                name: true,
+                                sku: true,
+                            }
+                        }
+                    },
+                  where: { item: { active: true } }
+                }
+            },
+            where: {
+                code: codeArg,
+            },
+        });
+
+        if (!module) {
+             console.log(`[moduleDetails] Module with code ${codeArg} not found.`);
+             return null;
+        }
+
+        console.log(`[moduleDetails] Found module details for code ${codeArg}.`);
+        return module; 
+    }
+  }),
 }));

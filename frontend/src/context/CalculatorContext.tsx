@@ -835,7 +835,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     retry: 2,
   });
 
-  // --- НОВЫЕ useQuery для получения ДЕТАЛЕЙ ---
+  // --- useQuery для получения ДЕТАЛЕЙ ---
 
   // Запрос деталей МОДУЛЯ
   const moduleDetailsQueryResult = useQuery<ModuleDetailsQueryResult, Error, ModuleDetailsQueryResult, QueryKey>({
@@ -843,24 +843,17 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     queryFn: async (): Promise<ModuleDetailsQueryResult> => {
         console.log(`[Module Details Query] Fetching details for module: ${selectedModuleCode}`);
         if (!selectedModuleCode) return { moduleDetails: null };
+
         try {
-            console.warn("[Module Details Query] Using MOCK data.");
-            await new Promise(resolve => setTimeout(resolve, 300));
-            const mockGqlModule = {
-              code: selectedModuleCode, // Убедимся, что selectedModuleCode здесь не null
-              sku: `SKU-${selectedModuleCode}`,
-              name: `Модуль ${selectedModuleCode}`,
-              moduleSizes: [{ size: { width: 320, height: 160 } }],
-              items: [
-                  { quantity: 1, item: { code: "LED-CHIP", name: "LED Чип", sku:"LC-01" } },
-                  { quantity: 4, item: { code: "SCREW-M3", name: "Винт M3", sku:null } },
-              ],
-              powerConsumptionAvg: 22,
-              powerConsumptionMax: 55,
-          };
-          // Тип будет выведен автоматически. Структура возврата queryFn все равно проверяется.
-          return { moduleDetails: mockGqlModule };
-        } catch (err) { console.error("Error fetching module details:", err); throw err; }
+            const variables = { code: selectedModuleCode };
+            console.log('[Module Details Query] Sending request with variables:', variables);
+            const result = await graphQLClient.request<ModuleDetailsQueryResult>(GET_MODULE_DETAILS, variables);
+            console.log('[Module Details Query] Received raw result:', result);
+            return result;
+        } catch (err) {
+            console.error("Error fetching module details:", err);
+            throw err;
+        }
     },
     enabled: !!selectedModuleCode,
     staleTime: 1000 * 60 * 15,
@@ -916,18 +909,17 @@ const {
     queryFn: async (): Promise<CabinetDetailsQueryResult> => {
         console.log(`[Cabinet Details Query] Fetching details for cabinet: ${selectedCabinetCode}`);
         if (!selectedCabinetCode) return { cabinetDetails: null };
+
         try {
-            console.warn("[Cabinet Details Query] Using MOCK data.");
-            await new Promise(resolve => setTimeout(resolve, 400));
-            const mockGqlCabinet = {
-              code: selectedCabinetCode, // Убедимся, что selectedCabinetCode здесь не null
-              sku: `CAB-SKU-${selectedCabinetCode}`,
-              name: `Кабинет ${selectedCabinetCode}`,
-              sizes: [{ size: { width: 640, height: 480 } }],
-          };
-           // Тип будет выведен автоматически.
-          return { cabinetDetails: mockGqlCabinet };
-        } catch (err) { console.error("Error fetching cabinet details:", err); throw err; }
+            const variables = { code: selectedCabinetCode };
+            console.log('[Cabinet Details Query] Sending request with variables:', variables);
+            const result = await graphQLClient.request<CabinetDetailsQueryResult>(GET_CABINET_DETAILS, variables);
+            console.log('[Cabinet Details Query] Received raw result:', result);
+            return result;
+        } catch (err) {
+            console.error("Error fetching cabinet details:", err);
+            throw err;
+        }
     },
     enabled: isCabinetScreenTypeSelected && !!selectedCabinetCode,
     staleTime: 1000 * 60 * 15,

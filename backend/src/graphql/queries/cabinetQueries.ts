@@ -211,6 +211,41 @@ builder.queryFields((t) => ({
             ]
         });
     }
-  })
+  }),
+
+  cabinetDetails: t.prismaField({
+    type: 'Cabinet',
+    nullable: true,
+    description: 'Получить подробную информацию о кабинете по его коду, включая размеры.',
+    args: {
+      code: t.arg.string({ required: true, description: 'Уникальный код кабинета' }),
+    },
+    resolve: async (query, _parent, args, ctx) => {
+        const codeArg = args.code as string;
+        console.log(`[cabinetDetails] Fetching details for cabinet code: ${codeArg}`);
+
+        const cabinet = await ctx.prisma.cabinet.findUnique({
+            select: {
+                id: true,
+                code: true,
+                sku: true,
+                name: true,
+                active: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+            where: {
+                code: codeArg,
+            },
+        });
+
+         if (!cabinet) {
+             console.log(`[cabinetDetails] Cabinet with code ${codeArg} not found.`);
+             return null;
+         }
+         console.log(`[cabinetDetails] Found cabinet details for code ${codeArg}.`);
+         return cabinet;
+    }
+  }),
 
 }));
