@@ -306,7 +306,7 @@ model Cabinet {
   pitches      CabinetPitch[]
   manufacturers CabinetManufacturer[]
   suppliers    CabinetSupplier[]
-  items        CabinetItemComponent[] // Переименовали CabinetItem -> CabinetItemComponent
+  items        CabinetItemComponent[]
   prices       CabinetPrice[]
 
   @@map("cabinets")
@@ -322,7 +322,6 @@ model Module {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  // Связи M-N
   categories   ModuleCategory[]
   subcategories ModuleSubcategory[]
   locations    ModuleLocation[]
@@ -348,13 +347,12 @@ model Item {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 
-  // --- ИСПРАВЛЕНО: Обратные связи на ЯВНЫЕ связующие таблицы ---
   categories    ItemCategoryRelation[]    
   subcategories ItemSubcategoryRelation[] 
   prices        ItemPrice[]
   suppliers     ItemSupplier[]
-  cabinets      CabinetItemComponent[] // Связь с компонентами кабинетов
-  modules       ModuleItemComponent[]  // Связь с компонентами модулей
+  cabinets      CabinetItemComponent[]
+  modules       ModuleItemComponent[]
 
   @@map("items") 
 }

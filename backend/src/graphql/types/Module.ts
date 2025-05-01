@@ -87,15 +87,42 @@ builder.prismaNode('Module', {
         }
     }),
 
-    sizes: t.relation('sizes', 
-        { query: { where: { size: { active: true } } }
-      }),
-      items: t.prismaConnection({
-          type: 'ModuleItemComponent',
-          cursor: 'moduleCode_itemCode',
-          resolve: (query, parent, _args, ctx) =>
-              ctx.prisma.moduleItemComponent.findMany({ ...query, where: { moduleCode: parent.code } })
-      }),
+    sizes: t.prismaField({
+        type: ['ModuleSize'],
+        resolve: async (query, parent, args, ctx) => {
+            console.log(`[Module.sizes resolver V2] Resolving sizes for module: ${parent.code}`);
+            try {
+                return ctx.prisma.moduleSize.findMany({
+                    ...query,
+                    where: {
+                        modules: {
+                            some: {
+                                moduleCode: parent.code
+                            }
+                        },
+                        active: true
+                    }
+                });
+            } catch (error: any) {
+                 console.error(`[Module.sizes resolver V2] Error resolving sizes for module ${parent.code}:`, error);
+                 return [];
+             }
+        }
+    }),
+
+    items: t.prismaField({
+        type: ['ModuleItemComponent'],
+        resolve: async (query, parent, _args, ctx) => {
+            console.log(`[Module.items resolver] Resolving items for module: ${parent.code}`);
+             return ctx.prisma.moduleItemComponent.findMany({
+                ...query,
+                where: {
+                    moduleCode: parent.code,
+                    item: { active: true }
+                }
+            });
+        }
+    }),
 
     // Связь с Яркостью через промежуточную модель ---
     brightnesses: t.relation('brightnesses'),

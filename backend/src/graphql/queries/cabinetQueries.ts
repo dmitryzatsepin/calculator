@@ -218,33 +218,35 @@ builder.queryFields((t) => ({
     nullable: true,
     description: 'Получить подробную информацию о кабинете по его коду, включая размеры.',
     args: {
-      code: t.arg.string({ required: true, description: 'Уникальный код кабинета' }),
+      code: t.arg.string({ required: true }),
     },
-    resolve: async (query, _parent, args, ctx) => {
+    resolve: async (_query, _parent, args, ctx) => {
         const codeArg = args.code as string;
-        console.log(`[cabinetDetails] Fetching details for cabinet code: ${codeArg}`);
+        console.log(`[cabinetDetails - INCLUDE] Fetching details for cabinet code: ${codeArg}`);
+        try {
+            const cabinet = await ctx.prisma.cabinet.findUnique({
+                where: { code: codeArg },
+                include: {
+                    sizes: {
+                        include: {
+                            size: true
+                        },
+                        where: { size: { active: true } },
+                        take: 1
+                    }
+                }
+            });
 
-        const cabinet = await ctx.prisma.cabinet.findUnique({
-            select: {
-                id: true,
-                code: true,
-                sku: true,
-                name: true,
-                active: true,
-                createdAt: true,
-                updatedAt: true,
-            },
-            where: {
-                code: codeArg,
-            },
-        });
-
-         if (!cabinet) {
-             console.log(`[cabinetDetails] Cabinet with code ${codeArg} not found.`);
-             return null;
-         }
-         console.log(`[cabinetDetails] Found cabinet details for code ${codeArg}.`);
-         return cabinet;
+            if (!cabinet) {
+                console.log(`[cabinetDetails - INCLUDE] Cabinet ${codeArg} not found.`);
+                return null;
+            }
+            console.log(`[cabinetDetails - INCLUDE] Prisma response for ${codeArg}:`, JSON.stringify(cabinet, null, 2));
+            return cabinet;
+        } catch (error: any) {
+             console.error(`[cabinetDetails - INCLUDE] Error fetching cabinet ${codeArg}:`, error);
+             throw error;
+        }
     }
   }),
 

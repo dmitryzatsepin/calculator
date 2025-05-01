@@ -1,7 +1,16 @@
-import { Container, Title, Paper } from '@mantine/core';
+//src/pages/DisplayCalculator.tsx
+import { Container, Title, Paper, Drawer, Button } from '@mantine/core';
 import CalculatorForm from '../components/CalculatorForm';
+import { useCalculatorContext } from '../context/CalculatorContext';
+import CalculationResults from '../components/CalculationResults';
 
 const DisplayCalculator = () => {
+  const {
+    isDrawerOpen,
+    setIsDrawerOpen,
+    calculationResult
+  } = useCalculatorContext();
+  
   return (
     <Container size="lg" my="xl">
       <Title order={1} ta="center" mb="xl">
@@ -10,6 +19,25 @@ const DisplayCalculator = () => {
       <Paper shadow="xs" p="xl" withBorder radius="md">
         <CalculatorForm />
       </Paper>
+      <Drawer
+          opened={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          title="Результаты расчета"
+          position="right"
+          size="xl"
+          padding="md"
+          shadow="sm"
+          overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+          transitionProps={{ transition: 'slide-left', duration: 250, timingFunction: 'ease' }}
+      >
+          {/* Содержимое Drawer'а */}
+          <CalculationResults results={calculationResult} />
+
+          {/* Кнопка закрытия внутри Drawer'а */}
+          <Button onClick={() => setIsDrawerOpen(false)} mt="lg" variant="light" fullWidth>
+              Закрыть
+          </Button>
+      </Drawer>
     </Container>
   );
 };

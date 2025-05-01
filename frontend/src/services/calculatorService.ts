@@ -124,8 +124,8 @@ export function calculateTechnicalSpecs(
     const requestedScreenHeightMm = selectedScreenHeight;
 
     // --- Переменные для результатов расчета ---
-    let finalCabinetWidth = 0;
-    let finalCabinetHeight = 0;
+    //let finalCabinetWidth = 0;
+    //let finalCabinetHeight = 0;
     let totalCabinets = 0;
     let cabinetsX = 0;
     let cabinetsY = 0;
@@ -155,8 +155,8 @@ export function calculateTechnicalSpecs(
         // Фактические размеры экрана на основе целого числа кабинетов
         actualScreenWidthMm = cabinetsX * cabinetWidthMm;
         actualScreenHeightMm = cabinetsY * cabinetHeightMm;
-        finalCabinetWidth = cabinetWidthMm;
-        finalCabinetHeight = cabinetHeightMm;
+        //finalCabinetWidth = cabinetWidthMm;
+        //finalCabinetHeight = cabinetHeightMm;
 
         // Расчет модулей в одном кабинете
         // Используем округление, предполагая точные размеры без зазоров
@@ -188,8 +188,8 @@ export function calculateTechnicalSpecs(
          cabinetsX = 0;
          cabinetsY = 0;
          modulesPerCabinet = 0; // Не применимо
-         finalCabinetWidth = 0;
-         finalCabinetHeight = 0;
+         //finalCabinetWidth = 0;
+         //finalCabinetHeight = 0;
     } else {
          // Случай: Кабинетный тип выбран, но cabinetData невалиден (эта проверка уже была выше)
          // Этот блок не должен выполниться, но для полноты:
