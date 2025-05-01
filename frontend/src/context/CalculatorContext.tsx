@@ -8,11 +8,19 @@ import {
   ReactNode,
   useEffect,
 } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, QueryKey } from "@tanstack/react-query";
 import { gql } from "graphql-request";
 import { graphQLClient } from "../services/graphqlClient";
+import {
+  TechnicalSpecsResult,
+  ModuleData,
+  CabinetData,
+  calculateTechnicalSpecs,
+} from '../services/calculatorService';
+import type { CalculatorFormData } from '../types/calculationTypes'; 
 
-// --- Импорты типов ---
+
+// --- Импорты типов GraphQL ---
 import type {
   ScreenType as GqlScreenType,
   Option as GqlOption,
@@ -227,7 +235,6 @@ const GET_FILTERED_BRIGHTNESS_OPTIONS = gql`
 
 const GET_MODULE_OPTIONS = gql`
   ${ModuleOptionFields}
-  # Определяем запрос с переменными
   query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {
     moduleOptions(filters: $filters, onlyActive: $onlyActive) {
       ...ModuleOptionFields
@@ -249,6 +256,27 @@ const GET_DOLLAR_RATE = gql`
     getCurrentDollarRate
   }
 `;
+
+const GET_MODULE_DETAILS = gql`
+  query GetModuleDetails($code: String!) {
+    moduleDetails(code: $code) {
+      code sku name
+      moduleSizes { size { width height } } # Связь из вашей Prisma/Pothos схемы
+      items { quantity item { code name sku } } # Связь из вашей Prisma/Pothos схемы
+      # powerConsumptionAvg
+      # powerConsumptionMax
+    }
+  }
+`;
+const GET_CABINET_DETAILS = gql`
+  query GetCabinetDetails($code: String!) {
+    cabinetDetails(code: $code) {
+      code sku name
+      sizes { size { width height } } # Связь из вашей Prisma/Pothos схемы
+    }
+  }
+`;
+
 
 // --- Типы для ответов GraphQL ---
 type InitialDataQueryResult = {
@@ -276,6 +304,37 @@ type DollarRateQueryResult = {
   getCurrentDollarRate: Maybe<number>;
 };
 
+// Типы для ДЕТАЛЬНЫХ ответов GraphQL (ПРИМЕРНЫЕ, настройте под вашу схему и Pothos)
+type ModuleDetailsGqlItemComponent = {
+  quantity: number;
+  item: { code: string; name: string; sku?: string | null; }
+}
+type ModuleDetailsGqlSize = {
+  size: { width: number; height: number; }
+}
+type ModuleDetailsGql = {
+  code: string;
+  sku?: string | null;
+  name?: string | null;
+  moduleSizes?: Maybe<Array<Maybe<ModuleDetailsGqlSize>>>; // Имя связи из Pothos типа Module
+  items?: Maybe<Array<Maybe<ModuleDetailsGqlItemComponent>>>; // Имя связи из Pothos типа Module
+  powerConsumptionAvg?: number | null; // Прямое поле, если есть
+  powerConsumptionMax?: number | null; // Прямое поле, если есть
+};
+type ModuleDetailsQueryResult = { moduleDetails: Maybe<ModuleDetailsGql> };
+
+type CabinetDetailsGqlSize = {
+   size: { width: number; height: number; }
+}
+type CabinetDetailsGql = {
+  code: string;
+  sku?: string | null;
+  name?: string | null;
+  sizes?: Maybe<Array<Maybe<CabinetDetailsGqlSize>>>; // Имя связи из Pothos типа Cabinet
+}
+type CabinetDetailsQueryResult = { cabinetDetails: Maybe<CabinetDetailsGql> };
+
+
 // --- Функция-запрос (Начальные данные) ---
 const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
   console.log("Fetching initial data (Context)...");
@@ -302,19 +361,20 @@ const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
 
 // --- Интерфейс для значения Контекста ---
 interface CalculatorContextProps {
+  // Статусы загрузки и ошибки основных данных
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  screenTypes: (
-    | Pick<GqlScreenType, "id" | "code" | "name">
-    | null
-    | undefined
-  )[];
+
+  // Справочники и основные данные
+  screenTypes: (Maybe<Pick<GqlScreenType, "id" | "code" | "name">>)[];
   locations: (GqlLocation | null | undefined)[];
   materials: (GqlMaterial | null | undefined)[];
   ipProtections: (Pick<GqlIpProtection, "id" | "code"> | null | undefined)[];
   sensors: (GqlSensor | null | undefined)[];
   controlTypes: (GqlControlType | null | undefined)[];
+
+  // Результаты запросов списков опций
   optionsQueryResult: {
     data: (
       | Pick<GqlOption, "id" | "code" | "name" | "active">
@@ -372,8 +432,25 @@ interface CalculatorContextProps {
     isError: boolean;
     error: Error | null;
   };
+  // Состояние для полных данных выбранных элементов
+  selectedModuleDetails: ModuleData | null;
+  selectedCabinetDetails: CabinetData | null;
+
+  // Статусы загрузки/ошибок для полных данных
+  isLoadingModuleDetails: boolean;
+  isErrorModuleDetails: boolean;
+  errorModuleDetails: Error | null;
+  isLoadingCabinetDetails: boolean;
+  isErrorCabinetDetails: boolean;
+  errorCabinetDetails: Error | null;
+
+  // Состояние расчета и UI результатов
   isLoadingDollarRate: boolean;
   isCalculating: boolean;
+  isDrawerOpen: boolean;
+  calculationResult: TechnicalSpecsResult | null;
+
+  // Выбранные значения формы
   selectedScreenTypeCode: string | null;
   isFlexSelected: boolean;
   selectedLocationCode: string | null;
@@ -389,6 +466,8 @@ interface CalculatorContextProps {
   dollarRate: number | string;
   widthMm: string | number;
   heightMm: string | number;
+
+  // Функции обновления состояния формы
   setSelectedScreenTypeCode: (code: string | null) => void;
   setIsFlexSelected: (selected: boolean) => void;
   setSelectedLocationCode: (code: string | null) => void;
@@ -404,7 +483,14 @@ interface CalculatorContextProps {
   setDollarRate: (rate: number | string) => void;
   setWidthMm: (value: string | number) => void;
   setHeightMm: (value: string | number) => void;
+
+  // Функции действий и статусы
   performCalculation: () => void;
+  setIsDrawerOpen: (open: boolean) => void;
+  resetQuery: () => void;
+  isCalculationReady: boolean;
+
+  // Мемоизированные опции для селектов
   screenTypeSegments: SelectOption[];
   isFlexOptionAvailable: boolean;
   locationOptions: SelectOption[];
@@ -417,108 +503,24 @@ interface CalculatorContextProps {
   refreshRateOptions: SelectOption[];
   moduleOptions: SelectOption[];
   cabinetOptions: SelectOption[];
-  isCalculationReady: boolean;
-  resetQuery: () => void;
 }
 
 // --- Создание Контекста ---
-const CalculatorContext = createContext<CalculatorContextProps>({
-  isLoading: true,
-  isError: false,
-  error: null,
-  screenTypes: [],
-  locations: [],
-  materials: [],
-  ipProtections: [],
-  refreshRateQueryResult: {
-    data: [],
-    isLoading: false,
-    isError: false,
-    error: null,
-  },
-  brightnessQueryResult: {
-    data: [],
-    isLoading: false,
-    isError: false,
-    error: null,
-  },
-  sensors: [],
-  controlTypes: [],
-  optionsQueryResult: {
-    data: [],
-    isLoading: false,
-    isError: false,
-    error: null,
-  },
-  pitchQueryResult: {
-    data: [],
-    isLoading: false,
-    isError: false,
-    error: null,
-  },
-  moduleQueryResult: {
-    data: [],
-    isLoading: false,
-    isError: false,
-    error: null,
-  },
-  cabinetQueryResult: {
-    data: [],
-    isLoading: false,
-    isError: false,
-    error: null,
-  },
-  isLoadingDollarRate: false,
-  isCalculating: false,
-  selectedScreenTypeCode: null,
-  isFlexSelected: false,
-  selectedLocationCode: null,
-  selectedMaterialCode: null,
-  selectedProtectionCode: null,
-  selectedBrightnessCode: null,
-  selectedRefreshRateCode: null,
-  selectedSensorCodes: [],
-  selectedControlTypeCodes: [],
-  selectedPitchCode: null,
-  selectedModuleCode: null,
-  selectedCabinetCode: null,
-  dollarRate: "",
-  widthMm: "",
-  heightMm: "",
-  setSelectedScreenTypeCode: () => {},
-  setIsFlexSelected: () => {},
-  setSelectedLocationCode: () => {},
-  setSelectedMaterialCode: () => {},
-  setSelectedProtectionCode: () => {},
-  setSelectedBrightnessCode: () => {},
-  setSelectedRefreshRateCode: () => {},
-  setSelectedSensorCodes: () => {},
-  setSelectedControlTypeCodes: () => {},
-  setSelectedPitchCode: () => {},
-  setSelectedModuleCode: () => {},
-  setSelectedCabinetCode: () => {},
-  setDollarRate: () => {},
-  setWidthMm: () => {},
-  setHeightMm: () => {},
-  performCalculation: () => {},
-  screenTypeSegments: [],
-  isFlexOptionAvailable: false,
-  locationOptions: [],
-  materialOptions: [],
-  protectionOptions: [],
-  brightnessOptions: [],
-  refreshRateOptions: [],
-  sensorOptions: [],
-  controlTypeOptions: [],
-  pitchOptions: [],
-  moduleOptions: [],
-  cabinetOptions: [],
-  isCalculationReady: false,
-  resetQuery: () => {},
-});
+const CalculatorContext = createContext<CalculatorContextProps | undefined>(undefined);
+
+export const useCalculatorContext = () => {
+  const context = useContext(CalculatorContext);
+  if (context === undefined) {
+      throw new Error("useCalculatorContext must be used within a CalculatorProvider");
+  }
+  return context;
+};
 
 // --- Компонент Провайдера Контекста ---
 export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient(); // <<< Будет использоваться в resetQuery
+  
+  // --- Состояния формы ---
   const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<
     string | null
   >(null);
@@ -556,7 +558,15 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   >(null);
   const [isFlexSelected, setIsFlexSelectedState] = useState<boolean>(false);
   const [dollarRate, setDollarRateState] = useState<number | string>("");
+
+  // --- Состояния для полных данных ---
+    const [selectedModuleDetails, setSelectedModuleDetailsState] = useState<ModuleData | null>(null);
+    const [selectedCabinetDetails, setSelectedCabinetDetailsState] = useState<CabinetData | null>(null);
+
+  // --- Состояния для расчета и UI ---
   const [isCalculating, setIsCalculatingState] = useState<boolean>(false);
+  const [isDrawerOpen, setIsDrawerOpenState] = useState<boolean>(false);
+  const [calculationResult, setCalculationResultState] = useState<TechnicalSpecsResult | null>(null);
 
   // --- Запрос начальных данных ---
   const {
@@ -564,13 +574,14 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isLoadingInitial,
     isError: isErrorInitial,
     error: errorInitial,
-    refetch: refetchInitial,
   } = useQuery<InitialDataQueryResult, Error>({
     queryKey: ["calculatorInitialData"],
     queryFn: fetchInitialData,
     staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });
+
+  // --- Извлечение данных из начального запроса ---
   const screenTypes = initialData?.screenTypes ?? [];
   const gqlLocations = initialData?.locations ?? [];
   const gqlMaterials = initialData?.materials ?? [];
@@ -585,7 +596,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isLoadingOptions,
     isError: isErrorOptions,
     error: errorOptions,
-    refetch: refetchOptions,
   } = useQuery<ScreenTypeOptionsQueryResult, Error>({
     queryKey: ["screenTypeOptions", selectedScreenTypeCode],
     queryFn: async () => {
@@ -614,7 +624,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isLoadingPitches,
     isError: isErrorPitches,
     error: errorPitches,
-    refetch: refetchPitches,
   } = useQuery<GetPitchOptionsByLocationQuery, Error>({
     queryKey: ["pitchOptions", selectedLocationCode],
     queryFn: async () => {
@@ -651,7 +660,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isLoadingBrightnesses,
     isError: isErrorBrightnesses,
     error: errorBrightnesses,
-    refetch: refetchBrightnesses,
   } = useQuery<GetFilteredBrightnessOptionsQuery, Error>({
     queryKey: ['brightnessOptions', selectedLocationCode, selectedPitchCode, selectedRefreshRateCode],
     queryFn: async () => {
@@ -690,7 +698,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isLoadingRefreshRates,
     isError: isErrorRefreshRates,
     error: errorRefreshRates,
-    refetch: refetchRefreshRates,
   } = useQuery<GetFilteredRefreshRateOptionsQuery, Error>({
     // Используем сгенерированный тип
     queryKey: ["refreshRateOptions", selectedLocationCode, selectedPitchCode],
@@ -732,7 +739,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isLoadingModules,
     isError: isErrorModules,
     error: errorModules,
-    refetch: refetchModules,
   } = useQuery<GetModuleOptionsQuery, Error>({
     queryKey: [
       "moduleOptions",
@@ -770,8 +776,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
 
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС КАБИНЕТОВ ---
   const cabinetScreenTypeCode = "cabinet";
-  const isCabinetScreenTypeSelected =
-    selectedScreenTypeCode === cabinetScreenTypeCode;
+  const isCabinetScreenTypeSelected = selectedScreenTypeCode === cabinetScreenTypeCode;
   const areCabinetDepsSelected = !!(
     selectedLocationCode &&
     selectedMaterialCode &&
@@ -785,7 +790,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     isLoading: isLoadingCabinets,
     isError: isErrorCabinets,
     error: errorCabinets,
-    refetch: refetchCabinets,
   } = useQuery<CabinetOptionsQueryResult, Error>({
     queryKey: [
       "cabinetOptions",
@@ -830,6 +834,140 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     refetchOnMount: true,
     retry: 2,
   });
+
+  // --- НОВЫЕ useQuery для получения ДЕТАЛЕЙ ---
+
+  // Запрос деталей МОДУЛЯ
+  const moduleDetailsQueryResult = useQuery<ModuleDetailsQueryResult, Error, ModuleDetailsQueryResult, QueryKey>({
+    queryKey: ['moduleDetails', selectedModuleCode],
+    queryFn: async (): Promise<ModuleDetailsQueryResult> => {
+        console.log(`[Module Details Query] Fetching details for module: ${selectedModuleCode}`);
+        if (!selectedModuleCode) return { moduleDetails: null };
+        try {
+            console.warn("[Module Details Query] Using MOCK data.");
+            await new Promise(resolve => setTimeout(resolve, 300));
+            const mockGqlModule = {
+              code: selectedModuleCode, // Убедимся, что selectedModuleCode здесь не null
+              sku: `SKU-${selectedModuleCode}`,
+              name: `Модуль ${selectedModuleCode}`,
+              moduleSizes: [{ size: { width: 320, height: 160 } }],
+              items: [
+                  { quantity: 1, item: { code: "LED-CHIP", name: "LED Чип", sku:"LC-01" } },
+                  { quantity: 4, item: { code: "SCREW-M3", name: "Винт M3", sku:null } },
+              ],
+              powerConsumptionAvg: 22,
+              powerConsumptionMax: 55,
+          };
+          // Тип будет выведен автоматически. Структура возврата queryFn все равно проверяется.
+          return { moduleDetails: mockGqlModule };
+        } catch (err) { console.error("Error fetching module details:", err); throw err; }
+    },
+    enabled: !!selectedModuleCode,
+    staleTime: 1000 * 60 * 15,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+});
+
+useEffect(() => {
+  if (moduleDetailsQueryResult.isSuccess && moduleDetailsQueryResult.data) {
+      const data = moduleDetailsQueryResult.data;
+      console.log("[Module Details Effect] Success (Raw):", data);
+      if (data?.moduleDetails) {
+          const gqlModule = data.moduleDetails;
+          const sizeData = gqlModule.moduleSizes?.[0]?.size;
+          const mappedModule: ModuleData = {
+              code: gqlModule.code, sku: gqlModule.sku, name: gqlModule.name,
+              width: sizeData?.width ?? 0, height: sizeData?.height ?? 0,
+              powerConsumptionAvg: gqlModule.powerConsumptionAvg,
+              powerConsumptionMax: gqlModule.powerConsumptionMax,
+              components: gqlModule.items?.map((comp: Maybe<ModuleDetailsGqlItemComponent>) => ({
+                  quantity: comp?.quantity ?? 0,
+                  itemCode: comp?.item?.code ?? 'unknown',
+                  itemName: comp?.item?.name ?? 'Unknown Item',
+                  itemSku: comp?.item?.sku,
+              })).filter((c: any) => c.itemCode !== 'unknown') ?? [],
+          };
+          console.log("[Module Details Effect] Mapped State:", mappedModule);
+          if (JSON.stringify(mappedModule) !== JSON.stringify(selectedModuleDetails)) {
+               setSelectedModuleDetailsState(mappedModule);
+          }
+      } else {
+           if (selectedModuleDetails !== null) {
+               setSelectedModuleDetailsState(null);
+           }
+      }
+  } else if (moduleDetailsQueryResult.isError) {
+      console.error("[Module Details Effect] Error:", moduleDetailsQueryResult.error.message);
+       if (selectedModuleDetails !== null) {
+           setSelectedModuleDetailsState(null);
+       }
+  }
+}, [moduleDetailsQueryResult.isSuccess, moduleDetailsQueryResult.isError, moduleDetailsQueryResult.data, moduleDetailsQueryResult.error, selectedModuleDetails]);
+
+const {
+    isLoading: isLoadingModuleDetails,
+    isError: isErrorModuleDetails,
+    error: errorModuleDetails,
+} = moduleDetailsQueryResult;
+
+  // Запрос деталей КАБИНЕТА
+  const cabinetDetailsQueryResult = useQuery<CabinetDetailsQueryResult, Error, CabinetDetailsQueryResult, QueryKey>({
+    queryKey: ['cabinetDetails', selectedCabinetCode],
+    queryFn: async (): Promise<CabinetDetailsQueryResult> => {
+        console.log(`[Cabinet Details Query] Fetching details for cabinet: ${selectedCabinetCode}`);
+        if (!selectedCabinetCode) return { cabinetDetails: null };
+        try {
+            console.warn("[Cabinet Details Query] Using MOCK data.");
+            await new Promise(resolve => setTimeout(resolve, 400));
+            const mockGqlCabinet = {
+              code: selectedCabinetCode, // Убедимся, что selectedCabinetCode здесь не null
+              sku: `CAB-SKU-${selectedCabinetCode}`,
+              name: `Кабинет ${selectedCabinetCode}`,
+              sizes: [{ size: { width: 640, height: 480 } }],
+          };
+           // Тип будет выведен автоматически.
+          return { cabinetDetails: mockGqlCabinet };
+        } catch (err) { console.error("Error fetching cabinet details:", err); throw err; }
+    },
+    enabled: isCabinetScreenTypeSelected && !!selectedCabinetCode,
+    staleTime: 1000 * 60 * 15,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+});
+useEffect(() => {
+  if (cabinetDetailsQueryResult.isSuccess && cabinetDetailsQueryResult.data) {
+      const data = cabinetDetailsQueryResult.data;
+      console.log("[Cabinet Details Effect] Success (Raw):", data);
+       if (data?.cabinetDetails) {
+          const gqlCabinet = data.cabinetDetails;
+          const sizeData = gqlCabinet.sizes?.[0]?.size;
+          const mappedCabinet: CabinetData = {
+              code: gqlCabinet.code, sku: gqlCabinet.sku, name: gqlCabinet.name,
+              width: sizeData?.width ?? 0, height: sizeData?.height ?? 0,
+          };
+          console.log("[Cabinet Details Effect] Mapped State:", mappedCabinet);
+          if (JSON.stringify(mappedCabinet) !== JSON.stringify(selectedCabinetDetails)) {
+               setSelectedCabinetDetailsState(mappedCabinet);
+          }
+       } else {
+           if (selectedCabinetDetails !== null) {
+               setSelectedCabinetDetailsState(null);
+           }
+       }
+  } else if (cabinetDetailsQueryResult.isError) {
+      console.error("[Cabinet Details Effect] Error:", cabinetDetailsQueryResult.error.message);
+       if (selectedCabinetDetails !== null) {
+           setSelectedCabinetDetailsState(null);
+       }
+  }
+}, [cabinetDetailsQueryResult.isSuccess, cabinetDetailsQueryResult.isError, cabinetDetailsQueryResult.data, cabinetDetailsQueryResult.error, selectedCabinetDetails]);
+
+const {
+    isLoading: isLoadingCabinetDetails,
+    isError: isErrorCabinetDetails,
+    error: errorCabinetDetails,
+} = cabinetDetailsQueryResult;
+  
 
   // --- Эффекты ---
   useEffect(() => {
@@ -998,6 +1136,41 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     if (isErrorDollarRate && errorDollarRate)
       console.error("Error fetching dollar rate:", errorDollarRate.message);
   }, [dollarRateData, dollarRate, isErrorDollarRate, errorDollarRate]);
+
+  // Сброс деталей Модуля при смене кода
+  useEffect(() => {
+    if (selectedModuleDetails && selectedModuleDetails.code !== selectedModuleCode) {
+        console.log("[Module Effect] Resetting module details due to code change.");
+        const previousCode = selectedModuleDetails.code;
+        setSelectedModuleDetailsState(null);
+        queryClient.cancelQueries({ queryKey: ['moduleDetails', previousCode] });
+    } else if (!selectedModuleCode && selectedModuleDetails) {
+        console.log("[Module Effect] Resetting module details because code is null.");
+        const previousCode = selectedModuleDetails.code;
+        setSelectedModuleDetailsState(null);
+        queryClient.cancelQueries({ queryKey: ['moduleDetails', previousCode] });
+    }
+}, [selectedModuleCode, selectedModuleDetails, queryClient]); // Добавили queryClient
+
+// Сброс деталей Кабинета при смене кода или типа экрана
+useEffect(() => {
+   let shouldReset = false;
+   let previousCode: string | undefined = undefined;
+   if (selectedCabinetDetails) {
+       previousCode = selectedCabinetDetails.code;
+       // <<< ИСПРАВЛЕНО: Используем isCabinetScreenTypeSelected >>>
+       if (selectedCabinetDetails.code !== selectedCabinetCode || !isCabinetScreenTypeSelected || !selectedCabinetCode) {
+            console.log(`[Cabinet Effect] Resetting cabinet details due to change (code: ${selectedCabinetCode}, type: ${selectedScreenTypeCode}).`);
+            shouldReset = true;
+       }
+   }
+   if (shouldReset) {
+       setSelectedCabinetDetailsState(null);
+       if (previousCode) {
+            queryClient.cancelQueries({ queryKey: ['cabinetDetails', previousCode] });
+       }
+   }
+}, [selectedCabinetCode, isCabinetScreenTypeSelected, selectedCabinetDetails, queryClient]);
 
   // --- Подготовка данных для селекторов (useMemo) ---
   const screenTypeSegments = useMemo((): SelectOption[] => {
@@ -1174,75 +1347,34 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     return availableOptions.some((opt) => opt?.code === "flex");
   }, [availableOptions]);
 
+  // --- ЛОГИКА ГОТОВНОСТИ К РАСЧЕТУ ---
   const isCalculationReady = useMemo((): boolean => {
-    // ... (логика с отладкой, как была исправлена ранее) ...
-    const widthValue = Number(widthMm);
-    const heightValue = Number(heightMm);
-    const rateValue = Number(dollarRate);
-    const checkScreenType = !!selectedScreenTypeCode;
-    const checkWidth = !isNaN(widthValue) && widthValue > 0;
-    const checkHeight = !isNaN(heightValue) && heightValue > 0;
-    const checkLocation = !!selectedLocationCode;
-    const checkMaterial =
-      selectedScreenTypeCode !== cabinetScreenTypeCode ||
-      !!selectedMaterialCode;
-    const checkProtection = !!selectedProtectionCode;
-    const checkPitch = !!selectedPitchCode;
-    const checkModule = !!selectedModuleCode;
-    const checkCabinet =
-      selectedScreenTypeCode !== cabinetScreenTypeCode || !!selectedCabinetCode;
-    const checkRate = !isNaN(rateValue) && rateValue > 0;
-    const checkCalculating = !isCalculating;
+    const widthValue = Number(widthMm); const heightValue = Number(heightMm); const rateValue = Number(dollarRate);
+    const checkScreenType = !!selectedScreenTypeCode; const checkWidth = !isNaN(widthValue) && widthValue > 0;
+    const checkHeight = !isNaN(heightValue) && heightValue > 0; const checkLocation = !!selectedLocationCode;
+    const checkProtection = !!selectedProtectionCode; const checkPitch = !!selectedPitchCode;
+    const checkBrightness = !!selectedBrightnessCode; // <<< Будет использоваться
+    const checkRefreshRate = !!selectedRefreshRateCode; // <<< Будет использоваться
+    const checkModule = !!selectedModuleCode && !!selectedModuleDetails && !isLoadingModuleDetails && !isErrorModuleDetails;
+    // <<< ИСПРАВЛЕНО: Используем isCabinetScreenTypeSelected >>>
+    const checkCabinet = !isCabinetScreenTypeSelected || (!!selectedCabinetCode && !!selectedCabinetDetails && !isLoadingCabinetDetails && !isErrorCabinetDetails);
+    const checkMaterial = !isCabinetScreenTypeSelected || !!selectedMaterialCode;
+    const checkRate = !isNaN(rateValue) && rateValue > 0; const checkCalculating = !isCalculating;
+
     const requiredFieldsFilled =
-      checkScreenType &&
-      checkWidth &&
-      checkHeight &&
-      checkLocation &&
-      checkMaterial &&
-      checkProtection &&
-      checkPitch &&
-      checkModule &&
-      checkCabinet &&
-      checkRate;
-    console.log("Calculation Ready Check:", {
-      checkScreenType,
-      checkWidth,
-      widthMm,
-      checkHeight,
-      heightMm,
-      checkLocation,
-      selectedLocationCode,
-      checkMaterial,
-      selectedMaterialCode,
-      checkProtection,
-      selectedProtectionCode,
-      checkPitch,
-      selectedPitchCode,
-      checkModule,
-      selectedModuleCode,
-      checkCabinet,
-      selectedCabinetCode,
-      checkRate,
-      dollarRate,
-      checkCalculating,
-      requiredFieldsFilled,
-      isCalculationReady: requiredFieldsFilled && checkCalculating,
-    });
+        checkScreenType && checkWidth && checkHeight && checkLocation && checkMaterial && checkProtection && checkPitch &&
+        checkBrightness && checkRefreshRate && // <<< ИСПОЛЬЗУЕМ ПРОВЕРКИ
+        checkModule && checkCabinet && checkRate;
+
+    // console.log("Calculation Ready Check:", { /* ... */ });
     return requiredFieldsFilled && checkCalculating;
-  }, [
-    selectedScreenTypeCode,
-    widthMm,
-    heightMm,
-    selectedLocationCode,
-    selectedMaterialCode,
-    selectedProtectionCode,
-    selectedPitchCode,
-    selectedModuleCode,
-    selectedCabinetCode,
-    dollarRate,
-    isCalculating,
-    cabinetScreenTypeCode,
-  ]);
+}, [
+    selectedScreenTypeCode, widthMm, heightMm, selectedLocationCode, selectedMaterialCode, selectedProtectionCode,
+    selectedPitchCode, selectedBrightnessCode, selectedRefreshRateCode, selectedModuleCode, selectedCabinetCode, dollarRate,
+    isCalculating, isCabinetScreenTypeSelected, // <<< ИСПРАВЛЕНО
+    selectedModuleDetails, isLoadingModuleDetails, isErrorModuleDetails,
+    selectedCabinetDetails, isLoadingCabinetDetails, isErrorCabinetDetails,
+]);
 
   // --- Функции для обновления состояния (useCallback) ---
   const setSelectedScreenTypeCode = useCallback(
@@ -1260,6 +1392,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
       setIsFlexSelectedState(false);
+      setCalculationResultState(null);
     },
     [selectedScreenTypeCode]
   );
@@ -1273,6 +1406,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setSelectedPitchCodeState(null);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
+      setCalculationResultState(null);
     },
     [selectedLocationCode]
   );
@@ -1364,192 +1498,167 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const setHeightMm = useCallback((value: string | number) => {
     setHeightMmState(value);
   }, []);
-  const performCalculation = useCallback(async () => {
-    if (!isCalculationReady) {
-      console.warn("Calculation prerequisites not met.");
-      return;
-    }
-    console.log("🚀 Starting calculation...");
+  const performCalculation = useCallback(() => {
+    console.log("Attempting calculation... Ready state:", isCalculationReady);
+
+    if (!isCalculationReady) { console.warn("Calculation prerequisites not met."); return; }
+    if (!selectedModuleDetails) { console.error("Calculation cannot proceed: Module details missing."); return; }
+    if (isCabinetScreenTypeSelected && !selectedCabinetDetails) { console.error("Calculation cannot proceed: Cabinet details missing."); return; }
+
+    console.log("🚀 Starting calculation with loaded details...");
     setIsCalculatingState(true);
+    setCalculationResultState(null);
+
     try {
-      const calculationInput = {
-        screenTypeCode: selectedScreenTypeCode,
-        widthMm: Number(widthMm),
-        heightMm: Number(heightMm),
-        locationCode: selectedLocationCode,
-        materialCode: selectedMaterialCode,
-        ipProtectionCode: selectedProtectionCode,
-        brightnessCode: selectedBrightnessCode,
-        refreshRateCode: selectedRefreshRateCode,
-        sensorCodes: selectedSensorCodes,
-        controlTypeCodes: selectedControlTypeCodes,
-        pitchCode: selectedPitchCode,
-        moduleCode: selectedModuleCode,
-        cabinetCode: selectedCabinetCode,
-        isFlex: isFlexSelected,
-        dollarRate: Number(dollarRate),
-      };
-      console.log("Calculation Input Data:", calculationInput);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("✅ Calculation finished (simulated).");
-    } catch (calcError) {
-      console.error("❌ Calculation failed:", calcError);
+        const locationName = locationOptions.find(o => o.value === selectedLocationCode)?.label;
+        const materialName = materialOptions.find(o => o.value === selectedMaterialCode)?.label;
+        const brightnessLabel = brightnessOptions.find(o => o.value === selectedBrightnessCode)?.label;
+        const refreshRateLabel = refreshRateOptions.find(o => o.value === selectedRefreshRateCode)?.label;
+        const pitchObj = (gqlFilteredPitches as GqlPitch[]).find(p => p?.code === selectedPitchCode);
+        const pitchValue = Number(pitchObj?.pitchValue ?? 0);
+
+        if (pitchValue <= 0) throw new Error("Invalid pitch value.");
+        if (!selectedScreenTypeCode) throw new Error("Screen type not selected.");
+
+        const formData: CalculatorFormData = { // <<< ИСПОЛЬЗУЕМ CalculatorFormData
+            selectedPlacement: locationName ?? selectedLocationCode ?? 'N/A',
+            selectedMaterialName: isCabinetScreenTypeSelected ? (materialName ?? selectedMaterialCode ?? 'N/A') : null,
+            selectedProtectionCode: selectedProtectionCode ?? 'N/A',
+            selectedBrightnessLabel: brightnessLabel ?? selectedBrightnessCode ?? 'N/A',
+            selectedRefreshRateLabel: refreshRateLabel ?? selectedRefreshRateCode ?? 'N/A',
+            selectedPitchValue: pitchValue,
+            selectedScreenWidth: Number(widthMm),
+            selectedScreenHeight: Number(heightMm),
+            selectedScreenTypeCode: selectedScreenTypeCode,
+            moduleItemComponents: [], // Не используется здесь
+        };
+
+        console.log("Prepared formData for calculation:", formData);
+        console.log("Using Module Details:", selectedModuleDetails);
+        console.log("Using Cabinet Details:", selectedCabinetDetails);
+
+        // Вызываем реальный расчет
+        const result = calculateTechnicalSpecs( // <<< ИСПОЛЬЗУЕМ calculateTechnicalSpecs
+            formData,
+            selectedModuleDetails,
+            selectedCabinetDetails
+        );
+
+        console.log("✅ Calculation Result:", result);
+        if (result) {
+            setCalculationResultState(result);
+            setIsDrawerOpenState(true);
+        } else {
+            console.error("❌ Calculation function returned null.");
+            setCalculationResultState(null);
+        }
+
+    } catch (calcError: any) {
+        console.error("❌ Calculation failed:", calcError?.message ?? calcError);
+        setCalculationResultState(null);
     } finally {
-      setIsCalculatingState(false);
+        setIsCalculatingState(false);
     }
-  }, [
-    isCalculationReady,
-    selectedScreenTypeCode,
-    widthMm,
-    heightMm,
-    selectedLocationCode,
-    selectedMaterialCode,
-    selectedProtectionCode,
-    selectedBrightnessCode,
-    selectedRefreshRateCode,
-    selectedSensorCodes,
-    selectedControlTypeCodes,
-    selectedPitchCode,
-    selectedModuleCode,
-    selectedCabinetCode,
-    isFlexSelected,
-    dollarRate,
-  ]);
-  const resetQuery = useCallback(() => {
-    refetchInitial();
-    refetchPitches();
-    refetchRefreshRates();
-    refetchBrightnesses();
-    refetchCabinets();
-    refetchOptions();
-    refetchModules();
-  }, [
-    refetchInitial,
-    refetchPitches,
-    refetchRefreshRates,
-    refetchBrightnesses,
-    refetchModules,
-    refetchCabinets,
-    refetchOptions,
+  }, [ // Обновляем зависимости
+      isCalculationReady, selectedModuleDetails, selectedCabinetDetails, isCabinetScreenTypeSelected,
+      selectedScreenTypeCode, widthMm, heightMm, selectedLocationCode, selectedMaterialCode,
+      selectedProtectionCode, selectedBrightnessCode, selectedRefreshRateCode, selectedPitchCode,
+      locationOptions, materialOptions, brightnessOptions, refreshRateOptions, gqlFilteredPitches,
+      setIsCalculatingState, setCalculationResultState, setIsDrawerOpenState // Добавили set функции
   ]);
 
+// <<< ИСПРАВЛЕНО: Используем queryClient >>>
+const resetQuery = useCallback(() => {
+    console.log("Invalidating all calculator queries...");
+    queryClient.invalidateQueries({ queryKey: ['calculatorInitialData'] });
+    queryClient.invalidateQueries({ queryKey: ['screenTypeOptions'] });
+    queryClient.invalidateQueries({ queryKey: ['pitchOptions'] });
+    queryClient.invalidateQueries({ queryKey: ['refreshRateOptions'] });
+    queryClient.invalidateQueries({ queryKey: ['brightnessOptions'] });
+    queryClient.invalidateQueries({ queryKey: ['moduleOptions'] });
+    queryClient.invalidateQueries({ queryKey: ['cabinetOptions'] });
+    queryClient.invalidateQueries({ queryKey: ['dollarRate'] });
+    queryClient.invalidateQueries({ queryKey: ['moduleDetails'] });
+    queryClient.invalidateQueries({ queryKey: ['cabinetDetails'] });
+    console.log("Calculator queries invalidated.");
+}, [queryClient]); // Добавили queryClient в зависимости
+
   // --- Формируем значение контекста ---
-  const contextValue: CalculatorContextProps = {
-    isLoading: isLoadingInitial,
-    isError: isErrorInitial,
-    error: errorInitial,
-    screenTypes,
-    locations: gqlLocations,
-    materials: gqlMaterials,
-    ipProtections: gqlIpProtections,
-    sensors: gqlSensors,
-    controlTypes: gqlControlTypes,
-    optionsQueryResult: {
-      data: availableOptions,
-      isLoading: isLoadingOptions,
-      isError: isErrorOptions,
-      error: errorOptions,
-    },
-    pitchQueryResult: {
-      data: gqlFilteredPitches as (
-        | Pick<GqlPitch, "id" | "code" | "pitchValue" | "active">
-        | null
-        | undefined
-      )[],
-      isLoading: isLoadingPitches,
-      isError: isErrorPitches,
-      error: errorPitches,
-    },
-    refreshRateQueryResult: {
-      data: gqlFilteredRefreshRates as (
-        | Pick<GqlRefreshRate, "id" | "code" | "value" | "active">
-        | null
-        | undefined
-      )[],
-      isLoading: isLoadingRefreshRates,
-      isError: isErrorRefreshRates,
-      error: errorRefreshRates,
-    },
-    brightnessQueryResult: {
-      data: gqlFilteredBrightnesses as any,
-      isLoading: isLoadingBrightnesses,
-      isError: isErrorBrightnesses,
-      error: errorBrightnesses,
-    },
-    moduleQueryResult: {
-      data: gqlFilteredModules as (GqlModule | null | undefined)[],
-      isLoading: isLoadingModules,
-      isError: isErrorModules,
-      error: errorModules,
-    },
-    cabinetQueryResult: {
-      data: gqlCabinets,
-      isLoading: isLoadingCabinets,
-      isError: isErrorCabinets,
-      error: errorCabinets,
-    },
-    isLoadingDollarRate,
-    isCalculating,
-    selectedScreenTypeCode,
-    isFlexSelected,
-    selectedLocationCode,
-    selectedMaterialCode,
-    selectedProtectionCode,
-    selectedBrightnessCode,
-    selectedRefreshRateCode,
-    selectedSensorCodes,
-    selectedControlTypeCodes,
-    selectedPitchCode,
-    selectedModuleCode,
-    selectedCabinetCode,
-    dollarRate,
-    widthMm,
-    heightMm,
-    setSelectedScreenTypeCode,
-    setIsFlexSelected,
-    setSelectedLocationCode,
-    setSelectedMaterialCode,
-    setSelectedProtectionCode,
-    setSelectedBrightnessCode,
-    setSelectedRefreshRateCode,
-    setSelectedSensorCodes,
-    setSelectedControlTypeCodes,
-    setSelectedPitchCode,
-    setSelectedModuleCode,
-    setSelectedCabinetCode,
-    setDollarRate,
-    performCalculation,
-    setWidthMm,
-    setHeightMm,
-    screenTypeSegments,
-    isFlexOptionAvailable,
-    locationOptions,
-    materialOptions,
-    protectionOptions,
-    brightnessOptions,
-    refreshRateOptions,
-    sensorOptions,
-    controlTypeOptions,
-    pitchOptions,
-    moduleOptions,
-    cabinetOptions,
-    isCalculationReady,
-    resetQuery,
-  };
+    // --- Формируем значение контекста ---
+    const contextValue: CalculatorContextProps = useMemo(() => ({
+      // Статусы загрузки и ошибки
+      isLoading: isLoadingInitial,
+      isError: isErrorInitial,
+      error: errorInitial,
+      // Справочники
+      screenTypes, locations: gqlLocations, materials: gqlMaterials, ipProtections: gqlIpProtections, sensors: gqlSensors, controlTypes: gqlControlTypes,
+      // Результаты запросов списков
+      optionsQueryResult: { data: availableOptions, isLoading: isLoadingOptions, isError: isErrorOptions, error: errorOptions },
+      pitchQueryResult: { data: gqlFilteredPitches as any, isLoading: isLoadingPitches, isError: isErrorPitches, error: errorPitches },
+      refreshRateQueryResult: { data: gqlFilteredRefreshRates as any, isLoading: isLoadingRefreshRates, isError: isErrorRefreshRates, error: errorRefreshRates },
+      brightnessQueryResult: { data: gqlFilteredBrightnesses as any, isLoading: isLoadingBrightnesses, isError: isErrorBrightnesses, error: errorBrightnesses },
+      moduleQueryResult: { data: gqlFilteredModules as any, isLoading: isLoadingModules, isError: isErrorModules, error: errorModules },
+      cabinetQueryResult: { data: gqlCabinets, isLoading: isLoadingCabinets, isError: isErrorCabinets, error: errorCabinets },
+      isLoadingDollarRate,
+      // Детали и их статусы
+      selectedModuleDetails,
+      selectedCabinetDetails,
+      isLoadingModuleDetails,
+      isErrorModuleDetails,
+      errorModuleDetails,
+      isLoadingCabinetDetails,
+      isErrorCabinetDetails,
+      errorCabinetDetails,
+      // Состояние расчета и UI
+      isCalculating,
+      calculationResult,
+      isDrawerOpen,
+      // Выбранные значения формы
+      selectedScreenTypeCode, isFlexSelected, selectedLocationCode, selectedMaterialCode, selectedProtectionCode,
+      selectedBrightnessCode, selectedSensorCodes, selectedControlTypeCodes, selectedPitchCode, selectedRefreshRateCode,
+      selectedModuleCode, selectedCabinetCode, dollarRate, widthMm, heightMm,
+      // Функции обновления состояния
+      setSelectedScreenTypeCode, setIsFlexSelected, setSelectedLocationCode, setSelectedMaterialCode, setSelectedProtectionCode,
+      setSelectedBrightnessCode, setSelectedSensorCodes, setSelectedControlTypeCodes, setSelectedPitchCode, setSelectedRefreshRateCode,
+      setSelectedModuleCode, setSelectedCabinetCode, setDollarRate, setWidthMm, setHeightMm,
+      // Функции действий и статусы
+      performCalculation, // <--- Убедитесь, что это правильная функция
+      setIsDrawerOpen: setIsDrawerOpenState,
+      resetQuery,
+      isCalculationReady,
+      // Опции для селектов
+      screenTypeSegments, isFlexOptionAvailable, locationOptions, materialOptions, protectionOptions, brightnessOptions,
+      refreshRateOptions, sensorOptions, controlTypeOptions, pitchOptions, moduleOptions, cabinetOptions,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }), [
+      // Перечисляем ВСЕ значения, используемые внутри contextValue
+      isLoadingInitial, isErrorInitial, errorInitial, screenTypes, gqlLocations, gqlMaterials, gqlIpProtections, gqlSensors, gqlControlTypes,
+      availableOptions, isLoadingOptions, isErrorOptions, errorOptions,
+      gqlFilteredPitches, isLoadingPitches, isErrorPitches, errorPitches,
+      gqlFilteredRefreshRates, isLoadingRefreshRates, isErrorRefreshRates, errorRefreshRates,
+      gqlFilteredBrightnesses, isLoadingBrightnesses, isErrorBrightnesses, errorBrightnesses,
+      gqlFilteredModules, isLoadingModules, isErrorModules, errorModules,
+      gqlCabinets, isLoadingCabinets, isErrorCabinets, errorCabinets,
+      isLoadingDollarRate,
+      // Добавленные зависимости:
+      selectedModuleDetails, selectedCabinetDetails, isLoadingModuleDetails, isErrorModuleDetails, errorModuleDetails,
+      isLoadingCabinetDetails, isErrorCabinetDetails, errorCabinetDetails, isCalculating, calculationResult, isDrawerOpen,
+      // Остальные зависимости:
+      selectedScreenTypeCode, isFlexSelected, selectedLocationCode, selectedMaterialCode, selectedProtectionCode,
+      selectedBrightnessCode, selectedSensorCodes, selectedControlTypeCodes, selectedPitchCode, selectedRefreshRateCode,
+      selectedModuleCode, selectedCabinetCode, dollarRate, widthMm, heightMm,
+      setSelectedScreenTypeCode, setIsFlexSelected, setSelectedLocationCode, setSelectedMaterialCode, setSelectedProtectionCode,
+      setSelectedBrightnessCode, setSelectedSensorCodes, setSelectedControlTypeCodes, setSelectedPitchCode, setSelectedRefreshRateCode,
+      setSelectedModuleCode, setSelectedCabinetCode, setDollarRate, setWidthMm, setHeightMm,
+      performCalculation, setIsDrawerOpenState, resetQuery, isCalculationReady,
+      screenTypeSegments, isFlexOptionAvailable, locationOptions, materialOptions, protectionOptions, brightnessOptions,
+      refreshRateOptions, sensorOptions, controlTypeOptions, pitchOptions, moduleOptions, cabinetOptions,
+      isCabinetScreenTypeSelected
+    ]);
 
   return (
     <CalculatorContext.Provider value={contextValue}>
       {children}
     </CalculatorContext.Provider>
   );
-};
-
-// --- Кастомный хук ---
-export const useCalculatorContext = () => {
-  const context = useContext(CalculatorContext);
-  if (context === undefined)
-    throw new Error(
-      "useCalculatorContext must be used within a CalculatorProvider"
-    );
-  return context;
 };

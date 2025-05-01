@@ -24,9 +24,9 @@ builder.queryFields((t) => ({
             where: {
                 module: {
                     active: onlyActive ?? undefined,
-                    locations: { some: { locationCode: locationCode } },
-                    pitches: { some: { pitchCode: pitchCode } },
-                    refreshRates: { some: { refreshRateCode: args.refreshRateCode } }
+                    locations: { some: { locationCode: locationCode as string} },
+                    pitches: { some: { pitchCode: pitchCode as string} },
+                    refreshRates: { some: { refreshRateCode: args.refreshRateCode as string} }
                 },
                 brightness: { active: onlyActive ?? undefined } // Условие на активность самой яркости
             },

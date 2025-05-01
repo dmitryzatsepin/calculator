@@ -1,5 +1,5 @@
 // src/graphql/builder.ts
-import SchemaBuilder from "@pothos/core";
+import SchemaBuilder from '@pothos/core'; // Default import
 import PrismaPlugin from '@pothos/plugin-prisma';
 import type PrismaTypes from '../generated/pothos-types';
 import RelayPlugin from '@pothos/plugin-relay';
@@ -33,8 +33,8 @@ export const builder = new SchemaBuilder<{
   },
 });
 
-builder.addScalarType("Date", DateResolver, {});
-builder.addScalarType("DateTime", DateTimeResolver, {});
+builder.addScalarType('Date', DateResolver, {});
+builder.addScalarType('DateTime', DateTimeResolver, {});
 
 builder.queryType({});
 builder.mutationType({});

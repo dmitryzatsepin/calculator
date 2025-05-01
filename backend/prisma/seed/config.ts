@@ -411,6 +411,7 @@ export const entityConfigs: EntityConfig[] = [
       prismaField: "active",
       transform: safeBoolean,
     },
+    nameField: { excelCol: "module_name", prismaField: "name" },
     otherFields: [{ excelCol: "module_option", prismaField: "moduleOption" }],
   },
 ];

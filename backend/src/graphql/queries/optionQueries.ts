@@ -19,7 +19,7 @@ builder.queryFields((t) => ({
         // Находим все связи Option для данного ScreenType
         const screenTypeOptions = await ctx.prisma.screenTypeOption.findMany({
             where: {
-                screenTypeCode: screenTypeCode,
+                screenTypeCode: screenTypeCode as string,
                 // Фильтруем по активным опциям, если нужно
                 option: onlyActive ? { active: true } : undefined
             },

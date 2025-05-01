@@ -31,9 +31,14 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _parent, args, ctx) => {
         console.log(`[ipProtectionByCode] Searching for code: ${args.code}`);
+        const codeArg = args.code;
+        if (typeof codeArg !== 'string') {
+             console.error("Invalid code argument type received:", typeof codeArg);
+             throw new Error("Invalid argument: code must be a string.");
+        }
         return ctx.prisma.ipProtection.findUnique({
             ...query,
-            where: { code: args.code }
+            where: { code: codeArg }
         });
     }
   })

@@ -12,6 +12,7 @@
     "prisma:generate": "prisma generate",
     "prisma:reset": "prisma migrate reset",
     "prisma:seed": "tsx prisma/seed/index.ts",
+    "prisma:seed:upsert": "tsx prisma/seed/index.ts --upsert",
     "clean": "rm -rf dist",
     "postinstall": "prisma generate",
     "db:push": "prisma db push --force-reset"
@@ -22,9 +23,10 @@
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
     "@apollo/server": "^4.12.0",
-    "@pothos/core": "^4.6.0",
-    "@pothos/plugin-prisma": "^4.5.0",
+    "@pothos/core": "^4.6.1",
+    "@pothos/plugin-prisma": "^4.7.0",
     "@pothos/plugin-relay": "^4.4.1",
+    "@pothos/plugin-simple-objects": "^4.1.1",
     "@prisma/client": "^6.6.0",
     "@types/xlsx": "^0.0.36",
     "axios": "^1.8.4",

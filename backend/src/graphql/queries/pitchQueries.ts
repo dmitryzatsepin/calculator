@@ -30,9 +30,14 @@ builder.queryFields((t) => ({
           code: t.arg.string({ required: true, description: 'Уникальный код шага (например, P3.91)' })
       },
       resolve: async (query, _parent, args, ctx) => {
+        const codeArg = args.code;
+        if (typeof codeArg !== 'string') {
+             console.error("Invalid code argument type received:", typeof codeArg);
+             throw new Error("Invalid argument: code must be a string.");
+        }
           return ctx.prisma.pitch.findUnique({
               ...query,
-              where: { code: args.code }
+              where: { code: codeArg }
           });
       }
   }),
@@ -53,7 +58,7 @@ builder.queryFields((t) => ({
             where: {
                 module: {
                     active: onlyActive ?? undefined,
-                    locations: { some: { locationCode: locationCode } }
+                    locations: { some: { locationCode: locationCode as string} }
                 }
             },
             select: { pitchCode: true },

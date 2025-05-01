@@ -3,7 +3,7 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { getDataFromSheet, safeBoolean, safeInt, safeDecimal } from './utils';
 import { entityConfigs, IdMaps } from './config';
-import type { SeedMode } from './index'; // Импортируем тип режима
+import type { SeedMode } from './index';
 
 /**
  * Заполняет основные таблицы сущностей (Cabinet, Module, Item).
@@ -17,7 +17,7 @@ import type { SeedMode } from './index'; // Импортируем тип реж
 export async function seedEntities(
     prisma: PrismaClient,
     workbook: XLSX.WorkBook,
-    idMaps: IdMaps, // Принимаем и МОДИФИЦИРУЕМ карты
+    idMaps: IdMaps,
     mode: SeedMode
 ): Promise<void> {
     console.log('\n--- Начало заполнения основных сущностей (Cabinet, Module, Item) ---');
@@ -37,10 +37,10 @@ export async function seedEntities(
              continue;
         }
 
-        const processedKeysLower = new Set<string>(); // Для дубликатов в Excel (lowercase)
+        const processedKeysLower = new Set<string>();
         let upsertedCount = 0;
         let skippedCount = 0;
-        const upsertPromises: Promise<any>[] = []; // Массив для промисов upsert
+        const upsertPromises: Promise<any>[] = [];
 
         for (const row of sheetData) {
             const codeRaw = row[config.codeField.excelCol] ? String(row[config.codeField.excelCol]).trim() : null;
@@ -95,7 +95,7 @@ export async function seedEntities(
                          : (valueToUse !== null && valueToUse !== undefined ? String(valueToUse).trim() : null);
                      if (prismaValue !== null || field.defaultValue !== undefined) {
                          createData[field.prismaField] = prismaValue;
-                         updateData[field.prismaField] = prismaValue; // Обновляем и другие поля
+                         updateData[field.prismaField] = prismaValue; // 
                      }
                  }
             }
@@ -103,20 +103,20 @@ export async function seedEntities(
             // Выполняем Upsert
             upsertPromises.push(
                 model.upsert({
-                    where: { [config.codeField.prismaField]: codeRaw }, // Ищем по уникальному коду
+                    where: { [config.codeField.prismaField]: codeRaw },
                     create: createData,
                     update: updateData,
                 }).then((result: any) => {
-                    idMap.set(codeLower, result.id); // Сразу заполняем карту ID
+                    idMap.set(codeLower, result.id);
                     upsertedCount++;
                 }).catch((e: any) => {
                      console.error(`[${config.modelName} Upsert Error] Ошибка при обработке кода '${codeRaw}'. Данные Create:`, createData, "Update:", updateData, "Ошибка:", e);
                      skippedCount++;
-                     processedKeysLower.delete(codeLower); // Удаляем из обработанных при ошибке
+                     processedKeysLower.delete(codeLower); 
                 })
             );
 
-        } // конец цикла по строкам
+        }
 
         // Ожидаем завершения всех upsert операций для данной таблицы
         await Promise.all(upsertPromises);
@@ -129,7 +129,7 @@ export async function seedEntities(
         console.log(`    - Карта ID '${modelMapKey}' содержит ${idMap.size} записей.`);
 
 
-    } // конец цикла по конфигурациям
+    }
 
     const endTime = Date.now();
     console.log(`✅ Заполнение основных сущностей завершено за ${(endTime - startTime) / 1000} сек.`);

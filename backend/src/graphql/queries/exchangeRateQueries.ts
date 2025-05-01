@@ -1,15 +1,15 @@
 // src/graphql/queries/exchangeRateQueries.ts
 import { builder } from '../builder';
 import axios from 'axios';
-import { XMLParser } from 'fast-xml-parser'; // Используем XMLParser
-import dayjs from 'dayjs'; // Используем dayjs для удобной работы с датами
-import customParseFormat from 'dayjs/plugin/customParseFormat'; // Плагин для парсинга формата
+import { XMLParser } from 'fast-xml-parser';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
-dayjs.extend(customParseFormat); // Расширяем dayjs
+dayjs.extend(customParseFormat);
 
 const CBRF_URL = 'http://www.cbr.ru/scripts/XML_daily.asp';
 const USD_CURRENCY_ID = 'R01235'; // ID доллара США в API ЦБ РФ
-const MAX_LOOKBACK_DAYS = 7; // Максимум дней назад для поиска курса
+const MAX_LOOKBACK_DAYS = 7;
 
 // --- Функция для получения и парсинга курса ---
 async function fetchRateForDate(date: dayjs.Dayjs): Promise<number | null> {
@@ -19,17 +19,15 @@ async function fetchRateForDate(date: dayjs.Dayjs): Promise<number | null> {
 
   try {
     const response = await axios.get(url, {
-        // Добавляем таймаут и обработку ошибок
-        timeout: 5000, // 5 секунд таймаут
-        validateStatus: (status) => status >= 200 && status < 300, // Считаем успехом только 2xx
+        timeout: 5000,
+        validateStatus: (status) => status >= 200 && status < 300,
      });
 
     // Парсим XML
     const parser = new XMLParser({
-      ignoreAttributes: false, // Нам нужны атрибуты (ID валюты)
-      attributeNamePrefix: "@_", // Префикс для атрибутов
-      parseAttributeValue: true, // Пытаться парсить значения атрибутов
-      //parseNodeValue: true,     // Пытаться парсить значения тегов
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      parseAttributeValue: true,
     });
     const parsedData = parser.parse(response.data);
 
@@ -56,34 +54,25 @@ async function fetchRateForDate(date: dayjs.Dayjs): Promise<number | null> {
         console.log(`[fetchRateForDate] USD rate not found for date ${dateString}`);
     }
   } catch (error: any) {
-    // Логируем ошибки HTTP-запроса или парсинга
     console.error(`[fetchRateForDate] Error fetching or parsing rate for date ${dateString}:`, error.message || error);
   }
 
-  return null; // Возвращаем null, если курс не найден или произошла ошибка
+  return null;
 }
-
 
 // --- Определяем GraphQL запрос ---
 builder.queryFields((t) => ({
   getCurrentDollarRate: t.field({
-    type: 'Float', // Возвращаем число с плавающей точкой
-    nullable: true, // Может вернуть null, если не удалось получить курс
-    description: 'Получить текущий курс доллара США от ЦБ РФ (с поиском предыдущего рабочего дня).',
+    type: 'Float',
+    nullable: true,
+    description: 'Получить текущий курс доллара США от ЦБ РФ',
     resolve: async () => {
-      let currentDate = dayjs(); // Начинаем с сегодняшнего дня
+      let currentDate = dayjs();
       for (let i = 0; i < MAX_LOOKBACK_DAYS; i++) {
         const rate = await fetchRateForDate(currentDate);
-        if (rate !== null) {
-          return rate; // Возвращаем первый найденный курс
-        }
-        // Если курс не найден, пробуем предыдущий день
+        if (rate !== null) return rate;
         currentDate = currentDate.subtract(1, 'day');
-        console.log(`[getCurrentDollarRate] Rate not found, trying previous day: ${currentDate.format('DD/MM/YYYY')}`);
       }
-
-      // Если за MAX_LOOKBACK_DAYS курс не найден
-      console.error(`[getCurrentDollarRate] Could not find USD rate within the last ${MAX_LOOKBACK_DAYS} days.`);
       return null;
     }
   })

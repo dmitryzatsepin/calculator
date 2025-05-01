@@ -7,8 +7,8 @@ const ModuleFilterInput = builder.inputType('ModuleFilterInput', {
   fields: (t) => ({
       locationCode: t.string({ required: false }),
       pitchCode:    t.string({ required: false }),
-      brightnessCode: t.string({ required: false }), // Оставляем, если нужно будет фильтровать
-      refreshRateCode: t.string({ required: false }), // Оставляем, если нужно будет фильтровать
+      brightnessCode: t.string({ required: false }),
+      refreshRateCode: t.string({ required: false }),
   }),
 });
 
@@ -19,60 +19,62 @@ builder.queryFields((t) => ({
     type: ['Module'],
     description: 'Получить отфильтрованный список модулей для выбора.',
     args: {
-        // Используем Input тип для фильтров
         filters: t.arg({ type: ModuleFilterInput, required: false }),
         onlyActive: t.arg.boolean({ defaultValue: true, required: false }),
     },
     resolve: async (query, _parent, args, ctx) => {
-        const { filters, onlyActive } = args;
+        const filters = args.filters as {
+            locationCode?: string | null;
+            pitchCode?: string | null;
+            brightnessCode?: string | null;
+            refreshRateCode?: string | null;
+        } | null | undefined;
+        const onlyActive = args.onlyActive;
         console.log('[moduleOptions] Fetching with filters:', JSON.stringify(filters));
 
         const where: Prisma.ModuleWhereInput = {
             active: onlyActive ?? undefined,
         };
 
-        // Применяем фильтры
+        // Добавляем фильтры по связям, если они переданы
         if (filters) {
-            if (filters.locationCode) {
-                where.locations = { some: { locationCode: filters.locationCode } };
-            }
-            if (filters.pitchCode) {
-                where.pitches = { some: { pitchCode: filters.pitchCode } };
-            }
-            // Добавляем фильтры по яркости и частоте, если они переданы
-            if (filters.brightnessCode) {
-                where.brightnesses = { some: { brightnessCode: filters.brightnessCode } };
-            }
-            if (filters.refreshRateCode) {
-                where.refreshRates = { some: { refreshRateCode: filters.refreshRateCode } };
-            }
+          if (typeof filters.locationCode === 'string' && filters.locationCode) {
+              where.locations = { some: { locationCode: filters.locationCode } };
+          }
+          if (typeof filters.pitchCode === 'string' && filters.pitchCode) {
+              where.pitches = { some: { pitchCode: filters.pitchCode } };
+          }
+          if (typeof filters.brightnessCode === 'string' && filters.brightnessCode) {
+              where.brightnesses = { some: { brightnessCode: filters.brightnessCode } };
+          }
+          if (typeof filters.refreshRateCode === 'string' && filters.refreshRateCode) {
+              where.refreshRates = { some: { refreshRateCode: filters.refreshRateCode } };
+          }
         }
+        
 
         console.log(`[moduleOptions] Final where clause:`, JSON.stringify(where));
         return ctx.prisma.module.findMany({
-            ...query, // Важно для code, sku, name и для связей!
+            ...query,
             where,
             orderBy: [ { sku: 'asc' }, { name: 'asc' }, { code: 'asc' } ]
         });
     }
-  }), // --- Конец запроса moduleOptions ---
+  }),
 
-  // --- Получить Module по коду (оставляем) ---
+  // --- Получить Module по коду ---
   moduleByCode: t.prismaField({
     type: 'Module',
     nullable: true,
     args: {
       code: t.arg.string({ required: true }),
     },
-    resolve: (query, _parent, args, ctx) =>
-      ctx.prisma.module.findUnique({
-        ...query,
-        where: { code: args.code },
-      }),
+    resolve: (query, _parent, args, ctx) => {
+        const codeArg = args.code as string;
+        return ctx.prisma.module.findUnique({
+            ...query,
+            where: { code: codeArg },
+        });
+    }
   }),
-
-  // Старый запрос `modules` (connection) можно оставить, если он нужен для других целей,
-  // либо удалить, если `moduleOptions` его полностью заменяет.
-  // modules: t.prismaConnection({ /* ... */ }),
-
 }));

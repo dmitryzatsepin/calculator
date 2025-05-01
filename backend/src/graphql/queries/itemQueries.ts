@@ -23,10 +23,16 @@ builder.queryFields((t) => ({
     args: {
       code: t.arg.string({ required: true }),
     },
-    resolve: (query, parent, args, ctx) =>
-      ctx.prisma.item.findUnique({
+    resolve: async (query, _parent, args, ctx) => {
+      const codeArg = args.code;
+      if (typeof codeArg !== 'string') {
+        console.error("Invalid code argument type received:", typeof codeArg);
+        throw new Error("Invalid argument: code must be a string.");
+      }
+      return ctx.prisma.item.findUnique({
         ...query,
-        where: { code: args.code },
-      }),
+        where: { code: codeArg },
+      });
+    },
   }),
 }));

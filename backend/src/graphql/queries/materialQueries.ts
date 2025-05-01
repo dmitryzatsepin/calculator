@@ -38,10 +38,15 @@ builder.queryFields((t) => ({
     },
     resolve: async (query, _parent, args, ctx, _info) => {
         console.log(`[materialByCode] Searching for code: ${args.code}`);
+        const codeArg = args.code;
+        if (typeof codeArg !== 'string') {
+             console.error("Invalid code argument type received:", typeof codeArg);
+             throw new Error("Invalid argument: code must be a string.");
+        }
         return ctx.prisma.material.findUnique({
             ...query,
             where: {
-                code: args.code
+                code: codeArg 
             }
         });
     }

@@ -28,11 +28,11 @@ builder.queryFields((t) => ({
          }
       });
     }
-  }), // --- Конец запроса refreshRates ---
+  }),
 
   // --- НОВЫЙ ЗАПРОС: Получить опции RefreshRate по Location и Pitch ---
   getFilteredRefreshRateOptions: t.prismaField({
-    type: ['RefreshRate'], // Возвращает массив RefreshRate
+    type: ['RefreshRate'],
     description: 'Получить доступные значения частоты обновления для модулей, подходящих под расположение и шаг пикселя.',
     args: {
         locationCode: t.arg.string({ required: true, description: 'Код расположения (Location)' }),
@@ -42,21 +42,18 @@ builder.queryFields((t) => ({
     resolve: async (query, _parent, args, ctx) => {
         const { locationCode, pitchCode, onlyActive } = args;
         console.log(`[getFilteredRefreshRateOptions] Fetching refresh rates for location: ${locationCode}, pitch: ${pitchCode}`);
-
-        // 1. Найти УНИКАЛЬНЫЕ коды частот обновления, связанные с модулями,
-        //    которые подходят под локацию И питч И активны (если onlyActive=true)
+        
         const refreshRateRelations = await ctx.prisma.moduleRefreshRate.findMany({
             where: {
-                module: { // Ищем модули...
+                module: {
                     active: onlyActive ?? undefined,
-                    locations: { some: { locationCode: locationCode } }, // ...с нужной локацией
-                    pitches: { some: { pitchCode: pitchCode } } // ...и нужным питчем
+                    locations: { some: { locationCode: locationCode as string } },
+                    pitches: { some: { pitchCode: pitchCode as string } }
                 },
-                // Условие на активность самой частоты обновления
                 refreshRate: { active: onlyActive ?? undefined }
             },
             select: { refreshRateCode: true },
-            distinct: ['refreshRateCode'] // Уникальные коды
+            distinct: ['refreshRateCode']
         });
 
         const availableRefreshRateCodes = refreshRateRelations.map(rr => rr.refreshRateCode);
@@ -72,11 +69,9 @@ builder.queryFields((t) => ({
             ...query,
             where: {
                 code: { in: availableRefreshRateCodes },
-                // 'active' уже учтен выше
             },
-            orderBy: { value: 'asc' } // Сортируем по значению
+            orderBy: { value: 'asc' }
         });
     }
-  }) // --- Конец getFilteredRefreshRateOptions ---
-
-})); // --- Конец builder.queryFields ---
+  })
+}));

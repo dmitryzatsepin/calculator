@@ -1,6 +1,6 @@
 // src/graphql/types/Module.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Импорт для Decimal и WhereInput
+import { Prisma } from '@prisma/client';
 
  // Определяем тип ModulePrice
 const ModulePriceRelay = builder.prismaNode('ModulePrice', {
@@ -24,7 +24,7 @@ builder.prismaObject('ModuleItemComponent', {
         quantity: t.exposeInt('quantity'),
         item: t.prismaField({
             type: 'Item',
-            resolve: (query, parent, _args, ctx) => // _args обычно не нужен здесь
+            resolve: (query, parent, _args, ctx) =>
                 ctx.prisma.item.findUniqueOrThrow({ ...query, where: { code: parent.itemCode } })
         }),
     })
@@ -35,8 +35,6 @@ builder.prismaObject('ModuleBrightness', {
     fields: (t) => ({
       moduleCode: t.exposeString('moduleCode'),
       brightnessCode: t.exposeString('brightnessCode'),
-      // Можно добавить связь на Brightness, если нужно получить его value
-      // brightness: t.relation('brightness')
     })
 });
 
@@ -45,8 +43,6 @@ builder.prismaObject('ModuleRefreshRate', {
     fields: (t) => ({
       moduleCode: t.exposeString('moduleCode'),
       refreshRateCode: t.exposeString('refreshRateCode'),
-      // Можно добавить связь на RefreshRate, если нужно получить его value
-      // refreshRate: t.relation('refreshRate')
     })
 });
 
@@ -93,11 +89,11 @@ builder.prismaNode('Module', {
 
     // --- ИЗМЕНЕНО: Связь с Частотой через промежуточную модель ---
      refreshRates: t.prismaField({
-         type: ['ModuleRefreshRate'], // <-- ИЗМЕНЕН ТИП
+         type: ['ModuleRefreshRate'],
          description: "Связи модуля с доступными значениями частоты обновления.",
          resolve: async (query, parent, _args, ctx) => {
             return ctx.prisma.moduleRefreshRate.findMany({
-                ...query, // Pothos/GraphQL запросят только нужные поля (refreshRateCode)
+                ...query,
                 where: { moduleCode: parent.code }
             });
         }
@@ -109,7 +105,7 @@ builder.prismaNode('Module', {
          description: "Связи модуля с доступными значениями яркости.",
          resolve: async (query, parent, _args, ctx) => {
             return ctx.prisma.moduleBrightness.findMany({
-                ...query, // Pothos/GraphQL запросят только нужные поля (brightnessCode)
+                ...query,
                 where: { moduleCode: parent.code }
             });
         }
@@ -155,8 +151,8 @@ builder.prismaNode('Module', {
     // Компоненты модуля (ModuleItemComponent)
      items: t.prismaConnection({
         type: 'ModuleItemComponent',
-        cursor: 'moduleCode_itemCode', // Используем композитный ключ как курсор
-        resolve: (query, parent, _args, ctx) => // _args для пагинации (first, after, etc.)
+        cursor: 'moduleCode_itemCode',
+        resolve: (query, parent, _args, ctx) =>
             ctx.prisma.moduleItemComponent.findMany({ ...query, where: { moduleCode: parent.code } })
     }),
 
