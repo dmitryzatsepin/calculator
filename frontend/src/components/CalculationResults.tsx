@@ -1,7 +1,7 @@
 // src/components/CalculationResults.tsx
 import React, { useState } from 'react';
 import { Table, Text, Title, Paper, List, ThemeIcon, Alert, Group } from '@mantine/core';
-import { IconCalculator, IconAlertCircle, IconBolt, IconDimensions, IconComponents } from '@tabler/icons-react';
+import { IconCalculator, IconAlertCircle, IconBolt, IconDimensions, IconComponents, IconMapPin, IconRulerMeasure } from '@tabler/icons-react';
 import type { TechnicalSpecsResult } from '../services/calculatorService';
 import SendToBitrixButton from './inputs/SendToBitrixButton'; // Импорт кнопки Битрикс
 
@@ -56,21 +56,23 @@ const CalculationResults: React.FC<CalculationResultsProps> = ({ results /*, onC
     // Группируем данные для таблицы
     const dataRows = [
         // --- Основные параметры ---
+        { icon: IconMapPin, label: 'Расположение экрана', value: results.placement },
         { icon: IconDimensions, label: 'Шаг пикселя', value: results.pixelPitch },
-        { icon: IconDimensions, label: 'Разрешение (ШxВ)', value: results.resolution },
+        { icon: IconDimensions, label: 'Разрешение экрана', value: `${results.resolution} пикс.` },
         { icon: IconDimensions, label: 'Всего пикселей', value: formatNumber(results.totalPixels, 0, 'пикс.') },
-        { icon: IconDimensions, label: 'Фактические размеры (ШxВ), м', value: `${formatNumber(results.actualScreenWidthM)} x ${formatNumber(results.actualScreenHeightM)} м` },
-        { icon: IconDimensions, label: 'Площадь экрана, м²', value: formatNumber(results.activeAreaM2, 2, 'м²') },
+        { icon: IconDimensions, label: 'Фактические размеры (ШxВ)', value: `${formatNumber(results.actualScreenWidthM)} x ${formatNumber(results.actualScreenHeightM)} м` },
+        { icon: IconDimensions, label: 'Площадь экрана', value: formatNumber(results.activeAreaM2, 2, 'м²') },
         { icon: IconDimensions, label: 'Яркость', value: results.brightness },
         { icon: IconDimensions, label: 'Частота обновления', value: results.refreshRate },
         { icon: IconDimensions, label: 'Защита IP', value: results.ipProtection },
-        { icon: IconDimensions, label: 'Углы обзора (Г°xВ°)', value: `${results.horizontalViewingAngle}°x${results.verticalViewingAngle}°` },
-        { icon: IconDimensions, label: 'Дистанция просмотра (мин/опт), м', value: `${formatNumber(results.viewingDistanceMinM, 1)} / ${formatNumber(results.viewingDistanceOptimalM, 1)} м` },
+        { icon: IconDimensions, label: 'Углы обзора (Г°xВ°)', value: `${results.horizontalViewingAngle} x ${results.verticalViewingAngle}` },
+        { icon: IconRulerMeasure, label: 'Дистанция просмотра, м', value: formatNumber(results.viewingDistanceBasedOnPitch, 2, 'м') },
+        // { icon: IconDimensions, label: 'Дистанция просмотра (мин/опт)', value: `${formatNumber(results.viewingDistanceMinM, 1)} / ${formatNumber(results.viewingDistanceOptimalM, 1)} м` },
 
         // --- Компоненты (Только если есть кабинеты) ---
         ...(results.cabinetsCountTotal > 0 ? [
             { icon: IconComponents, label: 'Тип кабинета', value: results.material },
-            { icon: IconComponents, label: 'Размер кабинета (ШxВ), мм', value: results.cabinetSize },
+            { icon: IconComponents, label: 'Размер кабинета (ШxВ)', value: results.cabinetSize },
             { icon: IconComponents, label: 'Кабинетов (ШxВ / Всего)', value: `${results.cabinetsCountHorizontal} x ${results.cabinetsCountVertical} / ${results.cabinetsCountTotal} шт.` },
             { icon: IconComponents, label: 'Модулей в кабинете', value: formatNumber(results.modulesPerCabinet, 0, 'шт.') },
         ] : []),

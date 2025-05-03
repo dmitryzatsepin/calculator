@@ -66,9 +66,10 @@ export type TechnicalSpecsResult = {
     resolutionHeightPx: number;      // Разрешение по высоте (пикс)
     resolution: string;              // Разрешение (ШxВ пикс)
     totalPixels: number;             // Общее кол-во пикселей
-    viewingDistanceMinM: number;     // Мин. дистанция просмотра (м)
-    viewingDistanceOptimalM: number; // Опт. дистанция просмотра (м)
-    viewingDistanceMaxM: number;     // Макс. дистанция просмотра (м)
+    //viewingDistanceMinM: number;     // Мин. дистанция просмотра (м)
+    //viewingDistanceOptimalM: number; // Опт. дистанция просмотра (м)
+    //viewingDistanceMaxM: number;     // Макс. дистанция просмотра (м)
+    viewingDistanceBasedOnPitch: number; // Дистанция = значению шага пикселя
     zipComponentList: { name: string; sku: string | null; totalQuantity: number }[]; // Список ЗИП компонентов
 };
 
@@ -100,7 +101,6 @@ export function calculateTechnicalSpecs(
         return null;
     }
 
-    // Код кабинетного типа экрана (уточнить при необходимости)
     const cabinetScreenTypeCode = "cabinet";
     const isCabinetType = selectedScreenTypeCode === cabinetScreenTypeCode;
 
@@ -113,7 +113,6 @@ export function calculateTechnicalSpecs(
          return null;
     }
 
-
     // --- Размеры и количество Модуля ---
     const pixelPitchMm = selectedPitchValue;
     const moduleWidthMm = moduleData.width;
@@ -124,8 +123,6 @@ export function calculateTechnicalSpecs(
     const requestedScreenHeightMm = selectedScreenHeight;
 
     // --- Переменные для результатов расчета ---
-    //let finalCabinetWidth = 0;
-    //let finalCabinetHeight = 0;
     let totalCabinets = 0;
     let cabinetsX = 0;
     let cabinetsY = 0;
@@ -134,75 +131,49 @@ export function calculateTechnicalSpecs(
     let actualScreenHeightMm = 0;
     let totalModules = 0;
 
-
     // --- Логика расчета в зависимости от типа экрана ---
     if (isCabinetType && cabinetData) {
-        // --- КАБИНЕТНЫЙ экран ---
         const cabinetWidthMm = cabinetData.width;
         const cabinetHeightMm = cabinetData.height;
-
-        // Расчет количества кабинетов (простой, без поворота)
         cabinetsX = cabinetWidthMm > 0 ? Math.floor(requestedScreenWidthMm / cabinetWidthMm) : 0;
         cabinetsY = cabinetHeightMm > 0 ? Math.floor(requestedScreenHeightMm / cabinetHeightMm) : 0;
         totalCabinets = cabinetsX * cabinetsY;
-
         if (totalCabinets === 0) {
              console.warn("Расчет: Не помещается ни одного кабинета в заданные размеры.");
-             // Возвращаем null, чтобы сигнализировать об ошибке или невозможности расчета
              return null;
         }
-
-        // Фактические размеры экрана на основе целого числа кабинетов
         actualScreenWidthMm = cabinetsX * cabinetWidthMm;
         actualScreenHeightMm = cabinetsY * cabinetHeightMm;
-        //finalCabinetWidth = cabinetWidthMm;
-        //finalCabinetHeight = cabinetHeightMm;
-
-        // Расчет модулей в одном кабинете
-        // Используем округление, предполагая точные размеры без зазоров
         const modulesPerCabX = moduleWidthMm > 0 ? Math.round(cabinetWidthMm / moduleWidthMm) : 0;
         const modulesPerCabY = moduleHeightMm > 0 ? Math.round(cabinetHeightMm / moduleHeightMm) : 0;
         modulesPerCabinet = modulesPerCabX * modulesPerCabY;
-
-        // Общее количество модулей
         totalModules = totalCabinets * modulesPerCabinet;
-
     } else if (!isCabinetType) {
-         // --- БЕСКАБИНЕТНЫЙ экран (например, гибкий, из модулей напрямую) ---
-         // Расчет количества модулей
          const modulesX = moduleWidthMm > 0 ? Math.floor(requestedScreenWidthMm / moduleWidthMm) : 0;
          const modulesY = moduleHeightMm > 0 ? Math.floor(requestedScreenHeightMm / moduleHeightMm) : 0;
          totalModules = modulesX * modulesY;
-
          if (totalModules === 0) {
             console.warn("Расчет: Не помещается ни одного модуля в заданные размеры.");
             return null;
          }
-
-         // Фактические размеры экрана на основе целого числа модулей
          actualScreenWidthMm = modulesX * moduleWidthMm;
          actualScreenHeightMm = modulesY * moduleHeightMm;
-
-         // Кабинетов нет
          totalCabinets = 0;
          cabinetsX = 0;
          cabinetsY = 0;
-         modulesPerCabinet = 0; // Не применимо
-         //finalCabinetWidth = 0;
-         //finalCabinetHeight = 0;
+         modulesPerCabinet = 0;
     } else {
-         // Случай: Кабинетный тип выбран, но cabinetData невалиден (эта проверка уже была выше)
-         // Этот блок не должен выполниться, но для полноты:
          console.error("Ошибка расчета: Непредвиденное состояние данных кабинета.");
          return null;
     }
 
-    // Проверка, что рассчитано хотя бы что-то
-    if (totalModules === 0 && totalCabinets === 0) {
+    if (totalModules === 0 && totalCabinets === 0 && isCabinetType) { // Добавил проверку для кабинетного типа, т.к. totalCabinets может быть 0, а totalModules - нет
         console.error("Ошибка расчета: Не удалось рассчитать ни модули, ни кабинеты.");
         return null;
+    } else if (totalModules === 0 && !isCabinetType) { // Для бескабинетного проверяем только модули
+         console.error("Ошибка расчета: Не удалось рассчитать модули.");
+         return null;
     }
-
 
     // --- Расчет остальных характеристик ---
 
@@ -211,67 +182,61 @@ export function calculateTechnicalSpecs(
     const actualScreenWidthM = actualScreenWidthMm / 1000;
     const actualScreenHeightM = actualScreenHeightMm / 1000;
 
-
-    // Разрешение (на основе пикселей модуля)
-    // Предполагаем, что пиксели расположены равномерно
+    // Разрешение
     const modulePixelsX = moduleWidthMm > 0 ? Math.round(moduleWidthMm / pixelPitchMm) : 0;
     const modulePixelsY = moduleHeightMm > 0 ? Math.round(moduleHeightMm / pixelPitchMm) : 0;
-    // Общее количество модулей по осям
     const totalModulesX = moduleWidthMm > 0 ? Math.round(actualScreenWidthMm / moduleWidthMm) : 0;
     const totalModulesY = moduleHeightMm > 0 ? Math.round(actualScreenHeightMm / moduleHeightMm) : 0;
-
     const resolutionWidthPx = totalModulesX * modulePixelsX;
     const resolutionHeightPx = totalModulesY * modulePixelsY;
     const resolution = `${resolutionWidthPx} x ${resolutionHeightPx}`;
     const totalPixels = resolutionWidthPx * resolutionHeightPx;
 
+    // <<< НАЧАЛО ИСПРАВЛЕННОГО БЛОКА РАСЧЕТА МОЩНОСТИ >>>
+    // Расчет мощности
+    const avgBasePowerPerModuleIndoor = 25; // Ваша базовая цифра для средней мощности (Интерьер)
+    const avgBasePowerPerModuleOutdoor = 45; // Ваша базовая цифра для средней мощности (Уличный)
+    const powerFactor = 0.87; // Ваш коэффициент
+    const peakFactor = 2.5;  // Ваш коэффициент для пиковой мощности
 
-    // Расчет мощности (используем данные из модуля, если есть, иначе - дефолты)
-    // Значения по умолчанию в Ваттах на модуль
-    const defaultAvgPowerIndoor = 20;
-    const defaultAvgPowerOutdoor = 30;
-    const defaultMaxPowerIndoor = 50;
-    const defaultMaxPowerOutdoor = 75;
     const isOutdoor = selectedPlacement?.toLowerCase().includes('уличн') || selectedPlacement?.toLowerCase().includes('outdoor');
 
-    const avgPowerPerModule = moduleData.powerConsumptionAvg ?? (isOutdoor ? defaultAvgPowerOutdoor : defaultAvgPowerIndoor);
-    const maxPowerPerModule = moduleData.powerConsumptionMax ?? (isOutdoor ? defaultMaxPowerOutdoor : defaultMaxPowerIndoor);
+    // Определяем базовую среднюю мощность на модуль
+    const avgBasePowerPerModule = isOutdoor ? avgBasePowerPerModuleOutdoor : avgBasePowerPerModuleIndoor;
 
-    // Суммарная мощность в Ваттах
-    const averagePowerConsumptionW = totalModules * avgPowerPerModule;
-    const maxPowerConsumptionW = totalModules * maxPowerPerModule;
+    // Рассчитываем СРЕДНЮЮ суммарную мощность в Ваттах с учетом коэффициента
+    const averagePowerConsumptionW = (totalModules * avgBasePowerPerModule) / powerFactor;
 
+    // Рассчитываем МАКСИМАЛЬНУЮ мощность на основе средней
+    const maxPowerConsumptionW = averagePowerConsumptionW * peakFactor;
+    // <<< КОНЕЦ ИСПРАВЛЕННОГО БЛОКА РАСЧЕТА МОЩНОСТИ >>>
 
-    // Дистанция обзора (Примерные формулы, в метрах)
-    const viewingDistanceMinM = pixelPitchMm / 1000;     // Мин. = шаг в метрах
-    const viewingDistanceOptimalM = pixelPitchMm * 1.5 / 1000; // Опт. ~1.5 шага в метрах
-    const viewingDistanceMaxM = pixelPitchMm * 3 / 1000;   // Макс. ~3 шага в метрах
+    // Дистанция обзора
+    //const viewingDistanceMinM = pixelPitchMm / 1000;
+    //const viewingDistanceOptimalM = pixelPitchMm * 1.5 / 1000;
+    //const viewingDistanceMaxM = pixelPitchMm * 3 / 1000;
 
-
-    // ЗИП комплект (5% от количества каждого компонента модуля)
+    // ЗИП комплект
     const zipComponentList = moduleData.components.map(comp => {
         const totalRequired = totalModules * comp.quantity;
-        const zipQuantity = Math.ceil(totalRequired * 0.05); // 5% ЗИП, округление вверх
+        const zipQuantity = Math.ceil(totalRequired * 0.05);
         return {
             name: comp.itemName,
             sku: comp.itemSku ?? null,
             totalQuantity: zipQuantity,
         };
-    }).filter(item => item.totalQuantity > 0); // Убираем компоненты с нулевым количеством в ЗИП
+    }).filter(item => item.totalQuantity > 0);
 
-
-    // Углы обзора (из данных или дефолт)
-    // TODO: Получать углы обзора из moduleData, если они там будут
-    const horizontalViewingAngle = '140°'; // Пока хардкод
-    const verticalViewingAngle = '140°';   // Пока хардкод
-
+    // Углы обзора
+    const horizontalViewingAngle = '140°';
+    const verticalViewingAngle = '140°';
 
     // --- Сборка результата ---
     return {
         pixelPitch: `${pixelPitchMm} мм (P${pixelPitchMm})`,
         placement: selectedPlacement || '-',
         material: isCabinetType ? (selectedMaterialName || '-') : 'Без кабинета',
-        cabinetSize: isCabinetType && cabinetData ? `${cabinetData.width}x${cabinetData.height} мм` : 'Без кабинета',
+        cabinetSize: isCabinetType && cabinetData ? `${cabinetData.width} x ${cabinetData.height} мм` : 'Без кабинета', // Добавлены пробелы
         cabinetsCountHorizontal: cabinetsX,
         cabinetsCountVertical: cabinetsY,
         cabinetsCountTotal: totalCabinets,
@@ -287,16 +252,16 @@ export function calculateTechnicalSpecs(
         refreshRate: selectedRefreshRateLabel || '-',
         horizontalViewingAngle,
         verticalViewingAngle,
-        // Мощность переводим в кВт для результата
-        averagePowerConsumption: Number((averagePowerConsumptionW / 1000).toFixed(2)),
-        maxPowerConsumption: Number((maxPowerConsumptionW / 1000).toFixed(2)),
+        averagePowerConsumption: Number((averagePowerConsumptionW / 1000).toFixed(2)), // Перевод в кВт и округление
+        maxPowerConsumption: Number((maxPowerConsumptionW / 1000).toFixed(2)), // Перевод в кВт и округление
         resolutionWidthPx,
         resolutionHeightPx,
         resolution,
         totalPixels,
-        viewingDistanceMinM: Number(viewingDistanceMinM.toFixed(1)),
-        viewingDistanceOptimalM: Number(viewingDistanceOptimalM.toFixed(1)),
-        viewingDistanceMaxM: Number(viewingDistanceMaxM.toFixed(1)),
+        //viewingDistanceMinM: Number(viewingDistanceMinM.toFixed(1)), // Округление
+        viewingDistanceBasedOnPitch: selectedPitchValue,
+        //viewingDistanceOptimalM: Number(viewingDistanceOptimalM.toFixed(1)), // Округление
+        //viewingDistanceMaxM: Number(viewingDistanceMaxM.toFixed(1)), // Округление
         zipComponentList,
     };
 }
