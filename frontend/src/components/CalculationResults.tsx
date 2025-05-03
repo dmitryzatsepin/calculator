@@ -1,148 +1,145 @@
 // src/components/CalculationResults.tsx
-import React from 'react';
-import { Table, Text, Title, Paper, SimpleGrid, List, ThemeIcon, Alert } from '@mantine/core';
-import { IconCalculator, IconAlertCircle } from '@tabler/icons-react';
-import type { TechnicalSpecsResult } from '../services/calculatorService'; // Убедитесь, что путь верный
+import React, { useState } from 'react';
+import { Table, Text, Title, Paper, List, ThemeIcon, Alert, Group } from '@mantine/core';
+import { IconCalculator, IconAlertCircle, IconBolt, IconDimensions, IconComponents } from '@tabler/icons-react';
+import type { TechnicalSpecsResult } from '../services/calculatorService';
+import SendToBitrixButton from './inputs/SendToBitrixButton'; // Импорт кнопки Битрикс
 
 interface CalculationResultsProps {
-    results: TechnicalSpecsResult | null; // Принимает результат или null
+    results: TechnicalSpecsResult | null;
+    // onClose?: () => void; // Раскомментируйте, если нужна функция закрытия
 }
 
-const CalculationResults: React.FC<CalculationResultsProps> = ({ results }) => {
-    // Если результатов нет (например, ошибка расчета)
+// Улучшенная функция форматирования
+const formatNumber = (num: number | undefined | null, fractionDigits = 2, unit = '') => {
+    if (num === undefined || num === null || isNaN(num)) return '-';
+    const formatted = num.toLocaleString('ru-RU', {
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits
+    });
+    return unit ? `${formatted} ${unit}` : formatted;
+};
+
+const CalculationResults: React.FC<CalculationResultsProps> = ({ results /*, onClose */ }) => {
+     // Состояние для индикатора загрузки отправки
+     const [isSending, setIsSending] = useState(false);
+
     if (!results) {
         return (
-            <Alert icon={<IconAlertCircle size="1rem" />} title="Ошибка" color="red" mt="md">
-                Не удалось выполнить расчет. Проверьте введенные данные или обратитесь к администратору.
+            <Alert icon={<IconAlertCircle size="1rem" />} title="Ошибка расчета" color="red" mt="md">
+                Не удалось получить результаты. Проверьте входные параметры.
             </Alert>
         );
     }
 
-    // Функция для форматирования чисел
-    const formatNumber = (num: number | undefined | null, fractionDigits = 2) => {
-        if (num === undefined || num === null) return '-';
-        return num.toLocaleString('ru-RU', { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits });
+    // Логика отправки в Битрикс
+    const handleSendToBitrix = async () => {
+        if (!results) return;
+        setIsSending(true);
+        console.log("Отправка в Битрикс24:", results);
+        // TODO: Реализовать логику отправки данных results в Битрикс24
+        try {
+            // await sendDataToBitrixAPI(results); // Пример вызова API
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Имитация задержки
+            console.log("Данные 'отправлены'");
+            // onClose?.(); // Закрыть Drawer после успешной отправки (если передан onClose)
+             // Можно показать уведомление об успехе
+        } catch (error) {
+            console.error("Ошибка отправки в Битрикс:", error);
+             // Можно показать уведомление об ошибке
+        } finally {
+            setIsSending(false);
+        }
     };
 
+
+    // Группируем данные для таблицы
+    const dataRows = [
+        // --- Основные параметры ---
+        { icon: IconDimensions, label: 'Шаг пикселя', value: results.pixelPitch },
+        { icon: IconDimensions, label: 'Разрешение (ШxВ)', value: results.resolution },
+        { icon: IconDimensions, label: 'Всего пикселей', value: formatNumber(results.totalPixels, 0, 'пикс.') },
+        { icon: IconDimensions, label: 'Фактические размеры (ШxВ), м', value: `${formatNumber(results.actualScreenWidthM)} x ${formatNumber(results.actualScreenHeightM)} м` },
+        { icon: IconDimensions, label: 'Площадь экрана, м²', value: formatNumber(results.activeAreaM2, 2, 'м²') },
+        { icon: IconDimensions, label: 'Яркость', value: results.brightness },
+        { icon: IconDimensions, label: 'Частота обновления', value: results.refreshRate },
+        { icon: IconDimensions, label: 'Защита IP', value: results.ipProtection },
+        { icon: IconDimensions, label: 'Углы обзора (Г°xВ°)', value: `${results.horizontalViewingAngle}°x${results.verticalViewingAngle}°` },
+        { icon: IconDimensions, label: 'Дистанция просмотра (мин/опт), м', value: `${formatNumber(results.viewingDistanceMinM, 1)} / ${formatNumber(results.viewingDistanceOptimalM, 1)} м` },
+
+        // --- Компоненты (Только если есть кабинеты) ---
+        ...(results.cabinetsCountTotal > 0 ? [
+            { icon: IconComponents, label: 'Тип кабинета', value: results.material },
+            { icon: IconComponents, label: 'Размер кабинета (ШxВ), мм', value: results.cabinetSize },
+            { icon: IconComponents, label: 'Кабинетов (ШxВ / Всего)', value: `${results.cabinetsCountHorizontal} x ${results.cabinetsCountVertical} / ${results.cabinetsCountTotal} шт.` },
+            { icon: IconComponents, label: 'Модулей в кабинете', value: formatNumber(results.modulesPerCabinet, 0, 'шт.') },
+        ] : []),
+        // --- Общее кол-во модулей ---
+        { icon: IconComponents, label: 'Модулей всего', value: formatNumber(results.modulesCountTotal, 0, 'шт.') },
+
+        // --- Энергопотребление ---
+        { icon: IconBolt, label: 'Среднее потребление, кВт', value: formatNumber(results.averagePowerConsumption, 2, 'кВт') },
+        { icon: IconBolt, label: 'Макс. потребление, кВт', value: formatNumber(results.maxPowerConsumption, 2, 'кВт') },
+    ];
+
     return (
-        <Paper shadow="sm" p="lg" mt="xl" withBorder>
-            <Title order={3} mb="lg">Результаты расчета</Title>
+        <Paper shadow="sm" p="lg" mt="md" withBorder>
+            <Table highlightOnHover verticalSpacing="sm" withTableBorder withColumnBorders>
+                <Table.Tbody>
+                    {dataRows.map((row, index) => (
+                       <Table.Tr key={index}>
+                            <Table.Td width="50%">
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <ThemeIcon variant="light" size="sm" mr="xs">
+                                        <row.icon style={{ width: '70%', height: '70%' }} />
+                                    </ThemeIcon>
+                                    <Text fw={500} size="sm">{row.label}:</Text>
+                                </div>
+                            </Table.Td>
+                            <Table.Td width="50%">
+                                <Text size="sm">{row.value}</Text>
+                            </Table.Td>
+                        </Table.Tr>
+                    ))}
+                </Table.Tbody>
+            </Table>
 
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
-                {/* Колонка 1: Основные параметры */}
-                <div>
-                    <Title order={5} mb="xs">Параметры экрана</Title>
-                    <Table highlightOnHover verticalSpacing="xs">
-                        <Table.Tbody>
-                            <Table.Tr>
-                                <Table.Td><Text fw={500}>Шаг пикселя:</Text></Table.Td>
-                                <Table.Td>{results.pixelPitch || '-'}</Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Td><Text fw={500}>Разрешение (ШxВ):</Text></Table.Td>
-                                <Table.Td>{results.resolution || '-'}</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Всего пикселей:</Text></Table.Td>
-                                <Table.Td>{formatNumber(results.totalPixels, 0) || '-'}</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Фактические размеры (ШxВ):</Text></Table.Td>
-                                <Table.Td>{formatNumber(results.actualScreenWidthM)} x {formatNumber(results.actualScreenHeightM)} м</Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Td><Text fw={500}>Площадь экрана:</Text></Table.Td>
-                                <Table.Td>{formatNumber(results.activeAreaM2)} м²</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Яркость:</Text></Table.Td>
-                                <Table.Td>{results.brightness || '-'}</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Частота обновления:</Text></Table.Td>
-                                <Table.Td>{results.refreshRate || '-'}</Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Td><Text fw={500}>Защита IP:</Text></Table.Td>
-                                <Table.Td>{results.ipProtection || '-'}</Table.Td>
-                            </Table.Tr>
-                              <Table.Tr>
-                                <Table.Td><Text fw={500}>Углы обзора (Г°xВ°):</Text></Table.Td>
-                                <Table.Td>{results.horizontalViewingAngle} x {results.verticalViewingAngle}</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Дистанция просмотра (мин/опт):</Text></Table.Td>
-                                <Table.Td>{formatNumber(results.viewingDistanceMinM, 1)} / {formatNumber(results.viewingDistanceOptimalM, 1)} м</Table.Td>
-                            </Table.Tr>
-                        </Table.Tbody>
-                    </Table>
-                </div>
+             {/* Отдельный блок для ЗИП */}
+             {results.zipComponentList && results.zipComponentList.length > 0 && (
+                 <>
+                    <Title order={5} mb="xs" mt="lg">ЗИП Комплект (5%)</Title>
+                    <List
+                        spacing="xs"
+                        size="sm"
+                        icon={
+                            <ThemeIcon color="gray" size={16} radius="xl">
+                                <IconCalculator style={{ width: '70%', height: '70%' }} />
+                            </ThemeIcon>
+                        }
+                    >
+                        {results.zipComponentList.map((item, index) => (
+                            <List.Item key={index}>
+                                 <Text span>{item.name}</Text>
+                                 {item.sku && <Text span c="dimmed" size="xs"> (Арт: {item.sku})</Text>}
+                                 <Text span> - {item.totalQuantity} шт.</Text>
+                            </List.Item>
+                        ))}
+                    </List>
+                 </>
+             )}
 
-                 {/* Колонка 2: Компоненты и Энергопотребление */}
-                 <div>
-                    <Title order={5} mb="xs">Компоненты и Питание</Title>
-                     <Table highlightOnHover verticalSpacing="xs" mb="lg">
-                        <Table.Tbody>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Тип кабинета:</Text></Table.Td>
-                                <Table.Td>{results.material || '-'}</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Размер кабинета (ШxВ):</Text></Table.Td>
-                                <Table.Td>{results.cabinetSize || '-'}</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Кабинетов (ШxВ / Всего):</Text></Table.Td>
-                                <Table.Td>
-                                    {results.cabinetsCountTotal > 0
-                                        ? `${results.cabinetsCountHorizontal} x ${results.cabinetsCountVertical} / ${results.cabinetsCountTotal} шт.`
-                                        : '-'}
-                                    </Table.Td>
-                            </Table.Tr>
-                            <Table.Tr>
-                                <Table.Td><Text fw={500}>Модулей в кабинете:</Text></Table.Td>
-                                <Table.Td>{results.modulesPerCabinet > 0 ? `${results.modulesPerCabinet} шт.` : '-'}</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Модулей всего:</Text></Table.Td>
-                                <Table.Td>{formatNumber(results.modulesCountTotal, 0) || '-'} шт.</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Среднее потребление:</Text></Table.Td>
-                                <Table.Td>{formatNumber(results.averagePowerConsumption)} кВт</Table.Td>
-                            </Table.Tr>
-                             <Table.Tr>
-                                <Table.Td><Text fw={500}>Макс. потребление:</Text></Table.Td>
-                                <Table.Td>{formatNumber(results.maxPowerConsumption)} кВт</Table.Td>
-                            </Table.Tr>
-                        </Table.Tbody>
-                    </Table>
+             {/* БЛОК С КНОПКОЙ ОТПРАВКИ */}
+             <Group justify="flex-end" mt="xl"> {/* Используем Group для позиционирования */}
+                 <SendToBitrixButton
+                    onClick={handleSendToBitrix}
+                    loading={isSending}
+                    disabled={isSending}
+                    size="sm" // Задаем размер или убираем, чтобы наследовался
+                    // variant="filled" // Задайте нужный variant
+                    // color="blue" // Задайте нужный цвет
+                 />
+             </Group>
 
-                    <Title order={5} mb="xs">ЗИП Комплект (5%)</Title>
-                    {results.zipComponentList && results.zipComponentList.length > 0 ? (
-                         <List
-                            spacing="xs"
-                            size="sm"
-                            center
-                            icon={
-                                <ThemeIcon color="gray" size={16} radius="xl">
-                                    <IconCalculator style={{ width: '70%', height: '70%' }} />
-                                </ThemeIcon>
-                            }
-                        >
-                            {results.zipComponentList.map((item, index) => (
-                                <List.Item key={index}>
-                                     <Text span>{item.name}</Text>
-                                     {item.sku && <Text span c="dimmed" size="xs"> (Арт: {item.sku})</Text>}
-                                     <Text span> - {item.totalQuantity} шт.</Text>
-                                </List.Item>
-                            ))}
-                        </List>
-                    ) : (
-                        <Text size="sm" c="dimmed">Компоненты для ЗИП не найдены.</Text>
-                    )}
-                </div>
-            </SimpleGrid>
         </Paper>
     );
 };
