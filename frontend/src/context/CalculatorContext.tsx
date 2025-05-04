@@ -202,11 +202,13 @@ const GET_FILTERED_REFRESH_RATE_OPTIONS = gql`
     $locationCode: String!
     $pitchCode: String!
     $onlyActive: Boolean
+    $isFlex: Boolean
   ) {
     getFilteredRefreshRateOptions(
       locationCode: $locationCode
       pitchCode: $pitchCode
       onlyActive: $onlyActive
+      isFlex: $isFlex
     ) {
       ...RefreshRateFields
     }
@@ -220,12 +222,14 @@ const GET_FILTERED_BRIGHTNESS_OPTIONS = gql`
     $pitchCode: String!
     $refreshRateCode: String!
     $onlyActive: Boolean
+    $isFlex: Boolean
   ) {
     getFilteredBrightnessOptions(
       locationCode: $locationCode
       pitchCode: $pitchCode
       refreshRateCode: $refreshRateCode
       onlyActive: $onlyActive
+      isFlex: $isFlex
     ) {
       ...BrightnessFields
     }
@@ -696,6 +700,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       selectedLocationCode,
       selectedPitchCode,
       selectedRefreshRateCode,
+      isFlexSelected,
     ],
     queryFn: async () => {
       console.log(`[Brightness Query] 
@@ -751,6 +756,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
         locationCode: selectedLocationCode,
         pitchCode: selectedPitchCode,
         onlyActive: true,
+        isFlex: isFlexSelected,
       };
       return graphQLClient.request<GetFilteredRefreshRateOptionsQuery>(
         GET_FILTERED_REFRESH_RATE_OPTIONS,
@@ -786,6 +792,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       selectedPitchCode,
       selectedBrightnessCode,
       selectedRefreshRateCode,
+      isFlexSelected
     ],
     queryFn: async () => {
       console.log("[Module Query] Fetching module options with filters:", {
@@ -794,12 +801,13 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
         refreshRateCode: selectedRefreshRateCode,
         brightnessCode: selectedBrightnessCode,
       });
-      const variables: { filters: ModuleFilterInput; onlyActive: boolean } = {
+      const variables: { filters: ModuleFilterInput & { isFlex?: boolean }; onlyActive: boolean } = {
         filters: {
           locationCode: selectedLocationCode || undefined,
           pitchCode: selectedPitchCode || undefined,
           brightnessCode: selectedBrightnessCode || undefined,
           refreshRateCode: selectedRefreshRateCode || undefined,
+          isFlex: isFlexSelected
         },
         onlyActive: true,
       };
@@ -1024,23 +1032,28 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
         const gqlCabinet = data.cabinetDetails as any;
         const sizeData = gqlCabinet.sizes?.[0]?.size;
 
-           const widthValue = sizeData?.width;
-           const heightValue = sizeData?.height;
+        const widthValue = sizeData?.width;
+        const heightValue = sizeData?.height;
 
-           const mappedCabinet: CabinetData = {
-               code: gqlCabinet.code,
-               sku: gqlCabinet.sku,
-               name: gqlCabinet.name,
-               width: widthValue ?? 0,
-               height: heightValue ?? 0,
-           };
+        const mappedCabinet: CabinetData = {
+          code: gqlCabinet.code,
+          sku: gqlCabinet.sku,
+          name: gqlCabinet.name,
+          width: widthValue ?? 0,
+          height: heightValue ?? 0,
+        };
         console.log("[Cabinet Details Effect] Mapped State:", mappedCabinet);
 
         // Обновляем состояние, только если данные действительно изменились
-        if (JSON.stringify(mappedCabinet) !== JSON.stringify(selectedCabinetDetails)) {
+        if (
+          JSON.stringify(mappedCabinet) !==
+          JSON.stringify(selectedCabinetDetails)
+        ) {
           setSelectedCabinetDetailsState(mappedCabinet);
+        }
+      } else {
+        /* ... сброс ... */
       }
-  } else { /* ... сброс ... */ }
     } else if (cabinetDetailsQueryResult.isError) {
       console.error(
         "[Cabinet Details Effect] Error:",
@@ -1058,7 +1071,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     selectedCabinetDetails,
     setSelectedCabinetDetailsState,
   ]);
-
 
   const {
     isLoading: isLoadingCabinetDetails,
@@ -1182,40 +1194,72 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
 
   // --- НОВЫЙ useEffect: Установка дефолтной Яркости ---
   useEffect(() => {
-    // Используем gqlFilteredBrightnesses
-    if (
-      gqlFilteredBrightnesses.length > 0 &&
-      selectedBrightnessCode === null &&
-      !isLoadingBrightnesses
-    ) {
-      // Находим опцию с минимальным значением 'value'
-      const defaultBrightness = [...gqlFilteredBrightnesses] // Копируем
-        .filter(
-          (
-            br: any // <-- any + проверка
-          ) => !!br && typeof br.value === "number" && !!br.code
-        )
-        .sort((a: any, b: any) => (a?.value ?? 0) - (b?.value ?? 0))[0]; // <-- any для sort
+    console.log("[Brightness Effect] Running. Deps:", {
+      optionsLength: gqlFilteredBrightnesses.length,
+      currentSelectedCode: selectedBrightnessCode,
+      isLoading: isLoadingBrightnesses,
+    });
+    console.log(
+      "[Brightness Effect] Filtered options received:",
+      JSON.stringify(gqlFilteredBrightnesses)
+    );
 
-      const defaultBrightnessObj = defaultBrightness as any; // <-- any для доступа
-
-      if (defaultBrightnessObj) {
-        console.log(
-          `[Brightness Effect] Setting default brightness: ${defaultBrightnessObj.code} (${defaultBrightnessObj.value} nit)`
-        );
-        setSelectedBrightnessCodeState(defaultBrightnessObj.code);
-      }
-    } else if (
-      gqlFilteredBrightnesses.length === 0 &&
-      selectedBrightnessCode !== null &&
-      !isLoadingBrightnesses
-    ) {
-      console.log(
-        `[Brightness Effect] Resetting brightness as no options are available.`
+    if (!isLoadingBrightnesses && gqlFilteredBrightnesses.length > 0) {
+      const currentSelectionValid = gqlFilteredBrightnesses.some(
+        (br: any) => br?.code === selectedBrightnessCode
       );
-      setSelectedBrightnessCodeState(null);
+      console.log(
+        `[Brightness Effect] Is current selection '${selectedBrightnessCode}' valid in new list? ${currentSelectionValid}`
+      );
+
+      if (!currentSelectionValid || selectedBrightnessCode === null) {
+        console.log(
+          "[Brightness Effect] Current selection invalid or null. Finding default..."
+        );
+        const defaultBrightness = [...gqlFilteredBrightnesses]
+          .filter((br: any) => br?.code && typeof br.value === "number")
+          .sort((a: any, b: any) => (a?.value ?? 0) - (b?.value ?? 0))[0];
+
+        if (defaultBrightness) {
+          const defaultCode = (defaultBrightness as any).code;
+          const defaultValue = (defaultBrightness as any).value;
+          // Устанавливаем, только если отличается от текущего, чтобы избежать лишних ререндеров
+          if (defaultCode !== selectedBrightnessCode) {
+            console.log(
+              `[Brightness Effect] Setting default/new brightness: code=${defaultCode}, value=${defaultValue}`
+            );
+            setSelectedBrightnessCodeState(defaultCode);
+          } else {
+            console.log(
+              `[Brightness Effect] Default code (${defaultCode}) matches current selection. No change needed.`
+            );
+          }
+        } else {
+          console.log(
+            "[Brightness Effect] No default brightness found in the new list, resetting."
+          );
+          if (selectedBrightnessCode !== null)
+            setSelectedBrightnessCodeState(null);
+        }
+      } else {
+        console.log(
+          "[Brightness Effect] Current brightness selection '${selectedBrightnessCode}' is still valid. Keeping it."
+        );
+      }
+    } else if (!isLoadingBrightnesses && gqlFilteredBrightnesses.length === 0) {
+      console.log(
+        "[Brightness Effect] No brightness options available. Resetting selection."
+      );
+      if (selectedBrightnessCode !== null) {
+        setSelectedBrightnessCodeState(null);
+      }
     }
-  }, [gqlFilteredBrightnesses, selectedBrightnessCode, isLoadingBrightnesses]);
+  }, [
+    gqlFilteredBrightnesses,
+    isLoadingBrightnesses,
+    selectedBrightnessCode,
+    setSelectedBrightnessCodeState,
+  ]); // Добавили selectedBrightnessCode для сравнения
 
   useEffect(() => {
     // Сбрасываем, если запрос стал неактивным или пришли новые данные

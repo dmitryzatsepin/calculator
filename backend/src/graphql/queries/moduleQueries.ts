@@ -9,6 +9,7 @@ const ModuleFilterInput = builder.inputType('ModuleFilterInput', {
       pitchCode:    t.string({ required: false }),
       brightnessCode: t.string({ required: false }),
       refreshRateCode: t.string({ required: false }),
+      isFlex: t.boolean({ required: false })
   }),
 });
 
@@ -28,6 +29,7 @@ builder.queryFields((t) => ({
             pitchCode?: string | null;
             brightnessCode?: string | null;
             refreshRateCode?: string | null;
+            isFlex?: boolean | null;
         } | null | undefined;
         const onlyActive = args.onlyActive;
         console.log('[moduleOptions] Fetching with filters:', JSON.stringify(filters));
@@ -50,6 +52,15 @@ builder.queryFields((t) => ({
           if (typeof filters.refreshRateCode === 'string' && filters.refreshRateCode) {
               where.refreshRates = { some: { refreshRateCode: filters.refreshRateCode } };
           }
+          if (typeof filters.isFlex === 'boolean') {
+            where.options = filters.isFlex
+               ? { some: { optionCode: 'flex' } }
+               : { none: { optionCode: 'flex' } };
+          } else {
+              where.options = { none: { optionCode: 'flex' } };
+          }
+        } else {
+            where.options = { none: { optionCode: 'flex' } };
         }
         
 
