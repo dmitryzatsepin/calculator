@@ -10,6 +10,7 @@ import { createIdMaps } from './config'; // Импортируем функци�
 import { seedReferences } from '../seed/seedReferences';
 import { seedEntities } from '../seed/seedEntities';
 import { seedRelations } from '../seed/seedRelations';
+import { seedPrices } from './seedPrices';
 
 const prisma = new PrismaClient();
 
@@ -92,8 +93,7 @@ async function main() {
     try {
         // Передаем режим в функцию сидинга
         await seedRelations(prisma, workbook, idMaps, seedMode);
-         // TODO: Добавить вызов функции для сидинга таблиц цен, если нужно
-         // await seedPrices(prisma, workbook, idMaps, seedMode);
+        await seedPrices(prisma, workbook, idMaps, seedMode);
     } catch (e) {
          console.error(`❌ Ошибка на этапе сидинга связей. Выполнение прервано.`);
          process.exit(1);

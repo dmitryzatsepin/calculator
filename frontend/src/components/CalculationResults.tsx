@@ -1,9 +1,15 @@
 // src/components/CalculationResults.tsx
 import React, { useState } from 'react';
-import { Table, Text, Title, Paper, List, ThemeIcon, Alert, Group } from '@mantine/core';
-import { IconCalculator, IconAlertCircle, IconBolt, IconDimensions, IconComponents, IconMapPin, IconRulerMeasure } from '@tabler/icons-react';
-import type { TechnicalSpecsResult } from '../services/calculatorService';
-import SendToBitrixButton from './inputs/SendToBitrixButton'; // Импорт кнопки Битрикс
+import { Table, Text, Paper, ThemeIcon, Alert, Group } from '@mantine/core';
+import { IconAlertCircle, IconBolt, IconDimensions, IconComponents, IconMapPin, IconRulerMeasure } from '@tabler/icons-react';
+
+// --- Импорты типов и КОНТЕКСТА ---
+import type { TechnicalSpecsResult } from '../types/calculationTypes';
+import { useCalculatorContext } from '../context/CalculatorContext';
+
+// --- Импорты компонентов ---
+import SendToBitrixButton from './inputs/SendToBitrixButton';
+import CostCalculationTable from './CostCalculationTable';
 
 interface CalculationResultsProps {
     results: TechnicalSpecsResult | null;
@@ -20,8 +26,8 @@ const formatNumber = (num: number | undefined | null, fractionDigits = 2, unit =
     return unit ? `${formatted} ${unit}` : formatted;
 };
 
-const CalculationResults: React.FC<CalculationResultsProps> = ({ results /*, onClose */ }) => {
-     // Состояние для индикатора загрузки отправки
+const CalculationResults: React.FC<CalculationResultsProps> = ({ results }) => {
+     const { costDetails } = useCalculatorContext();
      const [isSending, setIsSending] = useState(false);
 
     if (!results) {
@@ -66,8 +72,7 @@ const CalculationResults: React.FC<CalculationResultsProps> = ({ results /*, onC
         { icon: IconDimensions, label: 'Частота обновления', value: results.refreshRate },
         { icon: IconDimensions, label: 'Защита IP', value: results.ipProtection },
         { icon: IconDimensions, label: 'Углы обзора (Г°xВ°)', value: `${results.horizontalViewingAngle} x ${results.verticalViewingAngle}` },
-        { icon: IconRulerMeasure, label: 'Дистанция просмотра, м', value: formatNumber(results.viewingDistanceBasedOnPitch, 2, 'м') },
-        // { icon: IconDimensions, label: 'Дистанция просмотра (мин/опт)', value: `${formatNumber(results.viewingDistanceMinM, 1)} / ${formatNumber(results.viewingDistanceOptimalM, 1)} м` },
+        { icon: IconRulerMeasure, label: 'Дистанция просмотра, м', value: formatNumber(results.pixelPitchValue, 2, 'м') },
 
         // --- Компоненты (Только если есть кабинеты) ---
         ...(results.cabinetsCountTotal > 0 ? [
@@ -106,39 +111,17 @@ const CalculationResults: React.FC<CalculationResultsProps> = ({ results /*, onC
                 </Table.Tbody>
             </Table>
 
-             {/* Отдельный блок для ЗИП */}
-             {results.zipComponentList && results.zipComponentList.length > 0 && (
-                 <>
-                    <Title order={5} mb="xs" mt="lg">ЗИП Комплект (5%)</Title>
-                    <List
-                        spacing="xs"
-                        size="sm"
-                        icon={
-                            <ThemeIcon color="gray" size={16} radius="xl">
-                                <IconCalculator style={{ width: '70%', height: '70%' }} />
-                            </ThemeIcon>
-                        }
-                    >
-                        {results.zipComponentList.map((item, index) => (
-                            <List.Item key={index}>
-                                 <Text span>{item.name}</Text>
-                                 {item.sku && <Text span c="dimmed" size="xs"> (Арт: {item.sku})</Text>}
-                                 <Text span> - {item.totalQuantity} шт.</Text>
-                            </List.Item>
-                        ))}
-                    </List>
-                 </>
-             )}
+            {/* Таблица с РАСЧЕТОМ СТОИМОСТИ */}
+            {/* Используем costDetails из контекста */}
+            <CostCalculationTable costDetails={costDetails} />
 
              {/* БЛОК С КНОПКОЙ ОТПРАВКИ */}
-             <Group justify="flex-end" mt="xl"> {/* Используем Group для позиционирования */}
+             <Group justify="flex-end" mt="xl">
                  <SendToBitrixButton
                     onClick={handleSendToBitrix}
                     loading={isSending}
                     disabled={isSending}
-                    size="sm" // Задаем размер или убираем, чтобы наследовался
-                    // variant="filled" // Задайте нужный variant
-                    // color="blue" // Задайте нужный цвет
+                    size="sm"
                  />
              </Group>
 

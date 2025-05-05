@@ -12,12 +12,17 @@ import { useQuery, useQueryClient, QueryKey } from "@tanstack/react-query";
 import { gql } from "graphql-request";
 import { graphQLClient } from "../services/graphqlClient";
 import {
+  calculateTechnicalSpecs,
+  calculateCosts,
+} from "../services/calculatorService";
+import type {
+  CalculatorFormData,
   TechnicalSpecsResult,
+  CostCalculationResult,
   ModuleData,
   CabinetData,
-  calculateTechnicalSpecs,
-} from "../services/calculatorService";
-import type { CalculatorFormData } from "../types/calculationTypes";
+  PriceMap,
+} from '../types/calculationTypes';
 
 // --- Импорты типов GraphQL ---
 import type {
@@ -70,7 +75,6 @@ const MaterialFields = gql`
     active
   }
 `;
-
 const PitchFields = gql`
   fragment PitchFields on Pitch {
     id
@@ -168,7 +172,6 @@ const GET_INITIAL_DATA = gql`
     }
   }
 `;
-
 const GET_SCREEN_TYPE_OPTIONS = gql`
   ${OptionFields}
   query GetScreenTypeOptions($screenTypeCode: String!, $onlyActive: Boolean) {
@@ -180,7 +183,6 @@ const GET_SCREEN_TYPE_OPTIONS = gql`
     }
   }
 `;
-
 const GET_PITCH_OPTIONS_BY_LOCATION = gql`
   ${PitchFields}
   query GetPitchOptionsByLocation(
@@ -195,7 +197,6 @@ const GET_PITCH_OPTIONS_BY_LOCATION = gql`
     }
   }
 `;
-
 const GET_FILTERED_REFRESH_RATE_OPTIONS = gql`
   ${RefreshRateFields}
   query GetFilteredRefreshRateOptions(
@@ -214,7 +215,6 @@ const GET_FILTERED_REFRESH_RATE_OPTIONS = gql`
     }
   }
 `;
-
 const GET_FILTERED_BRIGHTNESS_OPTIONS = gql`
   ${BrightnessFields}
   query GetFilteredBrightnessOptions(
@@ -235,7 +235,6 @@ const GET_FILTERED_BRIGHTNESS_OPTIONS = gql`
     }
   }
 `;
-
 const GET_MODULE_OPTIONS = gql`
   ${ModuleOptionFields}
   query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {
@@ -244,7 +243,6 @@ const GET_MODULE_OPTIONS = gql`
     }
   }
 `;
-
 const GET_CABINET_OPTIONS = gql`
   ${CabinetOptionFields}
   query GetCabinetOptions($filters: CabinetFilterInput, $onlyActive: Boolean) {
@@ -253,13 +251,11 @@ const GET_CABINET_OPTIONS = gql`
     }
   }
 `;
-
 const GET_DOLLAR_RATE = gql`
   query GetDollarRate {
     getCurrentDollarRate
   }
 `;
-
 const GET_MODULE_DETAILS = gql`
   query GetModuleDetails($code: String!) {
     moduleDetails(code: $code) {
@@ -293,6 +289,15 @@ const GET_CABINET_DETAILS = gql`
     }
   }
 `;
+const GET_PRICES_BY_CODES = gql`
+  query GetPricesByCodes($codes: PriceRequestInput!) {
+    getPricesByCodes(codes: $codes) {
+      code
+      priceUsd
+      priceRub
+    }
+  }
+`;
 
 // --- Типы для ответов GraphQL ---
 type InitialDataQueryResult = {
@@ -318,6 +323,17 @@ type CabinetOptionsQueryResult = {
 
 type DollarRateQueryResult = {
   getCurrentDollarRate: Maybe<number>;
+};
+
+type PriceQueryResultItem = {
+  code: string;
+  priceUsd: Maybe<number>;
+  priceRub: Maybe<number>;
+};
+
+type PricesQueryResult = {
+  // Имя поля должно совпадать с именем поля в вашем GraphQL запросе/схеме
+  getPricesByCodes: Maybe<Array<Maybe<PriceQueryResultItem>>>;
 };
 
 // Типы для ДЕТАЛЬНЫХ ответов GraphQL (ПРИМЕРНЫЕ, настройте под вашу схему и Pothos)
@@ -474,6 +490,7 @@ interface CalculatorContextProps {
   isCalculating: boolean;
   isDrawerOpen: boolean;
   calculationResult: TechnicalSpecsResult | null;
+  costDetails: CostCalculationResult | null;
 
   // Выбранные значения формы
   selectedScreenTypeCode: string | null;
@@ -531,9 +548,7 @@ interface CalculatorContextProps {
 }
 
 // --- Создание Контекста ---
-const CalculatorContext = createContext<CalculatorContextProps | undefined>(
-  undefined
-);
+const CalculatorContext = createContext<CalculatorContextProps | undefined>(undefined);
 
 export const useCalculatorContext = () => {
   const context = useContext(CalculatorContext);
@@ -547,7 +562,7 @@ export const useCalculatorContext = () => {
 
 // --- Компонент Провайдера Контекста ---
 export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
-  const queryClient = useQueryClient(); // <<< Будет использоваться в resetQuery
+  const queryClient = useQueryClient();
 
   // --- Состояния формы ---
   const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<
@@ -587,7 +602,177 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   >(null);
   const [isFlexSelected, setIsFlexSelectedState] = useState<boolean>(false);
   const [dollarRate, setDollarRateState] = useState<number | string>("");
+  const cabinetScreenTypeCode = "cabinet";
+  const isCabinetScreenTypeSelected = selectedScreenTypeCode === cabinetScreenTypeCode;
 
+  // --- КОНСТАНТЫ для кодов стандартных компонентов ---
+  const ITEM_CODE_PSU = "bp300";
+  const ITEM_CODE_RCV_CARD = "receiver";
+  const ITEM_CODE_MAGNET = "magnets";
+  const ITEM_CODE_STEEL_M2 = "steel_cab_price_m2";
+
+  // --- ФОРМИРОВАНИЕ ПЕРЕМЕННЫХ ДЛЯ ЗАПРОСА ЦЕН ---
+  // const codesToFetch = useMemo(() => {
+  //   const codes = new Set<string>([
+  //       ITEM_CODE_PSU,
+  //       ITEM_CODE_RCV_CARD,
+  //       ITEM_CODE_MAGNET,
+  //       ITEM_CODE_STEEL_M2, // Всегда запрашиваем стандартные
+  //   ]);
+
+  //   if (selectedModuleCode) {
+  //       codes.add(selectedModuleCode);
+  //   }
+  //   // Добавляем код кабинета, только если это кабинетный тип и код выбран
+  //   if (isCabinetScreenTypeSelected && selectedCabinetCode) {
+  //       codes.add(selectedCabinetCode);
+  //   }
+
+  //   // Конвертируем Set обратно в массив
+  //   return Array.from(codes);
+  // }, [selectedModuleCode, selectedCabinetCode, isCabinetScreenTypeSelected]); // Зависит от выбранных кодов и типа
+  const priceRequestArgs = useMemo(() => {
+    // Собираем коды стандартных комплектующих
+    const itemCodesSet = new Set<string>([
+        ITEM_CODE_PSU,
+        ITEM_CODE_RCV_CARD,
+        ITEM_CODE_MAGNET,
+        ITEM_CODE_STEEL_M2,
+    ]);
+
+    // Создаем объект аргументов
+    const args: { // Явно типизируем для понятности
+      moduleCode?: string;
+      cabinetCode?: string;
+      itemCodes?: string[];
+    } = {};
+
+    // Добавляем код модуля, если он выбран
+    if (selectedModuleCode) {
+      args.moduleCode = selectedModuleCode;
+      // Не добавляем код модуля в itemCodes, так как он идет отдельным полем
+    }
+
+    // Добавляем код кабинета, если он выбран и это кабинетный тип
+    if (isCabinetScreenTypeSelected && selectedCabinetCode) {
+      args.cabinetCode = selectedCabinetCode;
+       // Не добавляем код кабинета в itemCodes
+    }
+
+    // Устанавливаем массив itemCodes
+    args.itemCodes = Array.from(itemCodesSet);
+
+    console.log("[Price Query Args] Prepared args:", args);
+    return args;
+
+    }, [selectedModuleCode, selectedCabinetCode, isCabinetScreenTypeSelected]); 
+
+  // --- ЗАПРОС ЦЕН ---
+  // const {
+  //   data: priceQueryData,
+  //   isLoading: isLoadingPricesQuery,
+  //   isError: isErrorPricesQuery,
+  //   error: errorPricesQuery,
+  // } = useQuery<PricesQueryResult, Error, PriceMap>({
+  //   queryKey: ['componentPrices', codesToFetch],
+  //   queryFn: async (): Promise<PricesQueryResult> => {
+  //     console.log('[Price Query] Fetching prices for codes:', codesToFetch);
+  //     if (codesToFetch.length === 0) {
+  //        console.warn('[Price Query] No codes to fetch.');
+  //        return { pricesByCodes: [] };
+  //     }
+  //     try {
+  //       const variables = { codes: codesToFetch };
+  //       const result = await graphQLClient.request<PricesQueryResult>(
+  //         GET_PRICES_BY_CODES,
+  //         variables
+  //       );
+  //       console.log('[Price Query] Received raw prices:', result);
+  //       return result ?? { pricesByCodes: [] }; // Обработка null ответа
+  //     } catch (err) {
+  //       console.error('[Price Query] Error fetching prices:', err);
+  //       throw err; // Пробрасываем ошибку для isError
+  //     }
+  //   },
+  //   // Запрос активен, только если есть хотя бы стандартные коды
+  //   // И ОБЯЗАТЕЛЬНО выбран модуль (т.к. без него расчет невозможен)
+  //   enabled: codesToFetch.length > 0 && !!selectedModuleCode,
+  //   staleTime: 1000 * 60 * 15, // Кэшировать цены на 15 минут
+  //   refetchOnWindowFocus: false,
+  //   refetchOnMount: true, // Перезапросить при монтировании, если данные устарели
+  //   // --- ТРАНСФОРМАЦИЯ ДАННЫХ в PriceMap ---
+  //   select: (data): PriceMap => {
+  //       const priceMap: PriceMap = {};
+  //       if (data?.pricesByCodes) {
+  //           for (const item of data.pricesByCodes) {
+  //               if (item?.code) { // Проверяем наличие кода
+  //                   priceMap[item.code] = {
+  //                       usd: item.priceUsd ?? null, // Используем ?? null для явного null
+  //                       rub: item.priceRub ?? null,
+  //                   };
+  //               }
+  //           }
+  //       }
+  //       console.log('[Price Query] Transformed PriceMap:', priceMap);
+  //       return priceMap;
+  //   },
+  // });
+  // --- ЗАПРОС ЦЕН (Обновленный) ---
+  const {
+    data: priceQueryData,
+    isLoading: isLoadingPricesQuery,
+    isError: isErrorPricesQuery,
+    error: errorPricesQuery,
+  } = useQuery<PricesQueryResult, Error, PriceMap>({
+    // Ключ запроса теперь зависит от объекта аргументов
+    queryKey: ['componentPrices', priceRequestArgs],
+    queryFn: async (): Promise<PricesQueryResult> => {
+        console.log('[Price Query] Fetching prices with args:', priceRequestArgs);
+
+        // Проверяем, есть ли вообще что запрашивать
+        if (!priceRequestArgs.moduleCode && !priceRequestArgs.cabinetCode && (!priceRequestArgs.itemCodes || priceRequestArgs.itemCodes.length === 0)) {
+            console.warn('[Price Query] No codes provided in args.');
+            return { getPricesByCodes: [] };
+        }
+
+        try {
+            // Передаем объект priceRequestArgs как значение переменной 'codes'
+            const variables = { codes: priceRequestArgs }; // <<< ИЗМЕНЕНО ЗДЕСЬ
+            const result = await graphQLClient.request<PricesQueryResult>(
+                GET_PRICES_BY_CODES, // Запрос теперь ожидает PriceRequestInput!
+                variables
+            );
+            console.log('[Price Query] Received raw prices:', result);
+            return result ?? { pricesByCodes: [] };
+        } catch (err) {
+            console.error('[Price Query] Error fetching prices:', err);
+            throw err;
+        }
+    },
+    // Запрос активен, если есть хотя бы модуль ИЛИ кабинет ИЛИ itemCodes
+    enabled: !!(priceRequestArgs.moduleCode || priceRequestArgs.cabinetCode || (priceRequestArgs.itemCodes && priceRequestArgs.itemCodes.length > 0)),
+    staleTime: 1000 * 60 * 15,
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    select: (data): PriceMap => { // Логика select остается прежней
+        const priceMap: PriceMap = {};
+        if (data?.getPricesByCodes) {
+            for (const item of data.getPricesByCodes) {
+                if (item?.code) {
+                    priceMap[item.code] = {
+                        usd: item.priceUsd ?? null,
+                        rub: item.priceRub ?? null,
+                    };
+                }
+            }
+        }
+        console.log('[Price Query] Transformed PriceMap:', priceMap);
+        return priceMap;
+    },
+  });
+
+  const priceMapData = priceQueryData ?? {};
+  
   // --- Состояния для полных данных ---
   const [selectedModuleDetails, setSelectedModuleDetailsState] =
     useState<ModuleData | null>(null);
@@ -599,6 +784,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const [isDrawerOpen, setIsDrawerOpenState] = useState<boolean>(false);
   const [calculationResult, setCalculationResultState] =
     useState<TechnicalSpecsResult | null>(null);
+  const [costDetails, setCostDetails] = useState<CostCalculationResult | null>(null);
 
   // --- Запрос начальных данных ---
   const {
@@ -792,7 +978,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       selectedPitchCode,
       selectedBrightnessCode,
       selectedRefreshRateCode,
-      isFlexSelected
+      isFlexSelected,
     ],
     queryFn: async () => {
       console.log("[Module Query] Fetching module options with filters:", {
@@ -801,13 +987,16 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
         refreshRateCode: selectedRefreshRateCode,
         brightnessCode: selectedBrightnessCode,
       });
-      const variables: { filters: ModuleFilterInput & { isFlex?: boolean }; onlyActive: boolean } = {
+      const variables: {
+        filters: ModuleFilterInput & { isFlex?: boolean };
+        onlyActive: boolean;
+      } = {
         filters: {
           locationCode: selectedLocationCode || undefined,
           pitchCode: selectedPitchCode || undefined,
           brightnessCode: selectedBrightnessCode || undefined,
           refreshRateCode: selectedRefreshRateCode || undefined,
-          isFlex: isFlexSelected
+          isFlex: isFlexSelected,
         },
         onlyActive: true,
       };
@@ -823,9 +1012,6 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const gqlFilteredModules = moduleData?.moduleOptions ?? [];
 
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС КАБИНЕТОВ ---
-  const cabinetScreenTypeCode = "cabinet";
-  const isCabinetScreenTypeSelected =
-    selectedScreenTypeCode === cabinetScreenTypeCode;
   const areCabinetDepsSelected = !!(
     selectedLocationCode &&
     selectedMaterialCode &&
@@ -1537,6 +1723,10 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       !isCabinetScreenTypeSelected || !!selectedMaterialCode;
     const checkRate = !isNaN(rateValue) && rateValue > 0;
     const checkCalculating = !isCalculating;
+    const checkPrices = 
+    !isLoadingPricesQuery && 
+    !isErrorPricesQuery && 
+    Object.keys(priceMapData).length > 0;
 
     const requiredFieldsFilled =
       checkScreenType &&
@@ -1549,9 +1739,9 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       checkBrightness &&
       checkRefreshRate && // <<< ИСПОЛЬЗУЕМ ПРОВЕРКИ
       checkModule &&
-      checkCabinet &&
-      checkRate;
-
+      checkCabinet && 
+      checkRate &&
+      checkPrices;
     // console.log("Calculation Ready Check:", { /* ... */ });
     return requiredFieldsFilled && checkCalculating;
   }, [
@@ -1568,228 +1758,235 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     selectedCabinetCode,
     dollarRate,
     isCalculating,
-    isCabinetScreenTypeSelected, // <<< ИСПРАВЛЕНО
+    isCabinetScreenTypeSelected,
     selectedModuleDetails,
     isLoadingModuleDetails,
     isErrorModuleDetails,
     selectedCabinetDetails,
     isLoadingCabinetDetails,
     isErrorCabinetDetails,
+    isLoadingPricesQuery,
+    isErrorPricesQuery,
+    priceMapData,
   ]);
 
   // --- Функции для обновления состояния (useCallback) ---
-  const setSelectedScreenTypeCode = useCallback(
-    (value: string | null) => {
-      if (selectedScreenTypeCode === value) return;
-      setSelectedScreenTypeCodeState(value);
-      setSelectedLocationCodeState(null);
-      setSelectedMaterialCodeState(null);
-      setSelectedProtectionCodeState(null);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedSensorCodesState([]);
-      setSelectedControlTypeCodesState([]);
-      setSelectedPitchCodeState(null);
-      setSelectedModuleCodeState(null);
-      setSelectedCabinetCodeState(null);
-      setIsFlexSelectedState(false);
-      setCalculationResultState(null);
-    },
-    [selectedScreenTypeCode]
-  );
-  const setSelectedLocationCode = useCallback(
-    (value: string | null) => {
+  const setSelectedScreenTypeCode = useCallback((value: string | null) => {
+    if (selectedScreenTypeCode === value) return;
+    setSelectedScreenTypeCodeState(value);
+    setSelectedLocationCodeState(null); setSelectedMaterialCodeState(null); setSelectedProtectionCodeState(null);
+    setSelectedBrightnessCodeState(null); setSelectedRefreshRateCodeState(null); setSelectedSensorCodesState([]);
+    setSelectedControlTypeCodesState([]); setSelectedPitchCodeState(null); setSelectedModuleCodeState(null);
+    setSelectedCabinetCodeState(null); setIsFlexSelectedState(false); setCalculationResultState(null); setCostDetails(null);
+  }, [selectedScreenTypeCode, setSelectedScreenTypeCodeState, setSelectedLocationCodeState, setSelectedMaterialCodeState, setSelectedProtectionCodeState, setSelectedBrightnessCodeState, setSelectedRefreshRateCodeState, setSelectedSensorCodesState, setSelectedControlTypeCodesState, setSelectedPitchCodeState, setSelectedModuleCodeState, setSelectedCabinetCodeState, setIsFlexSelectedState]);
+
+  const setSelectedLocationCode = useCallback((value: string | null) => {
       if (selectedLocationCode === value) return;
       setSelectedLocationCodeState(value);
-      setSelectedMaterialCodeState(null);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedPitchCodeState(null);
-      setSelectedModuleCodeState(null);
-      setSelectedCabinetCodeState(null);
-      setCalculationResultState(null);
-    },
-    [selectedLocationCode]
-  );
-  const setSelectedMaterialCode = useCallback(
-    (value: string | null) => {
+      setSelectedMaterialCodeState(null); setSelectedBrightnessCodeState(null); setSelectedRefreshRateCodeState(null);
+      setSelectedPitchCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null);
+      setCalculationResultState(null); setCostDetails(null);
+    }, [selectedLocationCode, setSelectedLocationCodeState, setSelectedMaterialCodeState, setSelectedBrightnessCodeState, setSelectedRefreshRateCodeState, setSelectedPitchCodeState, setSelectedModuleCodeState, setSelectedCabinetCodeState]);
+
+  const setSelectedMaterialCode = useCallback((value: string | null) => {
       if (selectedMaterialCode === value) return;
       setSelectedMaterialCodeState(value);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
       setSelectedCabinetCodeState(null);
-    },
-    [selectedMaterialCode]
-  );
-  const setSelectedProtectionCode = useCallback(
-    (value: string | null): void => {
+      setCalculationResultState(null);
+      setCostDetails(null);
+    }, [selectedMaterialCode, setSelectedMaterialCodeState, setSelectedCabinetCodeState]);
+
+    const setSelectedProtectionCode = useCallback((value: string | null): void => {
       if (selectedProtectionCode === value) return;
       setSelectedProtectionCodeState(value);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedPitchCodeState(null);
-      setSelectedModuleCodeState(null);
-      setSelectedCabinetCodeState(null);
-    },
-    [selectedProtectionCode]
-  );
-  const setSelectedBrightnessCode = useCallback(
-    (value: string | null) => {
+    }, [selectedProtectionCode, setSelectedProtectionCodeState]);
+
+    const setSelectedBrightnessCode = useCallback((value: string | null) => {
       if (selectedBrightnessCode === value) return;
       console.log("(Context) Selected Brightness Code:", value);
       setSelectedBrightnessCodeState(value);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
-    },
-    [selectedBrightnessCode]
-  );
-  const setSelectedRefreshRateCode = useCallback(
-    (value: string | null) => {
+      setCalculationResultState(null);
+      setCostDetails(null);
+    }, [selectedBrightnessCode, setSelectedBrightnessCodeState, setSelectedModuleCodeState, setSelectedCabinetCodeState]);
+
+    const setSelectedRefreshRateCode = useCallback((value: string | null) => {
       if (selectedRefreshRateCode === value) return;
       console.log("(Context) Selected Refresh Rate Code:", value);
       setSelectedRefreshRateCodeState(value);
       setSelectedBrightnessCodeState(null);
       setSelectedModuleCodeState(null);
       setSelectedCabinetCodeState(null);
-    },
-    [selectedRefreshRateCode]
-  );
-  const setSelectedSensorCodes = useCallback((value: string[]) => {
-    setSelectedSensorCodesState(value);
-  }, []);
-  const setSelectedControlTypeCodes = useCallback((value: string[]) => {
-    setSelectedControlTypeCodesState(value);
-  }, []);
-  const setSelectedPitchCode = useCallback(
-    (value: string | null) => {
+      setCalculationResultState(null);
+      setCostDetails(null);
+    }, [selectedRefreshRateCode, setSelectedRefreshRateCodeState, setSelectedBrightnessCodeState, setSelectedModuleCodeState, setSelectedCabinetCodeState]);
+
+    const setSelectedSensorCodes = useCallback((value: string[]) => { setSelectedSensorCodesState(value); }, [setSelectedSensorCodesState]);
+
+  const setSelectedControlTypeCodes = useCallback((value: string[]) => { setSelectedControlTypeCodesState(value); }, [setSelectedControlTypeCodesState]);
+
+  const setSelectedPitchCode = useCallback((value: string | null) => {
       if (selectedPitchCode === value) return;
       console.log("(Context) Selected Pitch Code:", value);
       setSelectedPitchCodeState(value);
-      setSelectedBrightnessCodeState(null);
-      setSelectedRefreshRateCodeState(null);
-      setSelectedModuleCodeState(null);
-      setSelectedCabinetCodeState(null);
-    },
-    [selectedPitchCode]
-  );
-  const setSelectedModuleCode = useCallback(
-    (value: string | null) => {
+      setSelectedRefreshRateCodeState(null); // Частота зависит от питча
+      setSelectedBrightnessCodeState(null); // Яркость зависит от частоты
+      setSelectedModuleCodeState(null); // Модуль зависит от яркости
+      setSelectedCabinetCodeState(null); // Кабинет зависит от модуля
+      setCalculationResultState(null);
+      setCostDetails(null);
+    }, [selectedPitchCode, setSelectedPitchCodeState, setSelectedRefreshRateCodeState, setSelectedBrightnessCodeState, setSelectedModuleCodeState, setSelectedCabinetCodeState]);
+
+  const setSelectedModuleCode = useCallback((value: string | null) => {
       if (selectedModuleCode === value) return;
       setSelectedModuleCodeState(value);
-      setSelectedCabinetCodeState(null);
-    },
-    [selectedModuleCode]
-  );
-  const setSelectedCabinetCode = useCallback(
-    (value: string | null) => {
+      setSelectedCabinetCodeState(null); // Кабинет зависит от модуля
+      setCalculationResultState(null);
+      setCostDetails(null);
+    }, [selectedModuleCode, setSelectedModuleCodeState, setSelectedCabinetCodeState]);
+
+  const setSelectedCabinetCode = useCallback((value: string | null) => {
       if (selectedCabinetCode === value) return;
       setSelectedCabinetCodeState(value);
-    },
-    [selectedCabinetCode]
-  );
-  const setIsFlexSelected = useCallback((selected: boolean) => {
-    setIsFlexSelectedState(selected);
-  }, []);
-  const setDollarRate = useCallback((value: number | string) => {
-    setDollarRateState(value);
-  }, []);
-  const setWidthMm = useCallback((value: string | number) => {
-    setWidthMmState(value);
-  }, []);
-  const setHeightMm = useCallback((value: string | number) => {
-    setHeightMmState(value);
-  }, []);
-  const performCalculation = useCallback(() => {
-    console.log("Attempting calculation... Ready state:", isCalculationReady);
+      setCalculationResultState(null);
+      setCostDetails(null);
+    }, [selectedCabinetCode, setSelectedCabinetCodeState]);
+    
+  const setIsFlexSelected = useCallback((selected: boolean) => { 
+    setIsFlexSelectedState(selected); 
+    setCalculationResultState(null); 
+    setCostDetails(null); 
+  }, [setIsFlexSelectedState]);
 
-    if (!isCalculationReady) {
-      console.warn("Calculation prerequisites not met.");
-      return;
-    }
-    if (!selectedModuleDetails) {
-      console.error("Calculation cannot proceed: Module details missing.");
-      return;
-    }
-    if (isCabinetScreenTypeSelected && !selectedCabinetDetails) {
-      console.error("Calculation cannot proceed: Cabinet details missing.");
-      return;
-    }
+  const setDollarRate = useCallback((value: number | string) => { 
+    setDollarRateState(value); 
+  }, [setDollarRateState]);
 
-    console.log("🚀 Starting calculation with loaded details...");
-    setIsCalculatingState(true);
-    setCalculationResultState(null);
+  const setWidthMm = useCallback((value: string | number) => { 
+    setWidthMmState(value); 
+    setCalculationResultState(null); 
+    setCostDetails(null); 
+  }, [setWidthMmState]);
+
+  const setHeightMm = useCallback((value: string | number) => { 
+    setHeightMmState(value); 
+    setCalculationResultState(null); 
+    setCostDetails(null); 
+  }, [setHeightMmState]);
+
+  const performCalculation = useCallback(async () => {
+      console.log("Attempting calculation... Ready state:", isCalculationReady);
+      if (!isCalculationReady) {
+        console.warn("Calculation prerequisites not met.");
+        if (isLoadingPricesQuery) console.warn("Prices are still loading.");
+        if (isErrorPricesQuery) console.error("Failed to load prices.", errorPricesQuery);
+        if (Object.keys(priceMapData).length === 0 && !isLoadingPricesQuery && !isErrorPricesQuery) console.warn("Price data is empty.");
+        return;
+      }
+
+      if (!selectedModuleDetails || (isCabinetScreenTypeSelected && !selectedCabinetDetails) || !priceMapData) {
+        console.error("Internal error: Calculation started but required details or price map are missing.", { selectedModuleDetails, selectedCabinetDetails, priceMapData });
+        return;
+      }
+
+      console.log("🚀 Starting calculation with loaded details...");
+      setIsCalculatingState(true);
+      setCalculationResultState(null);
+      setCostDetails(null);
 
     try {
-      const locationName = locationOptions.find(
-        (o) => o.value === selectedLocationCode
-      )?.label;
-      const materialName = materialOptions.find(
-        (o) => o.value === selectedMaterialCode
-      )?.label;
-      const brightnessLabel = brightnessOptions.find(
-        (o) => o.value === selectedBrightnessCode
-      )?.label;
-      const refreshRateLabel = refreshRateOptions.find(
-        (o) => o.value === selectedRefreshRateCode
-      )?.label;
-      const pitchObj = (gqlFilteredPitches as GqlPitch[]).find(
-        (p) => p?.code === selectedPitchCode
-      );
-      const pitchValue = Number(pitchObj?.pitchValue ?? 0);
+      // 1. Формируем данные для расчета тех. характеристик
+      const selectedPitchObject = gqlFilteredPitches.find(
+        p => (p as GqlPitch)?.code === selectedPitchCode // Приводим к GqlPitch для доступа к code
+    );
+    
+    // Проверяем, что объект найден, прежде чем получать значение
+    if (!selectedPitchObject) {
+      console.error("Filtered Pitches:", JSON.stringify(gqlFilteredPitches, null, 2));
+      throw new Error(`Pitch object with code '${selectedPitchCode}' not found in filtered list.`);
+  }
+      const pitchValue = (selectedPitchObject as GqlPitch)?.pitchValue;
+      if (typeof pitchValue !== 'number') {
+        console.error("Selected Pitch Object:", selectedPitchObject);
+        throw new Error(`Found pitch object for code '${selectedPitchCode}', but its pitchValue is not a number.`);
+      }
+      const brightnessLabel = brightnessOptions.find(b => b.value === selectedBrightnessCode)?.label;
+      const refreshRateLabel = refreshRateOptions.find(r => r.value === selectedRefreshRateCode)?.label;
+      const locationName = locationOptions.find(l => l.value === selectedLocationCode)?.label;
+      const materialName = materialOptions.find(m => m.value === selectedMaterialCode)?.label;
 
-      if (pitchValue <= 0) throw new Error("Invalid pitch value.");
-      if (!selectedScreenTypeCode) throw new Error("Screen type not selected.");
+      if (pitchValue === undefined || pitchValue === null) {
+          throw new Error("Selected pitch value not found");
+      }
+
 
       const formData: CalculatorFormData = {
-        // <<< ИСПОЛЬЗУЕМ CalculatorFormData
-        selectedPlacement: locationName ?? selectedLocationCode ?? "N/A",
-        selectedMaterialName: isCabinetScreenTypeSelected
-          ? materialName ?? selectedMaterialCode ?? "N/A"
-          : null,
-        selectedProtectionCode: selectedProtectionCode ?? "N/A",
-        selectedBrightnessLabel:
-          brightnessLabel ?? selectedBrightnessCode ?? "N/A",
-        selectedRefreshRateLabel:
-          refreshRateLabel ?? selectedRefreshRateCode ?? "N/A",
+        selectedPlacement: locationName ?? selectedLocationCode ?? '',
+        selectedMaterialName: materialName ?? selectedMaterialCode ?? '',
+        selectedProtectionCode: selectedProtectionCode ?? '',
+        selectedBrightnessLabel: brightnessLabel ?? selectedBrightnessCode ?? '',
+        selectedRefreshRateLabel: refreshRateLabel ?? selectedRefreshRateCode ?? '',
         selectedPitchValue: pitchValue,
-        selectedScreenWidth: Number(widthMm),
-        selectedScreenHeight: Number(heightMm),
-        selectedScreenTypeCode: selectedScreenTypeCode,
-        moduleItemComponents: [], // Не используется здесь
-      };
+        selectedScreenWidth: Number(widthMm) || 0,
+        selectedScreenHeight: Number(heightMm) || 0,
+        selectedScreenTypeCode: selectedScreenTypeCode ?? '',
+         moduleItemComponents: selectedModuleDetails.components?.map(c => ({
+            itemCode: c.itemCode,
+            itemName: c.itemName,
+            countPerModule: c.quantity
+        })) ?? [],
+    };
+    console.log("Prepared formData for calculation:", formData);
+    console.log("Using Module Details:", selectedModuleDetails);
+    console.log("Using Cabinet Details:", selectedCabinetDetails);
+    console.log("Using Prices:", priceMapData);
 
-      console.log("Prepared formData for calculation:", formData);
-      console.log("Using Module Details:", selectedModuleDetails);
-      console.log("Using Cabinet Details:", selectedCabinetDetails);
+    // 2. Рассчитываем технические характеристики
+    const techSpecResult = calculateTechnicalSpecs(
+      formData,
+      selectedModuleDetails, // selectedModuleDetails уже проверен на null выше
+      isCabinetScreenTypeSelected ? selectedCabinetDetails : null // Передаем кабинет только если тип кабинетный
+  );
+  console.log("✅ Tech Specs Calculation Result:", techSpecResult);
 
-      // Вызываем реальный расчет
-      const result = calculateTechnicalSpecs(
-        // <<< ИСПОЛЬЗУЕМ calculateTechnicalSpecs
-        formData,
-        selectedModuleDetails,
-        selectedCabinetDetails
-      );
+  if (!techSpecResult) {
+       throw new Error("Technical specification calculation failed or returned null.");
+  }
 
-      console.log("✅ Calculation Result:", result);
-      if (result) {
-        setCalculationResultState(result);
-        setIsDrawerOpenState(true);
-      } else {
-        console.error("❌ Calculation function returned null.");
-        setCalculationResultState(null);
-      }
-    } catch (calcError: any) {
-      console.error("❌ Calculation failed:", calcError?.message ?? calcError);
-      setCalculationResultState(null);
-    } finally {
-      setIsCalculatingState(false);
-    }
-  }, [
+  // 3. Устанавливаем результат тех. характеристик в состояние
+  setCalculationResultState(techSpecResult);
+
+  // 4. Рассчитываем стоимость
+  const costResult = calculateCosts(
+      techSpecResult,
+      priceMapData,
+      Number(dollarRate),
+      isCabinetScreenTypeSelected ? selectedMaterialCode : null // Передаем код материала только для кабинетов
+  );
+  console.log("✅ Cost Calculation Result:", costResult);
+  
+  setCostDetails(costResult);
+
+  setIsDrawerOpenState(true);
+
+} catch (calcError: any) {
+  console.error("❌ Calculation failed:", calcError?.message ?? calcError);
+  setCalculationResultState(null);
+  setCostDetails(null);
+} finally {
+  setIsCalculatingState(false);
+}
+}, [
     // Обновляем зависимости
     isCalculationReady,
     selectedModuleDetails,
     selectedCabinetDetails,
     isCabinetScreenTypeSelected,
+    priceMapData,
+    isLoadingPricesQuery,
+    isErrorPricesQuery,
+    errorPricesQuery, 
     selectedScreenTypeCode,
     widthMm,
     heightMm,
@@ -1799,6 +1996,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     selectedBrightnessCode,
     selectedRefreshRateCode,
     selectedPitchCode,
+    dollarRate,
     locationOptions,
     materialOptions,
     brightnessOptions,
@@ -1806,10 +2004,10 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     gqlFilteredPitches,
     setIsCalculatingState,
     setCalculationResultState,
-    setIsDrawerOpenState, // Добавили set функции
+    setIsDrawerOpenState,
+    setCostDetails
   ]);
 
-  // <<< ИСПРАВЛЕНО: Используем queryClient >>>
   const resetQuery = useCallback(() => {
     console.log("Invalidating all calculator queries...");
     queryClient.invalidateQueries({ queryKey: ["calculatorInitialData"] });
@@ -1823,9 +2021,8 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     queryClient.invalidateQueries({ queryKey: ["moduleDetails"] });
     queryClient.invalidateQueries({ queryKey: ["cabinetDetails"] });
     console.log("Calculator queries invalidated.");
-  }, [queryClient]); // Добавили queryClient в зависимости
+  }, [queryClient]);
 
-  // --- Формируем значение контекста ---
   // --- Формируем значение контекста ---
   const contextValue: CalculatorContextProps = useMemo(
     () => ({
@@ -1840,6 +2037,14 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       ipProtections: gqlIpProtections,
       sensors: gqlSensors,
       controlTypes: gqlControlTypes,
+      isCalculating, 
+      calculationResult, 
+      isDrawerOpen, 
+      costDetails,
+      isLoadingPrices: isLoadingPricesQuery,
+      isErrorPrices: isErrorPricesQuery,
+      errorPrices: errorPricesQuery,
+
       // Результаты запросов списков
       optionsQueryResult: {
         data: availableOptions,
@@ -1887,10 +2092,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       isLoadingCabinetDetails,
       isErrorCabinetDetails,
       errorCabinetDetails,
-      // Состояние расчета и UI
-      isCalculating,
-      calculationResult,
-      isDrawerOpen,
+
       // Выбранные значения формы
       selectedScreenTypeCode,
       isFlexSelected,
@@ -1907,6 +2109,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       dollarRate,
       widthMm,
       heightMm,
+
       // Функции обновления состояния
       setSelectedScreenTypeCode,
       setIsFlexSelected,
@@ -1923,11 +2126,13 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       setDollarRate,
       setWidthMm,
       setHeightMm,
+
       // Функции действий и статусы
-      performCalculation, // <--- Убедитесь, что это правильная функция
+      performCalculation,
       setIsDrawerOpen: setIsDrawerOpenState,
       resetQuery,
       isCalculationReady,
+
       // Опции для селектов
       screenTypeSegments,
       isFlexOptionAvailable,
@@ -1990,7 +2195,12 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
       errorCabinetDetails,
       isCalculating,
       calculationResult,
+      costDetails,
       isDrawerOpen,
+      isCalculating, 
+      calculationResult, 
+      isDrawerOpen, 
+      costDetails,
       // Остальные зависимости:
       selectedScreenTypeCode,
       isFlexSelected,

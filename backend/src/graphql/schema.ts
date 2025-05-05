@@ -42,6 +42,7 @@ import './queries/optionQueries';
 import './queries/cabinetQueries';
 import './queries/itemQueries';
 import './queries/exchangeRateQueries';
+import './queries/priceQueries'
 
 // Импортируем мутации
 import './mutations/authMutations';

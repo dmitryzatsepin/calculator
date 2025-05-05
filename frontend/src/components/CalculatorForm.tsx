@@ -1,5 +1,5 @@
 // src/components/CalculatorForm.tsx
-import { useCallback, useEffect } from "react"; // Импорт useEffect присутствует
+import { useCallback, useEffect } from "react";
 import {
   Stack,
   LoadingOverlay,
