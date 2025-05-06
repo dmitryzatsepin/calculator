@@ -3,7 +3,7 @@ import { builder } from "../builder"; // Убедитесь, что путь к 
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { GraphQLError } from "graphql";
-import { User as PrismaUser } from "@prisma/client"; // Импорт типа Prisma User
+import { User as PrismaUser } from "../../../prisma/generated/client"; // Импорт типа Prisma User
 import { UserObjectRef } from "../types/User"; // Импортируем ссылку на тип User из types/User.ts
 
 // 1. Определение Input типа для данных РЕГИСТРАЦИИ
@@ -40,7 +40,7 @@ const AuthPayload = builder
       user: t.field({
         type: UserObjectRef, // Используем импортированную ссылку на тип User
         description: "Данные аутентифицированного пользователя",
-        nullable: false,
+        nullable: true,
         resolve: (payload) => payload.user,
       }),
     }),
