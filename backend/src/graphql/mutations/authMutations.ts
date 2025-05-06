@@ -40,6 +40,7 @@ const AuthPayload = builder
       user: t.field({
         type: UserObjectRef, // Используем импортированную ссылку на тип User
         description: "Данные аутентифицированного пользователя",
+        nullable: true,
         resolve: (payload) => payload.user,
       }),
     }),
@@ -54,6 +55,7 @@ builder.mutationFields((t) => ({
     args: {
       input: t.arg({ type: LoginInput, required: true }),
     },
+    nullable: true,
     resolve: async (
       _parent,
       args,
@@ -108,6 +110,7 @@ builder.mutationFields((t) => ({
   register: t.field({
     type: UserObjectRef, // Возвращает созданного пользователя
     description: "Регистрация нового пользователя.",
+    nullable: true,
     args: {
       input: t.arg({ type: RegisterInput, required: true }),
     },
@@ -174,8 +177,3 @@ builder.mutationFields((t) => ({
     },
   }),
 }));
-
-// Напоминания:
-// 1. Убедитесь, что `src/graphql/types/User.ts` экспортирует `UserObjectRef`.
-// 2. Проверьте порядок импортов в `src/graphql/schema.ts`.
-// 3. Если поле `name` в `schema.prisma` обязательное, измените `name: name ?? undefined` на `name: name || ''` или сделайте поле в схеме опциональным (`name String?`).
