@@ -488,6 +488,7 @@ const CalculatorForm = () => {
           {/* --- КОНЕЦ ОСНОВНОЙ СЕТКИ --- */}
 
           {/* --- Блок отладки --- */}
+          {/*
           {(selectedScreenTypeCode ||
             widthMm ||
             heightMm ||
@@ -531,7 +532,6 @@ const CalculatorForm = () => {
               {selectedMaterialCode && showCabinetSection && (
                 <Text size="sm">Материал: {selectedMaterialCode}</Text>
               )}{" "}
-              {/* Показываем материал только для каб. */}
               {selectedProtectionCode && (
                 <Text size="sm">Защита IP: {selectedProtectionCode}</Text>
               )}
@@ -598,6 +598,8 @@ const CalculatorForm = () => {
               <Text size="sm">Курс $: {dollarRate || "Не задан"}</Text>
             </Stack>
           )}
+          */}
+          {/* --- КОНЕЦ БЛОКА ОТЛАДКИ --- */}
         </>
       )}
     </Stack>
