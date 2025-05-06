@@ -866,7 +866,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   // Извлекаем ОТФИЛЬТРОВАННЫЕ питчи
   const gqlFilteredPitches = pitchData?.pitchOptionsByLocation ?? [];
 
-  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЯРКОСТИ (НОВЫЙ) ---
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЯРКОСТИ ---
   // Активен, если выбраны Локация И Питч
   const areBrightnessDepsSelected = !!(
     selectedLocationCode &&
@@ -918,7 +918,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const gqlFilteredBrightnesses =
     brightnessData?.getFilteredBrightnessOptions ?? [];
 
-  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЧАСТОТЫ ОБНОВЛЕНИЯ (НОВЫЙ) ---
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС ЧАСТОТЫ ОБНОВЛЕНИЯ ---
   const areRefreshRateDepsSelected = !!(
     selectedLocationCode && selectedPitchCode
   );
@@ -956,7 +956,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const gqlFilteredRefreshRates =
     refreshRateData?.getFilteredRefreshRateOptions ?? [];
 
-  // --- ДИНАМИЧЕСКИЙ ЗАПРОС МОДУЛЕЙ (НОВЫЙ) ---
+  // --- ДИНАМИЧЕСКИЙ ЗАПРОС МОДУЛЕЙ ---
   // Запрос активен, если выбраны Локация И Питч (основные фильтры для модулей)
   const areModuleDepsSelected = !!(
     selectedLocationCode &&
@@ -1010,6 +1010,27 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     refetchOnWindowFocus: false,
   });
   const gqlFilteredModules = moduleData?.moduleOptions ?? [];
+
+  useEffect(() => {
+    if (!isLoadingModules && !isErrorModules && gqlFilteredModules) {
+        if (gqlFilteredModules.length === 1) {
+          const singleModule = gqlFilteredModules[0];
+          if (singleModule && (singleModule as GqlModule)?.code && (singleModule as GqlModule).active !== false) {
+              const singleModuleCode = (singleModule as GqlModule).code;
+              if (selectedModuleCode !== singleModuleCode) {
+                  console.log(`[Module Auto-Select Effect] Automatically selecting single available module: ${singleModuleCode}`);
+                  setSelectedModuleCodeState(singleModuleCode ?? null);
+              }
+          }
+        }
+    }
+}, [
+    gqlFilteredModules,
+    isLoadingModules,
+    isErrorModules,
+    selectedModuleCode,
+    setSelectedModuleCodeState,
+]);
 
   // --- ДИНАМИЧЕСКИЙ ЗАПРОС КАБИНЕТОВ ---
   const areCabinetDepsSelected = !!(
