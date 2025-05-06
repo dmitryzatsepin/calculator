@@ -4,12 +4,15 @@
     "module": "CommonJS",
     "outDir": "./dist",
     "rootDir": "./src",
+    "paths": {
+      "@prisma/client": ["../node_modules/.prisma/client"]
+    },
     "strict": true,
     "noImplicitAny": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": "./src"
+    "baseUrl": "./src",
   },
   "include": [
     "src/**/*"
