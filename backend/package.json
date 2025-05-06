@@ -13,7 +13,8 @@
     "prisma:seed:upsert": "tsx prisma/seed/index.ts --upsert",
     "clean": "rm -rf dist",
     "copy-engine": "mkdir -p dist && cp prisma/generated/client/libquery_engine-debian-openssl-3.0.x.so.node dist/query-engine.so.node",
-    "build": "pnpm run clean && pnpm prisma generate && tsc && pnpm run copy-engine",
+    "copy-prisma-client": "tsx copy-prisma-client.ts",
+    "build": "pnpm run clean && pnpm prisma generate && npm run copy-prisma-client && tsc && pnpm run copy-engine",
     "start": "node dist/server.js",
     "postinstall": "prisma generate",
     "db:push": "prisma db push --force-reset"
@@ -38,6 +39,7 @@
     "express": "^5.0.1",
     "express-async-handler": "^1.2.0",
     "fast-xml-parser": "^5.2.0",
+    "fs-extra": "^11.3.0",
     "graphql": "^16.10.0",
     "graphql-playground-middleware-express": "^1.7.23",
     "graphql-scalars": "^1.24.2",

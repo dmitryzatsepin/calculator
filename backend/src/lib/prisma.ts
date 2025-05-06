@@ -1,5 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { join } from 'path'
 
-export const prisma = new PrismaClient({
+process.env.PRISMA_CLIENT_LOCATION = join(__dirname, '../prisma/client')
 
-});
+import { PrismaClient } from '@prisma/client'
+
+export const prisma = new PrismaClient()
