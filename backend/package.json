@@ -12,7 +12,7 @@
     "prisma:seed": "tsx prisma/seed/index.ts",
     "prisma:seed:upsert": "tsx prisma/seed/index.ts --upsert",
     "clean": "rm -rf dist",
-    "copy-engine": "mkdir -p dist && cp node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node dist/query-engine.so.node",
+    "copy-engine": "mkdir -p dist && cp prisma/generated/client/libquery_engine-debian-openssl-3.0.x.so.node dist/query-engine.so.node",
     "build": "pnpm run clean && prisma generate && tsc && pnpm run copy-engine",
     "start": "node dist/server.js",
     "postinstall": "prisma generate",
