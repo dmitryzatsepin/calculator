@@ -40,7 +40,7 @@ const AuthPayload = builder
       user: t.field({
         type: UserObjectRef, // Используем импортированную ссылку на тип User
         description: "Данные аутентифицированного пользователя",
-        nullable: true,
+        nullable: false,
         resolve: (payload) => payload.user,
       }),
     }),
@@ -110,10 +110,10 @@ builder.mutationFields((t) => ({
   register: t.field({
     type: UserObjectRef, // Возвращает созданного пользователя
     description: "Регистрация нового пользователя.",
-    nullable: true,
     args: {
       input: t.arg({ type: RegisterInput, required: true }),
     },
+    nullable: true,
     resolve: async (_parent, args, ctx): Promise<PrismaUser> => {
       const { email, password, name } = args.input;
       const lowerCaseEmail = email.toLowerCase();
