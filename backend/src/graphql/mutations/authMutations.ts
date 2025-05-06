@@ -36,7 +36,7 @@ const AuthPayload = builder
   .implement({
     description: "Результат успешной аутентификации",
     fields: (t) => ({
-      token: t.exposeString("token", { description: "JWT токен доступа" }),
+      token: t.exposeString("token", { description: "JWT токен доступа", nullable: false }),
       user: t.field({
         type: UserObjectRef, // Используем импортированную ссылку на тип User
         description: "Данные аутентифицированного пользователя",
