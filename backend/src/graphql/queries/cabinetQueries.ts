@@ -1,6 +1,6 @@
 // src/graphql/queries/cabinetQueries.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Для WhereInput и Decimal
+import { Prisma } from '../../../prisma/generated/client'; // Для WhereInput и Decimal
 
 const CabinetFilterInput = builder.inputType('CabinetFilterInput', {
     fields: (t) => ({

@@ -1,5 +1,5 @@
 // prisma/seed/seedReferences.ts
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '../generated/client';
 import * as XLSX from 'xlsx';
 import { getDataFromSheet, safeBoolean, safeInt, safeDecimal } from './utils';
 import { referenceConfigs, IdMaps } from './config';

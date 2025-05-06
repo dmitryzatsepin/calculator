@@ -1,6 +1,6 @@
 // src/graphql/types/ModuleSize.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../prisma/generated/client';
 
 builder.prismaNode('ModuleSize', {
   id: { field: 'id' },

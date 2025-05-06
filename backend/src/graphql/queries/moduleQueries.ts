@@ -1,6 +1,6 @@
 // src/graphql/queries/moduleQueries.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../prisma/generated/client';
 
 // Input тип для фильтров Модулей
 const ModuleFilterInput = builder.inputType('ModuleFilterInput', {

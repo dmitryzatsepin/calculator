@@ -1,6 +1,6 @@
 // src/graphql/types/Module.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../prisma/generated/client';
 
  // Определяем тип ModulePrice
 const ModulePriceRelay = builder.prismaNode('ModulePrice', {

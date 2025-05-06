@@ -1,5 +1,5 @@
 // prisma/seed/seedPrices.ts
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '../generated/client';
 import * as XLSX from 'xlsx';
 import { getDataFromSheet, safeDecimal } from './utils'; // Убедитесь, что safeDecimal импортирован
 import { priceConfigs, IdMaps } from './config'; // Импортируем конфиг цен

@@ -1,6 +1,6 @@
 // src/graphql/types/CabinetSize.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Для WhereInput
+import { Prisma } from '../../../prisma/generated/client';
 
 builder.prismaNode('CabinetSize', {
   id: { field: 'id' },

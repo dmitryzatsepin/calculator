@@ -1,6 +1,6 @@
 // src/graphql/queries/refreshRateQueries.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../prisma/generated/client';
 
 builder.queryFields((t) => ({
 

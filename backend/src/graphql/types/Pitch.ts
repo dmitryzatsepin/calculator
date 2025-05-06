@@ -1,6 +1,6 @@
 // src/graphql/types/Pitch.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Для Decimal, если используется, и для WhereInput
+import { Prisma } from '../../../prisma/generated/client';
 
 builder.prismaNode('Pitch', {
   id: { field: 'id' },

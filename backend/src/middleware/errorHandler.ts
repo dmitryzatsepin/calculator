@@ -1,7 +1,7 @@
 // src/middleware/errorHandler.ts (Новый файл)
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../prisma/generated/client';
 import { JsonWebTokenError } from 'jsonwebtoken'; // Если используете JWT
 
 export const errorHandler: ErrorRequestHandler = (err, req: Request, res: Response, next: NextFunction) => {

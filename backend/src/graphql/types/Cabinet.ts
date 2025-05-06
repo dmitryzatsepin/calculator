@@ -1,6 +1,6 @@
 // src/graphql/types/Cabinet.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Импорт для Decimal
+import { Prisma } from '../../../prisma/generated/client';
 
 // Определяем тип CabinetPrice
 const CabinetPriceRelay = builder.prismaNode('CabinetPrice', {

@@ -17,7 +17,7 @@ import { prisma } from "./lib/prisma";
 import { GraphQLContext } from "./graphql/builder";
 import { validateSchema } from "graphql";
 import jwt from 'jsonwebtoken';
-import { User as PrismaUser } from '@prisma/client';
+import { User as PrismaUser } from '../prisma/generated/client';
 
 
 // --- Инициализация ---

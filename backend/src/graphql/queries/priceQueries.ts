@@ -1,6 +1,6 @@
 // src/graphql/queries/priceQueries.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../prisma/generated/client';
 import { Decimal } from '@prisma/client/runtime/library'; // Для преобразования
 
 // --- Input тип PriceRequestInput ---

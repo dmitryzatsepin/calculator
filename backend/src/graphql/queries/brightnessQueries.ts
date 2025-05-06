@@ -1,6 +1,6 @@
 // src/graphql/queries/brightnessQueries.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../prisma/generated/client'; // Импортируем Prisma Client
 
 builder.queryFields((t) => ({
   // <<< ЗАПРОС ФИЛЬТРОВАННЫХ ОПЦИЙ ЯРКОСТИ >>>

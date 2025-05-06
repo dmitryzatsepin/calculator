@@ -5,7 +5,7 @@ import type PrismaTypes from '../generated/pothos-types';
 import RelayPlugin from '@pothos/plugin-relay';
 import { prisma } from '../lib/prisma';
 import { DateResolver, DateTimeResolver } from 'graphql-scalars';
-import { User as PrismaUser } from '@prisma/client';
+import { User as PrismaUser } from '../../prisma/generated/client';
 
 export interface GraphQLContext {
   prisma: typeof prisma;

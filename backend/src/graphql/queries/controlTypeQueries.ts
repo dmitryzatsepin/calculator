@@ -1,6 +1,6 @@
 // src/graphql/queries/controlTypeQueries.ts
 import { builder } from '../builder';
-import { Prisma } from '@prisma/client'; // Импорт для WhereInput
+import { Prisma } from '../../../prisma/generated/client';
 
 // Используем builder.queryFields
 builder.queryFields((t) => ({

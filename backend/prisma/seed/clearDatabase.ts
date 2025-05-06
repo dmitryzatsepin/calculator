@@ -1,5 +1,5 @@
 // prisma/seed/clearDatabase.ts
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '../generated/client';
 
 export async function clearDatabase(prisma: PrismaClient): Promise<void> {
   console.log('🧹 Начало очистки базы данных...');
