@@ -7,7 +7,7 @@ async function copyPrismaClient() {
   const dest = path.resolve('dist/prisma/client')
 
   try {
-    await fs.ensureDir(path.dirname(dest))
+    await fs.ensureDir(dest)
     await fs.copy(source, dest)
     console.log(`✅ Prisma client copied from ${source} to ${dest}`)
   } catch (err) {

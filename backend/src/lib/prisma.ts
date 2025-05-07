@@ -1,12 +1,9 @@
-// prisma.ts
+// src/lib/prisma.ts
 
 import { resolve } from 'path'
+
+process.env.PRISMA_CLIENT_LOCATION = resolve(__dirname, '../prisma/client')
+
 import { PrismaClient } from '@prisma/client'
-
-// Указываем, где искать сгенерированный клиент
-const prismaClientLocation = resolve(__dirname, '../prisma/client')
-console.log('🔍 PRISMA_CLIENT_LOCATION:', prismaClientLocation)
-
-process.env.PRISMA_CLIENT_LOCATION = prismaClientLocation
 
 export const prisma = new PrismaClient()
