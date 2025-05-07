@@ -383,7 +383,7 @@ type CabinetDetailsQueryResult = {
 
 // --- Функция-запрос (Начальные данные) ---
 const fetchInitialData = async (): Promise<InitialDataQueryResult> => {
-  console.log("Fetching initial data (Context)...");
+  console.log("[CONTEXT_PROVIDER] fetchInitialData called");
   try {
     const data = await graphQLClient.request<InitialDataQueryResult>(
       GET_INITIAL_DATA
@@ -569,6 +569,7 @@ export const useCalculatorContext = () => {
 // --- Компонент Провайдера Контекста ---
 export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   const queryClient = useQueryClient();
+  console.log("[CONTEXT_PROVIDER] CalculatorProvider rendering...");
 
   // --- Состояния формы ---
   const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<
@@ -726,6 +727,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
   );
 
   // --- Запрос начальных данных ---
+  console.log("[CONTEXT_PROVIDER] About to call useQuery for calculatorInitialData");
   const {
     data: initialData,
     isLoading: isLoadingInitial,
@@ -737,6 +739,8 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });
+  console.log("[CONTEXT_PROVIDER] Initial Data useQuery hook executed. isLoading:", isLoadingInitial, "isError:", isErrorInitial);
+  console.log("[CONTEXT_PROVIDER] initialData raw object:", initialData);
 
   // --- Извлечение данных из начального запроса ---
   const screenTypes = initialData?.screenTypes ?? [];
