@@ -15,7 +15,7 @@
     "copy-engine": "tsx copy-engine.ts",
     "copy-prisma-client": "tsx copy-prisma-client.ts",
     "build": "pnpm run clean && pnpm prisma generate && npm run copy-prisma-client && tsc && pnpm run copy-engine",
-    "start": "node dist/server.js",
+    "start": "PRISMA_CLIENT_LOCATION=./dist/prisma/client node dist/server.js",
     "postinstall": "prisma generate",
     "db:push": "prisma db push --force-reset"
   },
