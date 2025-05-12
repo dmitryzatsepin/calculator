@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export default function handler(request, response) {
-  // ... (CORS и OPTIONS обработка остаются такими же) ...
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-Bitrix-Csrf-Token, X-Bitrix-Auth-Token, Placement, Placement_options, Pragma, Cache-Control');
@@ -14,18 +13,10 @@ export default function handler(request, response) {
   }
 
   if (request.method === 'POST' || request.method === 'GET') {
-    const currentDir = process.cwd(); // /var/task
-    console.log(`Current working directory: ${currentDir}`);
-    try {
-      const filesInCurrentDir = fs.readdirSync(currentDir);
-      console.log(`Files in ${currentDir}:`, filesInCurrentDir);
-    } catch (e) {
-      console.error(`Error reading directory ${currentDir}:`, e);
-    }
-
-    // Попытка прочитать index.html из корня функции
-    // (Vercel должен был скопировать содержимое 'dist' сюда)
-    const filePath = path.join(currentDir, 'index.html');
+    const currentDir = process.cwd(); // Это /var/task
+    // Правильный путь к index.html, учитывая, что /var/task содержит папку 'frontend'
+    const filePath = path.join(currentDir, 'frontend', 'dist', 'index.html');
+    
     console.log(`Attempting to read: ${filePath}`);
 
     try {
@@ -34,7 +25,7 @@ export default function handler(request, response) {
       response.status(200).send(fileContents);
     } catch (error) {
       console.error(`Error reading ${filePath}:`, error);
-      response.status(500).send('Error loading application content. Check Vercel function logs.');
+      response.status(500).send('Error loading application content. Check Vercel function logs for path issues.');
     }
   } else {
     response.status(405).send('Method Not Allowed by Function');
