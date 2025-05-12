@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export default function handler(request, response) {
+  // ... (CORS и OPTIONS обработка остаются такими же) ...
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-Bitrix-Csrf-Token, X-Bitrix-Auth-Token, Placement, Placement_options, Pragma, Cache-Control');
@@ -13,22 +14,27 @@ export default function handler(request, response) {
   }
 
   if (request.method === 'POST' || request.method === 'GET') {
-    const filePath = path.join(process.cwd(), 'index.html');
+    const currentDir = process.cwd(); // /var/task
+    console.log(`Current working directory: ${currentDir}`);
+    try {
+      const filesInCurrentDir = fs.readdirSync(currentDir);
+      console.log(`Files in ${currentDir}:`, filesInCurrentDir);
+    } catch (e) {
+      console.error(`Error reading directory ${currentDir}:`, e);
+    }
+
+    // Попытка прочитать index.html из корня функции
+    // (Vercel должен был скопировать содержимое 'dist' сюда)
+    const filePath = path.join(currentDir, 'index.html');
+    console.log(`Attempting to read: ${filePath}`);
+
     try {
       const fileContents = fs.readFileSync(filePath, 'utf8');
       response.setHeader('Content-Type', 'text/html; charset=utf-8');
       response.status(200).send(fileContents);
     } catch (error) {
-      console.error('Error reading index.html from function:', error);
-      try {
-          const fallbackFilePath = path.join(process.cwd(), 'dist', 'index.html');
-          const fileContents = fs.readFileSync(fallbackFilePath, 'utf8');
-          response.setHeader('Content-Type', 'text/html; charset=utf-8');
-          response.status(200).send(fileContents);
-      } catch (fallbackError) {
-          console.error('Error reading index.html from dist/ in function:', fallbackError);
-          response.status(500).send('Error loading application content.');
-      }
+      console.error(`Error reading ${filePath}:`, error);
+      response.status(500).send('Error loading application content. Check Vercel function logs.');
     }
   } else {
     response.status(405).send('Method Not Allowed by Function');
