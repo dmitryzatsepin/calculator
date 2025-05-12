@@ -1,24 +1,8 @@
 {
-  "trailingSlash": false,
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "methods": ["OPTIONS"],
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, X-Bitrix-Csrf-Token, X-Bitrix-Auth-Token, Placement, Placement_options, Pragma, Cache-Control"
-      },
-      "dest": "/index.html",
-      "continue": false
-    },
-    {
-      "src": "/(.*)",
-      "methods": ["POST", "GET"],
-      "headers": {
-         "Access-Control-Allow-Origin": "*"
-      },
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
   ]
 }
