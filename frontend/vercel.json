@@ -1,20 +1,23 @@
 {
   "routes": [
     {
-      "src": "/.*",
-      "methods": ["GET", "POST", "OPTIONS"],
+      "src": "/(.*)",
+      "methods": ["OPTIONS"],
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, X-Bitrix-Csrf-Token, X-Bitrix-Auth-Token, Placement, Placement_options, Pragma, Cache-Control"
+      },
       "dest": "/index.html",
-      "continue": true
-    }
-  ],
-  "headers": [
+      "continue": false
+    },
     {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With, X-Bitrix-Csrf-Token, X-Bitrix-Auth-Token" }
-      ]
+      "src": "/(.*)",
+      "methods": ["POST", "GET"],
+      "headers": {
+         "Access-Control-Allow-Origin": "*"
+      },
+      "dest": "/index.html"
     }
   ]
 }
