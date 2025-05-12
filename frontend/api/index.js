@@ -13,11 +13,16 @@ export default function handler(request, response) {
   }
 
   if (request.method === 'POST' || request.method === 'GET') {
-    const currentDir = process.cwd(); // Это /var/task
-    // Правильный путь к index.html, учитывая, что /var/task содержит папку 'frontend'
-    const filePath = path.join(currentDir, 'frontend', 'dist', 'index.html');
+    // Предполагаем, что Vercel скопировал содержимое 'frontend/dist/' в корень функции '/var/task/'
+    const filePath = path.join(process.cwd(), 'index.html'); 
     
     console.log(`Attempting to read: ${filePath}`);
+    console.log(`Current CWD: ${process.cwd()}`);
+    try {
+        const filesInCWD = fs.readdirSync(process.cwd());
+        console.log(`Files in CWD (${process.cwd()}):`, filesInCWD);
+    } catch(e) { console.error("Error reading CWD:", e); }
+
 
     try {
       const fileContents = fs.readFileSync(filePath, 'utf8');
@@ -25,7 +30,7 @@ export default function handler(request, response) {
       response.status(200).send(fileContents);
     } catch (error) {
       console.error(`Error reading ${filePath}:`, error);
-      response.status(500).send('Error loading application content. Check Vercel function logs for path issues.');
+      response.status(500).send('Error loading application content. Check Vercel function logs for path issues (final attempt).');
     }
   } else {
     response.status(405).send('Method Not Allowed by Function');
