@@ -5,8 +5,8 @@
     { "source": "/(.*)", "destination": "/api/index" }
   ],
   "functions": {
-    "frontend/api/index.js": {
-      "includeFiles": "frontend/dist/**"
+    "api/index.js": {
+      "includeFiles": "dist/**"
     }
   }
 }
