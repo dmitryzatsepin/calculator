@@ -8,7 +8,8 @@ generator client {
 
 generator pothos {
   provider = "prisma-pothos-types"
-  output = "../src/generated/pothos-types.ts"
+  output       = "./pothos-types.ts"
+  clientOutput = "./generated/client"
 }
 
 datasource db {
@@ -57,7 +58,7 @@ model Material {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cabinets CabinetMaterial[] // Связь через CabinetMaterial
+  cabinets CabinetMaterial[]
 
   @@map("materials")
 }
@@ -66,13 +67,13 @@ model Material {
 model Location {
   id        Int      @id @default(autoincrement())
   code      String   @unique @map("location_code")
-  name      String   @map("location_name") // Имя НЕ уникально? Если да, убрать @unique ниже
+  name      String   @map("location_name")
   active    Boolean  @default(true) @map("active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cabinets CabinetLocation[] // Связь через CabinetLocation
-  modules  ModuleLocation[]  // Связь через ModuleLocation
+  cabinets CabinetLocation[]
+  modules  ModuleLocation[]
 
   @@map("locations")
 }
@@ -86,7 +87,7 @@ model Placement {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cabinets CabinetPlacement[] // Связь через CabinetPlacement
+  cabinets CabinetPlacement[]
 
   @@map("placements")
 }
@@ -100,8 +101,8 @@ model Option {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  screenTypes ScreenTypeOption[] // Связь через ScreenTypeOption
-  modules     ModuleOption[]     // Связь через ModuleOption
+  screenTypes ScreenTypeOption[]
+  modules     ModuleOption[]
 
   @@map("options")
 }
@@ -115,7 +116,7 @@ model Sensor {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  screenTypes ScreenTypeSensor[] // Связь через ScreenTypeSensor
+  screenTypes ScreenTypeSensor[]
 
   @@map("sensors")
 }
@@ -129,7 +130,7 @@ model ControlType {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  screenTypes ScreenTypeControlType[] // Связь через ScreenTypeControlType
+  screenTypes ScreenTypeControlType[]
 
   @@map("control_types")
 }
@@ -143,8 +144,8 @@ model Pitch {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  cabinets CabinetPitch[] // Связь через CabinetPitch
-  modules  ModulePitch[]  // Связь через ModulePitch
+  cabinets CabinetPitch[]
+  modules  ModulePitch[]
 
   @@map("pitches")
 }
@@ -158,7 +159,7 @@ model RefreshRate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  modules ModuleRefreshRate[] // Связь через ModuleRefreshRate
+  modules ModuleRefreshRate[]
 
   @@map("refresh_rates")
 }
@@ -172,7 +173,7 @@ model Brightness {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  modules ModuleBrightness[] // Связь через ModuleBrightness
+  modules ModuleBrightness[]
 
   @@map("brightness_values")
 }
@@ -181,13 +182,13 @@ model Brightness {
 model Manufacturer {
   id        Int      @id @default(autoincrement())
   code      String   @unique @map("manufacturer_code")
-  name      String   @map("manufacturer_name") // Убрали @unique с name
+  name      String   @map("manufacturer_name")
   active    Boolean  @default(true) @map("active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cabinets CabinetManufacturer[] // Связь через CabinetManufacturer
-  modules  ModuleManufacturer[]  // Связь через ModuleManufacturer
+  cabinets CabinetManufacturer[]
+  modules  ModuleManufacturer[]
 
   @@map("manufacturers")
 }
@@ -196,13 +197,13 @@ model Manufacturer {
 model Supplier {
   id        Int      @id @default(autoincrement())
   code      String   @unique @map("supplier_code")
-  name      String   @map("supplier_name") // Убрали @unique с name
+  name      String   @map("supplier_name")
   active    Boolean  @default(true) @map("active")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cabinets CabinetSupplier[] // Связь через CabinetSupplier
-  items    ItemSupplier[]    // Связь через ItemSupplier
+  cabinets CabinetSupplier[]
+  items    ItemSupplier[]
 
   @@map("suppliers")
 }
@@ -230,8 +231,8 @@ model ModuleSize {
   active       Boolean                 @default(true) @map("active")
   createdAt    DateTime                @default(now())
   updatedAt    DateTime                @updatedAt
-  modules      ModuleModuleSize[]      // Связь через ModuleModuleSize
-  cabinetSizes CabinetSizeModuleSize[] // Связь через CabinetSizeModuleSize
+  modules      ModuleModuleSize[]
+  cabinetSizes CabinetSizeModuleSize[]
 
   @@map("module_sizes")
 }
@@ -246,8 +247,8 @@ model CabinetSize {
   active      Boolean                 @default(true) @map("active")
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @updatedAt
-  cabinets    CabinetCabinetSize[]    // Связь через CabinetCabinetSize
-  moduleSizes CabinetSizeModuleSize[] // Связь через CabinetSizeModuleSize
+  cabinets    CabinetCabinetSize[]
+  moduleSizes CabinetSizeModuleSize[]
 
   @@map("cabinet_sizes")
 }
@@ -261,8 +262,8 @@ model ItemCategory {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  subcategories ItemCategorySubcategory[] // Связь с подкатегориями через M-N
-  items         ItemCategoryRelation[]    // <--- ИСПРАВЛЕНО: Обратная связь на ItemCategoryRelation
+  subcategories ItemCategorySubcategory[]
+  items         ItemCategoryRelation[]
   cabinets      CabinetCategory[]         
   modules       ModuleCategory[]          
 
@@ -278,8 +279,8 @@ model ItemSubcategory {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  categories ItemCategorySubcategory[] // Связь с категориями через M-N
-  items      ItemSubcategoryRelation[] // <--- ИСПРАВЛЕНО: Обратная связь на ItemSubcategoryRelation
+  categories ItemCategorySubcategory[]
+  items      ItemSubcategoryRelation[]
   cabinets   CabinetSubcategory[]      
   modules    ModuleSubcategory[]       
 
@@ -388,22 +389,21 @@ model ScreenTypeSensor {
 }
 
 // --- Связи для Item ---
-// Модели ItemCategory и ItemSubcategory УЖЕ ОПРЕДЕЛЕНЫ ВЫШЕ КАК СПРАВОЧНИКИ.
 // Здесь определяем связующие таблицы.
 
-model ItemCategoryRelation { // Переименовали, чтобы не было конфликта
+model ItemCategoryRelation {
   itemCode     String       @map("item_code")
   categoryCode String       @map("item_category_code")
   item         Item         @relation(fields: [itemCode], references: [code], onDelete: Cascade)
-  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ категории
+  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
   @@id([itemCode, categoryCode])
   @@map("item_categories_items") 
 }
-model ItemSubcategoryRelation { // Переименовали
+model ItemSubcategoryRelation {
   itemCode        String          @map("item_code")
   subcategoryCode String          @map("item_subcategory_code")
   item            Item            @relation(fields: [itemCode], references: [code], onDelete: Cascade)
-  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ подкатегории
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
   @@id([itemCode, subcategoryCode])
   @@map("item_subcategories_items") 
 }
@@ -428,8 +428,8 @@ model ItemSupplier {
 model ItemCategorySubcategory {
   categoryCode    String          @map("item_category_code")
   subcategoryCode String          @map("item_subcategory_code")
-  category        ItemCategory    @relation(fields: [categoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ
-  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  category        ItemCategory    @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
   @@id([categoryCode, subcategoryCode])
   @@map("item_category_subcategories")
 }
@@ -439,15 +439,15 @@ model CabinetCategory {
   cabinetCode  String       @map("cabinet_code")
   categoryCode String       @map("item_category_code")
   cabinet      Cabinet      @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
-  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
   @@id([cabinetCode, categoryCode])
   @@map("cabinet_categories")
 }
 model CabinetSubcategory {
   cabinetCode     String          @map("cabinet_code")
-  subcategoryCode String          @map("item_subcategory_code") // Исправлено имя колонки Excel
+  subcategoryCode String          @map("item_subcategory_code")
   cabinet         Cabinet         @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
-  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
   @@id([cabinetCode, subcategoryCode])
   @@map("cabinet_subcategories")
 }
@@ -459,27 +459,27 @@ model CabinetLocation {
   @@id([cabinetCode, locationCode])
   @@map("cabinet_locations")
 }
-model CabinetPlacement { // Модель для связи M-N Cabinet и Placement
+model CabinetPlacement {
   cabinetCode   String    @map("cabinet_code")
-  placementCode String    @map("placement_code") // Связь по КОДУ
+  placementCode String    @map("placement_code")
   cabinet       Cabinet   @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
-  placement     Placement @relation(fields: [placementCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  placement     Placement @relation(fields: [placementCode], references: [code], onDelete: Cascade)
   @@id([cabinetCode, placementCode])
-  @@map("cabinet_placements_cabinets") // Имя таблицы для связи
+  @@map("cabinet_placements_cabinets")
 }
 model CabinetMaterial {
   cabinetCode  String   @map("cabinet_code")
-  materialCode String   @map("material_code") // Связь по КОДУ
+  materialCode String   @map("material_code")
   cabinet      Cabinet  @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
-  material     Material @relation(fields: [materialCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  material     Material @relation(fields: [materialCode], references: [code], onDelete: Cascade)
   @@id([cabinetCode, materialCode])
   @@map("cabinet_materials")
 }
 model CabinetCabinetSize {
   cabinetCode     String      @map("cabinet_code")
-  cabinetSizeCode String      @map("size_code") // Имя колонки из Excel листа cabinet>cabinet_size
+  cabinetSizeCode String      @map("size_code")
   cabinet         Cabinet     @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
-  size            CabinetSize @relation(fields: [cabinetSizeCode], references: [code], onDelete: Cascade) // Связь по коду размера
+  size            CabinetSize @relation(fields: [cabinetSizeCode], references: [code], onDelete: Cascade)
   @@id([cabinetCode, cabinetSizeCode])
   @@map("cabinet_cabinet_sizes")
 }
@@ -507,7 +507,7 @@ model CabinetSupplier {
   @@id([cabinetCode, supplierCode])
   @@map("cabinet_suppliers")
 }
-model CabinetItemComponent { // Переименовали из CabinetItem
+model CabinetItemComponent {
     cabinetCode String    @map("cabinet_code")
     itemCode    String    @map("item_code") 
     quantity    Int       @map("item_count") 
@@ -530,7 +530,7 @@ model ModuleCategory {
   moduleCode   String       @map("module_code")
   categoryCode String       @map("item_category_code")
   module       Module       @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
-  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
   @@id([moduleCode, categoryCode])
   @@map("module_categories")
 }
@@ -538,7 +538,7 @@ model ModuleSubcategory {
   moduleCode      String          @map("module_code")
   subcategoryCode String          @map("item_subcategory_code")
   module          Module          @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
-  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
   @@id([moduleCode, subcategoryCode])
   @@map("module_subcategories")
 }
@@ -554,7 +554,7 @@ model ModuleRefreshRate {
   moduleCode      String      @map("module_code")
   refreshRateCode String      @map("refresh_rate_code")
   module          Module      @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
-  refreshRate     RefreshRate @relation(fields: [refreshRateCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  refreshRate     RefreshRate @relation(fields: [refreshRateCode], references: [code], onDelete: Cascade)
   @@id([moduleCode, refreshRateCode])
   @@map("module_refresh_rates")
 }
@@ -562,7 +562,7 @@ model ModuleBrightness {
   moduleCode     String     @map("module_code")
   brightnessCode String     @map("brightness_code")
   module         Module     @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
-  brightness     Brightness @relation(fields: [brightnessCode], references: [code], onDelete: Cascade) // Связь по КОДУ
+  brightness     Brightness @relation(fields: [brightnessCode], references: [code], onDelete: Cascade)
   @@id([moduleCode, brightnessCode])
   @@map("module_brightness_values")
 }
@@ -590,7 +590,7 @@ model ModuleManufacturer {
   @@id([moduleCode, manufacturerCode])
   @@map("module_manufacturers")
 }
-model ModuleItemComponent { // Переименовали из ModuleItem
+model ModuleItemComponent {
     moduleCode String @map("module_code")
     itemCode   String @map("item_code") 
     quantity   Int    @map("item_count") 
