@@ -338,8 +338,12 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
     const controlTypeSelectOptions = useMemo((): SelectOption[] => controlTypes.filter(ct => ct?.active && !!ct.code && !!ct.name).sort((a, b) => (a.name!).localeCompare(b.name!)).map(ct => ({ value: ct.code!, label: ct.name! })), [controlTypes]);
     const moduleSelectOptions = useMemo((): SelectOption[] => gqlFilteredModules.filter(m => !!m?.code).map(m => ({ value: m.code!, label: m.name ?? m.sku ?? m.code! })), [gqlFilteredModules]);
     const cabinetSelectOptions = useMemo((): SelectOption[] => gqlCabinets.filter(c => !!c?.code).map(c => ({ value: c.code!, label: c.name ?? c.sku ?? c.code! })), [gqlCabinets]);
-    const isFlexOptionAvailableForSelectedScreenType = useMemo((): boolean => availableOptions.some(opt => opt?.code === "flex"), [availableOptions]);
-
+    const isFlexOptionAvailableForSelectedScreenType = useMemo((): boolean => {
+        if (!selectedScreenTypeCode) {
+            return false; // Если тип экрана не выбран, опция Flex недоступна
+        }
+        return selectedScreenTypeCode === cabinetScreenTypeCode; // Опция Flex доступна ТОЛЬКО для кабинетного экрана
+    }, [selectedScreenTypeCode, cabinetScreenTypeCode]);
     // --- Логика isCalculationReady (используем вынесенную функцию) ---
     const isCalculationReady = useMemo((): boolean => {
         return checkCalculationReadiness({
@@ -444,7 +448,7 @@ export const CalculatorProvider = ({ children }: { children: ReactNode }) => {
         }),
         [ // ВСЕ зависимости должны быть здесь
             screenTypes, locations, materials, ipProtections, sensors, controlTypes, isLoadingInitialData, isErrorInitialData, errorInitialData,
-            availableOptions, isLoadingScreenTypeOptions, isErrorScreenTypeOptions, errorScreenTypeOptions,
+            availableOptions, isLoadingScreenTypeOptions, isErrorScreenTypeOptions, errorScreenTypeOptions, isFlexOptionAvailableForSelectedScreenType,
             gqlFilteredPitches, isLoadingPitches, isErrorPitches, errorPitches,
             gqlFilteredRefreshRates, isLoadingRefreshRates, isErrorRefreshRates, errorRefreshRates,
             gqlFilteredBrightnesses, isLoadingBrightnesses, isErrorBrightnesses, errorBrightnesses,

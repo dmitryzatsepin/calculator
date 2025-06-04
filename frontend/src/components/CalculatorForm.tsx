@@ -36,15 +36,14 @@ import { useCalculatorContext } from "../context/CalculatorContext";
 
 // --- КОМПОНЕНТ ---
 const CalculatorForm = () => {
-  // --- Получаем данные из контекста ---
   const {
     // Статусы загрузки для начальных данных
-    isLoadingInitialData, // ИЗМЕНЕНО (было isLoading)
-    isErrorInitialData,   // ИЗМЕНЕНО (было isError)
-    errorInitialData,     // ИЗМЕНЕНО (было error)
+    isLoadingInitialData,
+    isErrorInitialData,
+    errorInitialData,
 
     // Данные и статусы для опций типа экрана (из хука useScreenTypeOptions)
-    screenTypeOptions, // Массив опций (было optionsQueryResult.data)
+    screenTypeOptions,
     isLoadingScreenTypeOptions,
     isErrorScreenTypeOptions,
     errorScreenTypeOptions,
@@ -73,13 +72,13 @@ const CalculatorForm = () => {
     isLoadingCabinets,
     isErrorCabinets,
     errorCabinets,
-    
-    // Курс доллара
-    localDollarRateInput, // ИЗМЕНЕНО (было dollarRate) - для инпута
-    setLocalDollarRateInput, // ИЗМЕНЕНО (было setDollarRate) - для инпута
-    isLoadingDollarRate, // Статус загрузки курса
 
-    // Состояние формы (имена не изменились)
+    // Курс доллара
+    localDollarRateInput,
+    setLocalDollarRateInput,
+    isLoadingDollarRate,
+
+    // Состояние формы
     selectedScreenTypeCode,
     selectedLocationCode,
     selectedMaterialCode,
@@ -94,12 +93,12 @@ const CalculatorForm = () => {
     isFlexSelected,
     widthMm,
     heightMm,
-    
-    // Статусы и результаты расчета (имена не изменились)
+
+    // Статусы и результаты расчета
     isCalculating,
-    isCalculationReady, // Убедитесь, что это поле есть и его логика в контексте корректна
-    
-    // Сеттеры состояния формы (имена не изменились)
+    isCalculationReady,
+
+    // Сеттеры состояния формы
     setSelectedScreenTypeCode,
     setSelectedLocationCode,
     setSelectedMaterialCode,
@@ -114,44 +113,42 @@ const CalculatorForm = () => {
     setIsFlexSelected,
     setWidthMm,
     setHeightMm,
-    performCalculation, // Функция расчета
+    performCalculation,
 
-    // Мемоизированные опции для селектов (новые имена)
+    // Мемоизированные опции для селектов
     screenTypeSegments,
-    locationSelectOptions,    // ИЗМЕНЕНО (было locationOptions)
-    materialSelectOptions,  // ИЗМЕНЕНО (было materialOptions)
-    protectionSelectOptions, // ИЗМЕНЕНО (было protectionOptions)
-    brightnessSelectOptions, // ИЗМЕНЕНО (было brightnessOptions)
-    refreshRateSelectOptions,// ИЗМЕНЕНО (было refreshRateOptions)
-    sensorSelectOptions,      // ИЗМЕНЕНО (было sensorOptions)
-    controlTypeSelectOptions, // ИЗМЕНЕНО (было controlTypeOptions)
-    pitchSelectOptions,       // ИЗМЕНЕНО (было pitchOptions)
-    moduleSelectOptions,      // ИЗМЕНЕНО (было moduleOptions)
-    cabinetSelectOptions,     // ИЗМЕНЕНО (было cabinetOptions)
-    isFlexOptionAvailableForSelectedScreenType, // ИЗМЕНЕНО (было isFlexOptionAvailable)
+    locationSelectOptions,
+    materialSelectOptions,
+    protectionSelectOptions,
+    brightnessSelectOptions,
+    refreshRateSelectOptions,
+    sensorSelectOptions,
+    controlTypeSelectOptions,
+    pitchSelectOptions,
+    moduleSelectOptions,
+    cabinetSelectOptions,
+    isFlexOptionAvailableForSelectedScreenType,
 
   } = useCalculatorContext();
 
-  // cabinetScreenTypeCode и showCabinetSection остаются как есть
   const cabinetScreenTypeCode = "cabinet";
   const showCabinetSection = selectedScreenTypeCode === cabinetScreenTypeCode;
 
-  // --- ОТЛАДКА ОПЦИЙ (адаптируем к новым именам) ---
+  // --- ОТЛАДКА ОПЦИЙ ---
   useEffect(() => {
     if (selectedScreenTypeCode) {
       console.log("Options Debug:", {
         selectedScreenTypeCode,
-        isLoadingOptions: isLoadingScreenTypeOptions, // ИЗМЕНЕНО
-        isErrorOptions: isErrorScreenTypeOptions,     // ИЗМЕНЕНО
-        errorOptions: errorScreenTypeOptions?.message, // ИЗМЕНЕНО
-        availableOptionsData: screenTypeOptions,       // ИЗМЕНЕНО
-        isFlexOptionAvailable: isFlexOptionAvailableForSelectedScreenType, // ИЗМЕНЕНО
+        isLoadingOptions: isLoadingScreenTypeOptions,
+        isErrorOptions: isErrorScreenTypeOptions,
+        errorOptions: errorScreenTypeOptions?.message,
+        availableOptionsData: screenTypeOptions,
+        isFlexOptionAvailable: isFlexOptionAvailableForSelectedScreenType,
       });
     }
   }, [selectedScreenTypeCode, screenTypeOptions, isLoadingScreenTypeOptions, isErrorScreenTypeOptions, errorScreenTypeOptions, isFlexOptionAvailableForSelectedScreenType]);
-  // ---------------------
 
-  // --- Обработчики (остаются как есть, так как имена сеттеров не менялись) ---
+  // --- Обработчики ---
   const handleScreenTypeChange = useCallback((value: string | null) => setSelectedScreenTypeCode(value), [setSelectedScreenTypeCode]);
   const handleLocationChange = useCallback((value: string | null) => setSelectedLocationCode(value), [setSelectedLocationCode]);
   const handleMaterialChange = useCallback((value: string | null) => setSelectedMaterialCode(value), [setSelectedMaterialCode]);
@@ -164,52 +161,51 @@ const CalculatorForm = () => {
   const handleModuleChange = useCallback((value: string | null) => setSelectedModuleCode(value), [setSelectedModuleCode]);
   const handleCabinetChange = useCallback((value: string | null) => setSelectedCabinetCode(value), [setSelectedCabinetCode]);
   const handleFlexChange = useCallback((checked: boolean) => setIsFlexSelected(checked), [setIsFlexSelected]);
-  const handleDollarRateChange = useCallback((value: number | string) => setLocalDollarRateInput(value), [setLocalDollarRateInput]); // ИЗМЕНЕНО
+  const handleDollarRateChange = useCallback((value: number | string) => setLocalDollarRateInput(value), [setLocalDollarRateInput]);
   const handleCalculateClick = useCallback(() => performCalculation(), [performCalculation]);
 
-  // --- JSX (адаптируем к новым именам) ---
+  // --- JSX ---
   return (
     <Stack gap="md">
       <LoadingOverlay
-        visible={isLoadingInitialData} // ИЗМЕНЕНО
+        visible={isLoadingInitialData}
         overlayProps={{ radius: "sm", blur: 2 }}
         loaderProps={{ children: <Loader /> }}
       />
-      {isLoadingInitialData && <Text ta="center">Загрузка конфигурации...</Text>} {/* ИЗМЕНЕНО */}
-      {!isLoadingInitialData && isErrorInitialData && ( // ИЗМЕНЕНО
+      {isLoadingInitialData && <Text ta="center">Загрузка конфигурации...</Text>}
+      {!isLoadingInitialData && isErrorInitialData && (
         <Alert
           title="Ошибка загрузки данных"
           color="red"
           icon={<IconAlertCircle size={16} />}
           radius="sm"
         >
-          {errorInitialData?.message ?? "Не удалось загрузить данные."} {/* ИЗМЕНЕНО */}
+          {errorInitialData?.message ?? "Не удалось загрузить данные."}
         </Alert>
       )}
 
-      {!isLoadingInitialData && !isErrorInitialData && ( // ИЗМЕНЕНО
+      {!isLoadingInitialData && !isErrorInitialData && (
         <>
           <ScreenTypeSelector
             data={screenTypeSegments}
             value={selectedScreenTypeCode}
             onChange={handleScreenTypeChange}
-            disabled={isLoadingInitialData} // ИЗМЕНЕНО
+            disabled={isLoadingInitialData}
           />
 
           {/* Условный рендеринг опции Flex */}
-          {isLoadingScreenTypeOptions && isFlexOptionAvailableForSelectedScreenType && ( // ИЗМЕНЕНО
+          {isLoadingScreenTypeOptions && selectedScreenTypeCode === cabinetScreenTypeCode && (
             <Loader size="xs" mt="sm" />
           )}
-          {isErrorScreenTypeOptions && isFlexOptionAvailableForSelectedScreenType && ( // ИЗМЕНЕНО
+          {isErrorScreenTypeOptions && selectedScreenTypeCode === cabinetScreenTypeCode && (
             <Text c="red" size="xs">
-              Ошибка загрузки опций: {errorScreenTypeOptions?.message} {/* ИЗМЕНЕНО */}
+              Ошибка загрузки специфичных опций: {errorScreenTypeOptions?.message}
             </Text>
           )}
-          {isFlexOptionAvailableForSelectedScreenType && !isLoadingScreenTypeOptions && !isErrorScreenTypeOptions && ( // ИЗМЕНЕНО
+          {isFlexOptionAvailableForSelectedScreenType && !isLoadingScreenTypeOptions && !isErrorScreenTypeOptions && (
             <FlexOptionSwitch
               checked={isFlexSelected}
               onChange={handleFlexChange}
-              disabled={selectedScreenTypeCode === cabinetScreenTypeCode}
             />
           )}
 
@@ -219,22 +215,22 @@ const CalculatorForm = () => {
               height={heightMm}
               onWidthChange={setWidthMm}
               onHeightChange={setHeightMm}
-              disabled={isLoadingInitialData} // ИЗМЕНЕНО
+              disabled={isLoadingInitialData}
             />
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Stack gap="md">
                 <LocationSelect
-                  options={locationSelectOptions} // ИЗМЕНЕНО
+                  options={locationSelectOptions}
                   value={selectedLocationCode}
                   onChange={handleLocationChange}
-                  disabled={isLoadingInitialData || !selectedScreenTypeCode || locationSelectOptions.length === 0} // ИЗМЕНЕНО
+                  disabled={isLoadingInitialData || !selectedScreenTypeCode || locationSelectOptions.length === 0}
                   required
                 />
                 <IpProtectionSelect
-                  options={protectionSelectOptions} // ИЗМЕНЕНО
+                  options={protectionSelectOptions}
                   value={selectedProtectionCode}
                   onChange={handleProtectionChange}
-                  disabled={isLoadingInitialData || !selectedLocationCode || protectionSelectOptions.length === 0} // ИЗМЕНЕНО
+                  disabled={isLoadingInitialData || !selectedLocationCode || protectionSelectOptions.length === 0}
                   required
                 />
               </Stack>
@@ -243,7 +239,7 @@ const CalculatorForm = () => {
               <Grid>
                 <Grid.Col span={{ base: 12, sm: 4 }}>
                   <SensorCheckboxGroup
-                    options={sensorSelectOptions} // ИЗМЕНЕНО
+                    options={sensorSelectOptions}
                     value={selectedSensorCodes}
                     onChange={handleSensorChange}
                     disabled={true}
@@ -251,7 +247,7 @@ const CalculatorForm = () => {
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, sm: 8 }}>
                   <ControlTypeCheckboxGroup
-                    options={controlTypeSelectOptions} // ИЗМЕНЕНО
+                    options={controlTypeSelectOptions}
                     value={selectedControlTypeCodes}
                     onChange={handleControlTypeChange}
                     disabled={true}
@@ -262,33 +258,33 @@ const CalculatorForm = () => {
             <Grid.Col span={12} mt="md">
               {showCabinetSection && (
                 <MaterialSelect
-                  options={materialSelectOptions} // ИЗМЕНЕНО
+                  options={materialSelectOptions}
                   value={selectedMaterialCode}
                   onChange={handleMaterialChange}
-                  disabled={isLoadingInitialData || !selectedLocationCode || materialSelectOptions.length === 0} // ИЗМЕНЕНО
+                  disabled={isLoadingInitialData || !selectedLocationCode || materialSelectOptions.length === 0}
                   required
                 />
               )}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <PitchSelect
-                options={pitchSelectOptions} // ИЗМЕНЕНО
+                options={pitchSelectOptions}
                 value={selectedPitchCode}
                 onChange={handlePitchChange}
                 disabled={
                   isLoadingInitialData || !selectedLocationCode || !selectedProtectionCode ||
                   (showCabinetSection && !selectedMaterialCode) ||
-                  isLoadingPitches || pitchSelectOptions.length === 0 // ИЗМЕНЕНО
+                  isLoadingPitches || pitchSelectOptions.length === 0
                 }
                 loading={isLoadingPitches}
                 required={true}
                 placeholder={!selectedLocationCode ? "Сначала выберите расположение" : isLoadingPitches ? "Загрузка..." : "Выберите шаг пикселя"}
               />
-              {isErrorPitches && ( <Text c="red" size="sm" mt="xs"> Ошибка загрузки шагов пикселя: {errorPitches?.message ?? "Неизвестная ошибка"} </Text> )}
+              {isErrorPitches && (<Text c="red" size="sm" mt="xs"> Ошибка загрузки шагов пикселя: {errorPitches?.message ?? "Неизвестная ошибка"} </Text>)}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <RefreshRateSelect
-                options={refreshRateSelectOptions} // ИЗМЕНЕНО
+                options={refreshRateSelectOptions}
                 value={selectedRefreshRateCode}
                 onChange={handleRefreshRateChange}
                 disabled={isLoadingInitialData || !selectedPitchCode || isLoadingRefreshRates}
@@ -296,11 +292,11 @@ const CalculatorForm = () => {
                 required={false}
                 placeholder={!selectedPitchCode ? "Выберите шаг пикселя" : (isLoadingRefreshRates ? "Загрузка..." : "Авто / Выберите частоту")}
               />
-              {isErrorRefreshRates && ( <Text c="red" size="sm" mt="xs">Ошибка загрузки частоты: {errorRefreshRates?.message}</Text> )}
+              {isErrorRefreshRates && (<Text c="red" size="sm" mt="xs">Ошибка загрузки частоты: {errorRefreshRates?.message}</Text>)}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <BrightnessSelect
-                options={brightnessSelectOptions} // ИЗМЕНЕНО
+                options={brightnessSelectOptions}
                 value={selectedBrightnessCode}
                 onChange={handleBrightnessChange}
                 disabled={isLoadingInitialData || !selectedPitchCode || isLoadingBrightnesses}
@@ -308,30 +304,30 @@ const CalculatorForm = () => {
                 required={false}
                 placeholder={!selectedPitchCode ? "Выберите шаг пикселя" : (isLoadingBrightnesses ? "Загрузка..." : "Авто / Выберите яркость")}
               />
-              {isErrorBrightnesses && ( <Text c="red" size="sm" mt="xs">Ошибка загрузки яркости: {errorBrightnesses?.message}</Text> )}
+              {isErrorBrightnesses && (<Text c="red" size="sm" mt="xs">Ошибка загрузки яркости: {errorBrightnesses?.message}</Text>)}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }} mt="md">
               <ModuleSelect
-                options={moduleSelectOptions} // ИЗМЕНЕНО
+                options={moduleSelectOptions}
                 value={selectedModuleCode}
                 onChange={handleModuleChange}
-                disabled={ isLoadingInitialData || !selectedLocationCode || !selectedPitchCode || !selectedBrightnessCode || !selectedRefreshRateCode || isLoadingModules || moduleSelectOptions.length === 0 } // ИЗМЕНЕНО
+                disabled={isLoadingInitialData || !selectedLocationCode || !selectedPitchCode || !selectedBrightnessCode || !selectedRefreshRateCode || isLoadingModules || moduleSelectOptions.length === 0}
                 loading={isLoadingModules}
                 required={true}
               />
-              {isErrorModules && ( <Text c="red" size="sm" mt="xs"> Ошибка загрузки модулей: {errorModules?.message ?? "Неизвестная ошибка"} </Text> )}
+              {isErrorModules && (<Text c="red" size="sm" mt="xs"> Ошибка загрузки модулей: {errorModules?.message ?? "Неизвестная ошибка"} </Text>)}
             </Grid.Col>
             {showCabinetSection ? (
               <Grid.Col span={{ base: 12, md: 6 }} mt="md">
                 <CabinetSelect
-                  options={cabinetSelectOptions} // ИЗМЕНЕНО
+                  options={cabinetSelectOptions}
                   value={selectedCabinetCode}
                   onChange={handleCabinetChange}
                   loading={isLoadingCabinets}
-                  disabled={ !selectedLocationCode || !selectedMaterialCode || !selectedPitchCode || !selectedModuleCode || isLoadingCabinets }
+                  disabled={!selectedLocationCode || !selectedMaterialCode || !selectedPitchCode || !selectedModuleCode || isLoadingCabinets}
                   required={true}
                 />
-                {isErrorCabinets && ( <Text c="red" size="sm" mt="xs"> Ошибка загрузки кабинетов: {errorCabinets?.message ?? "Неизвестная ошибка"} </Text> )}
+                {isErrorCabinets && (<Text c="red" size="sm" mt="xs"> Ошибка загрузки кабинетов: {errorCabinets?.message ?? "Неизвестная ошибка"} </Text>)}
               </Grid.Col>
             ) : (
               <Grid.Col span={{ base: 0, md: 6 }} />
@@ -339,9 +335,9 @@ const CalculatorForm = () => {
             <Grid.Col span={12} mt="md">
               <Group grow preventGrowOverflow={false} align="flex-end" wrap="nowrap">
                 <DollarRateInput
-                  value={localDollarRateInput} // ИЗМЕНЕНО
+                  value={localDollarRateInput}
                   onChange={handleDollarRateChange}
-                  disabled={isLoadingInitialData} // ИЗМЕНЕНО
+                  disabled={isLoadingInitialData}
                   loading={isLoadingDollarRate}
                   required={true}
                   size="sm"
@@ -356,9 +352,6 @@ const CalculatorForm = () => {
               </Group>
             </Grid.Col>
           </Grid>
-          
-          {/* Блок отладки - нужно будет адаптировать имена переменных, если раскомментируете */}
-          {/* ... ваш закомментированный блок отладки ... */}
         </>
       )}
     </Stack>
