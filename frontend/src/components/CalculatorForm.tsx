@@ -1,4 +1,4 @@
-// src/components/CalculatorForm.tsx
+// frontend/src/components/CalculatorForm.tsx
 import { useCallback, useEffect } from "react";
 import {
   Stack,
@@ -36,11 +36,49 @@ import { useCalculatorContext } from "../context/CalculatorContext";
 
 // --- КОМПОНЕНТ ---
 const CalculatorForm = () => {
-  // --- Получаем данные из контекста ---
   const {
-    isLoading: isLoadingInitial,
-    isError: isErrorInitial,
-    error: errorInitial,
+    // Статусы загрузки для начальных данных
+    isLoadingInitialData,
+    isErrorInitialData,
+    errorInitialData,
+
+    // Данные и статусы для опций типа экрана (из хука useScreenTypeOptions)
+    screenTypeOptions,
+    isLoadingScreenTypeOptions,
+    isErrorScreenTypeOptions,
+    errorScreenTypeOptions,
+
+    // Данные и статусы для питчей (из хука usePitchOptions)
+    isLoadingPitches,
+    isErrorPitches,
+    errorPitches,
+
+    // Данные и статусы для частоты обновления (из хука useFilteredRefreshRates)
+    isLoadingRefreshRates,
+    isErrorRefreshRates,
+    errorRefreshRates,
+
+    // Данные и статусы для яркости (из хука useFilteredBrightnesses)
+    isLoadingBrightnesses,
+    isErrorBrightnesses,
+    errorBrightnesses,
+
+    // Данные и статусы для модулей (из хука useModuleOptions)
+    isLoadingModules,
+    isErrorModules,
+    errorModules,
+
+    // Данные и статусы для кабинетов (из хука useCabinetOptions)
+    isLoadingCabinets,
+    isErrorCabinets,
+    errorCabinets,
+
+    // Курс доллара
+    localDollarRateInput,
+    setLocalDollarRateInput,
+    isLoadingDollarRate,
+
+    // Состояние формы
     selectedScreenTypeCode,
     selectedLocationCode,
     selectedMaterialCode,
@@ -53,17 +91,14 @@ const CalculatorForm = () => {
     selectedModuleCode,
     selectedCabinetCode,
     isFlexSelected,
-    dollarRate,
-    isCalculating,
-    isLoadingDollarRate,
     widthMm,
     heightMm,
-    optionsQueryResult,
-    pitchQueryResult,
-    refreshRateQueryResult,
-    brightnessQueryResult,
-    moduleQueryResult,
-    cabinetQueryResult,
+
+    // Статусы и результаты расчета
+    isCalculating,
+    isCalculationReady,
+
+    // Сеттеры состояния формы
     setSelectedScreenTypeCode,
     setSelectedLocationCode,
     setSelectedMaterialCode,
@@ -76,61 +111,25 @@ const CalculatorForm = () => {
     setSelectedModuleCode,
     setSelectedCabinetCode,
     setIsFlexSelected,
-    setDollarRate,
-    performCalculation,
     setWidthMm,
     setHeightMm,
+    performCalculation,
+
+    // Мемоизированные опции для селектов
     screenTypeSegments,
-    locationOptions,
-    materialOptions,
-    protectionOptions,
-    brightnessOptions,
-    refreshRateOptions,
-    sensorOptions,
-    controlTypeOptions,
-    pitchOptions,
-    moduleOptions,
-    cabinetOptions,
-    isFlexOptionAvailable,
-    isCalculationReady,
+    locationSelectOptions,
+    materialSelectOptions,
+    protectionSelectOptions,
+    brightnessSelectOptions,
+    refreshRateSelectOptions,
+    sensorSelectOptions,
+    controlTypeSelectOptions,
+    pitchSelectOptions,
+    moduleSelectOptions,
+    cabinetSelectOptions,
+    isFlexOptionAvailableForSelectedScreenType,
+
   } = useCalculatorContext();
-
-  const {
-    data: optionsData,
-    isLoading: isLoadingOptions,
-    isError: isErrorOptions,
-    error: errorOptions,
-  } = optionsQueryResult;
-
-  const {
-    isLoading: isLoadingPitches,
-    isError: isErrorPitches,
-    error: errorPitches,
-  } = pitchQueryResult;
-
-  const {
-    isLoading: isLoadingRefreshRates,
-    isError: isErrorRefreshRates,
-    error: errorRefreshRates,
-  } = refreshRateQueryResult;
-
-  const {
-    isLoading: isLoadingBrightnesses,
-    isError: isErrorBrightnesses,
-    error: errorBrightnesses,
-  } = brightnessQueryResult;
-
-  const {
-    isLoading: isLoadingModules,
-    isError: isErrorModules,
-    error: errorModules,
-  } = moduleQueryResult;
-
-  const {
-    isLoading: isLoadingCabinets,
-    isError: isErrorCabinets,
-    error: errorCabinets,
-  } = cabinetQueryResult;
 
   const cabinetScreenTypeCode = "cabinet";
   const showCabinetSection = selectedScreenTypeCode === cabinetScreenTypeCode;
@@ -140,494 +139,234 @@ const CalculatorForm = () => {
     if (selectedScreenTypeCode) {
       console.log("Options Debug:", {
         selectedScreenTypeCode,
-        isLoadingOptions,
-        isErrorOptions,
-        errorOptions: errorOptions?.message,
-        availableOptionsData: optionsData,
-        isFlexOptionAvailable,
+        isLoadingOptions: isLoadingScreenTypeOptions,
+        isErrorOptions: isErrorScreenTypeOptions,
+        errorOptions: errorScreenTypeOptions?.message,
+        availableOptionsData: screenTypeOptions,
+        isFlexOptionAvailable: isFlexOptionAvailableForSelectedScreenType,
       });
     }
-  }, [selectedScreenTypeCode, optionsQueryResult, isFlexOptionAvailable]);
-  // ---------------------
+  }, [selectedScreenTypeCode, screenTypeOptions, isLoadingScreenTypeOptions, isErrorScreenTypeOptions, errorScreenTypeOptions, isFlexOptionAvailableForSelectedScreenType]);
 
   // --- Обработчики ---
-  const handleScreenTypeChange = useCallback(
-    (value: string | null) => {
-      setSelectedScreenTypeCode(value);
-    },
-    [setSelectedScreenTypeCode]
-  );
-  const handleLocationChange = useCallback(
-    (value: string | null) => {
-      setSelectedLocationCode(value);
-    },
-    [setSelectedLocationCode]
-  );
-  const handleMaterialChange = useCallback(
-    (value: string | null) => {
-      setSelectedMaterialCode(value);
-    },
-    [setSelectedMaterialCode]
-  );
-  const handleProtectionChange = useCallback(
-    (value: string | null) => {
-      setSelectedProtectionCode(value);
-    },
-    [setSelectedProtectionCode]
-  );
-  const handleBrightnessChange = useCallback(
-    (value: string | null) => {
-      setSelectedBrightnessCode(value);
-    },
-    [setSelectedBrightnessCode]
-  );
-  const handleRefreshRateChange = useCallback(
-    (value: string | null) => {
-      setSelectedRefreshRateCode(value);
-    },
-    [setSelectedRefreshRateCode]
-  );
-  const handleSensorChange = useCallback(
-    (value: string[]) => {
-      setSelectedSensorCodes(value);
-    },
-    [setSelectedSensorCodes]
-  );
-  const handleControlTypeChange = useCallback(
-    (value: string[]) => {
-      setSelectedControlTypeCodes(value);
-    },
-    [setSelectedControlTypeCodes]
-  );
-  const handlePitchChange = useCallback(
-    (value: string | null) => {
-      setSelectedPitchCode(value);
-    },
-    [setSelectedPitchCode]
-  );
-  const handleModuleChange = useCallback(
-    (value: string | null) => {
-      setSelectedModuleCode(value);
-    },
-    [setSelectedModuleCode]
-  );
-  const handleCabinetChange = useCallback(
-    (value: string | null) => {
-      setSelectedCabinetCode(value);
-    },
-    [setSelectedCabinetCode]
-  );
-  const handleFlexChange = useCallback(
-    (checked: boolean) => {
-      setIsFlexSelected(checked);
-    },
-    [setIsFlexSelected]
-  );
-  const handleDollarRateChange = useCallback(
-    (value: number | string) => {
-      setDollarRate(value);
-    },
-    [setDollarRate]
-  );
-  const handleCalculateClick = useCallback(() => {
-    performCalculation();
-  }, [performCalculation]);
+  const handleScreenTypeChange = useCallback((value: string | null) => setSelectedScreenTypeCode(value), [setSelectedScreenTypeCode]);
+  const handleLocationChange = useCallback((value: string | null) => setSelectedLocationCode(value), [setSelectedLocationCode]);
+  const handleMaterialChange = useCallback((value: string | null) => setSelectedMaterialCode(value), [setSelectedMaterialCode]);
+  const handleProtectionChange = useCallback((value: string | null) => setSelectedProtectionCode(value), [setSelectedProtectionCode]);
+  const handleBrightnessChange = useCallback((value: string | null) => setSelectedBrightnessCode(value), [setSelectedBrightnessCode]);
+  const handleRefreshRateChange = useCallback((value: string | null) => setSelectedRefreshRateCode(value), [setSelectedRefreshRateCode]);
+  const handleSensorChange = useCallback((value: string[]) => setSelectedSensorCodes(value), [setSelectedSensorCodes]);
+  const handleControlTypeChange = useCallback((value: string[]) => setSelectedControlTypeCodes(value), [setSelectedControlTypeCodes]);
+  const handlePitchChange = useCallback((value: string | null) => setSelectedPitchCode(value), [setSelectedPitchCode]);
+  const handleModuleChange = useCallback((value: string | null) => setSelectedModuleCode(value), [setSelectedModuleCode]);
+  const handleCabinetChange = useCallback((value: string | null) => setSelectedCabinetCode(value), [setSelectedCabinetCode]);
+  const handleFlexChange = useCallback((checked: boolean) => setIsFlexSelected(checked), [setIsFlexSelected]);
+  const handleDollarRateChange = useCallback((value: number | string) => setLocalDollarRateInput(value), [setLocalDollarRateInput]);
+  const handleCalculateClick = useCallback(() => performCalculation(), [performCalculation]);
 
   // --- JSX ---
   return (
     <Stack gap="md">
       <LoadingOverlay
-        visible={isLoadingInitial}
+        visible={isLoadingInitialData}
         overlayProps={{ radius: "sm", blur: 2 }}
         loaderProps={{ children: <Loader /> }}
       />
-      {isLoadingInitial && <Text ta="center">Загрузка конфигурации...</Text>}
-      {!isLoadingInitial && isErrorInitial && (
+      {isLoadingInitialData && <Text ta="center">Загрузка конфигурации...</Text>}
+      {!isLoadingInitialData && isErrorInitialData && (
         <Alert
           title="Ошибка загрузки данных"
           color="red"
           icon={<IconAlertCircle size={16} />}
           radius="sm"
         >
-          {" "}
-          {errorInitial?.message ?? "Не удалось загрузить данные."}{" "}
+          {errorInitialData?.message ?? "Не удалось загрузить данные."}
         </Alert>
       )}
 
-      {!isLoadingInitial && !isErrorInitial && (
+      {!isLoadingInitialData && !isErrorInitialData && (
         <>
           <ScreenTypeSelector
             data={screenTypeSegments}
             value={selectedScreenTypeCode}
             onChange={handleScreenTypeChange}
-            disabled={isLoadingInitial}
+            disabled={isLoadingInitialData}
           />
 
           {/* Условный рендеринг опции Flex */}
-          {isLoadingOptions && isFlexOptionAvailable && (
+          {isLoadingScreenTypeOptions && selectedScreenTypeCode === cabinetScreenTypeCode && (
             <Loader size="xs" mt="sm" />
           )}
-          {isErrorOptions && isFlexOptionAvailable && (
+          {isErrorScreenTypeOptions && selectedScreenTypeCode === cabinetScreenTypeCode && (
             <Text c="red" size="xs">
-              Ошибка загрузки опций: {errorOptions?.message}
+              Ошибка загрузки специфичных опций: {errorScreenTypeOptions?.message}
             </Text>
           )}
-          {isFlexOptionAvailable && !isLoadingOptions && !isErrorOptions && (
+          {isFlexOptionAvailableForSelectedScreenType && !isLoadingScreenTypeOptions && !isErrorScreenTypeOptions && (
             <FlexOptionSwitch
               checked={isFlexSelected}
               onChange={handleFlexChange}
-              disabled={selectedScreenTypeCode === cabinetScreenTypeCode}
             />
           )}
 
-          {/* --- СЕТКА С ПАРАМЕТРАМИ --- */}
           <Grid>
-            {/* Размеры */}
             <DimensionInputs
               width={widthMm}
               height={heightMm}
               onWidthChange={setWidthMm}
               onHeightChange={setHeightMm}
-              disabled={isLoadingInitial}
+              disabled={isLoadingInitialData}
             />
-
-            {/* --- ЛЕВАЯ КОЛОНКА --- */}
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Stack gap="md">
                 <LocationSelect
-                  options={locationOptions}
+                  options={locationSelectOptions}
                   value={selectedLocationCode}
                   onChange={handleLocationChange}
-                  disabled={
-                    isLoadingInitial ||
-                    !selectedScreenTypeCode ||
-                    locationOptions.length === 0
-                  }
+                  disabled={isLoadingInitialData || !selectedScreenTypeCode || locationSelectOptions.length === 0}
                   required
                 />
                 <IpProtectionSelect
-                  options={protectionOptions}
+                  options={protectionSelectOptions}
                   value={selectedProtectionCode}
                   onChange={handleProtectionChange}
-                  disabled={
-                    isLoadingInitial ||
-                    !selectedLocationCode ||
-                    protectionOptions.length === 0
-                  }
+                  disabled={isLoadingInitialData || !selectedLocationCode || protectionSelectOptions.length === 0}
                   required
                 />
               </Stack>
             </Grid.Col>
-
-            {/* --- ПРАВАЯ КОЛОНКА --- */}
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Grid>
                 <Grid.Col span={{ base: 12, sm: 4 }}>
                   <SensorCheckboxGroup
-                    options={sensorOptions}
+                    options={sensorSelectOptions}
                     value={selectedSensorCodes}
                     onChange={handleSensorChange}
                     disabled={true}
-                    //disabled={isLoadingInitial || sensorOptions.length === 0}
                   />
                 </Grid.Col>
                 <Grid.Col span={{ base: 12, sm: 8 }}>
                   <ControlTypeCheckboxGroup
-                    options={controlTypeOptions}
+                    options={controlTypeSelectOptions}
                     value={selectedControlTypeCodes}
                     onChange={handleControlTypeChange}
                     disabled={true}
-                    // disabled={isLoadingInitial || controlTypeOptions.length === 0}
                   />
                 </Grid.Col>
               </Grid>
             </Grid.Col>
-            {/* --- ОСТАЛЬНЫЕ ПОЛЯ --- */}
-            {/* УСЛОВНЫЙ РЕНДЕРИНГ МАТЕРИАЛА */}
             <Grid.Col span={12} mt="md">
               {showCabinetSection && (
                 <MaterialSelect
-                  options={materialOptions}
+                  options={materialSelectOptions}
                   value={selectedMaterialCode}
                   onChange={handleMaterialChange}
-                  disabled={
-                    isLoadingInitial ||
-                    !selectedLocationCode ||
-                    materialOptions.length === 0
-                  }
+                  disabled={isLoadingInitialData || !selectedLocationCode || materialSelectOptions.length === 0}
                   required
                 />
               )}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <PitchSelect
-                options={pitchOptions}
+                options={pitchSelectOptions}
                 value={selectedPitchCode}
                 onChange={handlePitchChange}
                 disabled={
-                  isLoadingInitial ||
-                  !selectedLocationCode ||
-                  !selectedProtectionCode ||
+                  isLoadingInitialData || !selectedLocationCode || !selectedProtectionCode ||
                   (showCabinetSection && !selectedMaterialCode) ||
-                  isLoadingPitches ||
-                  pitchOptions.length === 0
+                  isLoadingPitches || pitchSelectOptions.length === 0
                 }
                 loading={isLoadingPitches}
                 required={true}
-                placeholder={
-                  !selectedLocationCode
-                    ? "Сначала выберите расположение"
-                    : isLoadingPitches
-                    ? "Загрузка..."
-                    : "Выберите шаг пикселя"
-                }
+                placeholder={!selectedLocationCode ? "Сначала выберите расположение" : isLoadingPitches ? "Загрузка..." : "Выберите шаг пикселя"}
               />
-              {isErrorPitches && (
-                <Text c="red" size="sm" mt="xs">
-                  Ошибка загрузки шагов пикселя:{" "}
-                  {errorPitches?.message ?? "Неизвестная ошибка"}
-                </Text>
-              )}
+              {isErrorPitches && (<Text c="red" size="sm" mt="xs"> Ошибка загрузки шагов пикселя: {errorPitches?.message ?? "Неизвестная ошибка"} </Text>)}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <RefreshRateSelect
-                options={refreshRateOptions}
+                options={refreshRateSelectOptions}
                 value={selectedRefreshRateCode}
                 onChange={handleRefreshRateChange}
-                disabled={isLoadingInitial || !selectedPitchCode || isLoadingRefreshRates}
+                disabled={isLoadingInitialData || !selectedPitchCode || isLoadingRefreshRates}
                 loading={isLoadingRefreshRates}
                 required={false}
                 placeholder={!selectedPitchCode ? "Выберите шаг пикселя" : (isLoadingRefreshRates ? "Загрузка..." : "Авто / Выберите частоту")}
               />
-              {isErrorRefreshRates && ( <Text c="red" size="sm" mt="xs">Ошибка загрузки частоты: {errorRefreshRates?.message}</Text> )}
+              {isErrorRefreshRates && (<Text c="red" size="sm" mt="xs">Ошибка загрузки частоты: {errorRefreshRates?.message}</Text>)}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 4 }} mt="md">
               <BrightnessSelect
-                options={brightnessOptions}
+                options={brightnessSelectOptions}
                 value={selectedBrightnessCode}
                 onChange={handleBrightnessChange}
-                disabled={isLoadingInitial || !selectedPitchCode || isLoadingBrightnesses}
+                disabled={isLoadingInitialData || !selectedPitchCode || isLoadingBrightnesses}
                 loading={isLoadingBrightnesses}
                 required={false}
                 placeholder={!selectedPitchCode ? "Выберите шаг пикселя" : (isLoadingBrightnesses ? "Загрузка..." : "Авто / Выберите яркость")}
               />
-              {isErrorBrightnesses && ( <Text c="red" size="sm" mt="xs">Ошибка загрузки яркости: {errorBrightnesses?.message}</Text> )}
+              {isErrorBrightnesses && (<Text c="red" size="sm" mt="xs">Ошибка загрузки яркости: {errorBrightnesses?.message}</Text>)}
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 6 }} mt="md">
               <ModuleSelect
-                options={moduleOptions}
+                options={moduleSelectOptions}
                 value={selectedModuleCode}
                 onChange={handleModuleChange}
-                disabled={ isLoadingInitial || !selectedLocationCode || !selectedPitchCode || !selectedBrightnessCode || !selectedRefreshRateCode || isLoadingModules || moduleOptions.length === 0 }
+                disabled={isLoadingInitialData || !selectedLocationCode || !selectedPitchCode || !selectedBrightnessCode || !selectedRefreshRateCode || isLoadingModules || moduleSelectOptions.length === 0}
                 loading={isLoadingModules}
                 required={true}
               />
-              {isErrorModules && (
-                <Text c="red" size="sm" mt="xs">
-                  Ошибка загрузки модулей:{" "}
-                  {errorModules?.message ?? "Неизвестная ошибка"}
-                </Text>
-              )}
+              {isErrorModules && (<Text c="red" size="sm" mt="xs"> Ошибка загрузки модулей: {errorModules?.message ?? "Неизвестная ошибка"} </Text>)}
             </Grid.Col>
-
-            {/* Правая колонка: либо Кабинет (если нужно), либо пустая */}
             {showCabinetSection ? (
-              // Если кабинетный тип, показываем селект Кабинета
               <Grid.Col span={{ base: 12, md: 6 }} mt="md">
                 <CabinetSelect
-                  options={cabinetOptions}
+                  options={cabinetSelectOptions}
                   value={selectedCabinetCode}
                   onChange={handleCabinetChange}
                   loading={isLoadingCabinets}
-                  disabled={
-                    !selectedLocationCode ||
-                    !selectedMaterialCode ||
-                    !selectedPitchCode ||
-                    !selectedModuleCode ||
-                    isLoadingCabinets
-                  }
+                  disabled={!selectedLocationCode || !selectedMaterialCode || !selectedPitchCode || !selectedModuleCode || isLoadingCabinets}
                   required={true}
                 />
-                {isErrorCabinets && (
-                  <Text c="red" size="sm" mt="xs">
-                    {" "}
-                    Ошибка загрузки кабинетов:{" "}
-                    {errorCabinets?.message ?? "Неизвестная ошибка"}{" "}
-                  </Text>
-                )}
+                {isErrorCabinets && (<Text c="red" size="sm" mt="xs"> Ошибка загрузки кабинетов: {errorCabinets?.message ?? "Неизвестная ошибка"} </Text>)}
               </Grid.Col>
             ) : (
-              // Если НЕ кабинетный тип, рендерим пустую колонку для сохранения структуры
               <Grid.Col span={{ base: 0, md: 6 }} />
             )}
             <Grid.Col span={12} mt="md">
-              <Group
-                grow
-                preventGrowOverflow={false}
-                align="flex-end"
-                wrap="nowrap"
-              >
+              <Group grow preventGrowOverflow={false} align="flex-end" wrap="nowrap">
                 <DollarRateInput
-                  value={dollarRate}
+                  value={localDollarRateInput}
                   onChange={handleDollarRateChange}
-                  disabled={isLoadingInitial}
+                  disabled={isLoadingInitialData}
                   loading={isLoadingDollarRate}
                   required={true}
-                  size="sm" // Задаем размер
-                  style={{ flexBasis: "150px", flexGrow: 0 }} // Ограничиваем ширину
+                  size="sm"
+                  style={{ flexBasis: "150px", flexGrow: 0 }}
                 />
                 <CalculateButton
                   onClick={handleCalculateClick}
                   loading={isCalculating}
                   disabled={!isCalculationReady}
-                  size="sm" // Задаем ТОТ ЖЕ размер
+                  size="sm"
                 />
               </Group>
             </Grid.Col>
           </Grid>
-          {/* --- КОНЕЦ ОСНОВНОЙ СЕТКИ --- */}
-
-          {/* --- Блок отладки --- */}
-          {/*
-          {(selectedScreenTypeCode ||
-            widthMm ||
-            heightMm ||
-            selectedLocationCode ||
-            selectedMaterialCode ||
-            selectedProtectionCode ||
-            selectedBrightnessCode ||
-            selectedRefreshRateCode ||
-            selectedSensorCodes.length > 0 ||
-            selectedControlTypeCodes.length > 0 ||
-            selectedPitchCode ||
-            selectedModuleCode ||
-            (showCabinetSection && selectedCabinetCode) ||
-            isFlexSelected ||
-            dollarRate) && (
-            <Stack
-              gap={0}
-              mt="xs"
-              p="xs"
-              style={{ border: "1px dashed #ccc", borderRadius: "4px" }}
-            >
-              <Text size="xs" c="dimmed">
-                Отладка:
-              </Text>
-              {selectedScreenTypeCode && (
-                <Text size="sm">Выбран тип: {selectedScreenTypeCode}</Text>
-              )}
-              {isFlexOptionAvailable && (
-                <Text size="sm">
-                  Гибкий экран: {isFlexSelected ? "Да" : "Нет"}
-                </Text>
-              )}
-              {(widthMm || heightMm) && (
-                <Text size="sm">
-                  Размеры: {widthMm || "?"} x {heightMm || "?"} мм
-                </Text>
-              )}
-              {selectedLocationCode && (
-                <Text size="sm">Расположение: {selectedLocationCode}</Text>
-              )}
-              {selectedMaterialCode && showCabinetSection && (
-                <Text size="sm">Материал: {selectedMaterialCode}</Text>
-              )}{" "}
-              {selectedProtectionCode && (
-                <Text size="sm">Защита IP: {selectedProtectionCode}</Text>
-              )}
-              {selectedBrightnessCode && (
-                <Text size="sm">
-                  Яркость: {selectedBrightnessCode} (
-                  {
-                    brightnessOptions.find(
-                      (o) => o.value === selectedBrightnessCode
-                    )?.label
-                  }
-                  )
-                </Text>
-              )}
-              {selectedRefreshRateCode && (
-                <Text size="sm">
-                  Частота: {selectedRefreshRateCode} (
-                  {
-                    refreshRateOptions.find(
-                      (o) => o.value === selectedRefreshRateCode
-                    )?.label
-                  }
-                  )
-                </Text>
-              )}
-              {selectedSensorCodes.length > 0 && (
-                <Text size="sm">Сенсоры: {selectedSensorCodes.join(", ")}</Text>
-              )}
-              {selectedControlTypeCodes.length > 0 && (
-                <Text size="sm">
-                  Типы управления: {selectedControlTypeCodes.join(", ")}
-                </Text>
-              )}
-              {selectedPitchCode && (
-                <Text size="sm">
-                  Шаг пикселя: {selectedPitchCode} (
-                  {
-                    pitchOptions.find((o) => o.value === selectedPitchCode)
-                      ?.label
-                  }
-                  )
-                </Text>
-              )}
-              {selectedModuleCode && (
-                <Text size="sm">
-                  Модуль: {selectedModuleCode} (
-                  {
-                    moduleOptions.find((o) => o.value === selectedModuleCode)
-                      ?.label
-                  }
-                  )
-                </Text>
-              )}
-              {showCabinetSection && selectedCabinetCode && (
-                <Text size="sm">
-                  Кабинет: {selectedCabinetCode} (
-                  {
-                    cabinetOptions.find((o) => o.value === selectedCabinetCode)
-                      ?.label
-                  }
-                  )
-                </Text>
-              )}
-              <Text size="sm">Курс $: {dollarRate || "Не задан"}</Text>
-            </Stack>
-          )}
-          */}
-          {/* --- КОНЕЦ БЛОКА ОТЛАДКИ --- */}
         </>
       )}
     </Stack>
   );
 };
 
-// --- Обертка с ErrorBoundary ---
 const CalculatorFormWrapper = () => (
   <QueryErrorResetBoundary>
     {({ reset }) => (
       <ErrorBoundary
         onReset={reset}
         fallbackRender={({ error, resetErrorBoundary }: FallbackProps) => (
-          <Alert
-            title="Критическая ошибка формы"
-            color="red"
-            radius="sm"
-            withCloseButton
-            onClose={resetErrorBoundary}
-          >
+          <Alert title="Критическая ошибка формы" color="red" radius="sm" withCloseButton onClose={resetErrorBoundary}>
             Произошла ошибка: {error?.message ?? "Неизвестная ошибка"}
-            <Button
-              onClick={resetErrorBoundary}
-              variant="outline"
-              color="red"
-              size="xs"
-              mt="sm"
-            >
+            <Button onClick={resetErrorBoundary} variant="outline" color="red" size="xs" mt="sm">
               Попробовать снова
             </Button>
           </Alert>

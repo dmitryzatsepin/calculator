@@ -1,14 +1,11 @@
 // prisma/seed/seedEntities.ts
-import { PrismaClient, Prisma } from '../generated/client';
+import { PrismaClient } from '../generated/client';
 import * as XLSX from 'xlsx';
 import { getDataFromSheet, safeBoolean, safeInt, safeDecimal } from './utils';
-import { entityConfigs, IdMaps } from './config';
+import { entityConfigs, type IdMaps } from './config';
 import type { SeedMode } from './index';
 
 /**
- * Заполняет основные таблицы сущностей (Cabinet, Module, Item).
- * Использует prisma.upsert для каждой строки.
- * Ключи в картах ID будут в lowercase.
  * @param prisma Экземпляр PrismaClient
  * @param workbook Рабочая книга Excel
  * @param idMaps Объект с картами ID (будет заполняться)
@@ -29,7 +26,7 @@ export async function seedEntities(
         if (sheetData.length === 0) continue;
 
         const model = prisma[config.modelName] as any;
-        const modelMapKey = config.modelName.charAt(0).toLowerCase() + config.modelName.slice(1);
+        const modelMapKey = config.modelName;
         const idMap = (idMaps as any)[modelMapKey] as Map<string, number> | undefined;
 
         if (!idMap) {
@@ -52,16 +49,13 @@ export async function seedEntities(
             const codeLower = codeRaw.toLowerCase();
 
             if (processedKeysLower.has(codeLower)) {
-                 // console.warn(`[${config.modelName} Duplicate Excel] Код '${codeRaw}' (ключ: ${codeLower}) уже обработан.`);
                  continue;
             }
             processedKeysLower.add(codeLower);
 
-            // Собираем данные для create и update
             const createData: { [key: string]: any } = {};
             const updateData: { [key: string]: any } = {};
 
-            // Code - только для create
             createData[config.codeField.prismaField] = codeRaw;
 
             // SKU
