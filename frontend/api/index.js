@@ -15,7 +15,7 @@ export default function handler(request, response) {
 
   if (request.method === 'POST' || request.method === 'GET') {
     // Если includeFiles сработал, index.html должен быть в CWD (/var/task)
-    const filePath = path.join(process.cwd(), '/index.html'); 
+    const filePath = path.join(process.cwd(), 'index.html'); 
     
     console.log(`Attempting to read (with includeFiles): ${filePath}`);
     console.log(`Current CWD: ${process.cwd()}`);
