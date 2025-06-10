@@ -4,7 +4,6 @@ import path from 'node:path';
 
 export default function handler(request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');
-  // ... (остальные CORS заголовки)
   response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   response.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, X-Bitrix-Csrf-Token, X-Bitrix-Auth-Token, Placement, Placement_options, Pragma, Cache-Control');
 
@@ -16,7 +15,7 @@ export default function handler(request, response) {
 
   if (request.method === 'POST' || request.method === 'GET') {
     // Если includeFiles сработал, index.html должен быть в CWD (/var/task)
-    const filePath = path.join(process.cwd(), 'index.html'); 
+    const filePath = path.join(process.cwd(), 'dist/index.html'); 
     
     console.log(`Attempting to read (with includeFiles): ${filePath}`);
     console.log(`Current CWD: ${process.cwd()}`);
