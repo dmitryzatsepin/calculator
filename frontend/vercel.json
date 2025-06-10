@@ -1,11 +1,11 @@
 {
   "rewrites": [
-    { "source": "/b24app/(.*)", "destination": "/frontend/api/index" },
-    { "source": "/b24app", "destination": "/frontend/api/index" },
-    { "source": "/(.*)", "destination": "/frontend/api/index" }
+    { "source": "/b24app/(.*)", "destination": "/api/index" },
+    { "source": "/b24app", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/api/index" }
   ],
   "functions": {
-    "frontend/api/index.js": {
+    "api/index.js": {
       "includeFiles": "dist/**"
     }
   }
