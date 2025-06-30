@@ -2,19 +2,18 @@
 import { Select, Loader, SelectProps } from '@mantine/core';
 
 // Тип для опции в выпадающем списке
-type SelectOption = { label: string; value: string }; // value будет кодом модуля (module.code)
+type SelectOption = { label: string; value: string };
 
-// Пропсы компонента
 interface ModuleSelectProps {
-    options: SelectOption[];                // Список доступных модулей
-    value: string | null;                   // Текущий выбранный код модуля
-    onChange: (value: string | null) => void; // Функция для обновления значения в контексте
-    disabled?: boolean;                     // Флаг блокировки компонента
-    required?: boolean;                     // Обязательно ли поле для заполнения
-    label?: string;                         // Заголовок поля
+    options: SelectOption[];
+    value: string | null;
+    onChange: (value: string | null) => void;
+    disabled?: boolean;
+    required?: boolean;
+    label?: string;
     placeholder?: string;
     loading?: boolean;
-    size?: SelectProps['size'];                   // Текст-подсказка внутри поля
+    size?: SelectProps['size'];
 }
 
 const ModuleSelect = ({
@@ -24,7 +23,7 @@ const ModuleSelect = ({
     disabled = false,
     required = false,
     label = "Модуль",
-    placeholder = "Выберите модуль" ,
+    placeholder = "Выберите модуль",
     loading = false,
     size,
 }: ModuleSelectProps) => {
@@ -32,17 +31,17 @@ const ModuleSelect = ({
         <Select
             label={label}
             placeholder={placeholder}
-            data={options} // Используем переданные опции
-            value={value} // Используем переданное значение
-            onChange={onChange} // Вызываем переданный обработчик
-            disabled={disabled || options.length === 0} // Блокируем, если нет опций или передан disabled
-            clearable // Разрешаем очистку значения
-            searchable // Разрешаем поиск по опциям (очень полезно для модулей)
-            required={required} // Устанавливаем обязательность
-            nothingFoundMessage="Нет подходящих модулей" // Сообщение при отсутствии опций
+            data={options}
+            value={value}
+            onChange={onChange}
+            disabled={disabled || options.length === 0}
+            clearable
+            searchable
+            required={required}
+            nothingFoundMessage="Нет подходящих модулей"
             limit={100}
-            rightSection={loading ? <Loader size="xs" /> : null} // <-- Добавлен лоадер
-            size={size} // <-- Передаем size
+            rightSection={loading ? <Loader size="xs" /> : null}
+            size={size} //
         />
     );
 };

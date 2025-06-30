@@ -3,10 +3,10 @@ import { NumberInput, Loader, NumberInputProps, rem } from '@mantine/core';
 import { IconCurrencyDollar } from '@tabler/icons-react';
 
 interface DollarRateInputProps {
-    value: number | string;                  // Текущее значение курса
-    onChange: (value: number | string) => void; // Функция обновления в контексте
-    disabled?: boolean;                      // Блокировка поля
-    loading?: boolean;                       // Индикатор загрузки курса
+    value: number | string;
+    onChange: (value: number | string) => void;
+    disabled?: boolean;
+    loading?: boolean;
     label?: string;
     placeholder?: string;
     required?: boolean;
@@ -32,7 +32,7 @@ const DollarRateInput = ({
     };
 
     const icon = <IconCurrencyDollar style={{ width: rem(18), height: rem(18) }} stroke={1.5} />;
-    
+
     return (
         <NumberInput
             label={label}

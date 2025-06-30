@@ -3,9 +3,9 @@ import { Button, NumberInputProps } from '@mantine/core';
 import { IconCalculator } from '@tabler/icons-react';
 
 interface CalculateButtonProps {
-    onClick: () => void;    // Функция, вызываемая при нажатии
-    loading?: boolean;      // Показать индикатор загрузки?
-    disabled?: boolean;     // Заблокировать кнопку?
+    onClick: () => void;
+    loading?: boolean;
+    disabled?: boolean;
     label?: string;
     size?: NumberInputProps['size'];
 }
@@ -15,7 +15,7 @@ const CalculateButton = ({
     loading = false,
     disabled = false,
     label = "Рассчитать стоимость",
-    size, 
+    size,
 }: CalculateButtonProps) => {
     return (
         <Button
@@ -23,8 +23,8 @@ const CalculateButton = ({
             onClick={onClick}
             loading={loading}
             disabled={disabled}
-            fullWidth // Растянем на всю ширину для заметности
-            mt="lg" // Добавим отступ сверху
+            fullWidth
+            mt="lg"
             size={size}
         >
             {label}

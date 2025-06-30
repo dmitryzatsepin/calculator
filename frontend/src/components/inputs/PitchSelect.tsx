@@ -6,15 +6,15 @@ type SelectOption = { label: string; value: string }; // value будет код
 
 // Пропсы компонента
 interface PitchSelectProps {
-    options: SelectOption[];                // Список доступных шагов пикселя
-    value: string | null;                   // Текущий выбранный код шага (e.g., 'P3.91')
-    onChange: (value: string | null) => void; // Функция для обновления значения в контексте
-    disabled?: boolean;                     // Флаг блокировки компонента
-    required?: boolean;                     // Обязательно ли поле для заполнения
-    label?: string;                         // Заголовок поля
+    options: SelectOption[];
+    value: string | null;
+    onChange: (value: string | null) => void;
+    disabled?: boolean;
+    required?: boolean;
+    label?: string;
     placeholder?: string;
     loading?: boolean;
-    size?: SelectProps['size'];                     // Текст-подсказка внутри поля
+    size?: SelectProps['size'];
 }
 
 const PitchSelect = ({
@@ -22,8 +22,8 @@ const PitchSelect = ({
     value,
     onChange,
     disabled = false,
-    required = false, // Шаг пикселя, вероятно, будет обязательным
-    label = "Шаг пикселя", // Дефолтный лейбл
+    required = false,
+    label = "Шаг пикселя",
     placeholder = "Выберите шаг",
     loading = false,
     size,
@@ -32,15 +32,15 @@ const PitchSelect = ({
         <Select
             label={label}
             placeholder={placeholder}
-            data={options} // Опции будут типа { label: "3.91 mm", value: "P3.91" }
+            data={options}
             value={value}
             onChange={onChange}
             disabled={disabled || options.length === 0}
             clearable
-            searchable // Поиск может быть полезен
+            searchable
             required={required}
             nothingFoundMessage="Нет доступных шагов пикселя"
-            limit={100} // Ограничение для производительности
+            limit={100}
             rightSection={loading ? <Loader size="xs" /> : null}
             size={size}
         />

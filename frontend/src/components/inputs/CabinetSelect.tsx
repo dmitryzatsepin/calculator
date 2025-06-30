@@ -2,18 +2,18 @@
 import { Select, Loader } from '@mantine/core';
 
 // Тип для опции в выпадающем списке
-type SelectOption = { label: string; value: string }; // value будет кодом кабинета (cabinet.code)
+type SelectOption = { label: string; value: string };
 
 // Пропсы компонента
 interface CabinetSelectProps {
-    options: SelectOption[];                 // Список ДОСТУПНЫХ кабинетов (отфильтрованный)
-    value: string | null;                    // Текущий выбранный код кабинета
-    onChange: (value: string | null) => void;  // Функция для обновления значения в контексте
-    disabled?: boolean;                      // Флаг блокировки компонента
-    required?: boolean;                      // Обязательно ли поле для заполнения
-    loading?: boolean;                       // Флаг загрузки опций для этого селекта
-    label?: string;                          // Заголовок поля
-    placeholder?: string;                    // Текст-подсказка внутри поля
+    options: SelectOption[];
+    value: string | null;
+    onChange: (value: string | null) => void;
+    disabled?: boolean;
+    required?: boolean;
+    loading?: boolean;
+    label?: string;
+    placeholder?: string;
 }
 
 const CabinetSelect = ({
