@@ -1,3 +1,4 @@
+// src/graphql/types/ControlType.ts
 import { builder } from '../builder';
 
 builder.prismaNode('ControlType', {

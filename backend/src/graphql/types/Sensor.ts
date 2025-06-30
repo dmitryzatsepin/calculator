@@ -1,3 +1,4 @@
+// src/graphql/types/Sensor.ts
 import { builder } from '../builder';
 
 builder.prismaNode('Sensor', {

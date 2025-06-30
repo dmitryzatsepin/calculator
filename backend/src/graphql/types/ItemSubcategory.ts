@@ -1,3 +1,4 @@
+// src/graphql/types/ItemSubcategory.ts
 import { builder } from '../builder';
 
 builder.prismaNode('ItemSubcategory', {

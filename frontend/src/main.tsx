@@ -8,8 +8,10 @@ import "@mantine/core/styles.css";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-// --- ДОБАВЛЯЕМ ИМПОРТ ПРОВАЙДЕРА КОНТЕКСТА ---
-import { CalculatorProvider } from './context/CalculatorContext';
+// --- ИМПОРТИРУЕМ НОВЫЕ ПРОВАЙДЕРЫ ---
+import { CalculatorFormProvider } from "./context/CalculatorFormProvider";
+import { CalculatorDataProvider } from "./context/CalculatorDataProvider";
+import { CalculationResultProvider } from "./context/CalculationResultProvider";
 
 // --- Настройка QueryClient ---
 const queryClient = new QueryClient({
@@ -28,9 +30,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <MantineProvider>
-        <CalculatorProvider>
-          <App />
-        </CalculatorProvider>
+        {/* --- НОВАЯ СТРУКТУРА ПРОВАЙДЕРОВ --- */}
+        <CalculatorFormProvider>
+          <CalculatorDataProvider>
+            <CalculationResultProvider>
+              <App />
+            </CalculationResultProvider>
+          </CalculatorDataProvider>
+        </CalculatorFormProvider>
       </MantineProvider>
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
     </QueryClientProvider>

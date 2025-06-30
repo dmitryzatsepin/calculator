@@ -48,9 +48,9 @@ export type TechnicalSpecsResult = {
   viewingDistanceMinM: number;           // Мин. дистанция просмотра (м)
   viewingDistanceOptimalM: number;       // Опт. дистанция просмотра (м)
   zipComponentList: {                    // Список ЗИП
-      name: string;                      // Название компонента
-      sku: string | null;                // Артикул компонента
-      totalQuantity: number;             // Итоговое кол-во в ЗИП
+    name: string;                      // Название компонента
+    sku: string | null;                // Артикул компонента
+    totalQuantity: number;             // Итоговое кол-во в ЗИП
   }[];
   // Поля, необходимые для последующего расчета стоимости
   moduleCode: string;                    // Код выбранного модуля
@@ -87,27 +87,32 @@ export type PriceMap = Record<
 // --- Дополнительные типы для данных из БД/GraphQL (можно оставить в calculatorService.ts или перенести сюда) ---
 
 export type EnrichedModuleComponent = {
-    itemCode: string;
-    itemName: string;
-    itemSku?: string | null;
-    quantity: number; // Количество НА ОДИН модуль
+  itemCode: string;
+  itemName: string;
+  itemSku?: string | null;
+  quantity: number; // Количество НА ОДИН модуль
 };
 
 export type ModuleData = {
-    code: string;
-    sku?: string | null;
-    name?: string | null;
-    width: number;
-    height: number;
-    powerConsumptionAvg?: number | null;
-    powerConsumptionMax?: number | null;
-    components: EnrichedModuleComponent[]; // Компоненты, входящие в модуль
+  code: string;
+  sku?: string | null;
+  name?: string | null;
+  width: number;
+  height: number;
+  powerConsumptionAvg?: number | null;
+  powerConsumptionMax?: number | null;
+  components: EnrichedModuleComponent[]; // Компоненты, входящие в модуль
 };
 
 export type CabinetData = {
-    code: string;
-    sku?: string | null;
-    name?: string | null;
-    width: number;
-    height: number;
+  code: string;
+  sku?: string | null;
+  name?: string | null;
+  width: number;
+  height: number;
+};
+
+export type SelectOption = {
+  label: string;
+  value: string;
 };

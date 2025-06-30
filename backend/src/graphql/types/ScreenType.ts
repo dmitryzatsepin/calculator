@@ -1,56 +1,37 @@
+// backend/src/graphql/types/ScreenType.ts
 import { builder } from '../builder';
+import { OptionService } from '../../services/optionService';
+import { ControlTypeService } from '../../services/controlTypeService';
+import { SensorService } from '../../services/sensorService';
+
+const getOptionService = (ctx: any) => new OptionService(ctx.prisma);
+const getControlTypeService = (ctx: any) => new ControlTypeService(ctx.prisma);
+const getSensorService = (ctx: any) => new SensorService(ctx.prisma);
 
 builder.prismaNode('ScreenType', {
-  id: { field: 'id' },
-  fields: (t) => ({
-    code: t.exposeString('code'),
-    name: t.exposeString('name'),
-    active: t.exposeBoolean('active'),
-    createdAt: t.expose('createdAt', { type: 'DateTime' }),
-    updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
+    id: { field: 'id' },
+    fields: (t) => ({
+        // Простые поля
+        code: t.exposeString('code'),
+        name: t.exposeString('name'),
+        active: t.exposeBoolean('active'),
+        createdAt: t.expose('createdAt', { type: 'DateTime' }),
+        updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
 
-    // --- Связи M-N через промежуточные таблицы ---
-    // Получаем связанные Option
-    options: t.prismaField({
-        type: ['Option'],
-        resolve: async (query, parent, args, ctx) => {
-            const screenTypeOptions = await ctx.prisma.screenTypeOption.findMany({
-                where: { screenTypeCode: parent.code },
-                select: { optionCode: true }
-            });
-            return ctx.prisma.option.findMany({
-                ...query,
-                where: { code: { in: screenTypeOptions.map(sto => sto.optionCode) } }
-            });
-        }
+        // --- Связи, делегированные сервисам ---
+        options: t.prismaField({
+            type: ['Option'],
+            resolve: (query, parent, _args, ctx) => getOptionService(ctx).findByScreenTypeCode(query, parent.code)
+        }),
+
+        controlTypes: t.prismaField({
+            type: ['ControlType'],
+            resolve: (query, parent, _args, ctx) => getControlTypeService(ctx).findByScreenTypeCode(query, parent.code)
+        }),
+
+        sensors: t.prismaField({
+            type: ['Sensor'],
+            resolve: (query, parent, _args, ctx) => getSensorService(ctx).findByScreenTypeCode(query, parent.code)
+        }),
     }),
-     // Получаем связанные ControlType
-    controlTypes: t.prismaField({
-        type: ['ControlType'],
-        resolve: async (query, parent, args, ctx) => {
-            const screenTypeControlTypes = await ctx.prisma.screenTypeControlType.findMany({
-                where: { screenTypeCode: parent.code },
-                select: { controlTypeCode: true }
-            });
-            return ctx.prisma.controlType.findMany({
-                ...query,
-                where: { code: { in: screenTypeControlTypes.map(stct => stct.controlTypeCode) } }
-            });
-        }
-    }),
-     // Получаем связанные Sensor
-    sensors: t.prismaField({
-        type: ['Sensor'],
-        resolve: async (query, parent, args, ctx) => {
-            const screenTypeSensors = await ctx.prisma.screenTypeSensor.findMany({
-                where: { screenTypeCode: parent.code },
-                select: { sensorCode: true }
-            });
-            return ctx.prisma.sensor.findMany({
-                ...query,
-                where: { code: { in: screenTypeSensors.map(sts => sts.sensorCode) } }
-            });
-        }
-    }),
-  }),
 });

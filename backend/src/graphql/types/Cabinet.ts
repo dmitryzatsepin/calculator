@@ -1,125 +1,103 @@
-// src/graphql/types/Cabinet.ts
+// backend/src/graphql/types/Cabinet.ts
 import { builder } from '../builder';
-import { Prisma } from '../../../prisma/generated/client';
 
-// Определяем тип CabinetPrice
+import { ItemCategoryService } from '../../services/itemCategoryService';
+import { ItemSubcategoryService } from '../../services/itemSubcategoryService';
+import { LocationService } from '../../services/locationService';
+import { PlacementService } from '../../services/placementService';
+import { MaterialService } from '../../services/materialService';
+import { PitchService } from '../../services/pitchService';
+import { ManufacturerService } from '../../services/manufacturerService';
+import { SupplierService } from '../../services/supplierService';
+import { CabinetItemComponentService } from '../../services/cabinetItemComponentService';
+import { CabinetPriceService } from '../../services/cabinetPriceService';
+
+// Вспомогательные функции для инициализации сервисов
+const getItemCategoryService = (ctx: any) => new ItemCategoryService(ctx.prisma);
+const getItemSubcategoryService = (ctx: any) => new ItemSubcategoryService(ctx.prisma);
+const getLocationService = (ctx: any) => new LocationService(ctx.prisma);
+const getPlacementService = (ctx: any) => new PlacementService(ctx.prisma);
+const getMaterialService = (ctx: any) => new MaterialService(ctx.prisma);
+const getPitchService = (ctx: any) => new PitchService(ctx.prisma);
+const getManufacturerService = (ctx: any) => new ManufacturerService(ctx.prisma);
+const getSupplierService = (ctx: any) => new SupplierService(ctx.prisma);
+const getCabinetItemComponentService = (ctx: any) => new CabinetItemComponentService(ctx.prisma);
+const getCabinetPriceService = (ctx: any) => new CabinetPriceService(ctx.prisma);
+
+// Тип CabinetPriceRelay (CabinetPrice)
 const CabinetPriceRelay = builder.prismaNode('CabinetPrice', {
-    id: { field: 'cabinetCode' },
-    fields: (t) => ({
-        cabinetCode: t.exposeString('cabinetCode'),
-        priceUsd: t.field({
-            type: 'Float', nullable: true, select: { priceUsd: true },
-            resolve: (parent) => parent.priceUsd ? parent.priceUsd.toNumber() : null
-        }),
-        priceRub: t.field({
-            type: 'Float', nullable: true, select: { priceRub: true },
-            resolve: (parent) => parent.priceRub ? parent.priceRub.toNumber() : null
-        }),
-    }),
+  id: { field: 'cabinetCode' },
+  fields: (t) => ({
+    cabinetCode: t.exposeString('cabinetCode'),
+    priceUsd: t.float({ nullable: true, resolve: (p) => p.priceUsd?.toNumber() ?? null }),
+    priceRub: t.float({ nullable: true, resolve: (p) => p.priceRub?.toNumber() ?? null }),
+  }),
 });
 
 builder.prismaNode('Cabinet', {
   id: { field: 'id' },
   fields: (t) => ({
+    // Простые поля
     code: t.exposeString('code'),
     sku: t.exposeString('sku', { nullable: true }),
     name: t.exposeString('name', { nullable: true }),
-    sizes: t.relation('sizes', {
-        query: {
-            where: {
-                size: {
-                    active: true
-                }
-            }
-        }
-    }),
     active: t.exposeBoolean('active'),
     createdAt: t.expose('createdAt', { type: 'DateTime' }),
     updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
 
-    // --- Связи M-N ---
+    // Простые связи, управляемые Pothos
+    sizes: t.relation('sizes', {
+      query: { where: { size: { active: true } } },
+    }),
+    
+    // --- Связи M-N с логикой, вынесенной в сервисы ---
     categories: t.prismaField({
         type: ['ItemCategory'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetCategory.findMany({ where: { cabinetCode: parent.code }, select: { categoryCode: true } });
-            return ctx.prisma.itemCategory.findMany({ ...query, where: { code: { in: relations.map(r => r.categoryCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getItemCategoryService(ctx).findByCabinetCode(query, parent.code)
     }),
     subcategories: t.prismaField({
         type: ['ItemSubcategory'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetSubcategory.findMany({ where: { cabinetCode: parent.code }, select: { subcategoryCode: true } });
-            return ctx.prisma.itemSubcategory.findMany({ ...query, where: { code: { in: relations.map(r => r.subcategoryCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getItemSubcategoryService(ctx).findByCabinetCode(query, parent.code)
     }),
     locations: t.prismaField({
         type: ['Location'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetLocation.findMany({ where: { cabinetCode: parent.code }, select: { locationCode: true } });
-            return ctx.prisma.location.findMany({ ...query, where: { code: { in: relations.map(r => r.locationCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getLocationService(ctx).findByCabinetCode(query, parent.code)
     }),
     placements: t.prismaField({
         type: ['Placement'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetPlacement.findMany({ where: { cabinetCode: parent.code }, select: { placementCode: true } });
-            return ctx.prisma.placement.findMany({ ...query, where: { code: { in: relations.map(r => r.placementCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getPlacementService(ctx).findByCabinetCode(query, parent.code)
     }),
     materials: t.prismaField({
         type: ['Material'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetMaterial.findMany({ where: { cabinetCode: parent.code }, select: { materialCode: true } });
-            return ctx.prisma.material.findMany({ ...query, where: { code: { in: relations.map(r => r.materialCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getMaterialService(ctx).findByCabinetCode(query, parent.code)
     }),
     pitches: t.prismaField({
         type: ['Pitch'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetPitch.findMany({ where: { cabinetCode: parent.code }, select: { pitchCode: true } });
-            return ctx.prisma.pitch.findMany({ ...query, where: { code: { in: relations.map(r => r.pitchCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getPitchService(ctx).findByCabinetCode(query, parent.code)
     }),
     manufacturers: t.prismaField({
         type: ['Manufacturer'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetManufacturer.findMany({ where: { cabinetCode: parent.code }, select: { manufacturerCode: true } });
-            return ctx.prisma.manufacturer.findMany({ ...query, where: { code: { in: relations.map(r => r.manufacturerCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getManufacturerService(ctx).findByCabinetCode(query, parent.code)
     }),
     suppliers: t.prismaField({
         type: ['Supplier'],
-        resolve: async (query, parent, args, ctx) => {
-            const relations = await ctx.prisma.cabinetSupplier.findMany({ where: { cabinetCode: parent.code }, select: { supplierCode: true } });
-            return ctx.prisma.supplier.findMany({ ...query, where: { code: { in: relations.map(r => r.supplierCode) } } });
-        }
+        resolve: (query, parent, _args, ctx) => getSupplierService(ctx).findByCabinetCode(query, parent.code)
     }),
 
-// Компоненты кабинета (CabinetItemComponent)
-items: t.prismaConnection({
-    type: 'CabinetItemComponent',
-    cursor: 'cabinetCode_itemCode',
-    totalCount: (parent, args, ctx, info) =>
-        ctx.prisma.cabinetItemComponent.count({
-            where: {
-                cabinetCode: parent.code
-            }
-        }),
-    resolve: (query, parent, args, ctx, info) =>
-        ctx.prisma.cabinetItemComponent.findMany({
-             ...query,
-             where: { cabinetCode: parent.code }
-         })
-}),
+    // Компоненты кабинета (CabinetItemComponent)
+    items: t.prismaConnection({
+        type: 'CabinetItemComponent',
+        cursor: 'cabinetCode_itemCode',
+        totalCount: (parent, _args, ctx) =>
+            ctx.prisma.cabinetItemComponent.count({ where: { cabinetCode: parent.code } }),
+        resolve: (query, parent, _args, ctx) => getCabinetItemComponentService(ctx).findByCabinetCode(query, parent.code)
+    }),
 
-// Цена кабинета (CabinetPrice)
-price: t.prismaField({
-    type: 'CabinetPrice',
-    nullable: true,
-    resolve: (query, parent, args, ctx, info) => ctx.prisma.cabinetPrice.findUnique({
-         ...query,
-         where: { cabinetCode: parent.code }
-     })
-}),
+    // Цена кабинета (CabinetPrice)
+    price: t.prismaField({
+        type: 'CabinetPrice',
+        nullable: true,
+        resolve: (query, parent, _args, ctx) => getCabinetPriceService(ctx).findByCabinetCode(query, parent.code)
+    }),
   }),
 });

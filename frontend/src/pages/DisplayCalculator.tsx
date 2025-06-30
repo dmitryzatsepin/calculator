@@ -1,12 +1,14 @@
-//src/pages/DisplayCalculator.tsx
+// src/pages/DisplayCalculator.tsx
 import { Container, Title, Paper, Drawer } from "@mantine/core";
 import CalculatorForm from "../components/CalculatorForm";
-import { useCalculatorContext } from "../context/CalculatorContext";
+// --- Импортируем новый хук ---
+import { useCalculationResult } from "../context/CalculationResultProvider";
 import CalculationResults from "../components/CalculationResults";
 
 const DisplayCalculator = () => {
-  const { isDrawerOpen, setIsDrawerOpen, calculationResult } =
-    useCalculatorContext();
+  // --- Используем новый, более специфичный хук ---
+  const { isDrawerOpen, setIsDrawerOpen } =
+    useCalculationResult();
 
   return (
     <Container size="lg" my="xl">
@@ -31,8 +33,13 @@ const DisplayCalculator = () => {
           timingFunction: "ease",
         }}
       >
-        {/* Содержимое Drawer'а */}
-        <CalculationResults results={calculationResult} />
+        {/*
+          Здесь мы передаем `calculationResult` в компонент CalculationResults.
+          Обратите внимание, что CalculationResults тоже нужно будет обновить,
+          чтобы он брал данные из контекста напрямую, а не через props.
+          Но пока оставим так, чтобы исправить текущую ошибку.
+        */}
+        <CalculationResults />
       </Drawer>
     </Container>
   );

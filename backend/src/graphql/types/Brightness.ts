@@ -1,3 +1,4 @@
+// backend/src/graphql/types/Brightness.ts
 import { builder } from '../builder';
 
 builder.prismaNode('Brightness', {

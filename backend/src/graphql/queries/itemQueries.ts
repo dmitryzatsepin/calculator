@@ -1,19 +1,26 @@
-// src/graphql/queries/itemQueries.ts
+// backend/src/graphql/queries/itemQueries.ts
 import { builder } from '../builder';
+import { ItemService } from '../../services/itemService';
+
+const getItemService = (ctx: any) => new ItemService(ctx.prisma);
 
 builder.queryFields((t) => ({
-  // Получить список всех Item (только активных)
+  // Получить список всех Item с пагинацией
   items: t.prismaConnection({
     type: 'Item',
-    cursor: 'id', // Пагинация по ID
-    args: { // Добавим аргумент для фильтрации по активности
-        onlyActive: t.arg.boolean({defaultValue: true})
+    cursor: 'id',
+    args: {
+      onlyActive: t.arg.boolean({ defaultValue: true }),
     },
-    resolve: (query, parent, args, ctx) =>
-      ctx.prisma.item.findMany({
-          ...query,
-          where: { active: args.onlyActive ?? undefined } // Фильтр по active
-      })
+    // Используем totalCount для получения общего количества записей (полезно для UI)
+    totalCount: (parent, args, ctx) => {
+        return ctx.prisma.item.count({
+            where: { active: args.onlyActive ?? undefined }
+        });
+    },
+    resolve: (query, _parent, args, ctx) => {
+      return getItemService(ctx).findMany(query, { onlyActive: args.onlyActive });
+    },
   }),
 
   // Получить Item по коду
@@ -23,16 +30,8 @@ builder.queryFields((t) => ({
     args: {
       code: t.arg.string({ required: true }),
     },
-    resolve: async (query, _parent, args, ctx) => {
-      const codeArg = args.code;
-      if (typeof codeArg !== 'string') {
-        console.error("Invalid code argument type received:", typeof codeArg);
-        throw new Error("Invalid argument: code must be a string.");
-      }
-      return ctx.prisma.item.findUnique({
-        ...query,
-        where: { code: codeArg },
-      });
+    resolve: (query, _parent, args, ctx) => {
+      return getItemService(ctx).findByCode(query, args.code);
     },
   }),
 }));

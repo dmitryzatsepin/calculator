@@ -1,58 +1,133 @@
-React + TypeScript + Vite
+```markdown
+# Описание проекта «LED Calculator»
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Обзор
+**LED Calculator** — full-stack веб-приложение для расчета характеристик и стоимости светодиодных экранов.  
+**Цель**: Инструмент для менеджеров и инженеров с возможностью:
+- Конфигурации LED-экранов по индивидуальным параметрам
+- Генерации технических спецификаций
+- Автоматического расчета стоимости
 
-Currently, two official plugins are available:
+## Стек технологий
+### Бэкенд
+| Компонент       | Технологии                          |
+|-----------------|------------------------------------|
+| Язык            | TypeScript (Node.js)               |
+| Фреймворк       | Express.js                         |
+| База данных     | PostgreSQL + Prisma ORM            |
+| API             | GraphQL (Apollo Server + Pothos)   |
+| Аутентификация  | JWT                                |
+| Безопасность    | helmet, cors                       |
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Фронтенд
+| Компонент          | Технологии                     |
+|--------------------|-------------------------------|
+| Язык               | TypeScript                    |
+| Фреймворк          | React (Vite)                  |
+| UI-библиотека      | Mantine UI                    |
+| State Management   | Context API + TanStack Query  |
+| GraphQL-клиент     | graphql-request               |
+| Роутинг           | react-router-dom              |
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Инфраструктура
+```mermaid
+graph TD
+  A[Монорепозиторий] --> B[Backend]
+  A --> C[Frontend]
+  B --> D[PostgreSQL]
+  B --> E[GraphQL API]
+  C --> E
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+## Структура проекта
+### Бэкенд (`/backend`)
 ```
-$ netstat -ano | findstr ":5000"
-$ taskkill //PID 15472 //F
+backend/
+├── prisma/
+│   ├── schema.prisma       # Модели БД
+│   └── migrations/        # SQL-миграции
+├── src/
+│   ├── graphql/           # Схемы GraphQL
+│   ├── lib/prisma.ts      # Prisma Client
+│   └── server.ts          # Точка входа
+└── seed/                  # Скрипты наполнения БД
+```
 
-<!-- создание новой ветки -->
-git checkout -b <branch_name>
+### Фронтенд (`/frontend`)
+```
+frontend/
+├── src/
+│   ├── components/        # UI-компоненты
+│   │   └── inputs/        # Поля формы
+│   ├── context/           # React Contexts
+│   ├── generated/         # GraphQL типы
+│   └── pages/             # Страницы приложения
+└── vite.config.ts         # Конфиг сборки
+```
 
-<!-- Список веток -->
-git branch
+## Ключевые функции
+1. **Динамический калькулятор**:
+   - Расчет технических параметров (разрешение, энергопотребление)
+   - Формирование спецификаций компонентов
+   - Автоматический расчет стоимости
+
+2. **Особенности реализации**:
+   ```tsx
+   // Пример компонента формы
+   <CalculatorForm>
+     <PitchSelect options={pitchOptions} />
+     <DimensionInputs onChange={updateSpecs} />
+   </CalculatorForm>
+   ```
+
+3. **Рабочий процесс**:
+   1. Пользователь выбирает параметры
+   2. Система фильтрует доступные опции
+   3. GraphQL-запросы к бэкенду
+   4. Расчет результатов на фронтенде
+
+## Текущий статус
+✅ **Завершено**:
+- Базовая функциональность калькулятора
+- Интеграция Prisma + GraphQL
+- Система аутентификации
+
+🛠 **В процессе**:
+- Рефакторинг CalculatorContext
+- Оптимизация хуков useMemo/useCallback
+- Декомпозиция бизнес-логики
+
+## Планы развития
+- [ ] Экспорт результатов в PDF
+- [ ] Интеграция с CRM (Bitrix24)
+- [ ] Система сохранения конфигураций
+- [ ] Расширенная валидация форм
+
+## Заключение
+Проект представляет собой современное решение с:
+- Типобезопасным стеком (TypeScript + GraphQL)
+- Гибкой архитектурой
+- Потенциалом для масштабирования
+
+> **Для новых разработчиков**: Полная документация по запуску доступна в `CONTRIBUTING.md`
+```
+
+### Дополнительные возможности:
+1. Для визуализации сложных связей можно добавить диаграмму последовательности:
+```mermaid
+sequenceDiagram
+  Frontend->>Backend: GraphQL Query (GetComponents)
+  Backend->>Database: Prisma Query
+  Database-->>Backend: Component Data
+  Backend-->>Frontend: JSON Response
+  Frontend->>CalculatorService: calculateSpecs()
+```
+
+2. Таблицу сравнения технологий:
+| Критерий          | Prisma       | TypeORM      |
+|-------------------|-------------|-------------|
+| Поддержка TS      | ✅ Нативно   | ✅           |
+| Миграции          | ✅ Авто     | ✅ Ручные    |
+| Производительность| ⚡️ Высокая  | 🐢 Средняя   |
+
+Хотите, чтобы я добавил какие-то конкретные разделы или детализировал определенные аспекты?

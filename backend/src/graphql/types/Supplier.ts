@@ -1,3 +1,4 @@
+// src/graphql/types/Supplier.ts
 import { builder } from '../builder';
 
 builder.prismaNode('Supplier', {

@@ -1,55 +1,35 @@
-// src/graphql/queries/materialQueries.ts
+// backend/src/graphql/queries/materialQueries.ts
 import { builder } from '../builder';
+import { MaterialService } from '../../services/materialService';
+
+const getMaterialService = (ctx: any) => new MaterialService(ctx.prisma);
 
 builder.queryFields((t) => ({
-
-  // --- Получить список материалов ---
+  // Запрос на получение списка материалов
   materials: t.prismaField({
     type: ['Material'],
     description: 'Получить список всех материалов.',
     args: {
-        onlyActive: t.arg.boolean({
-            defaultValue: true,
-            description: 'Вернуть только активные материалы?'
-        })
+      onlyActive: t.arg.boolean({
+        defaultValue: true,
+        description: 'Вернуть только активные материалы?',
+      }),
     },
-    resolve: async (query, _parent, args, ctx, _info) => {
-      console.log(`[materials] Fetching materials. onlyActive: ${args.onlyActive}`);
-      return ctx.prisma.material.findMany({
-         ...query,
-         where: {
-             active: args.onlyActive ?? undefined
-         },
-         orderBy: {
-             code: 'asc'
-         }
-      });
-    }
+    resolve: (_query, _parent, args, ctx) => {
+      return getMaterialService(ctx).findAll({ onlyActive: args.onlyActive });
+    },
   }),
 
-
-  // --- Получить один материал по коду ---
+  // Запрос на получение одного материала по коду
   materialByCode: t.prismaField({
     type: 'Material',
     nullable: true,
     description: 'Получить один материал по его уникальному коду.',
     args: {
-        code: t.arg.string({ required: true, description: 'Уникальный код материала' })
+      code: t.arg.string({ required: true, description: 'Уникальный код материала' }),
     },
-    resolve: async (query, _parent, args, ctx, _info) => {
-        console.log(`[materialByCode] Searching for code: ${args.code}`);
-        const codeArg = args.code;
-        if (typeof codeArg !== 'string') {
-             console.error("Invalid code argument type received:", typeof codeArg);
-             throw new Error("Invalid argument: code must be a string.");
-        }
-        return ctx.prisma.material.findUnique({
-            ...query,
-            where: {
-                code: codeArg 
-            }
-        });
-    }
-  })
-
+    resolve: (_query, _parent, args, ctx) => {
+      return getMaterialService(ctx).findByCode(args.code);
+    },
+  }),
 }));

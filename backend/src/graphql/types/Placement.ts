@@ -1,3 +1,4 @@
+// src/graphql/types/Placement.ts
 import { builder } from '../builder';
 
 builder.prismaNode('Placement', {

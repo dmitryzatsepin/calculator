@@ -3,7 +3,10 @@
     "target": "ES6",
     "module": "CommonJS",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDirs": [
+      "./src",
+      "./prisma"
+    ],
     "typeRoots": [
       "node_modules/@types",
       "prisma/generated/client"
@@ -16,10 +19,12 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@my-app/pothos-types": ["./prisma/pothos-types"]
     }
 
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "prisma/pothos-types.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

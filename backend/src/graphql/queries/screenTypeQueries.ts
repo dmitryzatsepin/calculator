@@ -1,52 +1,35 @@
-// src/graphql/queries/screenTypeQueries.ts
-import { builder } from '../builder'; // Импортируем наш builder
+// backend/src/graphql/queries/screenTypeQueries.ts
+import { builder } from '../builder';
+import { ScreenTypeService } from '../../services/screenTypeService';
+
+const getScreenTypeService = (ctx: any) => new ScreenTypeService(ctx.prisma);
 
 builder.queryFields((t) => ({
-
+  // Запрос на получение списка всех типов экранов
   screenTypes: t.prismaField({
     type: ['ScreenType'],
     description: 'Получить список всех типов экранов.',
     args: {
-        onlyActive: t.arg.boolean({
-            defaultValue: true,
-            description: 'Вернуть только активные типы экранов?'
-        })
+      onlyActive: t.arg.boolean({
+        defaultValue: true,
+        description: 'Вернуть только активные типы экранов?',
+      }),
     },
-    resolve: async (query, _parent, args, ctx, _info) => {
-      console.log(`[screenTypes] Fetching screen types. onlyActive: ${args.onlyActive}`);
-      return ctx.prisma.screenType.findMany({
-         ...query,
-         where: {
-             active: args.onlyActive ?? undefined
-         },
-         orderBy: {
-             code: 'asc'
-         }
-      });
-    }
+    resolve: (query, _parent, args, ctx) => {
+      return getScreenTypeService(ctx).findAll(query, { onlyActive: args.onlyActive });
+    },
   }),
 
+  // Запрос на получение одного типа экрана по коду
   screenTypeByCode: t.prismaField({
     type: 'ScreenType',
     nullable: true,
     description: 'Получить один тип экрана по его уникальному коду.',
     args: {
-        code: t.arg.string({ required: true, description: 'Уникальный код типа экрана' })
+      code: t.arg.string({ required: true, description: 'Уникальный код типа экрана' }),
     },
-    resolve: async (query, _parent, args, ctx, _info) => {
-        console.log(`[screenTypeByCode] Searching for code: ${args.code}`);
-        const codeArg = args.code;
-        if (typeof codeArg !== 'string') {
-          console.error("Invalid code argument type received:", typeof codeArg);
-          throw new Error("Invalid argument: code must be a string.");
-        }
-        return ctx.prisma.screenType.findUnique({
-            ...query,
-            where: {
-                code: codeArg 
-            }
-        });
-    }
-  })
-
+    resolve: (query, _parent, args, ctx) => {
+      return getScreenTypeService(ctx).findByCode(query, args.code);
+    },
+  }),
 }));

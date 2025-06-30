@@ -1,3 +1,4 @@
+// src/graphql/types/Material.ts
 import { builder } from '../builder';
 
 builder.prismaNode('Material', {

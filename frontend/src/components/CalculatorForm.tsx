@@ -31,54 +31,15 @@ import FlexOptionSwitch from "./inputs/FlexOptionSwitch";
 import DollarRateInput from "./inputs/DollarRateInput";
 import CalculateButton from "./inputs/CalculateButton";
 
-// --- Импорт Контекста ---
-import { useCalculatorContext } from "../context/CalculatorContext";
+// --- Импорт НОВЫХ Контекстов/Хуков ---
+import { useCalculatorForm } from "../context/CalculatorFormProvider";
+import { useCalculatorData } from "../context/CalculatorDataProvider";
+import { useCalculationResult } from "../context/CalculationResultProvider";
 
 // --- КОМПОНЕНТ ---
 const CalculatorForm = () => {
+  // 1. Получаем все, что касается полей формы и их сеттеров
   const {
-    // Статусы загрузки для начальных данных
-    isLoadingInitialData,
-    isErrorInitialData,
-    errorInitialData,
-
-    // Данные и статусы для опций типа экрана (из хука useScreenTypeOptions)
-    screenTypeOptions,
-    isLoadingScreenTypeOptions,
-    isErrorScreenTypeOptions,
-    errorScreenTypeOptions,
-
-    // Данные и статусы для питчей (из хука usePitchOptions)
-    isLoadingPitches,
-    isErrorPitches,
-    errorPitches,
-
-    // Данные и статусы для частоты обновления (из хука useFilteredRefreshRates)
-    isLoadingRefreshRates,
-    isErrorRefreshRates,
-    errorRefreshRates,
-
-    // Данные и статусы для яркости (из хука useFilteredBrightnesses)
-    isLoadingBrightnesses,
-    isErrorBrightnesses,
-    errorBrightnesses,
-
-    // Данные и статусы для модулей (из хука useModuleOptions)
-    isLoadingModules,
-    isErrorModules,
-    errorModules,
-
-    // Данные и статусы для кабинетов (из хука useCabinetOptions)
-    isLoadingCabinets,
-    isErrorCabinets,
-    errorCabinets,
-
-    // Курс доллара
-    localDollarRateInput,
-    setLocalDollarRateInput,
-    isLoadingDollarRate,
-
-    // Состояние формы
     selectedScreenTypeCode,
     selectedLocationCode,
     selectedMaterialCode,
@@ -93,12 +54,7 @@ const CalculatorForm = () => {
     isFlexSelected,
     widthMm,
     heightMm,
-
-    // Статусы и результаты расчета
-    isCalculating,
-    isCalculationReady,
-
-    // Сеттеры состояния формы
+    localDollarRateInput,
     setSelectedScreenTypeCode,
     setSelectedLocationCode,
     setSelectedMaterialCode,
@@ -113,8 +69,34 @@ const CalculatorForm = () => {
     setIsFlexSelected,
     setWidthMm,
     setHeightMm,
-    performCalculation,
+    setLocalDollarRateInput,
+  } = useCalculatorForm();
 
+  // 2. Получаем все данные, загруженные с сервера, и их статусы
+  const {
+    isLoadingInitialData,
+    isErrorInitialData,
+    errorInitialData,
+    screenTypeOptions,
+    isLoadingScreenTypeOptions,
+    isErrorScreenTypeOptions,
+    errorScreenTypeOptions,
+    isLoadingPitches,
+    isErrorPitches,
+    errorPitches,
+    isLoadingRefreshRates,
+    isErrorRefreshRates,
+    errorRefreshRates,
+    isLoadingBrightnesses,
+    isErrorBrightnesses,
+    errorBrightnesses,
+    isLoadingModules,
+    isErrorModules,
+    errorModules,
+    isLoadingCabinets,
+    isErrorCabinets,
+    errorCabinets,
+    isLoadingDollarRate,
     // Мемоизированные опции для селектов
     screenTypeSegments,
     locationSelectOptions,
@@ -128,8 +110,15 @@ const CalculatorForm = () => {
     moduleSelectOptions,
     cabinetSelectOptions,
     isFlexOptionAvailableForSelectedScreenType,
+  } = useCalculatorData();
 
-  } = useCalculatorContext();
+  // 3. Получаем все, что связано с выполнением и результатами расчетов
+  const {
+    isCalculating,
+    isCalculationReady,
+    performCalculation,
+  } = useCalculationResult();
+
 
   const cabinetScreenTypeCode = "cabinet";
   const showCabinetSection = selectedScreenTypeCode === cabinetScreenTypeCode;
@@ -164,7 +153,7 @@ const CalculatorForm = () => {
   const handleDollarRateChange = useCallback((value: number | string) => setLocalDollarRateInput(value), [setLocalDollarRateInput]);
   const handleCalculateClick = useCallback(() => performCalculation(), [performCalculation]);
 
-  // --- JSX ---
+  // --- JSX (остается без изменений) ---
   return (
     <Stack gap="md">
       <LoadingOverlay
@@ -358,6 +347,8 @@ const CalculatorForm = () => {
   );
 };
 
+
+// Компонент-обертка остается без изменений
 const CalculatorFormWrapper = () => (
   <QueryErrorResetBoundary>
     {({ reset }) => (

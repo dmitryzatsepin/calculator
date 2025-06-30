@@ -1,11 +1,10 @@
-// src/server.ts
+// backend/src/server.ts
 import express, { Request, Response, NextFunction, Application } from "express";
 import http from "http";
 import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import bodyParser from "body-parser";
 import expressPlayground from "graphql-playground-middleware-express";
 
 // --- GraphQL, Prisma и Зависимости для Контекста ---
@@ -14,10 +13,35 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { schema } from "./graphql/schema";
 import { prisma } from "./lib/prisma";
-import { GraphQLContext } from "./graphql/builder";
+import { GraphQLContext, Services } from "./graphql/builder"; // <-- Импортируем Services
 import { validateSchema } from "graphql";
 import jwt from 'jsonwebtoken';
 import { User as PrismaUser } from '../prisma/generated/client';
+
+// --- Импорты всех сервисов ---
+import { AuthService } from './services/authService';
+import { CabinetService } from './services/cabinetService';
+import { ItemService } from './services/itemService';
+import { LocationService } from './services/locationService';
+import { MaterialService } from './services/materialService';
+import { ModuleService } from './services/moduleService';
+import { OptionService } from './services/optionService';
+import { PitchService } from './services/pitchService';
+import { PriceService } from './services/priceService';
+import { RefreshRateService } from './services/refreshRateService';
+import { ScreenTypeService } from './services/screenTypeService';
+import { SensorService } from './services/sensorService';
+import { BrightnessService } from './services/brightnessService';
+import { ControlTypeService } from './services/controlTypeService';
+import { IpProtectionService } from './services/ipProtectionService';
+import { ItemCategoryService } from './services/itemCategoryService';
+import { ItemSubcategoryService } from './services/itemSubcategoryService';
+import { ManufacturerService } from './services/manufacturerService';
+import { PlacementService } from './services/placementService';
+import { SupplierService } from './services/supplierService';
+import { CabinetItemComponentService } from './services/cabinetItemComponentService';
+import { CabinetPriceService } from './services/cabinetPriceService';
+import { CabinetSizeService } from './services/cabinetSizeService';
 
 
 // --- Инициализация ---
@@ -46,10 +70,7 @@ async function startServer() {
   try {
     const schemaValidationErrors = validateSchema(schema);
     if (schemaValidationErrors.length > 0) {
-      console.error(
-        "❌ GraphQL schema validation errors:",
-        schemaValidationErrors
-      );
+      console.error("❌ GraphQL schema validation errors:", schemaValidationErrors);
       process.exit(1);
     }
     console.log("✅ GraphQL schema validated successfully");
@@ -71,100 +92,111 @@ async function startServer() {
   await apolloServer.start();
   console.log("✅ Apollo Server started successfully");
 
-  // 5. Middleware (Применяем ДО специфичных роутов GraphQL/Playground)
-  app.use(
-    cors({/* ... */})
-  );
+  // 5. Middleware
+  app.use(cors({/* ... */}));
   app.use(morgan("dev")); 
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
   console.log('✅ Basic middleware applied');
 
-  // 6. GraphQL Endpoint (Применяем нужные middleware только для него)
+  // 6. GraphQL Endpoint
   app.use(
-    '/api/v1',
+    GRAPHQL_PATH,
     cors<cors.CorsRequest>(),
     express.json({ limit: '10mb' }),
     expressMiddleware(apolloServer, {
-        context: async ({ req }): Promise<GraphQLContext> => {
-            let currentUser: PrismaUser | null = null;
-            const authHeader = req.headers.authorization;
-            if (authHeader && authHeader.startsWith('Bearer ')) {
-                const token = authHeader.split(' ')[1];
-                try {
-                    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: number; [key: string]: any };
-                    if (decoded && typeof decoded.id === 'number') {
-                        // Ищем пользователя в базе данных по ID из токена
-                        currentUser = await prisma.user.findUnique({
-                            where: { id: decoded.id },
-                        });
-                        if (!currentUser) {
-                             console.warn(`[AUTH CONTEXT] User ID ${decoded.id} from token not found in DB.`);
-                        } else {
-                             console.log(`[AUTH CONTEXT] Authenticated user: ${currentUser.email}`);
-                        }
-                    }
-                } catch (err) {
-                    // Ошибки верификации (невалидный, истекший, неверная подпись)
-                    console.warn(`[AUTH CONTEXT] JWT verification error: ${(err as Error).message}`);
-                    currentUser = null;
-                }
-            } else {
-                //console.log('[AUTH CONTEXT] No Bearer token found in Authorization header.');
+      context: async ({ req }): Promise<GraphQLContext> => {
+        let currentUser: PrismaUser | null = null;
+        const authHeader = req.headers.authorization;
+        
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+          const token = authHeader.split(' ')[1];
+          try {
+            const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: number; [key: string]: any };
+            if (decoded && typeof decoded.id === 'number') {
+              currentUser = await prisma.user.findUnique({ where: { id: decoded.id } });
+              if (!currentUser) console.warn(`[AUTH CONTEXT] User ID ${decoded.id} from token not found in DB.`);
+              else console.log(`[AUTH CONTEXT] Authenticated user: ${currentUser.email}`);
             }
+          } catch (err) {
+            console.warn(`[AUTH CONTEXT] JWT verification error: ${(err as Error).message}`);
+            currentUser = null;
+          }
+        }
+        
+        // --- ИНИЦИАЛИЗАЦИЯ СЕРВИСОВ ---
+        // Создаем экземпляры всех сервисов один раз на каждый запрос
+        const services: Services = {
+          authService: new AuthService(prisma),
+          cabinetService: new CabinetService(prisma),
+          itemService: new ItemService(prisma),
+          locationService: new LocationService(prisma),
+          materialService: new MaterialService(prisma),
+          moduleService: new ModuleService(prisma),
+          optionService: new OptionService(prisma),
+          pitchService: new PitchService(prisma),
+          priceService: new PriceService(prisma),
+          refreshRateService: new RefreshRateService(prisma),
+          screenTypeService: new ScreenTypeService(prisma),
+          sensorService: new SensorService(prisma),
+          brightnessService: new BrightnessService(prisma),
+          controlTypeService: new ControlTypeService(prisma),
+          ipProtectionService: new IpProtectionService(prisma),
+          itemCategoryService: new ItemCategoryService(prisma),
+          itemSubcategoryService: new ItemSubcategoryService(prisma),
+          manufacturerService: new ManufacturerService(prisma),
+          placementService: new PlacementService(prisma),
+          supplierService: new SupplierService(prisma),
+          cabinetItemComponentService: new CabinetItemComponentService(prisma),
+          cabinetPriceService: new CabinetPriceService(prisma),
+          cabinetSizeService: new CabinetSizeService(prisma),
+        };
 
-            // Возвращаем объект контекста
-            return {
-                prisma, 
-                currentUser,
-                auth: authHeader || null
-            };
-        },
+        // Возвращаем расширенный объект контекста
+        return {
+          prisma,
+          currentUser,
+          auth: authHeader || null,
+          services,
+        };
+      },
     })
-);
-console.log(`✅ GraphQL endpoint configured at /api/v1`);
+  );
+  console.log(`✅ GraphQL endpoint configured at ${GRAPHQL_PATH}`);
 
   // 7. GraphQL Playground Endpoint
-  app.get(
-    "/playground",
-    expressPlayground({ endpoint: "/api/v1" })
-  );
-  console.log(`✅ GraphQL Playground available at /playground`);
+  app.get(PLAYGROUND_PATH, expressPlayground({ endpoint: GRAPHQL_PATH }));
+  console.log(`✅ GraphQL Playground available at ${PLAYGROUND_PATH}`);
+  
   app.use(helmet());
   console.log("✅ Helmet applied globally (excluding /api/v1, /playground)");
 
   // 8. Healthcheck и корневой роут
   app.get("/", (req: Request, res: Response) => {
-    res
-      .status(200)
-      .json({
-        status: "OK",
-        message: "API is running",
-        endpoints: {
-          graphql: GRAPHQL_PATH,
-          playground: PLAYGROUND_PATH,
-          healthcheck: HEALTHCHECK_PATH,
-        },
-      });
+    res.status(200).json({
+      status: "OK",
+      message: "API is running",
+      endpoints: {
+        graphql: GRAPHQL_PATH,
+        playground: PLAYGROUND_PATH,
+        healthcheck: HEALTHCHECK_PATH,
+      },
+    });
   });
-  app.get("/health", async (req: Request, res: Response) => {
+  app.get(HEALTHCHECK_PATH, async (req: Request, res: Response) => {
     try {
       await prisma.$queryRaw`SELECT 1`;
-      res
-        .status(200)
-        .json({
-          status: "healthy",
-          database: "connected",
-          uptime: process.uptime(),
-        });
+      res.status(200).json({
+        status: "healthy",
+        database: "connected",
+        uptime: process.uptime(),
+      });
     } catch (error) {
-      res
-        .status(500)
-        .json({
-          status: "unhealthy",
-          database: "disconnected",
-          error: error instanceof Error ? error.message : "Unknown error",
-          uptime: process.uptime(),
-        });
+      res.status(500).json({
+        status: "unhealthy",
+        database: "disconnected",
+        error: error instanceof Error ? error.message : "Unknown error",
+        uptime: process.uptime(),
+      });
     }
   });
   console.log("✅ Other routes registered");
@@ -172,12 +204,9 @@ console.log(`✅ GraphQL endpoint configured at /api/v1`);
   // 9. Обработка ошибок
   console.log("🚀 Registering error handlers...");
   app.use((req: Request, res: Response, next: NextFunction) => {
-    console.warn(
-      `[404 HANDLER] Route not found: ${req.method} ${req.originalUrl}`
-    );
+    console.warn(`[404 HANDLER] Route not found: ${req.method} ${req.originalUrl}`);
     res.status(404).json({ error: "Not Found" });
   });
-  // Обработчик 500 - Самый последний middleware
   app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (res.headersSent) return next(err);
     console.error(`[500 HANDLER] Error for ${req.method} ${req.path}`, err);
@@ -195,10 +224,10 @@ console.log(`✅ GraphQL endpoint configured at /api/v1`);
   );
   console.log(`
     🚀 Server ready at: http://localhost:${PORT}
-    🎯 GraphQL Playground: http://localhost:${PORT}/playground
-    ⚡ GraphQL endpoint: http://localhost:${PORT}/api/v1
-    ❤️  Healthcheck: http://localhost:${PORT}/health
-    `);
+    🎯 GraphQL Playground: http://localhost:${PORT}${PLAYGROUND_PATH}
+    ⚡ GraphQL endpoint: http://localhost:${PORT}${GRAPHQL_PATH}
+    ❤️  Healthcheck: http://localhost:${PORT}${HEALTHCHECK_PATH}
+  `);
 }
 
 // --- Graceful shutdown (без изменений) ---
@@ -207,19 +236,11 @@ async function gracefulShutdown(signal: string) {
   try {
     if (httpServer) {
       await new Promise<void>((resolve, reject) => {
-        const t = setTimeout(
-          () => reject(new Error("HTTP close timeout")),
-          10000
-        );
-        httpServer.close((err) => {
-          clearTimeout(t);
-          if (err) reject(err);
-          else resolve();
-        });
+        const t = setTimeout(() => reject(new Error("HTTP close timeout")), 10000);
+        httpServer.close((err) => { clearTimeout(t); if (err) reject(err); else resolve(); });
       });
       console.log("✅ HTTP server closed");
     }
-    console.log("   Disconnecting Prisma...");
     await prisma.$disconnect();
     console.log("✅ Prisma disconnected");
     process.exit(0);

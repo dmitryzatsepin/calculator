@@ -1,3 +1,4 @@
+// src/graphql/types/RefreshRate.ts
 import { builder } from '../builder';
 
 builder.prismaNode('RefreshRate', {
