@@ -44,15 +44,16 @@ const fetchComponentPricesQuery = async (
 };
 
 export function useComponentPrices(
-  priceRequestArgs: PriceRequestArgs | null
+  priceRequestArgs: PriceRequestArgs | null,
+  isReadyForPricing: boolean
 ): ComponentPricesHookResult {
-  const enabled = !!(
+  const baseEnabled = !!(
     priceRequestArgs &&
     (priceRequestArgs.moduleCode ||
       priceRequestArgs.cabinetCode ||
       (priceRequestArgs.itemCodes && priceRequestArgs.itemCodes.length > 0))
   );
-
+  const enabled = baseEnabled && isReadyForPricing;
   const gqlPriceRequestInputArgs: GqlPriceRequestInput | undefined = useMemo(() => {
     if (!enabled || !priceRequestArgs) return undefined;
     // Преобразуем null в undefined для GraphQL

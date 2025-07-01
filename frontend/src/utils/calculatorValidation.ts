@@ -11,8 +11,6 @@ interface CalculationReadinessParams {
   selectedMaterialCode: string | null;
   selectedProtectionCode: string | null;
   selectedPitchCode: string | null;
-  selectedBrightnessCode: string | null;
-  selectedRefreshRateCode: string | null;
   selectedModuleCode: string | null;
   selectedCabinetCode: string | null;
   localDollarRateInput: number | string;
@@ -28,7 +26,6 @@ interface CalculationReadinessParams {
   isErrorPrices: boolean;
   priceMap: PriceMap;
 }
-
 export function checkCalculationReadiness(params: CalculationReadinessParams): boolean {
   const {
     selectedScreenTypeCode,
@@ -38,8 +35,6 @@ export function checkCalculationReadiness(params: CalculationReadinessParams): b
     selectedMaterialCode,
     selectedProtectionCode,
     selectedPitchCode,
-    selectedBrightnessCode,
-    selectedRefreshRateCode,
     selectedModuleCode,
     selectedCabinetCode,
     localDollarRateInput,
@@ -67,8 +62,6 @@ export function checkCalculationReadiness(params: CalculationReadinessParams): b
     !!selectedLocationCode &&
     !!selectedProtectionCode &&
     !!selectedPitchCode &&
-    !!selectedBrightnessCode &&
-    !!selectedRefreshRateCode &&
     !!selectedModuleCode &&
     !!selectedModuleDetailsState && !isLoadingModuleDetails && !isErrorModuleDetails &&
     rateVal > 0 &&
@@ -87,5 +80,5 @@ export function checkCalculationReadiness(params: CalculationReadinessParams): b
     );
   }
 
-  return true; // Для не-кабинетных типов остальные специфичные проверки не нужны
+  return true;
 }

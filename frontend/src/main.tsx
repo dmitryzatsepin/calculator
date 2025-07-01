@@ -30,10 +30,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <MantineProvider>
-        {/* --- НОВАЯ СТРУКТУРА ПРОВАЙДЕРОВ --- */}
-        <CalculatorFormProvider>
-          <CalculatorDataProvider>
-            <CalculationResultProvider>
+        <CalculatorFormProvider>  {/* 1. Форма (самый внешний) */}
+          <CalculatorDataProvider> {/* 2. Данные (внутри формы) */}
+            <CalculationResultProvider> {/* 3. Результаты (внутри данных) */}
               <App />
             </CalculationResultProvider>
           </CalculatorDataProvider>

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import {
   Stack,
   LoadingOverlay,
@@ -74,6 +74,7 @@ const CalculatorForm = () => {
     errorCabinets,
     isLoadingDollarRate,
     hasProOption,
+    dollarRateValue,
     screenTypeSegments,
     locationSelectOptions,
     materialSelectOptions,
@@ -90,6 +91,12 @@ const CalculatorForm = () => {
     isCalculationReady,
     performCalculation,
   } = useCalculationResult();
+
+  useEffect(() => {
+    if (typeof dollarRateValue === 'number' && dollarRateValue > 0) {
+      setLocalDollarRateInput(dollarRateValue);
+    }
+  }, [dollarRateValue, setLocalDollarRateInput]);
 
   const areDimensionsEntered = useMemo(() => {
     return +widthMm > 0 && +heightMm > 0;

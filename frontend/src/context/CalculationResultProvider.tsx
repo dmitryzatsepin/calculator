@@ -1,4 +1,3 @@
-// frontend/src/context/CalculationResultProvider.tsx
 import {
     createContext,
     useState,
@@ -9,26 +8,19 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
-// --- Импорты типов ---
 import type {
     TechnicalSpecsResult,
     CostCalculationResult,
     ModuleData,
     CabinetData,
 } from "../types/calculationTypes";
+import type { CabinetDetailsData } from '../graphql/calculator.types';
 
-import type {
-    ModuleDetailsData,
-    CabinetDetailsData,
-} from '../graphql/calculator.types';
-
-// --- Импорты хуков и утилит ---
 import { useCalculatorForm } from "./CalculatorFormProvider";
 import { useCalculatorData } from "./CalculatorDataProvider";
 import { useCalculationPerformer } from "../hooks/useCalculationPerformer";
 import { checkCalculationReadiness } from "../utils/calculatorValidation";
 
-// --- Интерфейс для этого контекста ---
 interface CalculationResultContextType {
     isCalculating: boolean;
     isDrawerOpen: boolean;
@@ -52,18 +44,13 @@ export const useCalculationResult = () => {
 
 export const CalculationResultProvider = ({ children }: { children: ReactNode }) => {
     const queryClient = useQueryClient();
-
-    // --- Получаем данные из других контекстов ---
     const formState = useCalculatorForm();
     const dataState = useCalculatorData();
 
-    // --- Трансформация данных для расчетов ---
     const processedModuleData = useMemo((): ModuleData | null => {
-        const details: ModuleDetailsData | null = dataState.moduleDetails;
-        if (!details || !details.sizes || details.sizes.length === 0) {
-            return null;
-        }
-        // Берем первый размер из массива
+        const details = dataState.moduleDetails;
+        if (!details || !details.sizes || details.sizes.length === 0) return null;
+
         const size = details.sizes[0];
         if (!size) return null;
 
@@ -75,16 +62,16 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
             height: size.height,
             powerConsumptionAvg: details.powerConsumptionAvg,
             powerConsumptionMax: details.powerConsumptionMax,
-            components: [], // Пока оставляем пустым, т.к. `items` не запрашиваются
+            brightness: details.brightness, // <-- Теперь просто берем готовое
+            refreshRate: details.refreshRate, // <-- Теперь просто берем готовое
+            components: [],
         };
     }, [dataState.moduleDetails]);
 
     const processedCabinetData = useMemo((): CabinetData | null => {
         const details: CabinetDetailsData | null = dataState.cabinetDetails;
-        // Проверяем всю цепочку вложенности
-        if (!details || !details.sizes || details.sizes.length === 0) {
-            return null;
-        }
+        if (!details || !details.sizes || details.sizes.length === 0) return null;
+
         const sizeLink = details.sizes[0];
         if (!sizeLink || !sizeLink.size) return null;
 
@@ -97,13 +84,11 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         };
     }, [dataState.cabinetDetails]);
 
-    // --- Локальные состояния для результатов ---
     const [isCalculating, setIsCalculatingState] = useState<boolean>(false);
     const [isDrawerOpen, setIsDrawerOpenState] = useState<boolean>(false);
     const [calculationResult, setCalculationResultState] = useState<TechnicalSpecsResult | null>(null);
     const [costDetails, setCostDetailsState] = useState<CostCalculationResult | null>(null);
 
-    // --- Логика isCalculationReady ---
     const isCalculationReady = useMemo((): boolean => {
         return checkCalculationReadiness({
             ...formState,
@@ -118,9 +103,8 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
             priceMap: dataState.priceMap,
             isCalculating,
         });
-    }, [formState, dataState, isCalculating]);
+    }, [formState, dataState, isCalculating, processedModuleData, processedCabinetData]);
 
-    // --- performCalculation (используем кастомный хук) ---
     const calculationParams = useMemo(() => ({
         isCalculationReady,
         selectedModuleDetails: processedModuleData,
@@ -130,29 +114,33 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         locationSelectOptions: dataState.locationSelectOptions,
         materialSelectOptions: dataState.materialSelectOptions,
         protectionSelectOptions: dataState.protectionSelectOptions,
-        brightnessSelectOptions: dataState.brightnessSelectOptions,
-        refreshRateSelectOptions: dataState.refreshRateSelectOptions,
         ...formState,
-    }), [isCalculationReady, dataState, formState]);
+    }), [
+        isCalculationReady,
+        processedModuleData,
+        processedCabinetData,
+        dataState.priceMap,
+        dataState.pitchOptionsData,
+        dataState.locationSelectOptions,
+        dataState.materialSelectOptions,
+        dataState.protectionSelectOptions,
+        formState
+    ]);
 
     const calculationSetters = useMemo(() => ({
         setIsCalculatingState,
         setCalculationResultState,
         setCostDetailsState,
         setIsDrawerOpenState,
-    }), []); // Сеттеры стабильны
+    }), []);
 
     const performCalculation = useCalculationPerformer(calculationParams, calculationSetters);
 
-    // --- resetQuery ---
     const resetQuery = useCallback(() => {
         queryClient.invalidateQueries({ queryKey: ["calculatorInitialData"] });
         queryClient.invalidateQueries({ queryKey: ["screenTypeOptions"] });
-        // ... и так далее для всех ключей
-        // Этот хук может быть более общим, если нужно
     }, [queryClient]);
 
-    // --- Формируем значение контекста ---
     const value = useMemo(() => ({
         isCalculating,
         isDrawerOpen,
@@ -163,13 +151,8 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         setIsDrawerOpen: setIsDrawerOpenState,
         resetQuery,
     }), [
-        isCalculating,
-        isDrawerOpen,
-        calculationResult,
-        costDetails,
-        isCalculationReady,
-        performCalculation,
-        resetQuery
+        isCalculating, isDrawerOpen, calculationResult, costDetails,
+        isCalculationReady, performCalculation, resetQuery
     ]);
 
     return (

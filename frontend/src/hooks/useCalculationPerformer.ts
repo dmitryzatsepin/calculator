@@ -1,4 +1,3 @@
-// frontend/src/hooks/useCalculationPerformer.ts
 import { useCallback } from 'react';
 import type {
   CalculatorFormData,
@@ -13,32 +12,26 @@ import {
   calculateCosts,
 } from '../utils/calculations';
 
-// Определяем интерфейс для параметров, которые хук будет принимать
 interface CalculationParams {
   isCalculationReady: boolean;
   selectedModuleDetails: ModuleData | null;
   isCabinetScreenTypeSelected: boolean;
   selectedCabinetDetails: CabinetData | null;
   priceMap: PriceMap;
-  gqlFilteredPitches: Array<{ code?: string | null, pitchValue?: number | null, [key: string]: any } | null>; // Упрощенный тип для питчей
+  gqlFilteredPitches: Array<{ code?: string | null, pitchValue?: number | null, [key: string]: any } | null>;
   selectedPitchCode: string | null;
   locationSelectOptions: Array<{ value: string, label: string }>;
   selectedLocationCode: string | null;
   materialSelectOptions: Array<{ value: string, label: string }>;
   selectedMaterialCode: string | null;
-  protectionSelectOptions: Array<{ value: string, label: string }>; // Если protectionSelectOptions не используется, можно убрать
+  protectionSelectOptions: Array<{ value: string, label: string }>;
   selectedProtectionCode: string | null;
-  brightnessSelectOptions: Array<{ value: string, label: string }>;
-  selectedBrightnessCode: string | null;
-  refreshRateSelectOptions: Array<{ value: string, label: string }>;
-  selectedRefreshRateCode: string | null;
   widthMm: string | number;
   heightMm: string | number;
   selectedScreenTypeCode: string | null;
   localDollarRateInput: number | string;
 }
 
-// Определяем интерфейс для функций обратного вызова (сеттеров состояния из контекста)
 interface CalculationSetters {
   setIsCalculatingState: (isCalculating: boolean) => void;
   setCalculationResultState: (result: TechnicalSpecsResult | null) => void;
@@ -63,10 +56,6 @@ export function useCalculationPerformer(
     materialSelectOptions,
     selectedMaterialCode,
     selectedProtectionCode,
-    brightnessSelectOptions,
-    selectedBrightnessCode,
-    refreshRateSelectOptions,
-    selectedRefreshRateCode,
     widthMm,
     heightMm,
     selectedScreenTypeCode,
@@ -85,10 +74,10 @@ export function useCalculationPerformer(
       !isCalculationReady ||
       !selectedModuleDetails ||
       (isCabinetScreenTypeSelected && !selectedCabinetDetails) ||
-      !priceMap // priceMap здесь уже результат select из useComponentPrices, т.е. PriceMap
+      !priceMap
     ) {
       console.warn(
-        "Calculation prerequisites not met or essential data missing (performCalculation). Details:",
+        "Calculation prerequisites not met or essential data missing (performCalculation).",
         {
           isCalculationReady,
           selectedModuleDetails,
@@ -108,8 +97,7 @@ export function useCalculationPerformer(
       const pitchObject = gqlFilteredPitches.find(p => p?.code === selectedPitchCode);
       const pitchValue = pitchObject?.pitchValue;
 
-      if (typeof pitchValue !== 'number') { // Строгая проверка
-        console.error("Pitch object or value not found:", { pitchObject, selectedPitchCode, gqlFilteredPitches });
+      if (typeof pitchValue !== 'number') {
         throw new Error(`Pitch value for code '${selectedPitchCode}' not found or not a number.`);
       }
 
@@ -117,9 +105,9 @@ export function useCalculationPerformer(
         selectedPlacement: locationSelectOptions.find(l => l.value === selectedLocationCode)?.label ?? selectedLocationCode ?? "",
         selectedMaterialName: materialSelectOptions.find(m => m.value === selectedMaterialCode)?.label ?? selectedMaterialCode ?? "",
         selectedProtectionCode: selectedProtectionCode ?? "",
-        selectedBrightnessLabel: brightnessSelectOptions.find(b => b.value === selectedBrightnessCode)?.label ?? selectedBrightnessCode ?? "",
-        selectedRefreshRateLabel: refreshRateSelectOptions.find(r => r.value === selectedRefreshRateCode)?.label ?? selectedRefreshRateCode ?? "",
-        selectedPitchValue: pitchValue, // Теперь это гарантированно number
+        selectedBrightnessLabel: selectedModuleDetails.brightness?.toString() ?? "-",
+        selectedRefreshRateLabel: selectedModuleDetails.refreshRate?.toString() ?? "-",
+        selectedPitchValue: pitchValue,
         selectedScreenWidth: Number(widthMm) || 0,
         selectedScreenHeight: Number(heightMm) || 0,
         selectedScreenTypeCode: selectedScreenTypeCode ?? "",
@@ -144,7 +132,7 @@ export function useCalculationPerformer(
       const costResult = calculateCosts(
         techSpecResult,
         priceMap,
-        Number(localDollarRateInput), // Убедитесь, что это число
+        Number(localDollarRateInput),
         isCabinetScreenTypeSelected ? selectedMaterialCode : null
       );
       setCostDetailsState(costResult);
@@ -154,17 +142,14 @@ export function useCalculationPerformer(
       console.error("❌ Calculation failed in useCalculationPerformer:", calcError?.message ?? calcError);
       setCalculationResultState(null);
       setCostDetailsState(null);
-      // Возможно, стоит также setIsDrawerOpenState(false) или показать ошибку пользователю
     } finally {
       setIsCalculatingState(false);
     }
-  }, [ // Тщательно проверьте и дополните этот массив зависимостей!
+  }, [
     isCalculationReady, selectedModuleDetails, isCabinetScreenTypeSelected, selectedCabinetDetails, priceMap,
     gqlFilteredPitches, selectedPitchCode, locationSelectOptions, selectedLocationCode, materialSelectOptions, selectedMaterialCode,
-    selectedProtectionCode, brightnessSelectOptions, selectedBrightnessCode, refreshRateSelectOptions, selectedRefreshRateCode,
-    widthMm, heightMm, selectedScreenTypeCode, localDollarRateInput,
+    selectedProtectionCode, widthMm, heightMm, selectedScreenTypeCode, localDollarRateInput,
     setIsCalculatingState, setCalculationResultState, setCostDetailsState, setIsDrawerOpenState,
-    calculateTechnicalSpecs, calculateCosts // Если они импортированы и являются стабильными ссылками, их можно не включать, но ESLint может потребовать
   ]);
 
   return performCalculation;

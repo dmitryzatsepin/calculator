@@ -101,7 +101,9 @@ export type ModuleData = {
   height: number;
   powerConsumptionAvg?: number | null;
   powerConsumptionMax?: number | null;
-  components: EnrichedModuleComponent[]; // Компоненты, входящие в модуль
+  brightness?: number | null;
+  refreshRate?: number | null;
+  components: EnrichedModuleComponent[];
 };
 
 export type CabinetData = {
