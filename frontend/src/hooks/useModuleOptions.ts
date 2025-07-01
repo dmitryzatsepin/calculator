@@ -3,11 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { graphQLClient } from '../services/graphqlClient';
 import { GET_MODULE_OPTIONS } from '../graphql/calculator.gql';
-import type { ModuleOptionsQueryResult } from '../graphql/calculator.types'; // Наш кастомный тип ответа
+import type { ModuleOptionsQueryResult } from '../graphql/calculator.types';
 import type {
-  Module as GqlModule, // Тип для одного элемента Module
+  Module as GqlModule,
   ModuleFilterInput,
-  // Maybe, // Не нужен, если возвращаем очищенный массив
 } from "../generated/graphql/graphql";
 
 // GqlModule должен содержать поля из фрагмента ModuleOptionFields
@@ -27,17 +26,15 @@ export interface UseModuleOptionsFilters {
   pitchCode?: string | null;
   brightnessCode?: string | null;
   refreshRateCode?: string | null;
-  isFlex?: boolean; // isFlex как отдельный параметр, а не часть filters для GraphQL
+  isFlex?: boolean;
 }
 
 const fetchModuleOptionsQuery = async (
-  filters: ModuleFilterInput, // Тип для GraphQL переменных
-  isFlex: boolean // Передаем isFlex отдельно для ясности
+  filters: ModuleFilterInput,
+  isFlex: boolean
 ): Promise<ModuleOptionsQueryResult> => {
-  // Добавляем isFlex в объект filters, если он будет частью ModuleFilterInput в GraphQL схеме
-  // Если isFlex - это отдельный параметр на верхнем уровне запроса, то переменные нужно формировать соответственно
   const gqlFilters: ModuleFilterInput & { isFlex?: boolean } = { ...filters };
-  if (isFlex !== undefined) { // Или если isFlex всегда передается
+  if (isFlex !== undefined) {
     gqlFilters.isFlex = isFlex;
   }
 
@@ -50,12 +47,9 @@ const fetchModuleOptionsQuery = async (
 };
 
 export function useModuleOptions(
-  filters: UseModuleOptionsFilters | null, // Фильтры, которые приходят из контекста
-  isFlex: boolean // isFlex всегда передаем
+  filters: UseModuleOptionsFilters | null,
+  isFlex: boolean
 ): ModuleOptionsHookResult {
-  // Запрос активен, только если ВСЕ НЕОБХОДИМЫЕ фильтры переданы
-  // В вашем CalculatorContext areModuleDepsSelected проверял:
-  // !!(selectedLocationCode && selectedPitchCode && selectedBrightnessCode && selectedRefreshRateCode)
   const enabled = !!(
     filters?.locationCode &&
     filters?.pitchCode &&
@@ -71,8 +65,6 @@ export function useModuleOptions(
       pitchCode: filters.pitchCode || undefined,
       brightnessCode: filters.brightnessCode || undefined,
       refreshRateCode: filters.refreshRateCode || undefined,
-      // isFlex будет добавлен в fetchModuleOptionsQuery, если это часть ModuleFilterInput
-      // или передан как отдельный параметр GraphQL запроса
     };
   }, [enabled, filters]);
 
@@ -86,7 +78,7 @@ export function useModuleOptions(
     // Ключ должен включать все параметры фильтрации, чтобы обеспечить уникальность и правильный refetch
     queryKey: ["moduleOptions", queryFilters, isFlex],
     queryFn: () => {
-      if (!queryFilters) { // Должно быть покрыто флагом enabled
+      if (!queryFilters) {
         return Promise.reject(
           new Error("Filters are required to fetch module options.")
         );
@@ -94,7 +86,7 @@ export function useModuleOptions(
       return fetchModuleOptionsQuery(queryFilters, isFlex);
     },
     enabled,
-    staleTime: 1000 * 60 * 5, // 5 минут
+    staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
   });
 

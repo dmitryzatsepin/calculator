@@ -15,26 +15,26 @@ import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 
 // --- Импорт Компонентов ---
-import DimensionInputs from "./inputs/DimensionInputs";
-import ScreenTypeSelector from "./inputs/ScreenTypeSelector";
-import LocationSelect from "./inputs/LocationSelect";
-import MaterialSelect from "./inputs/MaterialSelect";
-import IpProtectionSelect from "./inputs/IpProtectionSelect";
-import BrightnessSelect from "./inputs/BrightnessSelect";
-import RefreshRateSelect from "./inputs/RefreshRateSelect";
-import SensorCheckboxGroup from "./inputs/SensorCheckboxGroup";
-import ControlTypeCheckboxGroup from "./inputs/ControlTypeCheckboxGroup";
-import PitchSelect from "./inputs/PitchSelect";
-import ModuleSelect from "./inputs/ModuleSelect";
-import CabinetSelect from "./inputs/CabinetSelect";
-import FlexOptionSwitch from "./inputs/FlexOptionSwitch";
-import DollarRateInput from "./inputs/DollarRateInput";
-import CalculateButton from "./inputs/CalculateButton";
+import DimensionInputs from "../inputs/DimensionInputs";
+import ScreenTypeSelector from "../inputs/ScreenTypeSelector";
+import LocationSelect from "../inputs/LocationSelect";
+import MaterialSelect from "../inputs/MaterialSelect";
+import IpProtectionSelect from "../inputs/IpProtectionSelect";
+import BrightnessSelect from "../inputs/BrightnessSelect";
+import RefreshRateSelect from "../inputs/RefreshRateSelect";
+import SensorCheckboxGroup from "../inputs/SensorCheckboxGroup";
+import ControlTypeCheckboxGroup from "../inputs/ControlTypeCheckboxGroup";
+import PitchSelect from "../inputs/PitchSelect";
+import ModuleSelect from "../inputs/ModuleSelect";
+import CabinetSelect from "../inputs/CabinetSelect";
+import FlexOptionSwitch from "../inputs/FlexOptionSwitch";
+import DollarRateInput from "../inputs/DollarRateInput";
+import CalculateButton from "../inputs/CalculateButton";
 
 // --- Импорт НОВЫХ Контекстов/Хуков ---
-import { useCalculatorForm } from "../context/CalculatorFormProvider";
-import { useCalculatorData } from "../context/CalculatorDataProvider";
-import { useCalculationResult } from "../context/CalculationResultProvider";
+import { useCalculatorForm } from "../../context/CalculatorFormProvider";
+import { useCalculatorData } from "../../context/CalculatorDataProvider";
+import { useCalculationResult } from "../../context/CalculationResultProvider";
 
 // --- КОМПОНЕНТ ---
 const CalculatorForm = () => {

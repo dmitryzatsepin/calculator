@@ -215,7 +215,6 @@ export const GET_MODULE_DETAILS = gql`
       moduleOption
       active
       sizes {
-        # Поле 'sizes' в Module. Убедитесь, что его структура (width, height) верна.
         width
         height
       }
@@ -235,8 +234,6 @@ export const GET_CABINET_DETAILS = gql`
       # createdAt
       # updatedAt
       sizes {
-        # Поле 'sizes' в Cabinet. Оригинально было: sizes { size { width height } }
-        # Убедитесь, что это соответствует вашей схеме.
         size {
           width
           height

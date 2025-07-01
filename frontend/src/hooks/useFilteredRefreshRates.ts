@@ -4,9 +4,8 @@ import { useMemo } from 'react';
 import { graphQLClient } from '../services/graphqlClient';
 import { GET_FILTERED_REFRESH_RATE_OPTIONS } from '../graphql/calculator.gql';
 import type {
-  GetFilteredRefreshRateOptionsQuery, // Тип полного ответа от graphql-codegen
-  RefreshRate as GqlRefreshRate, // Тип для одного элемента RefreshRate
-  // Maybe, // Не нужен, если возвращаем очищенный массив
+  GetFilteredRefreshRateOptionsQuery,
+  RefreshRate as GqlRefreshRate,
 } from "../generated/graphql/graphql";
 
 // GqlRefreshRate уже должен содержать code и value из фрагмента RefreshRateFields
@@ -39,9 +38,8 @@ const fetchFilteredRefreshRatesQuery = async (
 export function useFilteredRefreshRates(
   locationCode: string | null,
   pitchCode: string | null,
-  isFlex: boolean // isFlex не может быть null, передаем его всегда
+  isFlex: boolean
 ): FilteredRefreshRatesHookResult {
-  // Запрос активен только если ВСЕ необходимые параметры предоставлены
   const enabled = !!locationCode && !!pitchCode;
 
   const {
@@ -53,7 +51,6 @@ export function useFilteredRefreshRates(
     queryKey: ["filteredRefreshRateOptions", locationCode, pitchCode, isFlex],
     queryFn: () => {
       if (!locationCode || !pitchCode) {
-        // Эта проверка больше для TypeScript, т.к. `enabled` флаг должен предотвратить вызов
         return Promise.reject(
           new Error("Location code and Pitch code are required to fetch refresh rates.")
         );

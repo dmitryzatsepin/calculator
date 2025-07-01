@@ -1,9 +1,9 @@
 // frontend/src/hooks/useInitialCalculatorData.ts
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { graphQLClient } from '../services/graphqlClient'; // Убедитесь, что путь корректен
-import { GET_INITIAL_DATA } from '../graphql/calculator.gql'; // Путь к вашим GraphQL запросам
-import type { InitialDataQueryResult } from '../graphql/calculator.types'; // Путь к вашим типам ответов
+import { graphQLClient } from '../services/graphqlClient';
+import { GET_INITIAL_DATA } from '../graphql/calculator.gql';
+import type { InitialDataQueryResult } from '../graphql/calculator.types';
 import type {
   ScreenType as GqlScreenType,
   Location as GqlLocation,
@@ -12,9 +12,8 @@ import type {
   Sensor as GqlSensor,
   ControlType as GqlControlType,
 
-} from "../generated/graphql/graphql"; // Путь к сгенерированным типам
+} from "../generated/graphql/graphql";
 
-// Определяем тип для данных, которые хук будет возвращать после обработки/фильтрации
 export interface ProcessedInitialData {
   screenTypes: Array<Pick<GqlScreenType, "id" | "code" | "name">>; // Массив без Maybe для элементов
   locations: GqlLocation[];
@@ -39,21 +38,19 @@ const fetchInitialDataQuery = async (): Promise<InitialDataQueryResult> => {
 
 export function useInitialCalculatorData(): InitialDataHookResult {
   const {
-    data: rawData, // Необработанные данные от useQuery
+    data: rawData,
     isLoading,
     isError,
     error,
-  } = useQuery<InitialDataQueryResult, Error, InitialDataQueryResult>({ // Третий дженерик - тип данных после select (если есть)
+  } = useQuery<InitialDataQueryResult, Error, InitialDataQueryResult>({
     queryKey: ["calculatorInitialData"],
     queryFn: fetchInitialDataQuery,
-    staleTime: 1000 * 60 * 10, // 10 минут
+    staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
-    // select не нужен здесь, если мы обрабатываем данные ниже
   });
 
   // Обработка и мемоизация данных для предотвращения лишних ре-рендеров
   const processedData = useMemo((): ProcessedInitialData => {
-    // console.log("[useInitialCalculatorData] Memoizing processedData, rawData changed:", rawData);
     return {
       screenTypes: rawData?.screenTypes?.filter((st): st is Pick<GqlScreenType, "id" | "code" | "name"> => !!st) ?? [],
       locations: rawData?.locations?.filter((loc): loc is GqlLocation => !!loc) ?? [],
@@ -62,10 +59,10 @@ export function useInitialCalculatorData(): InitialDataHookResult {
       sensors: rawData?.sensors?.filter((s): s is GqlSensor => !!s) ?? [],
       controlTypes: rawData?.controlTypes?.filter((ct): ct is GqlControlType => !!ct) ?? [],
     };
-  }, [rawData]); // Зависимость только от rawData
+  }, [rawData]);
 
   return {
-    ...processedData, // Возвращаем обработанные данные
+    ...processedData,
     isLoading,
     isError,
     error,

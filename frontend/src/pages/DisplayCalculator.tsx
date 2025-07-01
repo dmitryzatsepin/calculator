@@ -1,9 +1,9 @@
 // src/pages/DisplayCalculator.tsx
 import { Container, Title, Paper, Drawer } from "@mantine/core";
-import CalculatorForm from "../components/CalculatorForm";
+import CalculatorForm from "../components/calculator/CalculatorForm";
 // --- Импортируем новый хук ---
 import { useCalculationResult } from "../context/CalculationResultProvider";
-import CalculationResults from "../components/CalculationResults";
+import CalculationResults from "../components/calculator/CalculationResults";
 
 const DisplayCalculator = () => {
   // --- Используем новый, более специфичный хук ---
@@ -21,7 +21,7 @@ const DisplayCalculator = () => {
       <Drawer
         opened={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
-        title="Результаты расчета" // Changed to plain text
+        title="Результаты расчета"
         position="right"
         size="xl"
         padding="md"

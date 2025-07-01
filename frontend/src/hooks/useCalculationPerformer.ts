@@ -7,11 +7,11 @@ import type {
   ModuleData,
   CabinetData,
   PriceMap,
-} from '../types/calculationTypes'; // Путь к вашим типам
+} from '../types/calculationTypes';
 import {
   calculateTechnicalSpecs,
   calculateCosts,
-} from '../services/calculatorService'; // Путь к вашим сервисам
+} from '../utils/calculations';
 
 // Определяем интерфейс для параметров, которые хук будет принимать
 interface CalculationParams {
@@ -109,7 +109,7 @@ export function useCalculationPerformer(
       const pitchValue = pitchObject?.pitchValue;
 
       if (typeof pitchValue !== 'number') { // Строгая проверка
-        console.error("Pitch object or value not found:", {pitchObject, selectedPitchCode, gqlFilteredPitches});
+        console.error("Pitch object or value not found:", { pitchObject, selectedPitchCode, gqlFilteredPitches });
         throw new Error(`Pitch value for code '${selectedPitchCode}' not found or not a number.`);
       }
 

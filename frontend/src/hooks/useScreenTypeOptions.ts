@@ -1,6 +1,6 @@
 // frontend/src/hooks/useScreenTypeOptions.ts
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react'; // Добавляем useMemo, так как будем его использовать
+import { useMemo } from 'react';
 import { graphQLClient } from '../services/graphqlClient';
 import { GET_SCREEN_TYPE_OPTIONS } from '../graphql/calculator.gql';
 import type { ScreenTypeOptionsQueryResult } from '../graphql/calculator.types';

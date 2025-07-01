@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TextInput, PasswordInput, Button, Container, Title, Paper } from "@mantine/core";
-import { login } from "../utils/authService";
+import { login } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
@@ -12,7 +12,7 @@ const Login = () => {
     try {
       await login(email, password);
       navigate("/dashboard");
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       alert("Ошибка входа");
     }

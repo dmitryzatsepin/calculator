@@ -4,10 +4,10 @@ import { Table, Text, Paper, ThemeIcon, Alert, Group } from '@mantine/core';
 import { IconAlertCircle, IconBolt, IconDimensions, IconComponents, IconMapPin, IconRulerMeasure } from '@tabler/icons-react';
 
 // --- Импорт НОВОГО КОНТЕКСТА ---
-import { useCalculationResult } from '../context/CalculationResultProvider';
+import { useCalculationResult } from '../../context/CalculationResultProvider';
 
 // --- Импорты компонентов ---
-import SendToBitrixButton from './inputs/SendToBitrixButton';
+import SendToBitrixButton from '../inputs/SendToBitrixButton';
 import CostCalculationTable from './CostCalculationTable';
 
 // Убираем props из определения компонента

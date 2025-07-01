@@ -1,19 +1,17 @@
 // frontend/src/hooks/useModuleDetails.ts
-import { useQuery, QueryKey } from '@tanstack/react-query'; // QueryKey нужен для типизации useQuery
+import { useQuery, QueryKey } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { graphQLClient } from '../services/graphqlClient';
 import { GET_MODULE_DETAILS } from '../graphql/calculator.gql';
 import type {
   ModuleDetailsQueryResult,
-  ModuleDetailsData, // Наш кастомный тип для обработанных данных
+  ModuleDetailsData,
 } from '../graphql/calculator.types';
-// GqlModule не нужен здесь напрямую, если ModuleDetailsData его полностью описывает
-// import type { Module as GqlModule } from "../generated/graphql/graphql";
 
 export interface ModuleDetailsHookResult {
-  moduleDetails: ModuleDetailsData | null; // Используем наш обработанный тип
+  moduleDetails: ModuleDetailsData | null;
   isLoading: boolean;
-  isFetching: boolean; // Добавляем isFetching для индикации повторных запросов
+  isFetching: boolean;
   isError: boolean;
   error: Error | null;
 }
@@ -25,16 +23,16 @@ const fetchModuleDetailsQuery = async (moduleCode: string): Promise<ModuleDetail
 };
 
 export function useModuleDetails(moduleCode: string | null): ModuleDetailsHookResult {
-  const enabled = !!moduleCode; // Запрос активен только если moduleCode предоставлен
+  const enabled = !!moduleCode;
 
   const {
-    data: rawData, // Тип ModuleDetailsQueryResult | undefined
+    data: rawData,
     isLoading,
-    isFetching, // Полезно для отображения индикатора загрузки при refetch
+    isFetching,
     isError,
     error,
   } = useQuery<ModuleDetailsQueryResult, Error, ModuleDetailsQueryResult, QueryKey>({
-    queryKey: ["moduleDetails", moduleCode], // moduleCode в ключе
+    queryKey: ["moduleDetails", moduleCode],
     queryFn: () => {
       if (!moduleCode) {
         return Promise.reject(new Error("Module code is required to fetch details."));
@@ -42,13 +40,12 @@ export function useModuleDetails(moduleCode: string | null): ModuleDetailsHookRe
       return fetchModuleDetailsQuery(moduleCode);
     },
     enabled,
-    staleTime: 1000 * 60 * 15, // 15 минут
+    staleTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,
-    refetchOnMount: false, // Обычно детали не нужно перезапрашивать при каждом монтировании, если код не изменился
+    refetchOnMount: false,
   });
 
-  // Используем useMemo для возврата moduleDetails из rawData,
-  // чтобы ссылка на объект не менялась без необходимости.
+  // Используем useMemo для возврата moduleDetails из rawData
   const moduleDetailsData = useMemo((): ModuleDetailsData | null => {
     return rawData?.moduleDetails ?? null;
   }, [rawData]);
