@@ -189,7 +189,11 @@ export const GET_MODULE_OPTIONS = gql`
   ${ModuleOptionFields}
   query GetModuleOptions($filters: ModuleFilterInput, $onlyActive: Boolean) {
     moduleOptions(filters: $filters, onlyActive: $onlyActive) {
-      ...ModuleOptionFields
+      edges {
+        node {
+          ...ModuleOptionFields
+        }
+      }
     }
   }
 `;

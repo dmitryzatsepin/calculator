@@ -26,7 +26,11 @@ export type ScreenTypeOptionsQueryResult = {
   optionsByScreenType: Maybe<Array<Maybe<Pick<GqlOption, "id" | "code" | "name" | "active">>>>;
 };
 export type ModuleOptionsQueryResult = {
-  moduleOptions: Maybe<Array<Maybe<GqlModule>>>;
+  moduleOptions: Maybe<{
+    edges: Array<{
+      node: Maybe<GqlModule>
+    }>
+  }>
 };
 export type CabinetOptionsQueryResult = {
   cabinetOptions: Maybe<Array<Maybe<GqlCabinet>>>;

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import {
   Stack,
   LoadingOverlay,
@@ -91,6 +91,10 @@ const CalculatorForm = () => {
     performCalculation,
   } = useCalculationResult();
 
+  const areDimensionsEntered = useMemo(() => {
+    return +widthMm > 0 && +heightMm > 0;
+  }, [widthMm, heightMm]);
+
   const cabinetScreenTypeCode = "cabinet";
   const showCabinetSection = selectedScreenTypeCode === cabinetScreenTypeCode;
 
@@ -154,7 +158,12 @@ const CalculatorForm = () => {
                   options={locationSelectOptions}
                   value={selectedLocationCode}
                   onChange={handleLocationChange}
-                  disabled={isLoadingInitialData || !selectedScreenTypeCode || locationSelectOptions.length === 0}
+                  disabled={
+                    isLoadingInitialData ||
+                    !selectedScreenTypeCode ||
+                    !areDimensionsEntered || // <-- ВАШЕ НОВОЕ УСЛОВИЕ
+                    locationSelectOptions.length === 0
+                  }
                   required
                 />
                 <IpProtectionSelect
@@ -207,9 +216,13 @@ const CalculatorForm = () => {
                     value={selectedPitchCode}
                     onChange={handlePitchChange}
                     disabled={
-                      isLoadingInitialData || !selectedLocationCode || !selectedProtectionCode ||
+                      isLoadingInitialData ||
+                      !areDimensionsEntered ||
+                      !selectedLocationCode ||
+                      !selectedProtectionCode ||
                       (showCabinetSection && !selectedMaterialCode) ||
-                      isLoadingPitches || pitchSelectOptions.length === 0
+                      isLoadingPitches ||
+                      pitchSelectOptions.length === 0
                     }
                     loading={isLoadingPitches}
                     required={true}

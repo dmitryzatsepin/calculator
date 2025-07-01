@@ -4,8 +4,6 @@ import { useCalculatorForm } from "./CalculatorFormProvider";
 import type { ProcessedInitialData } from '../hooks/useInitialCalculatorData';
 import type { ProcessedScreenTypeOption } from '../hooks/useScreenTypeOptions';
 import type { ProcessedPitchOption } from '../hooks/usePitchOptions';
-import type { ProcessedRefreshRateOption } from '../hooks/useFilteredRefreshRates';
-import type { ProcessedBrightnessOption } from '../hooks/useFilteredBrightnesses';
 import type { ProcessedModuleOption } from '../hooks/useModuleOptions';
 import type { ProcessedCabinetOption } from '../hooks/useCabinetOptions';
 import type { Maybe } from "../generated/graphql/graphql";
@@ -16,8 +14,6 @@ import type { PriceRequestArgs } from '../hooks/useComponentPrices';
 import { useInitialCalculatorData } from '../hooks/useInitialCalculatorData';
 import { useScreenTypeOptions } from '../hooks/useScreenTypeOptions';
 import { usePitchOptions } from '../hooks/usePitchOptions';
-import { useFilteredRefreshRates } from '../hooks/useFilteredRefreshRates';
-import { useFilteredBrightnesses } from '../hooks/useFilteredBrightnesses';
 import { useModuleOptions } from '../hooks/useModuleOptions';
 import { useCabinetOptions } from '../hooks/useCabinetOptions';
 import { useDollarRate } from '../hooks/useDollarRate';
@@ -33,70 +29,49 @@ interface CalculatorDataContextType {
     isLoadingInitialData: boolean;
     isErrorInitialData: boolean;
     errorInitialData: Error | null;
-
     screenTypeOptions: ProcessedScreenTypeOption[];
     isLoadingScreenTypeOptions: boolean;
     isErrorScreenTypeOptions: boolean;
     errorScreenTypeOptions: Error | null;
-
     pitchOptionsData: ProcessedPitchOption[];
     isLoadingPitches: boolean;
     isErrorPitches: boolean;
     errorPitches: Error | null;
-
-    refreshRateOptionsData: ProcessedRefreshRateOption[];
-    isLoadingRefreshRates: boolean;
-    isErrorRefreshRates: boolean;
-    errorRefreshRates: Error | null;
-
-    brightnessOptionsData: ProcessedBrightnessOption[];
-    isLoadingBrightnesses: boolean;
-    isErrorBrightnesses: boolean;
-    errorBrightnesses: Error | null;
-
     moduleOptionsData: ProcessedModuleOption[];
     isLoadingModules: boolean;
     isErrorModules: boolean;
     errorModules: Error | null;
-
     cabinetOptionsData: ProcessedCabinetOption[];
     isLoadingCabinets: boolean;
     isErrorCabinets: boolean;
     errorCabinets: Error | null;
-
     dollarRateValue: Maybe<number>;
     isLoadingDollarRate: boolean;
     isErrorDollarRate: boolean;
     errorDollarRate: Error | null;
-
     moduleDetails: ModuleDetailsData | null;
     isLoadingModuleDetails: boolean;
     isFetchingModuleDetails: boolean;
     isErrorModuleDetails: boolean;
     errorModuleDetails: Error | null;
-
     cabinetDetails: CabinetDetailsData | null;
     isLoadingCabinetDetails: boolean;
     isFetchingCabinetDetails: boolean;
     isErrorCabinetDetails: boolean;
     errorCabinetDetails: Error | null;
-
     priceMap: PriceMap;
     isLoadingPrices: boolean;
     isFetchingPrices: boolean;
     isErrorPrices: boolean;
     errorPrices: Error | null;
-
     screenTypeSegments: SelectOption[];
     isFlexOptionAvailableForSelectedScreenType: boolean;
     locationSelectOptions: SelectOption[];
     materialSelectOptions: SelectOption[];
     protectionSelectOptions: SelectOption[];
-    brightnessSelectOptions: SelectOption[];
     sensorSelectOptions: SelectOption[];
     controlTypeSelectOptions: SelectOption[];
     pitchSelectOptions: SelectOption[];
-    refreshRateSelectOptions: SelectOption[];
     moduleSelectOptions: SelectOption[];
     cabinetSelectOptions: SelectOption[];
 }
@@ -153,12 +128,28 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
     }, [selectedModuleCode, selectedCabinetCode, isCabinetScreenTypeSelected]);
     const priceResult = useComponentPrices(priceRequestArgs);
 
-    const refreshRateResult = useFilteredRefreshRates(selectedLocationCode, selectedPitchCode, isFlexSelected);
-    const brightnessResult = useFilteredBrightnesses(selectedLocationCode, selectedPitchCode, null, isFlexSelected);
-
     useEffect(() => {
-        if (moduleOptionsResult.isLoading || moduleOptionsResult.modules.length === 0) {
+        console.log("[EFFECT RUN] State:", {
+            pitch: selectedPitchCode,
+            isFetching: moduleOptionsResult.isFetching,
+            modulesCount: moduleOptionsResult.modules.length
+        });
+
+        if (!selectedPitchCode) {
             setHasProOption(false);
+            return;
+        }
+
+        if (moduleOptionsResult.isFetching) {
+            setHasProOption(false);
+            return;
+        }
+
+        if (moduleOptionsResult.modules.length === 0) {
+            setHasProOption(false);
+            if (selectedModuleCode) {
+                setSelectedModuleCode(null);
+            }
             return;
         }
 
@@ -168,13 +159,14 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
 
         const uniqueSortedCodes = [...new Set(allRefreshRateCodes)].sort();
 
-        setHasProOption(uniqueSortedCodes.length > 1);
+        const hasChoice = uniqueSortedCodes.length > 1;
+        setHasProOption(hasChoice);
 
         if (uniqueSortedCodes.length === 0) {
             return;
         }
 
-        const targetRefreshRateCode = isProVersionSelected && uniqueSortedCodes.length > 1
+        const targetRefreshRateCode = isProVersionSelected && hasChoice
             ? uniqueSortedCodes[uniqueSortedCodes.length - 1]
             : uniqueSortedCodes[0];
 
@@ -182,18 +174,18 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             m.refreshRates?.some(r => r.refreshRateCode === targetRefreshRateCode)
         );
 
-        if (selectedModule && selectedModule.code) {
-            if (selectedModule.code !== selectedModuleCode) {
-                setSelectedModuleCode(selectedModule.code);
-            }
+        if (selectedModule?.code && selectedModule.code !== selectedModuleCode) {
+            setSelectedModuleCode(selectedModule.code);
         }
     }, [
+        selectedPitchCode,
         moduleOptionsResult.modules,
+        moduleOptionsResult.isFetching,
         isProVersionSelected,
-        moduleOptionsResult.isLoading,
         selectedModuleCode,
         setSelectedModuleCode,
     ]);
+
 
     const screenTypeSegments = useMemo((): SelectOption[] => initialDataResult.screenTypes
         .map(st => ({
@@ -243,14 +235,6 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
         [pitchOptionsResult.pitches]
     );
 
-    const brightnessSelectOptions = useMemo((): SelectOption[] => brightnessResult.brightnesses
-        .filter(br => br && br.code)
-        .map(br => ({ value: br.code!, label: `${br.value} nit` })), [brightnessResult.brightnesses]);
-
-    const refreshRateSelectOptions = useMemo((): SelectOption[] => refreshRateResult.refreshRates
-        .filter(rr => rr && rr.code)
-        .map(rr => ({ value: rr.code!, label: `${rr.value} Hz` })), [refreshRateResult.refreshRates]);
-
     const sensorSelectOptions = useMemo((): SelectOption[] =>
         initialDataResult.sensors
             .filter(s => s.active && s.code && s.name)
@@ -287,10 +271,6 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
         isLoadingScreenTypeOptions: screenTypeOptionsResult.isLoading, isErrorScreenTypeOptions: screenTypeOptionsResult.isError, errorScreenTypeOptions: screenTypeOptionsResult.error,
         pitchOptionsData: pitchOptionsResult.pitches,
         isLoadingPitches: pitchOptionsResult.isLoading, isErrorPitches: pitchOptionsResult.isError, errorPitches: pitchOptionsResult.error,
-        refreshRateOptionsData: refreshRateResult.refreshRates,
-        isLoadingRefreshRates: refreshRateResult.isLoading, isErrorRefreshRates: refreshRateResult.isError, errorRefreshRates: refreshRateResult.error,
-        brightnessOptionsData: brightnessResult.brightnesses,
-        isLoadingBrightnesses: brightnessResult.isLoading, isErrorBrightnesses: brightnessResult.isError, errorBrightnesses: brightnessResult.error,
         moduleOptionsData: moduleOptionsResult.modules,
         isLoadingModules: moduleOptionsResult.isLoading, isErrorModules: moduleOptionsResult.isError, errorModules: moduleOptionsResult.error,
         cabinetOptionsData: cabinetOptionsResult.cabinets,
@@ -305,13 +285,14 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
         isLoadingPrices: priceResult.isLoading, isFetchingPrices: priceResult.isFetching, isErrorPrices: priceResult.isError, errorPrices: priceResult.error,
         screenTypeSegments, isFlexOptionAvailableForSelectedScreenType,
         locationSelectOptions, materialSelectOptions, protectionSelectOptions,
-        brightnessSelectOptions, refreshRateSelectOptions, sensorSelectOptions, controlTypeSelectOptions,
-        pitchSelectOptions, moduleSelectOptions, cabinetSelectOptions,
+        sensorSelectOptions, controlTypeSelectOptions,
+        pitchSelectOptions,
+        moduleSelectOptions, cabinetSelectOptions,
     }), [
-        hasProOption, initialDataResult, screenTypeOptionsResult, pitchOptionsResult, refreshRateResult, brightnessResult,
+        hasProOption, initialDataResult, screenTypeOptionsResult, pitchOptionsResult,
         moduleOptionsResult, cabinetOptionsResult, dollarRateResult, moduleDetailsResult, cabinetDetailsResult, priceResult,
         screenTypeSegments, isFlexOptionAvailableForSelectedScreenType, locationSelectOptions, materialSelectOptions, protectionSelectOptions,
-        brightnessSelectOptions, refreshRateSelectOptions, sensorSelectOptions, controlTypeSelectOptions, pitchSelectOptions,
+        sensorSelectOptions, controlTypeSelectOptions, pitchSelectOptions,
         moduleSelectOptions, cabinetSelectOptions,
     ]);
 
