@@ -1,10 +1,10 @@
-// frontend/src/context/CalculatorFormProvider.tsx
 import { createContext, useState, useMemo, useCallback, useContext, ReactNode } from "react";
 
 // Состояние формы
 interface FormState {
     selectedScreenTypeCode: string | null;
     isFlexSelected: boolean;
+    isProVersionSelected: boolean;
     widthMm: string | number;
     heightMm: string | number;
     selectedLocationCode: string | null;
@@ -25,7 +25,7 @@ interface FormState {
 interface FormActions {
     setSelectedScreenTypeCode: (code: string | null) => void;
     setIsFlexSelected: (selected: boolean) => void;
-    // ... все остальные сеттеры
+    setIsProVersionSelected: (selected: boolean) => void;
     setWidthMm: (value: string | number) => void;
     setHeightMm: (value: string | number) => void;
     setSelectedLocationCode: (code: string | null) => void;
@@ -55,7 +55,7 @@ export const useCalculatorForm = () => {
 };
 
 export const CalculatorFormProvider = ({ children }: { children: ReactNode }) => {
-    const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<string | null>(null);
+    const [selectedScreenTypeCode, setSelectedScreenTypeCodeState] = useState<string | null>("cabinet");
     const [widthMm, setWidthMmState] = useState<string | number>("");
     const [heightMm, setHeightMmState] = useState<string | number>("");
     const [selectedLocationCode, setSelectedLocationCodeState] = useState<string | null>(null);
@@ -69,6 +69,7 @@ export const CalculatorFormProvider = ({ children }: { children: ReactNode }) =>
     const [selectedModuleCode, setSelectedModuleCodeState] = useState<string | null>(null);
     const [selectedCabinetCode, setSelectedCabinetCodeState] = useState<string | null>(null);
     const [isFlexSelected, setIsFlexSelectedState] = useState<boolean>(false);
+    const [isProVersionSelected, setIsProVersionSelectedState] = useState<boolean>(false);
     const [localDollarRateInput, setLocalDollarRateInputState] = useState<number | string>("");
 
     // Сеттеры с логикой сброса зависимых полей
@@ -85,10 +86,18 @@ export const CalculatorFormProvider = ({ children }: { children: ReactNode }) =>
         setSelectedModuleCodeState(null);
         setSelectedCabinetCodeState(null);
         setIsFlexSelectedState(false);
+        setIsProVersionSelectedState(false);
     }, []);
 
     const setSelectedLocationCode = useCallback((value: string | null) => {
         setSelectedLocationCodeState(value);
+        if (value === 'outdoor') {
+            setSelectedProtectionCodeState('IP69');
+        } else if (value === 'indoor') {
+            setSelectedProtectionCodeState('IP30');
+        } else {
+            setSelectedProtectionCodeState(null);
+        }
         setSelectedMaterialCodeState(null);
         setSelectedBrightnessCodeState(null);
         setSelectedRefreshRateCodeState(null);
@@ -97,17 +106,30 @@ export const CalculatorFormProvider = ({ children }: { children: ReactNode }) =>
         setSelectedCabinetCodeState(null);
     }, []);
 
-    // ... остальные сеттеры ...
+    const setSelectedPitchCode = useCallback((value: string | null) => {
+        setSelectedPitchCodeState(value);
+        setSelectedRefreshRateCodeState(null);
+        setSelectedBrightnessCodeState(null);
+        setSelectedModuleCodeState(null);
+        setSelectedCabinetCodeState(null);
+        setIsProVersionSelectedState(false);
+    }, []);
+
+    const setSelectedModuleCode = useCallback((value: string | null) => {
+        setSelectedModuleCodeState(value);
+        setSelectedCabinetCodeState(null);
+    }, []);
+
+    // Остальные сеттеры без изменений
     const setSelectedMaterialCode = useCallback((value: string | null) => { setSelectedMaterialCodeState(value); setSelectedCabinetCodeState(null); }, []);
     const setSelectedProtectionCode = useCallback((value: string | null) => setSelectedProtectionCodeState(value), []);
     const setSelectedBrightnessCode = useCallback((value: string | null) => { setSelectedBrightnessCodeState(value); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, []);
     const setSelectedRefreshRateCode = useCallback((value: string | null) => { setSelectedRefreshRateCodeState(value); setSelectedBrightnessCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, []);
     const setSelectedSensorCodes = useCallback((value: string[]) => setSelectedSensorCodesState(value), []);
     const setSelectedControlTypeCodes = useCallback((value: string[]) => setSelectedControlTypeCodesState(value), []);
-    const setSelectedPitchCode = useCallback((value: string | null) => { setSelectedPitchCodeState(value); setSelectedRefreshRateCodeState(null); setSelectedBrightnessCodeState(null); setSelectedModuleCodeState(null); setSelectedCabinetCodeState(null); }, []);
-    const setSelectedModuleCode = useCallback((value: string | null) => { setSelectedModuleCodeState(value); setSelectedCabinetCodeState(null); }, []);
     const setSelectedCabinetCode = useCallback((value: string | null) => setSelectedCabinetCodeState(value), []);
     const setIsFlexSelected = useCallback((selected: boolean) => setIsFlexSelectedState(selected), []);
+    const setIsProVersionSelected = useCallback((selected: boolean) => setIsProVersionSelectedState(selected), []); // <-- НОВОЕ
     const setLocalDollarRateInput = useCallback((value: number | string) => setLocalDollarRateInputState(value), []);
     const setWidthMm = useCallback((value: string | number) => setWidthMmState(value), []);
     const setHeightMm = useCallback((value: string | number) => setHeightMmState(value), []);
@@ -118,22 +140,23 @@ export const CalculatorFormProvider = ({ children }: { children: ReactNode }) =>
         selectedScreenTypeCode, widthMm, heightMm, selectedLocationCode, selectedMaterialCode,
         selectedProtectionCode, selectedBrightnessCode, selectedRefreshRateCode, selectedSensorCodes,
         selectedControlTypeCodes, selectedPitchCode, selectedModuleCode, selectedCabinetCode,
-        isFlexSelected, localDollarRateInput, isCabinetScreenTypeSelected,
+        isFlexSelected, isProVersionSelected, localDollarRateInput, isCabinetScreenTypeSelected,
+
         setSelectedScreenTypeCode, setWidthMm, setHeightMm, setSelectedLocationCode,
         setSelectedMaterialCode, setSelectedProtectionCode, setSelectedBrightnessCode,
         setSelectedRefreshRateCode, setSelectedSensorCodes, setSelectedControlTypeCodes,
         setSelectedPitchCode, setSelectedModuleCode, setSelectedCabinetCode, setIsFlexSelected,
-        setLocalDollarRateInput,
+        setIsProVersionSelected, setLocalDollarRateInput,
     }), [
         selectedScreenTypeCode, widthMm, heightMm, selectedLocationCode, selectedMaterialCode,
         selectedProtectionCode, selectedBrightnessCode, selectedRefreshRateCode, selectedSensorCodes,
         selectedControlTypeCodes, selectedPitchCode, selectedModuleCode, selectedCabinetCode,
-        isFlexSelected, localDollarRateInput, isCabinetScreenTypeSelected,
-        setSelectedScreenTypeCode, setWidthMm, setHeightMm, setSelectedLocationCode,
-        setSelectedMaterialCode, setSelectedProtectionCode, setSelectedBrightnessCode,
-        setSelectedRefreshRateCode, setSelectedSensorCodes, setSelectedControlTypeCodes,
-        setSelectedPitchCode, setSelectedModuleCode, setSelectedCabinetCode, setIsFlexSelected,
-        setLocalDollarRateInput,
+        isFlexSelected, isProVersionSelected, localDollarRateInput, isCabinetScreenTypeSelected,
+        setSelectedScreenTypeCode, setSelectedPitchCode, setSelectedModuleCode, setSelectedMaterialCode,
+        setSelectedProtectionCode, setSelectedBrightnessCode, setSelectedRefreshRateCode,
+        setSelectedSensorCodes, setSelectedControlTypeCodes, setSelectedCabinetCode, setIsFlexSelected,
+        setIsProVersionSelected, setWidthMm, setHeightMm, setLocalDollarRateInput,
+        setSelectedLocationCode,
     ]);
 
     return (

@@ -1,8 +1,6 @@
-// frontend/src/context/CalculatorDataProvider.tsx
-import { createContext, useMemo, useContext, ReactNode } from "react";
-import { useCalculatorForm } from "./CalculatorFormProvider"; // <-- Используем наш новый хук
+import { createContext, useMemo, useContext, ReactNode, useEffect, useState } from "react";
+import { useCalculatorForm } from "./CalculatorFormProvider";
 
-// --- Импорты типов и хуков ---
 import type { ProcessedInitialData } from '../hooks/useInitialCalculatorData';
 import type { ProcessedScreenTypeOption } from '../hooks/useScreenTypeOptions';
 import type { ProcessedPitchOption } from '../hooks/usePitchOptions';
@@ -29,9 +27,8 @@ import { useComponentPrices } from '../hooks/useComponentPrices';
 
 type SelectOption = { label: string; value: string };
 
-// --- Интерфейс для этого контекста ---
 interface CalculatorDataContextType {
-    // Все данные и статусы, которые мы получаем
+    hasProOption: boolean;
     initialData: ProcessedInitialData;
     isLoadingInitialData: boolean;
     isErrorInitialData: boolean;
@@ -90,7 +87,6 @@ interface CalculatorDataContextType {
     isErrorPrices: boolean;
     errorPrices: Error | null;
 
-    // И все мемоизированные опции для селектов
     screenTypeSegments: SelectOption[];
     isFlexOptionAvailableForSelectedScreenType: boolean;
     locationSelectOptions: SelectOption[];
@@ -116,28 +112,31 @@ export const useCalculatorData = () => {
 };
 
 export const CalculatorDataProvider = ({ children }: { children: ReactNode }) => {
-    // --- Получаем состояние формы из FormProvider ---
     const {
         selectedScreenTypeCode,
         selectedLocationCode,
         isFlexSelected,
+        isProVersionSelected,
         selectedPitchCode,
-        selectedRefreshRateCode,
-        selectedBrightnessCode,
         selectedMaterialCode,
         selectedModuleCode,
         selectedCabinetCode,
         isCabinetScreenTypeSelected,
+        setSelectedModuleCode,
     } = useCalculatorForm();
 
-    // --- Вызываем все хуки для получения данных, используя состояние формы ---
+    const [hasProOption, setHasProOption] = useState(false);
+
     const initialDataResult = useInitialCalculatorData();
     const screenTypeOptionsResult = useScreenTypeOptions(selectedScreenTypeCode);
     const pitchOptionsResult = usePitchOptions(selectedLocationCode);
-    const refreshRateResult = useFilteredRefreshRates(selectedLocationCode, selectedPitchCode, isFlexSelected);
-    const brightnessResult = useFilteredBrightnesses(selectedLocationCode, selectedPitchCode, selectedRefreshRateCode, isFlexSelected);
-    const moduleOptionsFilters = useMemo(() => ({ locationCode: selectedLocationCode, pitchCode: selectedPitchCode, brightnessCode: selectedBrightnessCode, refreshRateCode: selectedRefreshRateCode }), [selectedLocationCode, selectedPitchCode, selectedBrightnessCode, selectedRefreshRateCode]);
+
+    const moduleOptionsFilters = useMemo(() => ({
+        locationCode: selectedLocationCode,
+        pitchCode: selectedPitchCode,
+    }), [selectedLocationCode, selectedPitchCode]);
     const moduleOptionsResult = useModuleOptions(moduleOptionsFilters, isFlexSelected);
+
     const cabinetOptionsFilters = useMemo(() => ({ locationCode: selectedLocationCode, materialCode: selectedMaterialCode, pitchCode: selectedPitchCode, moduleCode: selectedModuleCode }), [selectedLocationCode, selectedMaterialCode, selectedPitchCode, selectedModuleCode]);
     const cabinetOptionsResult = useCabinetOptions(cabinetOptionsFilters, isCabinetScreenTypeSelected);
     const dollarRateResult = useDollarRate();
@@ -154,12 +153,54 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
     }, [selectedModuleCode, selectedCabinetCode, isCabinetScreenTypeSelected]);
     const priceResult = useComponentPrices(priceRequestArgs);
 
-    // --- Формируем опции для селектов ---
+    const refreshRateResult = useFilteredRefreshRates(selectedLocationCode, selectedPitchCode, isFlexSelected);
+    const brightnessResult = useFilteredBrightnesses(selectedLocationCode, selectedPitchCode, null, isFlexSelected);
+
+    useEffect(() => {
+        if (moduleOptionsResult.isLoading || moduleOptionsResult.modules.length === 0) {
+            setHasProOption(false);
+            return;
+        }
+
+        const allRefreshRateCodes = moduleOptionsResult.modules
+            .flatMap(m => m.refreshRates?.map(r => r.refreshRateCode) ?? [])
+            .filter((code): code is string => !!code);
+
+        const uniqueSortedCodes = [...new Set(allRefreshRateCodes)].sort();
+
+        setHasProOption(uniqueSortedCodes.length > 1);
+
+        if (uniqueSortedCodes.length === 0) {
+            return;
+        }
+
+        const targetRefreshRateCode = isProVersionSelected && uniqueSortedCodes.length > 1
+            ? uniqueSortedCodes[uniqueSortedCodes.length - 1]
+            : uniqueSortedCodes[0];
+
+        const selectedModule = moduleOptionsResult.modules.find(m =>
+            m.refreshRates?.some(r => r.refreshRateCode === targetRefreshRateCode)
+        );
+
+        if (selectedModule && selectedModule.code) {
+            if (selectedModule.code !== selectedModuleCode) {
+                setSelectedModuleCode(selectedModule.code);
+            }
+        }
+    }, [
+        moduleOptionsResult.modules,
+        isProVersionSelected,
+        moduleOptionsResult.isLoading,
+        selectedModuleCode,
+        setSelectedModuleCode,
+    ]);
+
     const screenTypeSegments = useMemo((): SelectOption[] => initialDataResult.screenTypes
         .map(st => ({
             value: st.code ?? '',
             label: st.name ?? st.code ?? ''
         })), [initialDataResult.screenTypes]);
+
     const locationSelectOptions = useMemo((): SelectOption[] =>
         initialDataResult.locations
             .filter(loc => loc.active && loc.code && loc.name)
@@ -169,6 +210,7 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             })),
         [initialDataResult.locations]
     );
+
     const materialSelectOptions = useMemo((): SelectOption[] =>
         initialDataResult.materials
             .filter(mat => mat.active && mat.code && mat.name)
@@ -178,6 +220,7 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             })),
         [initialDataResult.materials]
     );
+
     const protectionSelectOptions = useMemo((): SelectOption[] =>
         initialDataResult.ipProtections
             .filter(ip => ip && ip.code)
@@ -188,6 +231,7 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             })),
         [initialDataResult.ipProtections]
     );
+
     const pitchSelectOptions = useMemo((): SelectOption[] =>
         pitchOptionsResult.pitches
             .filter(p => p && typeof p.code === 'string' && typeof p.pitchValue === 'number')
@@ -198,18 +242,15 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             })),
         [pitchOptionsResult.pitches]
     );
-    const brightnessSelectOptions = useMemo((): SelectOption[] =>
-        brightnessResult.brightnesses
-            .filter(br => br && br.code)
-            .map(br => ({ value: br.code!, label: `${br.value} nit` })),
-        [brightnessResult.brightnesses]
-    );
-    const refreshRateSelectOptions = useMemo((): SelectOption[] =>
-        refreshRateResult.refreshRates
-            .filter(rr => rr && rr.code)
-            .map(rr => ({ value: rr.code!, label: `${rr.value} Hz` })),
-        [refreshRateResult.refreshRates]
-    );
+
+    const brightnessSelectOptions = useMemo((): SelectOption[] => brightnessResult.brightnesses
+        .filter(br => br && br.code)
+        .map(br => ({ value: br.code!, label: `${br.value} nit` })), [brightnessResult.brightnesses]);
+
+    const refreshRateSelectOptions = useMemo((): SelectOption[] => refreshRateResult.refreshRates
+        .filter(rr => rr && rr.code)
+        .map(rr => ({ value: rr.code!, label: `${rr.value} Hz` })), [refreshRateResult.refreshRates]);
+
     const sensorSelectOptions = useMemo((): SelectOption[] =>
         initialDataResult.sensors
             .filter(s => s.active && s.code && s.name)
@@ -217,6 +258,7 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             .map(s => ({ value: s.code!, label: s.name! })),
         [initialDataResult.sensors]
     );
+
     const controlTypeSelectOptions = useMemo((): SelectOption[] =>
         initialDataResult.controlTypes
             .filter(ct => ct.active && ct.code && ct.name)
@@ -224,22 +266,21 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             .map(ct => ({ value: ct.code!, label: ct.name! })),
         [initialDataResult.controlTypes]
     );
-    const moduleSelectOptions = useMemo((): SelectOption[] =>
-        moduleOptionsResult.modules
-            .filter(m => m && m.code)
-            .map(m => ({ value: m.code!, label: m.name ?? m.sku ?? m.code! })),
-        [moduleOptionsResult.modules]
-    );
-    const cabinetSelectOptions = useMemo((): SelectOption[] =>
-        cabinetOptionsResult.cabinets
-            .filter(c => c && c.code)
-            .map(c => ({ value: c.code!, label: c.name ?? c.sku ?? c.code! })),
-        [cabinetOptionsResult.cabinets]
-    );
-    const isFlexOptionAvailableForSelectedScreenType = useMemo((): boolean => screenTypeOptionsResult.options.some(opt => opt?.code === "flex"), [screenTypeOptionsResult.options]);
 
-    // --- Формируем значение контекста ---
+    const moduleSelectOptions = useMemo((): SelectOption[] => moduleOptionsResult.modules
+        .filter(m => m && m.code)
+        .map(m => ({ value: m.code!, label: m.name ?? m.sku ?? m.code! })), [moduleOptionsResult.modules]);
+
+    const cabinetSelectOptions = useMemo((): SelectOption[] => cabinetOptionsResult.cabinets
+        .filter(c => c && c.code)
+        .map(c => ({ value: c.code!, label: c.name ?? c.sku ?? c.code! })), [cabinetOptionsResult.cabinets]);
+
+    const isFlexOptionAvailableForSelectedScreenType = useMemo((): boolean => {
+        return selectedScreenTypeCode === "cabinet";
+    }, [selectedScreenTypeCode]);
+
     const value = useMemo(() => ({
+        hasProOption,
         initialData: initialDataResult,
         isLoadingInitialData: initialDataResult.isLoading, isErrorInitialData: initialDataResult.isError, errorInitialData: initialDataResult.error,
         screenTypeOptions: screenTypeOptionsResult.options,
@@ -267,7 +308,7 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
         brightnessSelectOptions, refreshRateSelectOptions, sensorSelectOptions, controlTypeSelectOptions,
         pitchSelectOptions, moduleSelectOptions, cabinetSelectOptions,
     }), [
-        initialDataResult, screenTypeOptionsResult, pitchOptionsResult, refreshRateResult, brightnessResult,
+        hasProOption, initialDataResult, screenTypeOptionsResult, pitchOptionsResult, refreshRateResult, brightnessResult,
         moduleOptionsResult, cabinetOptionsResult, dollarRateResult, moduleDetailsResult, cabinetDetailsResult, priceResult,
         screenTypeSegments, isFlexOptionAvailableForSelectedScreenType, locationSelectOptions, materialSelectOptions, protectionSelectOptions,
         brightnessSelectOptions, refreshRateSelectOptions, sensorSelectOptions, controlTypeSelectOptions, pitchSelectOptions,
