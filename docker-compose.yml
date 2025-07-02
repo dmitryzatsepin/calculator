@@ -1,54 +1,30 @@
+version: '3.8'
+
 services:
-  db:
-    image: postgres:15
-    container_name: postgres_db
-    restart: always
-    env_file:
-    - .env
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgress_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
-      interval: 10s
-      retries: 5
-      timeout: 5s
-
+  # Название нашего сервиса
   backend:
+    # Указываем, что образ нужно собрать из Dockerfile
     build:
-      context: ./backend  # <-- изменил путь
-      dockerfile: Dockerfile
-    container_name: backend_app
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=public"
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRES_IN: "7d"
-      BCRYPT_SALT: "10"
-    ports:
-      - "5000:5000"
-    volumes:
-      - prisma_migrations:/app/prisma/migrations
+      context: . # Контекст сборки - текущая папка
+      dockerfile: Dockerfile.backend # Имя нашего Dockerfile
+    image: led-calculator-backend # Имя, которое мы дадим собранному образу
+    container_name: led-calculator-backend-container # Имя запущенного контейнера
+    
+    # Переменные окружения
+    env_file:
+      - ./backend/.env # Указываем путь к файлу с переменными окружения
 
-  frontend:
-    build:
-      context: ./frontend  # <-- изменил путь
-      dockerfile: Dockerfile
-    container_name: frontend_app
-    restart: always
-    depends_on:
-      - backend
-    ports:
-      - "80:80"
+    # Сеть
+    networks:
+      - led-calculator-network
+      
+    # Перезапуск
+    # always - всегда перезапускать контейнер, если он остановился
+    # no - не перезапускать
+    # on-failure - перезапускать только если он завершился с ошибкой
+    restart: unless-stopped
 
-volumes:
-  postgress_data:
-  prisma_migrations:
+# Определяем нашу изолированную сеть
+networks:
+  led-calculator-network:
+    driver: bridge

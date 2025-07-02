@@ -1,26 +1,51 @@
-# 1. Используем официальный образ Node.js с Alpine (лёгкий и быстрый)
-FROM node:18-alpine
+# --- ЭТАП 1: Сборка (Builder) ---
+# Используем образ Node.js с pnpm для установки зависимостей и сборки TypeScript
+FROM node:18-alpine AS builder
 
-# 2. Указываем рабочую директорию внутри контейнера
-WORKDIR /app
-
-# 3. Устанавливаем pnpm глобально
+# Устанавливаем pnpm глобально
 RUN npm install -g pnpm
 
-# 4. Копируем package.json и pnpm-lock.yaml перед установкой зависимостей
-COPY package.json pnpm-lock.yaml ./
+# Устанавливаем рабочую директорию внутри контейнера
+WORKDIR /app
 
-# 5. Устанавливаем зависимости
-RUN pnpm install --frozen-lockfile
+# Копируем файлы конфигурации pnpm и package.json
+COPY pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json ./backend/
 
-# 6. Копируем весь код проекта внутрь контейнера
-COPY . .
+# Устанавливаем ТОЛЬКО зависимости для бэкенда
+# Флаг --prod говорит pnpm устанавливать только production зависимости, что уменьшает размер
+RUN pnpm install --filter backend --prod
 
-# 7. Генерируем Prisma-клиент
-RUN pnpm prisma:generate
+# Копируем весь исходный код бэкенда
+COPY backend/ ./backend/
 
-# 8. Открываем порт 5000
+# Компилируем TypeScript в JavaScript
+# Код будет в папке /app/backend/dist
+RUN pnpm --filter backend run build
+
+
+# --- ЭТАП 2: Запуск (Runner) ---
+# Используем "чистый" и легкий образ Node.js для запуска
+FROM node:18-alpine
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем ТОЛЬКО скомпилированный код и production зависимости из этапа "builder"
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/backend/node_modules ./backend/node_modules
+
+# Копируем Prisma схему для генерации клиента
+COPY backend/prisma ./backend/prisma
+
+# Генерируем Prisma Client внутри production-окружения
+# Это важно, так как бинарные файлы могут зависеть от ОС
+RUN npx prisma generate --schema=./backend/prisma/schema.prisma
+
+# Указываем порт, который будет слушать наше приложение внутри контейнера
 EXPOSE 5000
 
-# 9. Запускаем миграции и сидинг перед запуском сервера
-CMD ["sh", "-c", "pnpm prisma:migrate && pnpm prisma:seed && pnpm dev"]
+# Команда для запуска нашего приложения
+# Запускаем скомпилированный server.js
+CMD ["node", "backend/dist/server.js"]
