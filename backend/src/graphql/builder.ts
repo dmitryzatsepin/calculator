@@ -70,19 +70,21 @@ export interface GraphQLContext {
 // --- Инициализация SchemaBuilder ---
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
-  Context: GraphQLContext; // Используем расширенный контекст
+  Context: GraphQLContext;
   Scalars: {
     Date: { Input: Date; Output: Date };
     DateTime: { Input: Date; Output: Date };
   };
 }>({
   plugins: [PrismaPlugin, RelayPlugin],
+
   prisma: {
     client: prisma,
     exposeDescriptions: true,
     filterConnectionTotalCount: true,
   },
-  relay: {
+
+  relayOptions: {
     clientMutationId: 'omit',
     cursorType: 'String',
   },

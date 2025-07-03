@@ -1,30 +1,16 @@
-version: '3.8'
-
 services:
-  # Название нашего сервиса
   backend:
-    # Указываем, что образ нужно собрать из Dockerfile
     build:
-      context: . # Контекст сборки - текущая папка
-      dockerfile: Dockerfile.backend # Имя нашего Dockerfile
-    image: led-calculator-backend # Имя, которое мы дадим собранному образу
-    container_name: led-calculator-backend-container # Имя запущенного контейнера
-    
-    # Переменные окружения
+      context: .
+      dockerfile: Dockerfile.backend
+    image: led-calculator-backend
+    container_name: led-calculator-backend-container
     env_file:
-      - ./backend/.env # Указываем путь к файлу с переменными окружения
-
-    # Сеть
+      - ./backend/.env
     networks:
       - led-calculator-network
-      
-    # Перезапуск
-    # always - всегда перезапускать контейнер, если он остановился
-    # no - не перезапускать
-    # on-failure - перезапускать только если он завершился с ошибкой
     restart: unless-stopped
 
-# Определяем нашу изолированную сеть
 networks:
   led-calculator-network:
     driver: bridge
