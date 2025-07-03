@@ -1,29 +1,8 @@
-# Используем базовый образ
 FROM node:18-alpine
-
-# Устанавливаем pnpm
-RUN npm install -g pnpm
-
-# Устанавливаем рабочую директорию
 WORKDIR /app
-
-# --- САМЫЙ ВАЖНЫЙ ШАГ ---
-# Копируем ВЕСЬ проект (все папки) в контейнер
 COPY . .
-
-# Устанавливаем ВСЕ зависимости для всего воркспейса
-# pnpm сам разберется, что куда ставить
-# postinstall теперь отработает, так как package.json ему подскажет путь к схеме
+RUN npm install -g pnpm
 RUN pnpm install
-
-# Запускаем сборку ТОЛЬКО для бэкенда
-# Используем ВАШ оригинальный, рабочий build-скрипт
-RUN pnpm --filter backend run build
-
-# --- Финальный этап не нужен, так как ваш start-скрипт настроен для production ---
-
+RUN pnpm run build
 EXPOSE 5000
-
-# Запускаем скомпилированное приложение через pnpm
-# Он возьмет команду "start" из backend/package.json
 CMD ["pnpm", "--filter", "backend", "start"]

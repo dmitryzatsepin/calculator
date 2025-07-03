@@ -993,8 +993,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.9.0
-   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
+   * Prisma Client JS version: 6.11.0
+   * Query Engine version: 9c30299f5a0ea26a96790e13f796dc6094db3173
    */
   export type PrismaVersion = {
     client: string
@@ -1501,6 +1501,10 @@ export namespace Prisma {
             args: Prisma.UserUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.UserUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
+          }
           upsert: {
             args: Prisma.UserUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$UserPayload>
@@ -1570,6 +1574,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ScreenTypeUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ScreenTypeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreenTypePayload>[]
           }
           upsert: {
             args: Prisma.ScreenTypeUpsertArgs<ExtArgs>
@@ -1641,6 +1649,10 @@ export namespace Prisma {
             args: Prisma.MaterialUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.MaterialUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$MaterialPayload>[]
+          }
           upsert: {
             args: Prisma.MaterialUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$MaterialPayload>
@@ -1710,6 +1722,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.LocationUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.LocationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$LocationPayload>[]
           }
           upsert: {
             args: Prisma.LocationUpsertArgs<ExtArgs>
@@ -1781,6 +1797,10 @@ export namespace Prisma {
             args: Prisma.PlacementUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.PlacementUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PlacementPayload>[]
+          }
           upsert: {
             args: Prisma.PlacementUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$PlacementPayload>
@@ -1850,6 +1870,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.OptionUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.OptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$OptionPayload>[]
           }
           upsert: {
             args: Prisma.OptionUpsertArgs<ExtArgs>
@@ -1921,6 +1945,10 @@ export namespace Prisma {
             args: Prisma.SensorUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.SensorUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SensorPayload>[]
+          }
           upsert: {
             args: Prisma.SensorUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$SensorPayload>
@@ -1990,6 +2018,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ControlTypeUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ControlTypeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ControlTypePayload>[]
           }
           upsert: {
             args: Prisma.ControlTypeUpsertArgs<ExtArgs>
@@ -2061,6 +2093,10 @@ export namespace Prisma {
             args: Prisma.PitchUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.PitchUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PitchPayload>[]
+          }
           upsert: {
             args: Prisma.PitchUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$PitchPayload>
@@ -2130,6 +2166,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.RefreshRateUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RefreshRateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RefreshRatePayload>[]
           }
           upsert: {
             args: Prisma.RefreshRateUpsertArgs<ExtArgs>
@@ -2201,6 +2241,10 @@ export namespace Prisma {
             args: Prisma.BrightnessUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.BrightnessUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$BrightnessPayload>[]
+          }
           upsert: {
             args: Prisma.BrightnessUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$BrightnessPayload>
@@ -2270,6 +2314,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ManufacturerUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ManufacturerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ManufacturerPayload>[]
           }
           upsert: {
             args: Prisma.ManufacturerUpsertArgs<ExtArgs>
@@ -2341,6 +2389,10 @@ export namespace Prisma {
             args: Prisma.SupplierUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.SupplierUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SupplierPayload>[]
+          }
           upsert: {
             args: Prisma.SupplierUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$SupplierPayload>
@@ -2410,6 +2462,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.IpProtectionUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.IpProtectionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$IpProtectionPayload>[]
           }
           upsert: {
             args: Prisma.IpProtectionUpsertArgs<ExtArgs>
@@ -2481,6 +2537,10 @@ export namespace Prisma {
             args: Prisma.ModuleSizeUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ModuleSizeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleSizePayload>[]
+          }
           upsert: {
             args: Prisma.ModuleSizeUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ModuleSizePayload>
@@ -2550,6 +2610,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetSizeUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetSizeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetSizePayload>[]
           }
           upsert: {
             args: Prisma.CabinetSizeUpsertArgs<ExtArgs>
@@ -2621,6 +2685,10 @@ export namespace Prisma {
             args: Prisma.ItemCategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ItemCategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemCategoryPayload>[]
+          }
           upsert: {
             args: Prisma.ItemCategoryUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ItemCategoryPayload>
@@ -2690,6 +2758,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ItemSubcategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ItemSubcategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemSubcategoryPayload>[]
           }
           upsert: {
             args: Prisma.ItemSubcategoryUpsertArgs<ExtArgs>
@@ -2761,6 +2833,10 @@ export namespace Prisma {
             args: Prisma.CabinetUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.CabinetUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetPayload>[]
+          }
           upsert: {
             args: Prisma.CabinetUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CabinetPayload>
@@ -2830,6 +2906,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ModuleUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModuleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModulePayload>[]
           }
           upsert: {
             args: Prisma.ModuleUpsertArgs<ExtArgs>
@@ -2901,6 +2981,10 @@ export namespace Prisma {
             args: Prisma.ItemUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ItemUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemPayload>[]
+          }
           upsert: {
             args: Prisma.ItemUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ItemPayload>
@@ -2970,6 +3054,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ScreenTypeOptionUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ScreenTypeOptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreenTypeOptionPayload>[]
           }
           upsert: {
             args: Prisma.ScreenTypeOptionUpsertArgs<ExtArgs>
@@ -3041,6 +3129,10 @@ export namespace Prisma {
             args: Prisma.ScreenTypeControlTypeUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ScreenTypeControlTypeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreenTypeControlTypePayload>[]
+          }
           upsert: {
             args: Prisma.ScreenTypeControlTypeUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ScreenTypeControlTypePayload>
@@ -3110,6 +3202,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ScreenTypeSensorUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ScreenTypeSensorUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ScreenTypeSensorPayload>[]
           }
           upsert: {
             args: Prisma.ScreenTypeSensorUpsertArgs<ExtArgs>
@@ -3181,6 +3277,10 @@ export namespace Prisma {
             args: Prisma.ItemCategoryRelationUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ItemCategoryRelationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemCategoryRelationPayload>[]
+          }
           upsert: {
             args: Prisma.ItemCategoryRelationUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ItemCategoryRelationPayload>
@@ -3250,6 +3350,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ItemSubcategoryRelationUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ItemSubcategoryRelationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemSubcategoryRelationPayload>[]
           }
           upsert: {
             args: Prisma.ItemSubcategoryRelationUpsertArgs<ExtArgs>
@@ -3321,6 +3425,10 @@ export namespace Prisma {
             args: Prisma.ItemPriceUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ItemPriceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemPricePayload>[]
+          }
           upsert: {
             args: Prisma.ItemPriceUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ItemPricePayload>
@@ -3390,6 +3498,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ItemSupplierUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ItemSupplierUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemSupplierPayload>[]
           }
           upsert: {
             args: Prisma.ItemSupplierUpsertArgs<ExtArgs>
@@ -3461,6 +3573,10 @@ export namespace Prisma {
             args: Prisma.ItemCategorySubcategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ItemCategorySubcategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ItemCategorySubcategoryPayload>[]
+          }
           upsert: {
             args: Prisma.ItemCategorySubcategoryUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ItemCategorySubcategoryPayload>
@@ -3530,6 +3646,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetCategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetCategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetCategoryPayload>[]
           }
           upsert: {
             args: Prisma.CabinetCategoryUpsertArgs<ExtArgs>
@@ -3601,6 +3721,10 @@ export namespace Prisma {
             args: Prisma.CabinetSubcategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.CabinetSubcategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetSubcategoryPayload>[]
+          }
           upsert: {
             args: Prisma.CabinetSubcategoryUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CabinetSubcategoryPayload>
@@ -3670,6 +3794,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetLocationUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetLocationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetLocationPayload>[]
           }
           upsert: {
             args: Prisma.CabinetLocationUpsertArgs<ExtArgs>
@@ -3741,6 +3869,10 @@ export namespace Prisma {
             args: Prisma.CabinetPlacementUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.CabinetPlacementUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetPlacementPayload>[]
+          }
           upsert: {
             args: Prisma.CabinetPlacementUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CabinetPlacementPayload>
@@ -3810,6 +3942,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetMaterialUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetMaterialUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetMaterialPayload>[]
           }
           upsert: {
             args: Prisma.CabinetMaterialUpsertArgs<ExtArgs>
@@ -3881,6 +4017,10 @@ export namespace Prisma {
             args: Prisma.CabinetCabinetSizeUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.CabinetCabinetSizeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetCabinetSizePayload>[]
+          }
           upsert: {
             args: Prisma.CabinetCabinetSizeUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CabinetCabinetSizePayload>
@@ -3950,6 +4090,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetPitchUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetPitchUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetPitchPayload>[]
           }
           upsert: {
             args: Prisma.CabinetPitchUpsertArgs<ExtArgs>
@@ -4021,6 +4165,10 @@ export namespace Prisma {
             args: Prisma.CabinetManufacturerUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.CabinetManufacturerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetManufacturerPayload>[]
+          }
           upsert: {
             args: Prisma.CabinetManufacturerUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CabinetManufacturerPayload>
@@ -4090,6 +4238,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetSupplierUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetSupplierUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetSupplierPayload>[]
           }
           upsert: {
             args: Prisma.CabinetSupplierUpsertArgs<ExtArgs>
@@ -4161,6 +4313,10 @@ export namespace Prisma {
             args: Prisma.CabinetItemComponentUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.CabinetItemComponentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetItemComponentPayload>[]
+          }
           upsert: {
             args: Prisma.CabinetItemComponentUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CabinetItemComponentPayload>
@@ -4230,6 +4386,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetPriceUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetPriceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetPricePayload>[]
           }
           upsert: {
             args: Prisma.CabinetPriceUpsertArgs<ExtArgs>
@@ -4301,6 +4461,10 @@ export namespace Prisma {
             args: Prisma.ModuleCategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ModuleCategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleCategoryPayload>[]
+          }
           upsert: {
             args: Prisma.ModuleCategoryUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ModuleCategoryPayload>
@@ -4370,6 +4534,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ModuleSubcategoryUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModuleSubcategoryUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleSubcategoryPayload>[]
           }
           upsert: {
             args: Prisma.ModuleSubcategoryUpsertArgs<ExtArgs>
@@ -4441,6 +4609,10 @@ export namespace Prisma {
             args: Prisma.ModuleLocationUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ModuleLocationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleLocationPayload>[]
+          }
           upsert: {
             args: Prisma.ModuleLocationUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ModuleLocationPayload>
@@ -4510,6 +4682,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ModuleRefreshRateUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModuleRefreshRateUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleRefreshRatePayload>[]
           }
           upsert: {
             args: Prisma.ModuleRefreshRateUpsertArgs<ExtArgs>
@@ -4581,6 +4757,10 @@ export namespace Prisma {
             args: Prisma.ModuleBrightnessUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ModuleBrightnessUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleBrightnessPayload>[]
+          }
           upsert: {
             args: Prisma.ModuleBrightnessUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ModuleBrightnessPayload>
@@ -4650,6 +4830,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ModuleModuleSizeUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModuleModuleSizeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleModuleSizePayload>[]
           }
           upsert: {
             args: Prisma.ModuleModuleSizeUpsertArgs<ExtArgs>
@@ -4721,6 +4905,10 @@ export namespace Prisma {
             args: Prisma.ModulePitchUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ModulePitchUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModulePitchPayload>[]
+          }
           upsert: {
             args: Prisma.ModulePitchUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ModulePitchPayload>
@@ -4790,6 +4978,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ModuleManufacturerUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModuleManufacturerUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleManufacturerPayload>[]
           }
           upsert: {
             args: Prisma.ModuleManufacturerUpsertArgs<ExtArgs>
@@ -4861,6 +5053,10 @@ export namespace Prisma {
             args: Prisma.ModuleItemComponentUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ModuleItemComponentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleItemComponentPayload>[]
+          }
           upsert: {
             args: Prisma.ModuleItemComponentUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ModuleItemComponentPayload>
@@ -4930,6 +5126,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ModuleOptionUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.ModuleOptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModuleOptionPayload>[]
           }
           upsert: {
             args: Prisma.ModuleOptionUpsertArgs<ExtArgs>
@@ -5001,6 +5201,10 @@ export namespace Prisma {
             args: Prisma.ModulePriceUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
+          updateManyAndReturn: {
+            args: Prisma.ModulePriceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ModulePricePayload>[]
+          }
           upsert: {
             args: Prisma.ModulePriceUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ModulePricePayload>
@@ -5070,6 +5274,10 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.CabinetSizeModuleSizeUpdateManyArgs<ExtArgs>
             result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CabinetSizeModuleSizeUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CabinetSizeModuleSizePayload>[]
           }
           upsert: {
             args: Prisma.CabinetSizeModuleSizeUpsertArgs<ExtArgs>
@@ -6484,6 +6692,14 @@ export namespace Prisma {
     name?: boolean
   }, ExtArgs["result"]["user"]>
 
+  export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    email?: boolean
+    password?: boolean
+    role?: boolean
+    createdAt?: boolean
+    name?: boolean
+  }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
     id?: boolean
@@ -6710,6 +6926,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Users and returns the data updated in the database.
+     * @param {UserUpdateManyAndReturnArgs} args - Arguments to update many Users.
+     * @example
+     * // Update many Users
+     * const user = await prisma.user.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Users and only return the `id`
+     * const userWithIdOnly = await prisma.user.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends UserUpdateManyAndReturnArgs>(args: SelectSubset<T, UserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User.
@@ -7166,6 +7412,36 @@ export namespace Prisma {
      * Filter which Users to update
      */
     where?: UserWhereInput
+    /**
+     * Limit how many Users to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * User updateManyAndReturn
+   */
+  export type UserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * The data used to update Users.
+     */
+    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
+    /**
+     * Filter which Users to update
+     */
+    where?: UserWhereInput
+    /**
+     * Limit how many Users to update.
+     */
+    limit?: number
   }
 
   /**
@@ -7220,6 +7496,10 @@ export namespace Prisma {
      * Filter which Users to delete
      */
     where?: UserWhereInput
+    /**
+     * Limit how many Users to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -7458,6 +7738,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["screenType"]>
 
+  export type ScreenTypeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["screenType"]>
 
   export type ScreenTypeSelectScalar = {
     id?: boolean
@@ -7476,6 +7764,7 @@ export namespace Prisma {
     _count?: boolean | ScreenTypeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ScreenTypeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ScreenTypeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ScreenTypePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ScreenType"
@@ -7695,6 +7984,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ScreenTypeUpdateManyArgs>(args: SelectSubset<T, ScreenTypeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScreenTypes and returns the data updated in the database.
+     * @param {ScreenTypeUpdateManyAndReturnArgs} args - Arguments to update many ScreenTypes.
+     * @example
+     * // Update many ScreenTypes
+     * const screenType = await prisma.screenType.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ScreenTypes and only return the `id`
+     * const screenTypeWithIdOnly = await prisma.screenType.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ScreenTypeUpdateManyAndReturnArgs>(args: SelectSubset<T, ScreenTypeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreenTypePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ScreenType.
@@ -8182,6 +8501,36 @@ export namespace Prisma {
      * Filter which ScreenTypes to update
      */
     where?: ScreenTypeWhereInput
+    /**
+     * Limit how many ScreenTypes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScreenType updateManyAndReturn
+   */
+  export type ScreenTypeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreenType
+     */
+    select?: ScreenTypeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreenType
+     */
+    omit?: ScreenTypeOmit<ExtArgs> | null
+    /**
+     * The data used to update ScreenTypes.
+     */
+    data: XOR<ScreenTypeUpdateManyMutationInput, ScreenTypeUncheckedUpdateManyInput>
+    /**
+     * Filter which ScreenTypes to update
+     */
+    where?: ScreenTypeWhereInput
+    /**
+     * Limit how many ScreenTypes to update.
+     */
+    limit?: number
   }
 
   /**
@@ -8244,6 +8593,10 @@ export namespace Prisma {
      * Filter which ScreenTypes to delete
      */
     where?: ScreenTypeWhereInput
+    /**
+     * Limit how many ScreenTypes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -8556,6 +8909,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["material"]>
 
+  export type MaterialSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["material"]>
 
   export type MaterialSelectScalar = {
     id?: boolean
@@ -8572,6 +8933,7 @@ export namespace Prisma {
     _count?: boolean | MaterialCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type MaterialIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type MaterialIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $MaterialPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Material"
@@ -8789,6 +9151,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends MaterialUpdateManyArgs>(args: SelectSubset<T, MaterialUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Materials and returns the data updated in the database.
+     * @param {MaterialUpdateManyAndReturnArgs} args - Arguments to update many Materials.
+     * @example
+     * // Update many Materials
+     * const material = await prisma.material.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Materials and only return the `id`
+     * const materialWithIdOnly = await prisma.material.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends MaterialUpdateManyAndReturnArgs>(args: SelectSubset<T, MaterialUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MaterialPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Material.
@@ -9274,6 +9666,36 @@ export namespace Prisma {
      * Filter which Materials to update
      */
     where?: MaterialWhereInput
+    /**
+     * Limit how many Materials to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Material updateManyAndReturn
+   */
+  export type MaterialUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Material
+     */
+    select?: MaterialSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Material
+     */
+    omit?: MaterialOmit<ExtArgs> | null
+    /**
+     * The data used to update Materials.
+     */
+    data: XOR<MaterialUpdateManyMutationInput, MaterialUncheckedUpdateManyInput>
+    /**
+     * Filter which Materials to update
+     */
+    where?: MaterialWhereInput
+    /**
+     * Limit how many Materials to update.
+     */
+    limit?: number
   }
 
   /**
@@ -9336,6 +9758,10 @@ export namespace Prisma {
      * Filter which Materials to delete
      */
     where?: MaterialWhereInput
+    /**
+     * Limit how many Materials to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -9601,6 +10027,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["location"]>
 
+  export type LocationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["location"]>
 
   export type LocationSelectScalar = {
     id?: boolean
@@ -9618,6 +10052,7 @@ export namespace Prisma {
     _count?: boolean | LocationCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type LocationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type LocationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $LocationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Location"
@@ -9836,6 +10271,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends LocationUpdateManyArgs>(args: SelectSubset<T, LocationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Locations and returns the data updated in the database.
+     * @param {LocationUpdateManyAndReturnArgs} args - Arguments to update many Locations.
+     * @example
+     * // Update many Locations
+     * const location = await prisma.location.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Locations and only return the `id`
+     * const locationWithIdOnly = await prisma.location.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends LocationUpdateManyAndReturnArgs>(args: SelectSubset<T, LocationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LocationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Location.
@@ -10322,6 +10787,36 @@ export namespace Prisma {
      * Filter which Locations to update
      */
     where?: LocationWhereInput
+    /**
+     * Limit how many Locations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Location updateManyAndReturn
+   */
+  export type LocationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Location
+     */
+    select?: LocationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Location
+     */
+    omit?: LocationOmit<ExtArgs> | null
+    /**
+     * The data used to update Locations.
+     */
+    data: XOR<LocationUpdateManyMutationInput, LocationUncheckedUpdateManyInput>
+    /**
+     * Filter which Locations to update
+     */
+    where?: LocationWhereInput
+    /**
+     * Limit how many Locations to update.
+     */
+    limit?: number
   }
 
   /**
@@ -10384,6 +10879,10 @@ export namespace Prisma {
      * Filter which Locations to delete
      */
     where?: LocationWhereInput
+    /**
+     * Limit how many Locations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -10672,6 +11171,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["placement"]>
 
+  export type PlacementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["placement"]>
 
   export type PlacementSelectScalar = {
     id?: boolean
@@ -10688,6 +11195,7 @@ export namespace Prisma {
     _count?: boolean | PlacementCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PlacementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type PlacementIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $PlacementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Placement"
@@ -10905,6 +11413,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends PlacementUpdateManyArgs>(args: SelectSubset<T, PlacementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Placements and returns the data updated in the database.
+     * @param {PlacementUpdateManyAndReturnArgs} args - Arguments to update many Placements.
+     * @example
+     * // Update many Placements
+     * const placement = await prisma.placement.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Placements and only return the `id`
+     * const placementWithIdOnly = await prisma.placement.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PlacementUpdateManyAndReturnArgs>(args: SelectSubset<T, PlacementUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PlacementPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Placement.
@@ -11390,6 +11928,36 @@ export namespace Prisma {
      * Filter which Placements to update
      */
     where?: PlacementWhereInput
+    /**
+     * Limit how many Placements to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Placement updateManyAndReturn
+   */
+  export type PlacementUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Placement
+     */
+    select?: PlacementSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Placement
+     */
+    omit?: PlacementOmit<ExtArgs> | null
+    /**
+     * The data used to update Placements.
+     */
+    data: XOR<PlacementUpdateManyMutationInput, PlacementUncheckedUpdateManyInput>
+    /**
+     * Filter which Placements to update
+     */
+    where?: PlacementWhereInput
+    /**
+     * Limit how many Placements to update.
+     */
+    limit?: number
   }
 
   /**
@@ -11452,6 +12020,10 @@ export namespace Prisma {
      * Filter which Placements to delete
      */
     where?: PlacementWhereInput
+    /**
+     * Limit how many Placements to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -11717,6 +12289,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["option"]>
 
+  export type OptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["option"]>
 
   export type OptionSelectScalar = {
     id?: boolean
@@ -11734,6 +12314,7 @@ export namespace Prisma {
     _count?: boolean | OptionCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type OptionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $OptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Option"
@@ -11952,6 +12533,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends OptionUpdateManyArgs>(args: SelectSubset<T, OptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Options and returns the data updated in the database.
+     * @param {OptionUpdateManyAndReturnArgs} args - Arguments to update many Options.
+     * @example
+     * // Update many Options
+     * const option = await prisma.option.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Options and only return the `id`
+     * const optionWithIdOnly = await prisma.option.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends OptionUpdateManyAndReturnArgs>(args: SelectSubset<T, OptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Option.
@@ -12438,6 +13049,36 @@ export namespace Prisma {
      * Filter which Options to update
      */
     where?: OptionWhereInput
+    /**
+     * Limit how many Options to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Option updateManyAndReturn
+   */
+  export type OptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Option
+     */
+    select?: OptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Option
+     */
+    omit?: OptionOmit<ExtArgs> | null
+    /**
+     * The data used to update Options.
+     */
+    data: XOR<OptionUpdateManyMutationInput, OptionUncheckedUpdateManyInput>
+    /**
+     * Filter which Options to update
+     */
+    where?: OptionWhereInput
+    /**
+     * Limit how many Options to update.
+     */
+    limit?: number
   }
 
   /**
@@ -12500,6 +13141,10 @@ export namespace Prisma {
      * Filter which Options to delete
      */
     where?: OptionWhereInput
+    /**
+     * Limit how many Options to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -12788,6 +13433,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["sensor"]>
 
+  export type SensorSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["sensor"]>
 
   export type SensorSelectScalar = {
     id?: boolean
@@ -12804,6 +13457,7 @@ export namespace Prisma {
     _count?: boolean | SensorCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SensorIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type SensorIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $SensorPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Sensor"
@@ -13021,6 +13675,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends SensorUpdateManyArgs>(args: SelectSubset<T, SensorUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Sensors and returns the data updated in the database.
+     * @param {SensorUpdateManyAndReturnArgs} args - Arguments to update many Sensors.
+     * @example
+     * // Update many Sensors
+     * const sensor = await prisma.sensor.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Sensors and only return the `id`
+     * const sensorWithIdOnly = await prisma.sensor.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SensorUpdateManyAndReturnArgs>(args: SelectSubset<T, SensorUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SensorPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Sensor.
@@ -13506,6 +14190,36 @@ export namespace Prisma {
      * Filter which Sensors to update
      */
     where?: SensorWhereInput
+    /**
+     * Limit how many Sensors to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Sensor updateManyAndReturn
+   */
+  export type SensorUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Sensor
+     */
+    select?: SensorSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Sensor
+     */
+    omit?: SensorOmit<ExtArgs> | null
+    /**
+     * The data used to update Sensors.
+     */
+    data: XOR<SensorUpdateManyMutationInput, SensorUncheckedUpdateManyInput>
+    /**
+     * Filter which Sensors to update
+     */
+    where?: SensorWhereInput
+    /**
+     * Limit how many Sensors to update.
+     */
+    limit?: number
   }
 
   /**
@@ -13568,6 +14282,10 @@ export namespace Prisma {
      * Filter which Sensors to delete
      */
     where?: SensorWhereInput
+    /**
+     * Limit how many Sensors to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -13832,6 +14550,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["controlType"]>
 
+  export type ControlTypeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["controlType"]>
 
   export type ControlTypeSelectScalar = {
     id?: boolean
@@ -13848,6 +14574,7 @@ export namespace Prisma {
     _count?: boolean | ControlTypeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ControlTypeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ControlTypeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ControlTypePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ControlType"
@@ -14065,6 +14792,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ControlTypeUpdateManyArgs>(args: SelectSubset<T, ControlTypeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ControlTypes and returns the data updated in the database.
+     * @param {ControlTypeUpdateManyAndReturnArgs} args - Arguments to update many ControlTypes.
+     * @example
+     * // Update many ControlTypes
+     * const controlType = await prisma.controlType.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ControlTypes and only return the `id`
+     * const controlTypeWithIdOnly = await prisma.controlType.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ControlTypeUpdateManyAndReturnArgs>(args: SelectSubset<T, ControlTypeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ControlTypePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ControlType.
@@ -14550,6 +15307,36 @@ export namespace Prisma {
      * Filter which ControlTypes to update
      */
     where?: ControlTypeWhereInput
+    /**
+     * Limit how many ControlTypes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ControlType updateManyAndReturn
+   */
+  export type ControlTypeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ControlType
+     */
+    select?: ControlTypeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ControlType
+     */
+    omit?: ControlTypeOmit<ExtArgs> | null
+    /**
+     * The data used to update ControlTypes.
+     */
+    data: XOR<ControlTypeUpdateManyMutationInput, ControlTypeUncheckedUpdateManyInput>
+    /**
+     * Filter which ControlTypes to update
+     */
+    where?: ControlTypeWhereInput
+    /**
+     * Limit how many ControlTypes to update.
+     */
+    limit?: number
   }
 
   /**
@@ -14612,6 +15399,10 @@ export namespace Prisma {
      * Filter which ControlTypes to delete
      */
     where?: ControlTypeWhereInput
+    /**
+     * Limit how many ControlTypes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -14881,6 +15672,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["pitch"]>
 
+  export type PitchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    pitchValue?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["pitch"]>
 
   export type PitchSelectScalar = {
     id?: boolean
@@ -14898,6 +15697,7 @@ export namespace Prisma {
     _count?: boolean | PitchCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type PitchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type PitchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $PitchPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Pitch"
@@ -15116,6 +15916,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends PitchUpdateManyArgs>(args: SelectSubset<T, PitchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Pitches and returns the data updated in the database.
+     * @param {PitchUpdateManyAndReturnArgs} args - Arguments to update many Pitches.
+     * @example
+     * // Update many Pitches
+     * const pitch = await prisma.pitch.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Pitches and only return the `id`
+     * const pitchWithIdOnly = await prisma.pitch.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PitchUpdateManyAndReturnArgs>(args: SelectSubset<T, PitchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PitchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Pitch.
@@ -15602,6 +16432,36 @@ export namespace Prisma {
      * Filter which Pitches to update
      */
     where?: PitchWhereInput
+    /**
+     * Limit how many Pitches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Pitch updateManyAndReturn
+   */
+  export type PitchUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pitch
+     */
+    select?: PitchSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pitch
+     */
+    omit?: PitchOmit<ExtArgs> | null
+    /**
+     * The data used to update Pitches.
+     */
+    data: XOR<PitchUpdateManyMutationInput, PitchUncheckedUpdateManyInput>
+    /**
+     * Filter which Pitches to update
+     */
+    where?: PitchWhereInput
+    /**
+     * Limit how many Pitches to update.
+     */
+    limit?: number
   }
 
   /**
@@ -15664,6 +16524,10 @@ export namespace Prisma {
      * Filter which Pitches to delete
      */
     where?: PitchWhereInput
+    /**
+     * Limit how many Pitches to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -15956,6 +16820,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["refreshRate"]>
 
+  export type RefreshRateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    value?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["refreshRate"]>
 
   export type RefreshRateSelectScalar = {
     id?: boolean
@@ -15972,6 +16844,7 @@ export namespace Prisma {
     _count?: boolean | RefreshRateCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type RefreshRateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type RefreshRateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $RefreshRatePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "RefreshRate"
@@ -16189,6 +17062,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends RefreshRateUpdateManyArgs>(args: SelectSubset<T, RefreshRateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RefreshRates and returns the data updated in the database.
+     * @param {RefreshRateUpdateManyAndReturnArgs} args - Arguments to update many RefreshRates.
+     * @example
+     * // Update many RefreshRates
+     * const refreshRate = await prisma.refreshRate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RefreshRates and only return the `id`
+     * const refreshRateWithIdOnly = await prisma.refreshRate.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RefreshRateUpdateManyAndReturnArgs>(args: SelectSubset<T, RefreshRateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RefreshRatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one RefreshRate.
@@ -16674,6 +17577,36 @@ export namespace Prisma {
      * Filter which RefreshRates to update
      */
     where?: RefreshRateWhereInput
+    /**
+     * Limit how many RefreshRates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RefreshRate updateManyAndReturn
+   */
+  export type RefreshRateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RefreshRate
+     */
+    select?: RefreshRateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RefreshRate
+     */
+    omit?: RefreshRateOmit<ExtArgs> | null
+    /**
+     * The data used to update RefreshRates.
+     */
+    data: XOR<RefreshRateUpdateManyMutationInput, RefreshRateUncheckedUpdateManyInput>
+    /**
+     * Filter which RefreshRates to update
+     */
+    where?: RefreshRateWhereInput
+    /**
+     * Limit how many RefreshRates to update.
+     */
+    limit?: number
   }
 
   /**
@@ -16736,6 +17669,10 @@ export namespace Prisma {
      * Filter which RefreshRates to delete
      */
     where?: RefreshRateWhereInput
+    /**
+     * Limit how many RefreshRates to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -17004,6 +17941,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["brightness"]>
 
+  export type BrightnessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    value?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["brightness"]>
 
   export type BrightnessSelectScalar = {
     id?: boolean
@@ -17020,6 +17965,7 @@ export namespace Prisma {
     _count?: boolean | BrightnessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BrightnessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type BrightnessIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $BrightnessPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Brightness"
@@ -17237,6 +18183,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends BrightnessUpdateManyArgs>(args: SelectSubset<T, BrightnessUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Brightnesses and returns the data updated in the database.
+     * @param {BrightnessUpdateManyAndReturnArgs} args - Arguments to update many Brightnesses.
+     * @example
+     * // Update many Brightnesses
+     * const brightness = await prisma.brightness.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Brightnesses and only return the `id`
+     * const brightnessWithIdOnly = await prisma.brightness.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends BrightnessUpdateManyAndReturnArgs>(args: SelectSubset<T, BrightnessUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BrightnessPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Brightness.
@@ -17722,6 +18698,36 @@ export namespace Prisma {
      * Filter which Brightnesses to update
      */
     where?: BrightnessWhereInput
+    /**
+     * Limit how many Brightnesses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Brightness updateManyAndReturn
+   */
+  export type BrightnessUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Brightness
+     */
+    select?: BrightnessSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Brightness
+     */
+    omit?: BrightnessOmit<ExtArgs> | null
+    /**
+     * The data used to update Brightnesses.
+     */
+    data: XOR<BrightnessUpdateManyMutationInput, BrightnessUncheckedUpdateManyInput>
+    /**
+     * Filter which Brightnesses to update
+     */
+    where?: BrightnessWhereInput
+    /**
+     * Limit how many Brightnesses to update.
+     */
+    limit?: number
   }
 
   /**
@@ -17784,6 +18790,10 @@ export namespace Prisma {
      * Filter which Brightnesses to delete
      */
     where?: BrightnessWhereInput
+    /**
+     * Limit how many Brightnesses to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -18049,6 +19059,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["manufacturer"]>
 
+  export type ManufacturerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["manufacturer"]>
 
   export type ManufacturerSelectScalar = {
     id?: boolean
@@ -18066,6 +19084,7 @@ export namespace Prisma {
     _count?: boolean | ManufacturerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ManufacturerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ManufacturerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ManufacturerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Manufacturer"
@@ -18284,6 +19303,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ManufacturerUpdateManyArgs>(args: SelectSubset<T, ManufacturerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Manufacturers and returns the data updated in the database.
+     * @param {ManufacturerUpdateManyAndReturnArgs} args - Arguments to update many Manufacturers.
+     * @example
+     * // Update many Manufacturers
+     * const manufacturer = await prisma.manufacturer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Manufacturers and only return the `id`
+     * const manufacturerWithIdOnly = await prisma.manufacturer.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ManufacturerUpdateManyAndReturnArgs>(args: SelectSubset<T, ManufacturerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ManufacturerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Manufacturer.
@@ -18770,6 +19819,36 @@ export namespace Prisma {
      * Filter which Manufacturers to update
      */
     where?: ManufacturerWhereInput
+    /**
+     * Limit how many Manufacturers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Manufacturer updateManyAndReturn
+   */
+  export type ManufacturerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Manufacturer
+     */
+    select?: ManufacturerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Manufacturer
+     */
+    omit?: ManufacturerOmit<ExtArgs> | null
+    /**
+     * The data used to update Manufacturers.
+     */
+    data: XOR<ManufacturerUpdateManyMutationInput, ManufacturerUncheckedUpdateManyInput>
+    /**
+     * Filter which Manufacturers to update
+     */
+    where?: ManufacturerWhereInput
+    /**
+     * Limit how many Manufacturers to update.
+     */
+    limit?: number
   }
 
   /**
@@ -18832,6 +19911,10 @@ export namespace Prisma {
      * Filter which Manufacturers to delete
      */
     where?: ManufacturerWhereInput
+    /**
+     * Limit how many Manufacturers to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -19121,6 +20204,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["supplier"]>
 
+  export type SupplierSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["supplier"]>
 
   export type SupplierSelectScalar = {
     id?: boolean
@@ -19138,6 +20229,7 @@ export namespace Prisma {
     _count?: boolean | SupplierCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type SupplierIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type SupplierIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $SupplierPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Supplier"
@@ -19356,6 +20448,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends SupplierUpdateManyArgs>(args: SelectSubset<T, SupplierUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Suppliers and returns the data updated in the database.
+     * @param {SupplierUpdateManyAndReturnArgs} args - Arguments to update many Suppliers.
+     * @example
+     * // Update many Suppliers
+     * const supplier = await prisma.supplier.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Suppliers and only return the `id`
+     * const supplierWithIdOnly = await prisma.supplier.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SupplierUpdateManyAndReturnArgs>(args: SelectSubset<T, SupplierUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SupplierPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Supplier.
@@ -19842,6 +20964,36 @@ export namespace Prisma {
      * Filter which Suppliers to update
      */
     where?: SupplierWhereInput
+    /**
+     * Limit how many Suppliers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Supplier updateManyAndReturn
+   */
+  export type SupplierUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Supplier
+     */
+    select?: SupplierSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Supplier
+     */
+    omit?: SupplierOmit<ExtArgs> | null
+    /**
+     * The data used to update Suppliers.
+     */
+    data: XOR<SupplierUpdateManyMutationInput, SupplierUncheckedUpdateManyInput>
+    /**
+     * Filter which Suppliers to update
+     */
+    where?: SupplierWhereInput
+    /**
+     * Limit how many Suppliers to update.
+     */
+    limit?: number
   }
 
   /**
@@ -19904,6 +21056,10 @@ export namespace Prisma {
      * Filter which Suppliers to delete
      */
     where?: SupplierWhereInput
+    /**
+     * Limit how many Suppliers to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -20199,6 +21355,15 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["ipProtection"]>
 
+  export type IpProtectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    protectionSolid?: boolean
+    protectionWater?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["ipProtection"]>
 
   export type IpProtectionSelectScalar = {
     id?: boolean
@@ -20427,6 +21592,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends IpProtectionUpdateManyArgs>(args: SelectSubset<T, IpProtectionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more IpProtections and returns the data updated in the database.
+     * @param {IpProtectionUpdateManyAndReturnArgs} args - Arguments to update many IpProtections.
+     * @example
+     * // Update many IpProtections
+     * const ipProtection = await prisma.ipProtection.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more IpProtections and only return the `id`
+     * const ipProtectionWithIdOnly = await prisma.ipProtection.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends IpProtectionUpdateManyAndReturnArgs>(args: SelectSubset<T, IpProtectionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$IpProtectionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one IpProtection.
@@ -20884,6 +22079,36 @@ export namespace Prisma {
      * Filter which IpProtections to update
      */
     where?: IpProtectionWhereInput
+    /**
+     * Limit how many IpProtections to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * IpProtection updateManyAndReturn
+   */
+  export type IpProtectionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the IpProtection
+     */
+    select?: IpProtectionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the IpProtection
+     */
+    omit?: IpProtectionOmit<ExtArgs> | null
+    /**
+     * The data used to update IpProtections.
+     */
+    data: XOR<IpProtectionUpdateManyMutationInput, IpProtectionUncheckedUpdateManyInput>
+    /**
+     * Filter which IpProtections to update
+     */
+    where?: IpProtectionWhereInput
+    /**
+     * Limit how many IpProtections to update.
+     */
+    limit?: number
   }
 
   /**
@@ -20938,6 +22163,10 @@ export namespace Prisma {
      * Filter which IpProtections to delete
      */
     where?: IpProtectionWhereInput
+    /**
+     * Limit how many IpProtections to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -21201,6 +22430,16 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["moduleSize"]>
 
+  export type ModuleSizeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    size?: boolean
+    width?: boolean
+    height?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["moduleSize"]>
 
   export type ModuleSizeSelectScalar = {
     id?: boolean
@@ -21220,6 +22459,7 @@ export namespace Prisma {
     _count?: boolean | ModuleSizeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ModuleSizeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ModuleSizeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ModuleSizePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ModuleSize"
@@ -21440,6 +22680,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleSizeUpdateManyArgs>(args: SelectSubset<T, ModuleSizeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleSizes and returns the data updated in the database.
+     * @param {ModuleSizeUpdateManyAndReturnArgs} args - Arguments to update many ModuleSizes.
+     * @example
+     * // Update many ModuleSizes
+     * const moduleSize = await prisma.moduleSize.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleSizes and only return the `id`
+     * const moduleSizeWithIdOnly = await prisma.moduleSize.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleSizeUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleSizeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleSizePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleSize.
@@ -21928,6 +23198,36 @@ export namespace Prisma {
      * Filter which ModuleSizes to update
      */
     where?: ModuleSizeWhereInput
+    /**
+     * Limit how many ModuleSizes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleSize updateManyAndReturn
+   */
+  export type ModuleSizeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleSize
+     */
+    select?: ModuleSizeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleSize
+     */
+    omit?: ModuleSizeOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleSizes.
+     */
+    data: XOR<ModuleSizeUpdateManyMutationInput, ModuleSizeUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleSizes to update
+     */
+    where?: ModuleSizeWhereInput
+    /**
+     * Limit how many ModuleSizes to update.
+     */
+    limit?: number
   }
 
   /**
@@ -21990,6 +23290,10 @@ export namespace Prisma {
      * Filter which ModuleSizes to delete
      */
     where?: ModuleSizeWhereInput
+    /**
+     * Limit how many ModuleSizes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -22305,6 +23609,16 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["cabinetSize"]>
 
+  export type CabinetSizeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    size?: boolean
+    width?: boolean
+    height?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["cabinetSize"]>
 
   export type CabinetSizeSelectScalar = {
     id?: boolean
@@ -22324,6 +23638,7 @@ export namespace Prisma {
     _count?: boolean | CabinetSizeCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CabinetSizeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CabinetSizeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $CabinetSizePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CabinetSize"
@@ -22544,6 +23859,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetSizeUpdateManyArgs>(args: SelectSubset<T, CabinetSizeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetSizes and returns the data updated in the database.
+     * @param {CabinetSizeUpdateManyAndReturnArgs} args - Arguments to update many CabinetSizes.
+     * @example
+     * // Update many CabinetSizes
+     * const cabinetSize = await prisma.cabinetSize.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetSizes and only return the `id`
+     * const cabinetSizeWithIdOnly = await prisma.cabinetSize.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetSizeUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetSizeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetSizePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetSize.
@@ -23032,6 +24377,36 @@ export namespace Prisma {
      * Filter which CabinetSizes to update
      */
     where?: CabinetSizeWhereInput
+    /**
+     * Limit how many CabinetSizes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetSize updateManyAndReturn
+   */
+  export type CabinetSizeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetSize
+     */
+    select?: CabinetSizeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetSize
+     */
+    omit?: CabinetSizeOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetSizes.
+     */
+    data: XOR<CabinetSizeUpdateManyMutationInput, CabinetSizeUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetSizes to update
+     */
+    where?: CabinetSizeWhereInput
+    /**
+     * Limit how many CabinetSizes to update.
+     */
+    limit?: number
   }
 
   /**
@@ -23094,6 +24469,10 @@ export namespace Prisma {
      * Filter which CabinetSizes to delete
      */
     where?: CabinetSizeWhereInput
+    /**
+     * Limit how many CabinetSizes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -23385,6 +24764,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["itemCategory"]>
 
+  export type ItemCategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["itemCategory"]>
 
   export type ItemCategorySelectScalar = {
     id?: boolean
@@ -23404,6 +24791,7 @@ export namespace Prisma {
     _count?: boolean | ItemCategoryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ItemCategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ItemCategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ItemCategoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ItemCategory"
@@ -23624,6 +25012,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemCategoryUpdateManyArgs>(args: SelectSubset<T, ItemCategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemCategories and returns the data updated in the database.
+     * @param {ItemCategoryUpdateManyAndReturnArgs} args - Arguments to update many ItemCategories.
+     * @example
+     * // Update many ItemCategories
+     * const itemCategory = await prisma.itemCategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemCategories and only return the `id`
+     * const itemCategoryWithIdOnly = await prisma.itemCategory.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemCategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemCategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemCategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ItemCategory.
@@ -24112,6 +25530,36 @@ export namespace Prisma {
      * Filter which ItemCategories to update
      */
     where?: ItemCategoryWhereInput
+    /**
+     * Limit how many ItemCategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemCategory updateManyAndReturn
+   */
+  export type ItemCategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemCategory
+     */
+    select?: ItemCategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemCategory
+     */
+    omit?: ItemCategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemCategories.
+     */
+    data: XOR<ItemCategoryUpdateManyMutationInput, ItemCategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemCategories to update
+     */
+    where?: ItemCategoryWhereInput
+    /**
+     * Limit how many ItemCategories to update.
+     */
+    limit?: number
   }
 
   /**
@@ -24174,6 +25622,10 @@ export namespace Prisma {
      * Filter which ItemCategories to delete
      */
     where?: ItemCategoryWhereInput
+    /**
+     * Limit how many ItemCategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -24513,6 +25965,14 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["itemSubcategory"]>
 
+  export type ItemSubcategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["itemSubcategory"]>
 
   export type ItemSubcategorySelectScalar = {
     id?: boolean
@@ -24532,6 +25992,7 @@ export namespace Prisma {
     _count?: boolean | ItemSubcategoryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ItemSubcategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ItemSubcategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ItemSubcategoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ItemSubcategory"
@@ -24752,6 +26213,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemSubcategoryUpdateManyArgs>(args: SelectSubset<T, ItemSubcategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemSubcategories and returns the data updated in the database.
+     * @param {ItemSubcategoryUpdateManyAndReturnArgs} args - Arguments to update many ItemSubcategories.
+     * @example
+     * // Update many ItemSubcategories
+     * const itemSubcategory = await prisma.itemSubcategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemSubcategories and only return the `id`
+     * const itemSubcategoryWithIdOnly = await prisma.itemSubcategory.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemSubcategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemSubcategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemSubcategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ItemSubcategory.
@@ -25240,6 +26731,36 @@ export namespace Prisma {
      * Filter which ItemSubcategories to update
      */
     where?: ItemSubcategoryWhereInput
+    /**
+     * Limit how many ItemSubcategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemSubcategory updateManyAndReturn
+   */
+  export type ItemSubcategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemSubcategory
+     */
+    select?: ItemSubcategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemSubcategory
+     */
+    omit?: ItemSubcategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemSubcategories.
+     */
+    data: XOR<ItemSubcategoryUpdateManyMutationInput, ItemSubcategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemSubcategories to update
+     */
+    where?: ItemSubcategoryWhereInput
+    /**
+     * Limit how many ItemSubcategories to update.
+     */
+    limit?: number
   }
 
   /**
@@ -25302,6 +26823,10 @@ export namespace Prisma {
      * Filter which ItemSubcategories to delete
      */
     where?: ItemSubcategoryWhereInput
+    /**
+     * Limit how many ItemSubcategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -25657,6 +27182,15 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["cabinet"]>
 
+  export type CabinetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    sku?: boolean
+    name?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["cabinet"]>
 
   export type CabinetSelectScalar = {
     id?: boolean
@@ -25684,6 +27218,7 @@ export namespace Prisma {
     _count?: boolean | CabinetCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CabinetIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type CabinetIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $CabinetPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Cabinet"
@@ -25912,6 +27447,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetUpdateManyArgs>(args: SelectSubset<T, CabinetUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Cabinets and returns the data updated in the database.
+     * @param {CabinetUpdateManyAndReturnArgs} args - Arguments to update many Cabinets.
+     * @example
+     * // Update many Cabinets
+     * const cabinet = await prisma.cabinet.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Cabinets and only return the `id`
+     * const cabinetWithIdOnly = await prisma.cabinet.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Cabinet.
@@ -26408,6 +27973,36 @@ export namespace Prisma {
      * Filter which Cabinets to update
      */
     where?: CabinetWhereInput
+    /**
+     * Limit how many Cabinets to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Cabinet updateManyAndReturn
+   */
+  export type CabinetUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Cabinet
+     */
+    select?: CabinetSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Cabinet
+     */
+    omit?: CabinetOmit<ExtArgs> | null
+    /**
+     * The data used to update Cabinets.
+     */
+    data: XOR<CabinetUpdateManyMutationInput, CabinetUncheckedUpdateManyInput>
+    /**
+     * Filter which Cabinets to update
+     */
+    where?: CabinetWhereInput
+    /**
+     * Limit how many Cabinets to update.
+     */
+    limit?: number
   }
 
   /**
@@ -26470,6 +28065,10 @@ export namespace Prisma {
      * Filter which Cabinets to delete
      */
     where?: CabinetWhereInput
+    /**
+     * Limit how many Cabinets to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -27002,6 +28601,16 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["module"]>
 
+  export type ModuleSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    sku?: boolean
+    name?: boolean
+    moduleOption?: boolean
+    active?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["module"]>
 
   export type ModuleSelectScalar = {
     id?: boolean
@@ -27030,6 +28639,7 @@ export namespace Prisma {
     _count?: boolean | ModuleCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ModuleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ModuleIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ModulePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Module"
@@ -27259,6 +28869,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleUpdateManyArgs>(args: SelectSubset<T, ModuleUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Modules and returns the data updated in the database.
+     * @param {ModuleUpdateManyAndReturnArgs} args - Arguments to update many Modules.
+     * @example
+     * // Update many Modules
+     * const module = await prisma.module.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Modules and only return the `id`
+     * const moduleWithIdOnly = await prisma.module.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModulePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Module.
@@ -27756,6 +29396,36 @@ export namespace Prisma {
      * Filter which Modules to update
      */
     where?: ModuleWhereInput
+    /**
+     * Limit how many Modules to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Module updateManyAndReturn
+   */
+  export type ModuleUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Module
+     */
+    select?: ModuleSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Module
+     */
+    omit?: ModuleOmit<ExtArgs> | null
+    /**
+     * The data used to update Modules.
+     */
+    data: XOR<ModuleUpdateManyMutationInput, ModuleUncheckedUpdateManyInput>
+    /**
+     * Filter which Modules to update
+     */
+    where?: ModuleWhereInput
+    /**
+     * Limit how many Modules to update.
+     */
+    limit?: number
   }
 
   /**
@@ -27818,6 +29488,10 @@ export namespace Prisma {
      * Filter which Modules to delete
      */
     where?: ModuleWhereInput
+    /**
+     * Limit how many Modules to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -28345,6 +30019,16 @@ export namespace Prisma {
     updatedAt?: boolean
   }, ExtArgs["result"]["item"]>
 
+  export type ItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    code?: boolean
+    sku?: boolean
+    name?: boolean
+    active?: boolean
+    comment?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["item"]>
 
   export type ItemSelectScalar = {
     id?: boolean
@@ -28368,6 +30052,7 @@ export namespace Prisma {
     _count?: boolean | ItemCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type ItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ItemPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Item"
@@ -28592,6 +30277,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemUpdateManyArgs>(args: SelectSubset<T, ItemUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Items and returns the data updated in the database.
+     * @param {ItemUpdateManyAndReturnArgs} args - Arguments to update many Items.
+     * @example
+     * // Update many Items
+     * const item = await prisma.item.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Items and only return the `id`
+     * const itemWithIdOnly = await prisma.item.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Item.
@@ -29084,6 +30799,36 @@ export namespace Prisma {
      * Filter which Items to update
      */
     where?: ItemWhereInput
+    /**
+     * Limit how many Items to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Item updateManyAndReturn
+   */
+  export type ItemUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Item
+     */
+    select?: ItemSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Item
+     */
+    omit?: ItemOmit<ExtArgs> | null
+    /**
+     * The data used to update Items.
+     */
+    data: XOR<ItemUpdateManyMutationInput, ItemUncheckedUpdateManyInput>
+    /**
+     * Filter which Items to update
+     */
+    where?: ItemWhereInput
+    /**
+     * Limit how many Items to update.
+     */
+    limit?: number
   }
 
   /**
@@ -29146,6 +30891,10 @@ export namespace Prisma {
      * Filter which Items to delete
      */
     where?: ItemWhereInput
+    /**
+     * Limit how many Items to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -29462,6 +31211,12 @@ export namespace Prisma {
     option?: boolean | OptionDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["screenTypeOption"]>
 
+  export type ScreenTypeOptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    screenTypeCode?: boolean
+    optionCode?: boolean
+    screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
+    option?: boolean | OptionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["screenTypeOption"]>
 
   export type ScreenTypeOptionSelectScalar = {
     screenTypeCode?: boolean
@@ -29474,6 +31229,10 @@ export namespace Prisma {
     option?: boolean | OptionDefaultArgs<ExtArgs>
   }
   export type ScreenTypeOptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
+    option?: boolean | OptionDefaultArgs<ExtArgs>
+  }
+  export type ScreenTypeOptionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
     option?: boolean | OptionDefaultArgs<ExtArgs>
   }
@@ -29691,6 +31450,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ScreenTypeOptionUpdateManyArgs>(args: SelectSubset<T, ScreenTypeOptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScreenTypeOptions and returns the data updated in the database.
+     * @param {ScreenTypeOptionUpdateManyAndReturnArgs} args - Arguments to update many ScreenTypeOptions.
+     * @example
+     * // Update many ScreenTypeOptions
+     * const screenTypeOption = await prisma.screenTypeOption.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ScreenTypeOptions and only return the `screenTypeCode`
+     * const screenTypeOptionWithScreenTypeCodeOnly = await prisma.screenTypeOption.updateManyAndReturn({
+     *   select: { screenTypeCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ScreenTypeOptionUpdateManyAndReturnArgs>(args: SelectSubset<T, ScreenTypeOptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreenTypeOptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ScreenTypeOption.
@@ -30177,6 +31966,40 @@ export namespace Prisma {
      * Filter which ScreenTypeOptions to update
      */
     where?: ScreenTypeOptionWhereInput
+    /**
+     * Limit how many ScreenTypeOptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScreenTypeOption updateManyAndReturn
+   */
+  export type ScreenTypeOptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreenTypeOption
+     */
+    select?: ScreenTypeOptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreenTypeOption
+     */
+    omit?: ScreenTypeOptionOmit<ExtArgs> | null
+    /**
+     * The data used to update ScreenTypeOptions.
+     */
+    data: XOR<ScreenTypeOptionUpdateManyMutationInput, ScreenTypeOptionUncheckedUpdateManyInput>
+    /**
+     * Filter which ScreenTypeOptions to update
+     */
+    where?: ScreenTypeOptionWhereInput
+    /**
+     * Limit how many ScreenTypeOptions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreenTypeOptionIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -30239,6 +32062,10 @@ export namespace Prisma {
      * Filter which ScreenTypeOptions to delete
      */
     where?: ScreenTypeOptionWhereInput
+    /**
+     * Limit how many ScreenTypeOptions to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -30411,6 +32238,12 @@ export namespace Prisma {
     controlType?: boolean | ControlTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["screenTypeControlType"]>
 
+  export type ScreenTypeControlTypeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    screenTypeCode?: boolean
+    controlTypeCode?: boolean
+    screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
+    controlType?: boolean | ControlTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["screenTypeControlType"]>
 
   export type ScreenTypeControlTypeSelectScalar = {
     screenTypeCode?: boolean
@@ -30423,6 +32256,10 @@ export namespace Prisma {
     controlType?: boolean | ControlTypeDefaultArgs<ExtArgs>
   }
   export type ScreenTypeControlTypeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
+    controlType?: boolean | ControlTypeDefaultArgs<ExtArgs>
+  }
+  export type ScreenTypeControlTypeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
     controlType?: boolean | ControlTypeDefaultArgs<ExtArgs>
   }
@@ -30640,6 +32477,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ScreenTypeControlTypeUpdateManyArgs>(args: SelectSubset<T, ScreenTypeControlTypeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScreenTypeControlTypes and returns the data updated in the database.
+     * @param {ScreenTypeControlTypeUpdateManyAndReturnArgs} args - Arguments to update many ScreenTypeControlTypes.
+     * @example
+     * // Update many ScreenTypeControlTypes
+     * const screenTypeControlType = await prisma.screenTypeControlType.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ScreenTypeControlTypes and only return the `screenTypeCode`
+     * const screenTypeControlTypeWithScreenTypeCodeOnly = await prisma.screenTypeControlType.updateManyAndReturn({
+     *   select: { screenTypeCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ScreenTypeControlTypeUpdateManyAndReturnArgs>(args: SelectSubset<T, ScreenTypeControlTypeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreenTypeControlTypePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ScreenTypeControlType.
@@ -31126,6 +32993,40 @@ export namespace Prisma {
      * Filter which ScreenTypeControlTypes to update
      */
     where?: ScreenTypeControlTypeWhereInput
+    /**
+     * Limit how many ScreenTypeControlTypes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScreenTypeControlType updateManyAndReturn
+   */
+  export type ScreenTypeControlTypeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreenTypeControlType
+     */
+    select?: ScreenTypeControlTypeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreenTypeControlType
+     */
+    omit?: ScreenTypeControlTypeOmit<ExtArgs> | null
+    /**
+     * The data used to update ScreenTypeControlTypes.
+     */
+    data: XOR<ScreenTypeControlTypeUpdateManyMutationInput, ScreenTypeControlTypeUncheckedUpdateManyInput>
+    /**
+     * Filter which ScreenTypeControlTypes to update
+     */
+    where?: ScreenTypeControlTypeWhereInput
+    /**
+     * Limit how many ScreenTypeControlTypes to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreenTypeControlTypeIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -31188,6 +33089,10 @@ export namespace Prisma {
      * Filter which ScreenTypeControlTypes to delete
      */
     where?: ScreenTypeControlTypeWhereInput
+    /**
+     * Limit how many ScreenTypeControlTypes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -31360,6 +33265,12 @@ export namespace Prisma {
     sensor?: boolean | SensorDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["screenTypeSensor"]>
 
+  export type ScreenTypeSensorSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    screenTypeCode?: boolean
+    sensorCode?: boolean
+    screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
+    sensor?: boolean | SensorDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["screenTypeSensor"]>
 
   export type ScreenTypeSensorSelectScalar = {
     screenTypeCode?: boolean
@@ -31372,6 +33283,10 @@ export namespace Prisma {
     sensor?: boolean | SensorDefaultArgs<ExtArgs>
   }
   export type ScreenTypeSensorIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
+    sensor?: boolean | SensorDefaultArgs<ExtArgs>
+  }
+  export type ScreenTypeSensorIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     screenType?: boolean | ScreenTypeDefaultArgs<ExtArgs>
     sensor?: boolean | SensorDefaultArgs<ExtArgs>
   }
@@ -31589,6 +33504,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ScreenTypeSensorUpdateManyArgs>(args: SelectSubset<T, ScreenTypeSensorUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ScreenTypeSensors and returns the data updated in the database.
+     * @param {ScreenTypeSensorUpdateManyAndReturnArgs} args - Arguments to update many ScreenTypeSensors.
+     * @example
+     * // Update many ScreenTypeSensors
+     * const screenTypeSensor = await prisma.screenTypeSensor.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ScreenTypeSensors and only return the `screenTypeCode`
+     * const screenTypeSensorWithScreenTypeCodeOnly = await prisma.screenTypeSensor.updateManyAndReturn({
+     *   select: { screenTypeCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ScreenTypeSensorUpdateManyAndReturnArgs>(args: SelectSubset<T, ScreenTypeSensorUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ScreenTypeSensorPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ScreenTypeSensor.
@@ -32075,6 +34020,40 @@ export namespace Prisma {
      * Filter which ScreenTypeSensors to update
      */
     where?: ScreenTypeSensorWhereInput
+    /**
+     * Limit how many ScreenTypeSensors to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ScreenTypeSensor updateManyAndReturn
+   */
+  export type ScreenTypeSensorUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ScreenTypeSensor
+     */
+    select?: ScreenTypeSensorSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ScreenTypeSensor
+     */
+    omit?: ScreenTypeSensorOmit<ExtArgs> | null
+    /**
+     * The data used to update ScreenTypeSensors.
+     */
+    data: XOR<ScreenTypeSensorUpdateManyMutationInput, ScreenTypeSensorUncheckedUpdateManyInput>
+    /**
+     * Filter which ScreenTypeSensors to update
+     */
+    where?: ScreenTypeSensorWhereInput
+    /**
+     * Limit how many ScreenTypeSensors to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ScreenTypeSensorIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -32137,6 +34116,10 @@ export namespace Prisma {
      * Filter which ScreenTypeSensors to delete
      */
     where?: ScreenTypeSensorWhereInput
+    /**
+     * Limit how many ScreenTypeSensors to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -32309,6 +34292,12 @@ export namespace Prisma {
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["itemCategoryRelation"]>
 
+  export type ItemCategoryRelationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    itemCode?: boolean
+    categoryCode?: boolean
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["itemCategoryRelation"]>
 
   export type ItemCategoryRelationSelectScalar = {
     itemCode?: boolean
@@ -32321,6 +34310,10 @@ export namespace Prisma {
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }
   export type ItemCategoryRelationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+  }
+  export type ItemCategoryRelationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     item?: boolean | ItemDefaultArgs<ExtArgs>
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }
@@ -32538,6 +34531,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemCategoryRelationUpdateManyArgs>(args: SelectSubset<T, ItemCategoryRelationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemCategoryRelations and returns the data updated in the database.
+     * @param {ItemCategoryRelationUpdateManyAndReturnArgs} args - Arguments to update many ItemCategoryRelations.
+     * @example
+     * // Update many ItemCategoryRelations
+     * const itemCategoryRelation = await prisma.itemCategoryRelation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemCategoryRelations and only return the `itemCode`
+     * const itemCategoryRelationWithItemCodeOnly = await prisma.itemCategoryRelation.updateManyAndReturn({
+     *   select: { itemCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemCategoryRelationUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemCategoryRelationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemCategoryRelationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ItemCategoryRelation.
@@ -33024,6 +35047,40 @@ export namespace Prisma {
      * Filter which ItemCategoryRelations to update
      */
     where?: ItemCategoryRelationWhereInput
+    /**
+     * Limit how many ItemCategoryRelations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemCategoryRelation updateManyAndReturn
+   */
+  export type ItemCategoryRelationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemCategoryRelation
+     */
+    select?: ItemCategoryRelationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemCategoryRelation
+     */
+    omit?: ItemCategoryRelationOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemCategoryRelations.
+     */
+    data: XOR<ItemCategoryRelationUpdateManyMutationInput, ItemCategoryRelationUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemCategoryRelations to update
+     */
+    where?: ItemCategoryRelationWhereInput
+    /**
+     * Limit how many ItemCategoryRelations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemCategoryRelationIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -33086,6 +35143,10 @@ export namespace Prisma {
      * Filter which ItemCategoryRelations to delete
      */
     where?: ItemCategoryRelationWhereInput
+    /**
+     * Limit how many ItemCategoryRelations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -33258,6 +35319,12 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["itemSubcategoryRelation"]>
 
+  export type ItemSubcategoryRelationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    itemCode?: boolean
+    subcategoryCode?: boolean
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["itemSubcategoryRelation"]>
 
   export type ItemSubcategoryRelationSelectScalar = {
     itemCode?: boolean
@@ -33270,6 +35337,10 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
   export type ItemSubcategoryRelationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }
+  export type ItemSubcategoryRelationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     item?: boolean | ItemDefaultArgs<ExtArgs>
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
@@ -33487,6 +35558,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemSubcategoryRelationUpdateManyArgs>(args: SelectSubset<T, ItemSubcategoryRelationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemSubcategoryRelations and returns the data updated in the database.
+     * @param {ItemSubcategoryRelationUpdateManyAndReturnArgs} args - Arguments to update many ItemSubcategoryRelations.
+     * @example
+     * // Update many ItemSubcategoryRelations
+     * const itemSubcategoryRelation = await prisma.itemSubcategoryRelation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemSubcategoryRelations and only return the `itemCode`
+     * const itemSubcategoryRelationWithItemCodeOnly = await prisma.itemSubcategoryRelation.updateManyAndReturn({
+     *   select: { itemCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemSubcategoryRelationUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemSubcategoryRelationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemSubcategoryRelationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ItemSubcategoryRelation.
@@ -33973,6 +36074,40 @@ export namespace Prisma {
      * Filter which ItemSubcategoryRelations to update
      */
     where?: ItemSubcategoryRelationWhereInput
+    /**
+     * Limit how many ItemSubcategoryRelations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemSubcategoryRelation updateManyAndReturn
+   */
+  export type ItemSubcategoryRelationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemSubcategoryRelation
+     */
+    select?: ItemSubcategoryRelationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemSubcategoryRelation
+     */
+    omit?: ItemSubcategoryRelationOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemSubcategoryRelations.
+     */
+    data: XOR<ItemSubcategoryRelationUpdateManyMutationInput, ItemSubcategoryRelationUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemSubcategoryRelations to update
+     */
+    where?: ItemSubcategoryRelationWhereInput
+    /**
+     * Limit how many ItemSubcategoryRelations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemSubcategoryRelationIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -34035,6 +36170,10 @@ export namespace Prisma {
      * Filter which ItemSubcategoryRelations to delete
      */
     where?: ItemSubcategoryRelationWhereInput
+    /**
+     * Limit how many ItemSubcategoryRelations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -34252,6 +36391,12 @@ export namespace Prisma {
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["itemPrice"]>
 
+  export type ItemPriceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    itemCode?: boolean
+    priceUsd?: boolean
+    priceRub?: boolean
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["itemPrice"]>
 
   export type ItemPriceSelectScalar = {
     itemCode?: boolean
@@ -34264,6 +36409,9 @@ export namespace Prisma {
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }
   export type ItemPriceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+  }
+  export type ItemPriceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }
 
@@ -34480,6 +36628,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemPriceUpdateManyArgs>(args: SelectSubset<T, ItemPriceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemPrices and returns the data updated in the database.
+     * @param {ItemPriceUpdateManyAndReturnArgs} args - Arguments to update many ItemPrices.
+     * @example
+     * // Update many ItemPrices
+     * const itemPrice = await prisma.itemPrice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemPrices and only return the `itemCode`
+     * const itemPriceWithItemCodeOnly = await prisma.itemPrice.updateManyAndReturn({
+     *   select: { itemCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemPriceUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemPriceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemPricePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ItemPrice.
@@ -34966,6 +37144,40 @@ export namespace Prisma {
      * Filter which ItemPrices to update
      */
     where?: ItemPriceWhereInput
+    /**
+     * Limit how many ItemPrices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemPrice updateManyAndReturn
+   */
+  export type ItemPriceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemPrice
+     */
+    select?: ItemPriceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemPrice
+     */
+    omit?: ItemPriceOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemPrices.
+     */
+    data: XOR<ItemPriceUpdateManyMutationInput, ItemPriceUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemPrices to update
+     */
+    where?: ItemPriceWhereInput
+    /**
+     * Limit how many ItemPrices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemPriceIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -35028,6 +37240,10 @@ export namespace Prisma {
      * Filter which ItemPrices to delete
      */
     where?: ItemPriceWhereInput
+    /**
+     * Limit how many ItemPrices to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -35200,6 +37416,12 @@ export namespace Prisma {
     supplier?: boolean | SupplierDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["itemSupplier"]>
 
+  export type ItemSupplierSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    itemCode?: boolean
+    supplierCode?: boolean
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+    supplier?: boolean | SupplierDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["itemSupplier"]>
 
   export type ItemSupplierSelectScalar = {
     itemCode?: boolean
@@ -35212,6 +37434,10 @@ export namespace Prisma {
     supplier?: boolean | SupplierDefaultArgs<ExtArgs>
   }
   export type ItemSupplierIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+    supplier?: boolean | SupplierDefaultArgs<ExtArgs>
+  }
+  export type ItemSupplierIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     item?: boolean | ItemDefaultArgs<ExtArgs>
     supplier?: boolean | SupplierDefaultArgs<ExtArgs>
   }
@@ -35429,6 +37655,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemSupplierUpdateManyArgs>(args: SelectSubset<T, ItemSupplierUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemSuppliers and returns the data updated in the database.
+     * @param {ItemSupplierUpdateManyAndReturnArgs} args - Arguments to update many ItemSuppliers.
+     * @example
+     * // Update many ItemSuppliers
+     * const itemSupplier = await prisma.itemSupplier.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemSuppliers and only return the `itemCode`
+     * const itemSupplierWithItemCodeOnly = await prisma.itemSupplier.updateManyAndReturn({
+     *   select: { itemCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemSupplierUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemSupplierUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemSupplierPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ItemSupplier.
@@ -35915,6 +38171,40 @@ export namespace Prisma {
      * Filter which ItemSuppliers to update
      */
     where?: ItemSupplierWhereInput
+    /**
+     * Limit how many ItemSuppliers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemSupplier updateManyAndReturn
+   */
+  export type ItemSupplierUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemSupplier
+     */
+    select?: ItemSupplierSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemSupplier
+     */
+    omit?: ItemSupplierOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemSuppliers.
+     */
+    data: XOR<ItemSupplierUpdateManyMutationInput, ItemSupplierUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemSuppliers to update
+     */
+    where?: ItemSupplierWhereInput
+    /**
+     * Limit how many ItemSuppliers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemSupplierIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -35977,6 +38267,10 @@ export namespace Prisma {
      * Filter which ItemSuppliers to delete
      */
     where?: ItemSupplierWhereInput
+    /**
+     * Limit how many ItemSuppliers to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -36149,6 +38443,12 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["itemCategorySubcategory"]>
 
+  export type ItemCategorySubcategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    categoryCode?: boolean
+    subcategoryCode?: boolean
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["itemCategorySubcategory"]>
 
   export type ItemCategorySubcategorySelectScalar = {
     categoryCode?: boolean
@@ -36161,6 +38461,10 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
   export type ItemCategorySubcategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }
+  export type ItemCategorySubcategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
@@ -36378,6 +38682,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ItemCategorySubcategoryUpdateManyArgs>(args: SelectSubset<T, ItemCategorySubcategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ItemCategorySubcategories and returns the data updated in the database.
+     * @param {ItemCategorySubcategoryUpdateManyAndReturnArgs} args - Arguments to update many ItemCategorySubcategories.
+     * @example
+     * // Update many ItemCategorySubcategories
+     * const itemCategorySubcategory = await prisma.itemCategorySubcategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ItemCategorySubcategories and only return the `categoryCode`
+     * const itemCategorySubcategoryWithCategoryCodeOnly = await prisma.itemCategorySubcategory.updateManyAndReturn({
+     *   select: { categoryCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ItemCategorySubcategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, ItemCategorySubcategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ItemCategorySubcategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ItemCategorySubcategory.
@@ -36864,6 +39198,40 @@ export namespace Prisma {
      * Filter which ItemCategorySubcategories to update
      */
     where?: ItemCategorySubcategoryWhereInput
+    /**
+     * Limit how many ItemCategorySubcategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ItemCategorySubcategory updateManyAndReturn
+   */
+  export type ItemCategorySubcategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ItemCategorySubcategory
+     */
+    select?: ItemCategorySubcategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ItemCategorySubcategory
+     */
+    omit?: ItemCategorySubcategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update ItemCategorySubcategories.
+     */
+    data: XOR<ItemCategorySubcategoryUpdateManyMutationInput, ItemCategorySubcategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which ItemCategorySubcategories to update
+     */
+    where?: ItemCategorySubcategoryWhereInput
+    /**
+     * Limit how many ItemCategorySubcategories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ItemCategorySubcategoryIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -36926,6 +39294,10 @@ export namespace Prisma {
      * Filter which ItemCategorySubcategories to delete
      */
     where?: ItemCategorySubcategoryWhereInput
+    /**
+     * Limit how many ItemCategorySubcategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -37098,6 +39470,12 @@ export namespace Prisma {
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetCategory"]>
 
+  export type CabinetCategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    categoryCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetCategory"]>
 
   export type CabinetCategorySelectScalar = {
     cabinetCode?: boolean
@@ -37110,6 +39488,10 @@ export namespace Prisma {
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }
   export type CabinetCategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+  }
+  export type CabinetCategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }
@@ -37327,6 +39709,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetCategoryUpdateManyArgs>(args: SelectSubset<T, CabinetCategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetCategories and returns the data updated in the database.
+     * @param {CabinetCategoryUpdateManyAndReturnArgs} args - Arguments to update many CabinetCategories.
+     * @example
+     * // Update many CabinetCategories
+     * const cabinetCategory = await prisma.cabinetCategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetCategories and only return the `cabinetCode`
+     * const cabinetCategoryWithCabinetCodeOnly = await prisma.cabinetCategory.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetCategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetCategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetCategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetCategory.
@@ -37813,6 +40225,40 @@ export namespace Prisma {
      * Filter which CabinetCategories to update
      */
     where?: CabinetCategoryWhereInput
+    /**
+     * Limit how many CabinetCategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetCategory updateManyAndReturn
+   */
+  export type CabinetCategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetCategory
+     */
+    select?: CabinetCategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetCategory
+     */
+    omit?: CabinetCategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetCategories.
+     */
+    data: XOR<CabinetCategoryUpdateManyMutationInput, CabinetCategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetCategories to update
+     */
+    where?: CabinetCategoryWhereInput
+    /**
+     * Limit how many CabinetCategories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetCategoryIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -37875,6 +40321,10 @@ export namespace Prisma {
      * Filter which CabinetCategories to delete
      */
     where?: CabinetCategoryWhereInput
+    /**
+     * Limit how many CabinetCategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -38047,6 +40497,12 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetSubcategory"]>
 
+  export type CabinetSubcategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    subcategoryCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetSubcategory"]>
 
   export type CabinetSubcategorySelectScalar = {
     cabinetCode?: boolean
@@ -38059,6 +40515,10 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
   export type CabinetSubcategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }
+  export type CabinetSubcategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
@@ -38276,6 +40736,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetSubcategoryUpdateManyArgs>(args: SelectSubset<T, CabinetSubcategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetSubcategories and returns the data updated in the database.
+     * @param {CabinetSubcategoryUpdateManyAndReturnArgs} args - Arguments to update many CabinetSubcategories.
+     * @example
+     * // Update many CabinetSubcategories
+     * const cabinetSubcategory = await prisma.cabinetSubcategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetSubcategories and only return the `cabinetCode`
+     * const cabinetSubcategoryWithCabinetCodeOnly = await prisma.cabinetSubcategory.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetSubcategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetSubcategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetSubcategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetSubcategory.
@@ -38762,6 +41252,40 @@ export namespace Prisma {
      * Filter which CabinetSubcategories to update
      */
     where?: CabinetSubcategoryWhereInput
+    /**
+     * Limit how many CabinetSubcategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetSubcategory updateManyAndReturn
+   */
+  export type CabinetSubcategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetSubcategory
+     */
+    select?: CabinetSubcategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetSubcategory
+     */
+    omit?: CabinetSubcategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetSubcategories.
+     */
+    data: XOR<CabinetSubcategoryUpdateManyMutationInput, CabinetSubcategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetSubcategories to update
+     */
+    where?: CabinetSubcategoryWhereInput
+    /**
+     * Limit how many CabinetSubcategories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetSubcategoryIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -38824,6 +41348,10 @@ export namespace Prisma {
      * Filter which CabinetSubcategories to delete
      */
     where?: CabinetSubcategoryWhereInput
+    /**
+     * Limit how many CabinetSubcategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -38996,6 +41524,12 @@ export namespace Prisma {
     location?: boolean | LocationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetLocation"]>
 
+  export type CabinetLocationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    locationCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    location?: boolean | LocationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetLocation"]>
 
   export type CabinetLocationSelectScalar = {
     cabinetCode?: boolean
@@ -39008,6 +41542,10 @@ export namespace Prisma {
     location?: boolean | LocationDefaultArgs<ExtArgs>
   }
   export type CabinetLocationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    location?: boolean | LocationDefaultArgs<ExtArgs>
+  }
+  export type CabinetLocationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     location?: boolean | LocationDefaultArgs<ExtArgs>
   }
@@ -39225,6 +41763,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetLocationUpdateManyArgs>(args: SelectSubset<T, CabinetLocationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetLocations and returns the data updated in the database.
+     * @param {CabinetLocationUpdateManyAndReturnArgs} args - Arguments to update many CabinetLocations.
+     * @example
+     * // Update many CabinetLocations
+     * const cabinetLocation = await prisma.cabinetLocation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetLocations and only return the `cabinetCode`
+     * const cabinetLocationWithCabinetCodeOnly = await prisma.cabinetLocation.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetLocationUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetLocationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetLocationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetLocation.
@@ -39711,6 +42279,40 @@ export namespace Prisma {
      * Filter which CabinetLocations to update
      */
     where?: CabinetLocationWhereInput
+    /**
+     * Limit how many CabinetLocations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetLocation updateManyAndReturn
+   */
+  export type CabinetLocationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetLocation
+     */
+    select?: CabinetLocationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetLocation
+     */
+    omit?: CabinetLocationOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetLocations.
+     */
+    data: XOR<CabinetLocationUpdateManyMutationInput, CabinetLocationUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetLocations to update
+     */
+    where?: CabinetLocationWhereInput
+    /**
+     * Limit how many CabinetLocations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetLocationIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -39773,6 +42375,10 @@ export namespace Prisma {
      * Filter which CabinetLocations to delete
      */
     where?: CabinetLocationWhereInput
+    /**
+     * Limit how many CabinetLocations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -39945,6 +42551,12 @@ export namespace Prisma {
     placement?: boolean | PlacementDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetPlacement"]>
 
+  export type CabinetPlacementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    placementCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    placement?: boolean | PlacementDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetPlacement"]>
 
   export type CabinetPlacementSelectScalar = {
     cabinetCode?: boolean
@@ -39957,6 +42569,10 @@ export namespace Prisma {
     placement?: boolean | PlacementDefaultArgs<ExtArgs>
   }
   export type CabinetPlacementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    placement?: boolean | PlacementDefaultArgs<ExtArgs>
+  }
+  export type CabinetPlacementIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     placement?: boolean | PlacementDefaultArgs<ExtArgs>
   }
@@ -40174,6 +42790,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetPlacementUpdateManyArgs>(args: SelectSubset<T, CabinetPlacementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetPlacements and returns the data updated in the database.
+     * @param {CabinetPlacementUpdateManyAndReturnArgs} args - Arguments to update many CabinetPlacements.
+     * @example
+     * // Update many CabinetPlacements
+     * const cabinetPlacement = await prisma.cabinetPlacement.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetPlacements and only return the `cabinetCode`
+     * const cabinetPlacementWithCabinetCodeOnly = await prisma.cabinetPlacement.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetPlacementUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetPlacementUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetPlacementPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetPlacement.
@@ -40660,6 +43306,40 @@ export namespace Prisma {
      * Filter which CabinetPlacements to update
      */
     where?: CabinetPlacementWhereInput
+    /**
+     * Limit how many CabinetPlacements to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetPlacement updateManyAndReturn
+   */
+  export type CabinetPlacementUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetPlacement
+     */
+    select?: CabinetPlacementSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetPlacement
+     */
+    omit?: CabinetPlacementOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetPlacements.
+     */
+    data: XOR<CabinetPlacementUpdateManyMutationInput, CabinetPlacementUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetPlacements to update
+     */
+    where?: CabinetPlacementWhereInput
+    /**
+     * Limit how many CabinetPlacements to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetPlacementIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -40722,6 +43402,10 @@ export namespace Prisma {
      * Filter which CabinetPlacements to delete
      */
     where?: CabinetPlacementWhereInput
+    /**
+     * Limit how many CabinetPlacements to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -40894,6 +43578,12 @@ export namespace Prisma {
     material?: boolean | MaterialDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetMaterial"]>
 
+  export type CabinetMaterialSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    materialCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    material?: boolean | MaterialDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetMaterial"]>
 
   export type CabinetMaterialSelectScalar = {
     cabinetCode?: boolean
@@ -40906,6 +43596,10 @@ export namespace Prisma {
     material?: boolean | MaterialDefaultArgs<ExtArgs>
   }
   export type CabinetMaterialIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    material?: boolean | MaterialDefaultArgs<ExtArgs>
+  }
+  export type CabinetMaterialIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     material?: boolean | MaterialDefaultArgs<ExtArgs>
   }
@@ -41123,6 +43817,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetMaterialUpdateManyArgs>(args: SelectSubset<T, CabinetMaterialUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetMaterials and returns the data updated in the database.
+     * @param {CabinetMaterialUpdateManyAndReturnArgs} args - Arguments to update many CabinetMaterials.
+     * @example
+     * // Update many CabinetMaterials
+     * const cabinetMaterial = await prisma.cabinetMaterial.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetMaterials and only return the `cabinetCode`
+     * const cabinetMaterialWithCabinetCodeOnly = await prisma.cabinetMaterial.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetMaterialUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetMaterialUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetMaterialPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetMaterial.
@@ -41609,6 +44333,40 @@ export namespace Prisma {
      * Filter which CabinetMaterials to update
      */
     where?: CabinetMaterialWhereInput
+    /**
+     * Limit how many CabinetMaterials to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetMaterial updateManyAndReturn
+   */
+  export type CabinetMaterialUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetMaterial
+     */
+    select?: CabinetMaterialSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetMaterial
+     */
+    omit?: CabinetMaterialOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetMaterials.
+     */
+    data: XOR<CabinetMaterialUpdateManyMutationInput, CabinetMaterialUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetMaterials to update
+     */
+    where?: CabinetMaterialWhereInput
+    /**
+     * Limit how many CabinetMaterials to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetMaterialIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -41671,6 +44429,10 @@ export namespace Prisma {
      * Filter which CabinetMaterials to delete
      */
     where?: CabinetMaterialWhereInput
+    /**
+     * Limit how many CabinetMaterials to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -41843,6 +44605,12 @@ export namespace Prisma {
     size?: boolean | CabinetSizeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetCabinetSize"]>
 
+  export type CabinetCabinetSizeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    cabinetSizeCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    size?: boolean | CabinetSizeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetCabinetSize"]>
 
   export type CabinetCabinetSizeSelectScalar = {
     cabinetCode?: boolean
@@ -41855,6 +44623,10 @@ export namespace Prisma {
     size?: boolean | CabinetSizeDefaultArgs<ExtArgs>
   }
   export type CabinetCabinetSizeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    size?: boolean | CabinetSizeDefaultArgs<ExtArgs>
+  }
+  export type CabinetCabinetSizeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     size?: boolean | CabinetSizeDefaultArgs<ExtArgs>
   }
@@ -42072,6 +44844,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetCabinetSizeUpdateManyArgs>(args: SelectSubset<T, CabinetCabinetSizeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetCabinetSizes and returns the data updated in the database.
+     * @param {CabinetCabinetSizeUpdateManyAndReturnArgs} args - Arguments to update many CabinetCabinetSizes.
+     * @example
+     * // Update many CabinetCabinetSizes
+     * const cabinetCabinetSize = await prisma.cabinetCabinetSize.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetCabinetSizes and only return the `cabinetCode`
+     * const cabinetCabinetSizeWithCabinetCodeOnly = await prisma.cabinetCabinetSize.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetCabinetSizeUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetCabinetSizeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetCabinetSizePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetCabinetSize.
@@ -42558,6 +45360,40 @@ export namespace Prisma {
      * Filter which CabinetCabinetSizes to update
      */
     where?: CabinetCabinetSizeWhereInput
+    /**
+     * Limit how many CabinetCabinetSizes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetCabinetSize updateManyAndReturn
+   */
+  export type CabinetCabinetSizeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetCabinetSize
+     */
+    select?: CabinetCabinetSizeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetCabinetSize
+     */
+    omit?: CabinetCabinetSizeOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetCabinetSizes.
+     */
+    data: XOR<CabinetCabinetSizeUpdateManyMutationInput, CabinetCabinetSizeUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetCabinetSizes to update
+     */
+    where?: CabinetCabinetSizeWhereInput
+    /**
+     * Limit how many CabinetCabinetSizes to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetCabinetSizeIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -42620,6 +45456,10 @@ export namespace Prisma {
      * Filter which CabinetCabinetSizes to delete
      */
     where?: CabinetCabinetSizeWhereInput
+    /**
+     * Limit how many CabinetCabinetSizes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -42792,6 +45632,12 @@ export namespace Prisma {
     pitch?: boolean | PitchDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetPitch"]>
 
+  export type CabinetPitchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    pitchCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    pitch?: boolean | PitchDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetPitch"]>
 
   export type CabinetPitchSelectScalar = {
     cabinetCode?: boolean
@@ -42804,6 +45650,10 @@ export namespace Prisma {
     pitch?: boolean | PitchDefaultArgs<ExtArgs>
   }
   export type CabinetPitchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    pitch?: boolean | PitchDefaultArgs<ExtArgs>
+  }
+  export type CabinetPitchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     pitch?: boolean | PitchDefaultArgs<ExtArgs>
   }
@@ -43021,6 +45871,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetPitchUpdateManyArgs>(args: SelectSubset<T, CabinetPitchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetPitches and returns the data updated in the database.
+     * @param {CabinetPitchUpdateManyAndReturnArgs} args - Arguments to update many CabinetPitches.
+     * @example
+     * // Update many CabinetPitches
+     * const cabinetPitch = await prisma.cabinetPitch.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetPitches and only return the `cabinetCode`
+     * const cabinetPitchWithCabinetCodeOnly = await prisma.cabinetPitch.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetPitchUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetPitchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetPitchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetPitch.
@@ -43507,6 +46387,40 @@ export namespace Prisma {
      * Filter which CabinetPitches to update
      */
     where?: CabinetPitchWhereInput
+    /**
+     * Limit how many CabinetPitches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetPitch updateManyAndReturn
+   */
+  export type CabinetPitchUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetPitch
+     */
+    select?: CabinetPitchSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetPitch
+     */
+    omit?: CabinetPitchOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetPitches.
+     */
+    data: XOR<CabinetPitchUpdateManyMutationInput, CabinetPitchUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetPitches to update
+     */
+    where?: CabinetPitchWhereInput
+    /**
+     * Limit how many CabinetPitches to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetPitchIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -43569,6 +46483,10 @@ export namespace Prisma {
      * Filter which CabinetPitches to delete
      */
     where?: CabinetPitchWhereInput
+    /**
+     * Limit how many CabinetPitches to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -43741,6 +46659,12 @@ export namespace Prisma {
     manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetManufacturer"]>
 
+  export type CabinetManufacturerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    manufacturerCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetManufacturer"]>
 
   export type CabinetManufacturerSelectScalar = {
     cabinetCode?: boolean
@@ -43753,6 +46677,10 @@ export namespace Prisma {
     manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
   }
   export type CabinetManufacturerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
+  }
+  export type CabinetManufacturerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
   }
@@ -43970,6 +46898,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetManufacturerUpdateManyArgs>(args: SelectSubset<T, CabinetManufacturerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetManufacturers and returns the data updated in the database.
+     * @param {CabinetManufacturerUpdateManyAndReturnArgs} args - Arguments to update many CabinetManufacturers.
+     * @example
+     * // Update many CabinetManufacturers
+     * const cabinetManufacturer = await prisma.cabinetManufacturer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetManufacturers and only return the `cabinetCode`
+     * const cabinetManufacturerWithCabinetCodeOnly = await prisma.cabinetManufacturer.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetManufacturerUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetManufacturerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetManufacturerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetManufacturer.
@@ -44456,6 +47414,40 @@ export namespace Prisma {
      * Filter which CabinetManufacturers to update
      */
     where?: CabinetManufacturerWhereInput
+    /**
+     * Limit how many CabinetManufacturers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetManufacturer updateManyAndReturn
+   */
+  export type CabinetManufacturerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetManufacturer
+     */
+    select?: CabinetManufacturerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetManufacturer
+     */
+    omit?: CabinetManufacturerOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetManufacturers.
+     */
+    data: XOR<CabinetManufacturerUpdateManyMutationInput, CabinetManufacturerUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetManufacturers to update
+     */
+    where?: CabinetManufacturerWhereInput
+    /**
+     * Limit how many CabinetManufacturers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetManufacturerIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -44518,6 +47510,10 @@ export namespace Prisma {
      * Filter which CabinetManufacturers to delete
      */
     where?: CabinetManufacturerWhereInput
+    /**
+     * Limit how many CabinetManufacturers to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -44690,6 +47686,12 @@ export namespace Prisma {
     supplier?: boolean | SupplierDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetSupplier"]>
 
+  export type CabinetSupplierSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    supplierCode?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    supplier?: boolean | SupplierDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetSupplier"]>
 
   export type CabinetSupplierSelectScalar = {
     cabinetCode?: boolean
@@ -44702,6 +47704,10 @@ export namespace Prisma {
     supplier?: boolean | SupplierDefaultArgs<ExtArgs>
   }
   export type CabinetSupplierIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    supplier?: boolean | SupplierDefaultArgs<ExtArgs>
+  }
+  export type CabinetSupplierIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     supplier?: boolean | SupplierDefaultArgs<ExtArgs>
   }
@@ -44919,6 +47925,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetSupplierUpdateManyArgs>(args: SelectSubset<T, CabinetSupplierUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetSuppliers and returns the data updated in the database.
+     * @param {CabinetSupplierUpdateManyAndReturnArgs} args - Arguments to update many CabinetSuppliers.
+     * @example
+     * // Update many CabinetSuppliers
+     * const cabinetSupplier = await prisma.cabinetSupplier.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetSuppliers and only return the `cabinetCode`
+     * const cabinetSupplierWithCabinetCodeOnly = await prisma.cabinetSupplier.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetSupplierUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetSupplierUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetSupplierPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetSupplier.
@@ -45405,6 +48441,40 @@ export namespace Prisma {
      * Filter which CabinetSuppliers to update
      */
     where?: CabinetSupplierWhereInput
+    /**
+     * Limit how many CabinetSuppliers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetSupplier updateManyAndReturn
+   */
+  export type CabinetSupplierUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetSupplier
+     */
+    select?: CabinetSupplierSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetSupplier
+     */
+    omit?: CabinetSupplierOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetSuppliers.
+     */
+    data: XOR<CabinetSupplierUpdateManyMutationInput, CabinetSupplierUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetSuppliers to update
+     */
+    where?: CabinetSupplierWhereInput
+    /**
+     * Limit how many CabinetSuppliers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetSupplierIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -45467,6 +48537,10 @@ export namespace Prisma {
      * Filter which CabinetSuppliers to delete
      */
     where?: CabinetSupplierWhereInput
+    /**
+     * Limit how many CabinetSuppliers to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -45682,6 +48756,13 @@ export namespace Prisma {
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetItemComponent"]>
 
+  export type CabinetItemComponentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    itemCode?: boolean
+    quantity?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetItemComponent"]>
 
   export type CabinetItemComponentSelectScalar = {
     cabinetCode?: boolean
@@ -45695,6 +48776,10 @@ export namespace Prisma {
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }
   export type CabinetItemComponentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+  }
+  export type CabinetItemComponentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }
@@ -45913,6 +48998,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetItemComponentUpdateManyArgs>(args: SelectSubset<T, CabinetItemComponentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetItemComponents and returns the data updated in the database.
+     * @param {CabinetItemComponentUpdateManyAndReturnArgs} args - Arguments to update many CabinetItemComponents.
+     * @example
+     * // Update many CabinetItemComponents
+     * const cabinetItemComponent = await prisma.cabinetItemComponent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetItemComponents and only return the `cabinetCode`
+     * const cabinetItemComponentWithCabinetCodeOnly = await prisma.cabinetItemComponent.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetItemComponentUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetItemComponentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetItemComponentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetItemComponent.
@@ -46400,6 +49515,40 @@ export namespace Prisma {
      * Filter which CabinetItemComponents to update
      */
     where?: CabinetItemComponentWhereInput
+    /**
+     * Limit how many CabinetItemComponents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetItemComponent updateManyAndReturn
+   */
+  export type CabinetItemComponentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetItemComponent
+     */
+    select?: CabinetItemComponentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetItemComponent
+     */
+    omit?: CabinetItemComponentOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetItemComponents.
+     */
+    data: XOR<CabinetItemComponentUpdateManyMutationInput, CabinetItemComponentUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetItemComponents to update
+     */
+    where?: CabinetItemComponentWhereInput
+    /**
+     * Limit how many CabinetItemComponents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetItemComponentIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -46462,6 +49611,10 @@ export namespace Prisma {
      * Filter which CabinetItemComponents to delete
      */
     where?: CabinetItemComponentWhereInput
+    /**
+     * Limit how many CabinetItemComponents to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -46679,6 +49832,12 @@ export namespace Prisma {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetPrice"]>
 
+  export type CabinetPriceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetCode?: boolean
+    priceUsd?: boolean
+    priceRub?: boolean
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetPrice"]>
 
   export type CabinetPriceSelectScalar = {
     cabinetCode?: boolean
@@ -46691,6 +49850,9 @@ export namespace Prisma {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
   }
   export type CabinetPriceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
+  }
+  export type CabinetPriceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinet?: boolean | CabinetDefaultArgs<ExtArgs>
   }
 
@@ -46907,6 +50069,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetPriceUpdateManyArgs>(args: SelectSubset<T, CabinetPriceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetPrices and returns the data updated in the database.
+     * @param {CabinetPriceUpdateManyAndReturnArgs} args - Arguments to update many CabinetPrices.
+     * @example
+     * // Update many CabinetPrices
+     * const cabinetPrice = await prisma.cabinetPrice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetPrices and only return the `cabinetCode`
+     * const cabinetPriceWithCabinetCodeOnly = await prisma.cabinetPrice.updateManyAndReturn({
+     *   select: { cabinetCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetPriceUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetPriceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetPricePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetPrice.
@@ -47393,6 +50585,40 @@ export namespace Prisma {
      * Filter which CabinetPrices to update
      */
     where?: CabinetPriceWhereInput
+    /**
+     * Limit how many CabinetPrices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetPrice updateManyAndReturn
+   */
+  export type CabinetPriceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetPrice
+     */
+    select?: CabinetPriceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetPrice
+     */
+    omit?: CabinetPriceOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetPrices.
+     */
+    data: XOR<CabinetPriceUpdateManyMutationInput, CabinetPriceUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetPrices to update
+     */
+    where?: CabinetPriceWhereInput
+    /**
+     * Limit how many CabinetPrices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetPriceIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -47455,6 +50681,10 @@ export namespace Prisma {
      * Filter which CabinetPrices to delete
      */
     where?: CabinetPriceWhereInput
+    /**
+     * Limit how many CabinetPrices to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -47627,6 +50857,12 @@ export namespace Prisma {
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleCategory"]>
 
+  export type ModuleCategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    categoryCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleCategory"]>
 
   export type ModuleCategorySelectScalar = {
     moduleCode?: boolean
@@ -47639,6 +50875,10 @@ export namespace Prisma {
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }
   export type ModuleCategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
+  }
+  export type ModuleCategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     category?: boolean | ItemCategoryDefaultArgs<ExtArgs>
   }
@@ -47856,6 +51096,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleCategoryUpdateManyArgs>(args: SelectSubset<T, ModuleCategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleCategories and returns the data updated in the database.
+     * @param {ModuleCategoryUpdateManyAndReturnArgs} args - Arguments to update many ModuleCategories.
+     * @example
+     * // Update many ModuleCategories
+     * const moduleCategory = await prisma.moduleCategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleCategories and only return the `moduleCode`
+     * const moduleCategoryWithModuleCodeOnly = await prisma.moduleCategory.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleCategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleCategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleCategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleCategory.
@@ -48342,6 +51612,40 @@ export namespace Prisma {
      * Filter which ModuleCategories to update
      */
     where?: ModuleCategoryWhereInput
+    /**
+     * Limit how many ModuleCategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleCategory updateManyAndReturn
+   */
+  export type ModuleCategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleCategory
+     */
+    select?: ModuleCategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleCategory
+     */
+    omit?: ModuleCategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleCategories.
+     */
+    data: XOR<ModuleCategoryUpdateManyMutationInput, ModuleCategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleCategories to update
+     */
+    where?: ModuleCategoryWhereInput
+    /**
+     * Limit how many ModuleCategories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleCategoryIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -48404,6 +51708,10 @@ export namespace Prisma {
      * Filter which ModuleCategories to delete
      */
     where?: ModuleCategoryWhereInput
+    /**
+     * Limit how many ModuleCategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -48576,6 +51884,12 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleSubcategory"]>
 
+  export type ModuleSubcategorySelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    subcategoryCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleSubcategory"]>
 
   export type ModuleSubcategorySelectScalar = {
     moduleCode?: boolean
@@ -48588,6 +51902,10 @@ export namespace Prisma {
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
   export type ModuleSubcategoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
+  }
+  export type ModuleSubcategoryIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     subcategory?: boolean | ItemSubcategoryDefaultArgs<ExtArgs>
   }
@@ -48805,6 +52123,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleSubcategoryUpdateManyArgs>(args: SelectSubset<T, ModuleSubcategoryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleSubcategories and returns the data updated in the database.
+     * @param {ModuleSubcategoryUpdateManyAndReturnArgs} args - Arguments to update many ModuleSubcategories.
+     * @example
+     * // Update many ModuleSubcategories
+     * const moduleSubcategory = await prisma.moduleSubcategory.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleSubcategories and only return the `moduleCode`
+     * const moduleSubcategoryWithModuleCodeOnly = await prisma.moduleSubcategory.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleSubcategoryUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleSubcategoryUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleSubcategoryPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleSubcategory.
@@ -49291,6 +52639,40 @@ export namespace Prisma {
      * Filter which ModuleSubcategories to update
      */
     where?: ModuleSubcategoryWhereInput
+    /**
+     * Limit how many ModuleSubcategories to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleSubcategory updateManyAndReturn
+   */
+  export type ModuleSubcategoryUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleSubcategory
+     */
+    select?: ModuleSubcategorySelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleSubcategory
+     */
+    omit?: ModuleSubcategoryOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleSubcategories.
+     */
+    data: XOR<ModuleSubcategoryUpdateManyMutationInput, ModuleSubcategoryUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleSubcategories to update
+     */
+    where?: ModuleSubcategoryWhereInput
+    /**
+     * Limit how many ModuleSubcategories to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleSubcategoryIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -49353,6 +52735,10 @@ export namespace Prisma {
      * Filter which ModuleSubcategories to delete
      */
     where?: ModuleSubcategoryWhereInput
+    /**
+     * Limit how many ModuleSubcategories to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -49525,6 +52911,12 @@ export namespace Prisma {
     location?: boolean | LocationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleLocation"]>
 
+  export type ModuleLocationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    locationCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    location?: boolean | LocationDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleLocation"]>
 
   export type ModuleLocationSelectScalar = {
     moduleCode?: boolean
@@ -49537,6 +52929,10 @@ export namespace Prisma {
     location?: boolean | LocationDefaultArgs<ExtArgs>
   }
   export type ModuleLocationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    location?: boolean | LocationDefaultArgs<ExtArgs>
+  }
+  export type ModuleLocationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     location?: boolean | LocationDefaultArgs<ExtArgs>
   }
@@ -49754,6 +53150,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleLocationUpdateManyArgs>(args: SelectSubset<T, ModuleLocationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleLocations and returns the data updated in the database.
+     * @param {ModuleLocationUpdateManyAndReturnArgs} args - Arguments to update many ModuleLocations.
+     * @example
+     * // Update many ModuleLocations
+     * const moduleLocation = await prisma.moduleLocation.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleLocations and only return the `moduleCode`
+     * const moduleLocationWithModuleCodeOnly = await prisma.moduleLocation.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleLocationUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleLocationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleLocationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleLocation.
@@ -50240,6 +53666,40 @@ export namespace Prisma {
      * Filter which ModuleLocations to update
      */
     where?: ModuleLocationWhereInput
+    /**
+     * Limit how many ModuleLocations to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleLocation updateManyAndReturn
+   */
+  export type ModuleLocationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleLocation
+     */
+    select?: ModuleLocationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleLocation
+     */
+    omit?: ModuleLocationOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleLocations.
+     */
+    data: XOR<ModuleLocationUpdateManyMutationInput, ModuleLocationUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleLocations to update
+     */
+    where?: ModuleLocationWhereInput
+    /**
+     * Limit how many ModuleLocations to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleLocationIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -50302,6 +53762,10 @@ export namespace Prisma {
      * Filter which ModuleLocations to delete
      */
     where?: ModuleLocationWhereInput
+    /**
+     * Limit how many ModuleLocations to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -50474,6 +53938,12 @@ export namespace Prisma {
     refreshRate?: boolean | RefreshRateDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleRefreshRate"]>
 
+  export type ModuleRefreshRateSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    refreshRateCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    refreshRate?: boolean | RefreshRateDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleRefreshRate"]>
 
   export type ModuleRefreshRateSelectScalar = {
     moduleCode?: boolean
@@ -50486,6 +53956,10 @@ export namespace Prisma {
     refreshRate?: boolean | RefreshRateDefaultArgs<ExtArgs>
   }
   export type ModuleRefreshRateIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    refreshRate?: boolean | RefreshRateDefaultArgs<ExtArgs>
+  }
+  export type ModuleRefreshRateIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     refreshRate?: boolean | RefreshRateDefaultArgs<ExtArgs>
   }
@@ -50703,6 +54177,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleRefreshRateUpdateManyArgs>(args: SelectSubset<T, ModuleRefreshRateUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleRefreshRates and returns the data updated in the database.
+     * @param {ModuleRefreshRateUpdateManyAndReturnArgs} args - Arguments to update many ModuleRefreshRates.
+     * @example
+     * // Update many ModuleRefreshRates
+     * const moduleRefreshRate = await prisma.moduleRefreshRate.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleRefreshRates and only return the `moduleCode`
+     * const moduleRefreshRateWithModuleCodeOnly = await prisma.moduleRefreshRate.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleRefreshRateUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleRefreshRateUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleRefreshRatePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleRefreshRate.
@@ -51189,6 +54693,40 @@ export namespace Prisma {
      * Filter which ModuleRefreshRates to update
      */
     where?: ModuleRefreshRateWhereInput
+    /**
+     * Limit how many ModuleRefreshRates to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleRefreshRate updateManyAndReturn
+   */
+  export type ModuleRefreshRateUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleRefreshRate
+     */
+    select?: ModuleRefreshRateSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleRefreshRate
+     */
+    omit?: ModuleRefreshRateOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleRefreshRates.
+     */
+    data: XOR<ModuleRefreshRateUpdateManyMutationInput, ModuleRefreshRateUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleRefreshRates to update
+     */
+    where?: ModuleRefreshRateWhereInput
+    /**
+     * Limit how many ModuleRefreshRates to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleRefreshRateIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -51251,6 +54789,10 @@ export namespace Prisma {
      * Filter which ModuleRefreshRates to delete
      */
     where?: ModuleRefreshRateWhereInput
+    /**
+     * Limit how many ModuleRefreshRates to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -51423,6 +54965,12 @@ export namespace Prisma {
     brightness?: boolean | BrightnessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleBrightness"]>
 
+  export type ModuleBrightnessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    brightnessCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    brightness?: boolean | BrightnessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleBrightness"]>
 
   export type ModuleBrightnessSelectScalar = {
     moduleCode?: boolean
@@ -51435,6 +54983,10 @@ export namespace Prisma {
     brightness?: boolean | BrightnessDefaultArgs<ExtArgs>
   }
   export type ModuleBrightnessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    brightness?: boolean | BrightnessDefaultArgs<ExtArgs>
+  }
+  export type ModuleBrightnessIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     brightness?: boolean | BrightnessDefaultArgs<ExtArgs>
   }
@@ -51652,6 +55204,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleBrightnessUpdateManyArgs>(args: SelectSubset<T, ModuleBrightnessUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleBrightnesses and returns the data updated in the database.
+     * @param {ModuleBrightnessUpdateManyAndReturnArgs} args - Arguments to update many ModuleBrightnesses.
+     * @example
+     * // Update many ModuleBrightnesses
+     * const moduleBrightness = await prisma.moduleBrightness.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleBrightnesses and only return the `moduleCode`
+     * const moduleBrightnessWithModuleCodeOnly = await prisma.moduleBrightness.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleBrightnessUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleBrightnessUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleBrightnessPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleBrightness.
@@ -52138,6 +55720,40 @@ export namespace Prisma {
      * Filter which ModuleBrightnesses to update
      */
     where?: ModuleBrightnessWhereInput
+    /**
+     * Limit how many ModuleBrightnesses to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleBrightness updateManyAndReturn
+   */
+  export type ModuleBrightnessUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleBrightness
+     */
+    select?: ModuleBrightnessSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleBrightness
+     */
+    omit?: ModuleBrightnessOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleBrightnesses.
+     */
+    data: XOR<ModuleBrightnessUpdateManyMutationInput, ModuleBrightnessUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleBrightnesses to update
+     */
+    where?: ModuleBrightnessWhereInput
+    /**
+     * Limit how many ModuleBrightnesses to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleBrightnessIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -52200,6 +55816,10 @@ export namespace Prisma {
      * Filter which ModuleBrightnesses to delete
      */
     where?: ModuleBrightnessWhereInput
+    /**
+     * Limit how many ModuleBrightnesses to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -52372,6 +55992,12 @@ export namespace Prisma {
     size?: boolean | ModuleSizeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleModuleSize"]>
 
+  export type ModuleModuleSizeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    moduleSizeCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    size?: boolean | ModuleSizeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleModuleSize"]>
 
   export type ModuleModuleSizeSelectScalar = {
     moduleCode?: boolean
@@ -52384,6 +56010,10 @@ export namespace Prisma {
     size?: boolean | ModuleSizeDefaultArgs<ExtArgs>
   }
   export type ModuleModuleSizeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    size?: boolean | ModuleSizeDefaultArgs<ExtArgs>
+  }
+  export type ModuleModuleSizeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     size?: boolean | ModuleSizeDefaultArgs<ExtArgs>
   }
@@ -52601,6 +56231,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleModuleSizeUpdateManyArgs>(args: SelectSubset<T, ModuleModuleSizeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleModuleSizes and returns the data updated in the database.
+     * @param {ModuleModuleSizeUpdateManyAndReturnArgs} args - Arguments to update many ModuleModuleSizes.
+     * @example
+     * // Update many ModuleModuleSizes
+     * const moduleModuleSize = await prisma.moduleModuleSize.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleModuleSizes and only return the `moduleCode`
+     * const moduleModuleSizeWithModuleCodeOnly = await prisma.moduleModuleSize.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleModuleSizeUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleModuleSizeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleModuleSizePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleModuleSize.
@@ -53087,6 +56747,40 @@ export namespace Prisma {
      * Filter which ModuleModuleSizes to update
      */
     where?: ModuleModuleSizeWhereInput
+    /**
+     * Limit how many ModuleModuleSizes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleModuleSize updateManyAndReturn
+   */
+  export type ModuleModuleSizeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleModuleSize
+     */
+    select?: ModuleModuleSizeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleModuleSize
+     */
+    omit?: ModuleModuleSizeOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleModuleSizes.
+     */
+    data: XOR<ModuleModuleSizeUpdateManyMutationInput, ModuleModuleSizeUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleModuleSizes to update
+     */
+    where?: ModuleModuleSizeWhereInput
+    /**
+     * Limit how many ModuleModuleSizes to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleModuleSizeIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -53149,6 +56843,10 @@ export namespace Prisma {
      * Filter which ModuleModuleSizes to delete
      */
     where?: ModuleModuleSizeWhereInput
+    /**
+     * Limit how many ModuleModuleSizes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -53321,6 +57019,12 @@ export namespace Prisma {
     pitch?: boolean | PitchDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["modulePitch"]>
 
+  export type ModulePitchSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    pitchCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    pitch?: boolean | PitchDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["modulePitch"]>
 
   export type ModulePitchSelectScalar = {
     moduleCode?: boolean
@@ -53333,6 +57037,10 @@ export namespace Prisma {
     pitch?: boolean | PitchDefaultArgs<ExtArgs>
   }
   export type ModulePitchIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    pitch?: boolean | PitchDefaultArgs<ExtArgs>
+  }
+  export type ModulePitchIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     pitch?: boolean | PitchDefaultArgs<ExtArgs>
   }
@@ -53550,6 +57258,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModulePitchUpdateManyArgs>(args: SelectSubset<T, ModulePitchUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModulePitches and returns the data updated in the database.
+     * @param {ModulePitchUpdateManyAndReturnArgs} args - Arguments to update many ModulePitches.
+     * @example
+     * // Update many ModulePitches
+     * const modulePitch = await prisma.modulePitch.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModulePitches and only return the `moduleCode`
+     * const modulePitchWithModuleCodeOnly = await prisma.modulePitch.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModulePitchUpdateManyAndReturnArgs>(args: SelectSubset<T, ModulePitchUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModulePitchPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModulePitch.
@@ -54036,6 +57774,40 @@ export namespace Prisma {
      * Filter which ModulePitches to update
      */
     where?: ModulePitchWhereInput
+    /**
+     * Limit how many ModulePitches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModulePitch updateManyAndReturn
+   */
+  export type ModulePitchUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModulePitch
+     */
+    select?: ModulePitchSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModulePitch
+     */
+    omit?: ModulePitchOmit<ExtArgs> | null
+    /**
+     * The data used to update ModulePitches.
+     */
+    data: XOR<ModulePitchUpdateManyMutationInput, ModulePitchUncheckedUpdateManyInput>
+    /**
+     * Filter which ModulePitches to update
+     */
+    where?: ModulePitchWhereInput
+    /**
+     * Limit how many ModulePitches to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModulePitchIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -54098,6 +57870,10 @@ export namespace Prisma {
      * Filter which ModulePitches to delete
      */
     where?: ModulePitchWhereInput
+    /**
+     * Limit how many ModulePitches to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -54270,6 +58046,12 @@ export namespace Prisma {
     manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleManufacturer"]>
 
+  export type ModuleManufacturerSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    manufacturerCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleManufacturer"]>
 
   export type ModuleManufacturerSelectScalar = {
     moduleCode?: boolean
@@ -54282,6 +58064,10 @@ export namespace Prisma {
     manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
   }
   export type ModuleManufacturerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
+  }
+  export type ModuleManufacturerIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     manufacturer?: boolean | ManufacturerDefaultArgs<ExtArgs>
   }
@@ -54499,6 +58285,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleManufacturerUpdateManyArgs>(args: SelectSubset<T, ModuleManufacturerUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleManufacturers and returns the data updated in the database.
+     * @param {ModuleManufacturerUpdateManyAndReturnArgs} args - Arguments to update many ModuleManufacturers.
+     * @example
+     * // Update many ModuleManufacturers
+     * const moduleManufacturer = await prisma.moduleManufacturer.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleManufacturers and only return the `moduleCode`
+     * const moduleManufacturerWithModuleCodeOnly = await prisma.moduleManufacturer.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleManufacturerUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleManufacturerUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleManufacturerPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleManufacturer.
@@ -54985,6 +58801,40 @@ export namespace Prisma {
      * Filter which ModuleManufacturers to update
      */
     where?: ModuleManufacturerWhereInput
+    /**
+     * Limit how many ModuleManufacturers to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleManufacturer updateManyAndReturn
+   */
+  export type ModuleManufacturerUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleManufacturer
+     */
+    select?: ModuleManufacturerSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleManufacturer
+     */
+    omit?: ModuleManufacturerOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleManufacturers.
+     */
+    data: XOR<ModuleManufacturerUpdateManyMutationInput, ModuleManufacturerUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleManufacturers to update
+     */
+    where?: ModuleManufacturerWhereInput
+    /**
+     * Limit how many ModuleManufacturers to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleManufacturerIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -55047,6 +58897,10 @@ export namespace Prisma {
      * Filter which ModuleManufacturers to delete
      */
     where?: ModuleManufacturerWhereInput
+    /**
+     * Limit how many ModuleManufacturers to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -55262,6 +59116,13 @@ export namespace Prisma {
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleItemComponent"]>
 
+  export type ModuleItemComponentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    itemCode?: boolean
+    quantity?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleItemComponent"]>
 
   export type ModuleItemComponentSelectScalar = {
     moduleCode?: boolean
@@ -55275,6 +59136,10 @@ export namespace Prisma {
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }
   export type ModuleItemComponentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    item?: boolean | ItemDefaultArgs<ExtArgs>
+  }
+  export type ModuleItemComponentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     item?: boolean | ItemDefaultArgs<ExtArgs>
   }
@@ -55493,6 +59358,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleItemComponentUpdateManyArgs>(args: SelectSubset<T, ModuleItemComponentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleItemComponents and returns the data updated in the database.
+     * @param {ModuleItemComponentUpdateManyAndReturnArgs} args - Arguments to update many ModuleItemComponents.
+     * @example
+     * // Update many ModuleItemComponents
+     * const moduleItemComponent = await prisma.moduleItemComponent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleItemComponents and only return the `moduleCode`
+     * const moduleItemComponentWithModuleCodeOnly = await prisma.moduleItemComponent.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleItemComponentUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleItemComponentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleItemComponentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleItemComponent.
@@ -55980,6 +59875,40 @@ export namespace Prisma {
      * Filter which ModuleItemComponents to update
      */
     where?: ModuleItemComponentWhereInput
+    /**
+     * Limit how many ModuleItemComponents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleItemComponent updateManyAndReturn
+   */
+  export type ModuleItemComponentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleItemComponent
+     */
+    select?: ModuleItemComponentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleItemComponent
+     */
+    omit?: ModuleItemComponentOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleItemComponents.
+     */
+    data: XOR<ModuleItemComponentUpdateManyMutationInput, ModuleItemComponentUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleItemComponents to update
+     */
+    where?: ModuleItemComponentWhereInput
+    /**
+     * Limit how many ModuleItemComponents to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleItemComponentIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -56042,6 +59971,10 @@ export namespace Prisma {
      * Filter which ModuleItemComponents to delete
      */
     where?: ModuleItemComponentWhereInput
+    /**
+     * Limit how many ModuleItemComponents to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -56214,6 +60147,12 @@ export namespace Prisma {
     option?: boolean | OptionDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["moduleOption"]>
 
+  export type ModuleOptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    optionCode?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    option?: boolean | OptionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["moduleOption"]>
 
   export type ModuleOptionSelectScalar = {
     moduleCode?: boolean
@@ -56226,6 +60165,10 @@ export namespace Prisma {
     option?: boolean | OptionDefaultArgs<ExtArgs>
   }
   export type ModuleOptionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+    option?: boolean | OptionDefaultArgs<ExtArgs>
+  }
+  export type ModuleOptionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
     option?: boolean | OptionDefaultArgs<ExtArgs>
   }
@@ -56443,6 +60386,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModuleOptionUpdateManyArgs>(args: SelectSubset<T, ModuleOptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModuleOptions and returns the data updated in the database.
+     * @param {ModuleOptionUpdateManyAndReturnArgs} args - Arguments to update many ModuleOptions.
+     * @example
+     * // Update many ModuleOptions
+     * const moduleOption = await prisma.moduleOption.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModuleOptions and only return the `moduleCode`
+     * const moduleOptionWithModuleCodeOnly = await prisma.moduleOption.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModuleOptionUpdateManyAndReturnArgs>(args: SelectSubset<T, ModuleOptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModuleOptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModuleOption.
@@ -56929,6 +60902,40 @@ export namespace Prisma {
      * Filter which ModuleOptions to update
      */
     where?: ModuleOptionWhereInput
+    /**
+     * Limit how many ModuleOptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModuleOption updateManyAndReturn
+   */
+  export type ModuleOptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModuleOption
+     */
+    select?: ModuleOptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModuleOption
+     */
+    omit?: ModuleOptionOmit<ExtArgs> | null
+    /**
+     * The data used to update ModuleOptions.
+     */
+    data: XOR<ModuleOptionUpdateManyMutationInput, ModuleOptionUncheckedUpdateManyInput>
+    /**
+     * Filter which ModuleOptions to update
+     */
+    where?: ModuleOptionWhereInput
+    /**
+     * Limit how many ModuleOptions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModuleOptionIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -56991,6 +60998,10 @@ export namespace Prisma {
      * Filter which ModuleOptions to delete
      */
     where?: ModuleOptionWhereInput
+    /**
+     * Limit how many ModuleOptions to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -57208,6 +61219,12 @@ export namespace Prisma {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["modulePrice"]>
 
+  export type ModulePriceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    moduleCode?: boolean
+    priceUsd?: boolean
+    priceRub?: boolean
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["modulePrice"]>
 
   export type ModulePriceSelectScalar = {
     moduleCode?: boolean
@@ -57220,6 +61237,9 @@ export namespace Prisma {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
   }
   export type ModulePriceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    module?: boolean | ModuleDefaultArgs<ExtArgs>
+  }
+  export type ModulePriceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     module?: boolean | ModuleDefaultArgs<ExtArgs>
   }
 
@@ -57436,6 +61456,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ModulePriceUpdateManyArgs>(args: SelectSubset<T, ModulePriceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ModulePrices and returns the data updated in the database.
+     * @param {ModulePriceUpdateManyAndReturnArgs} args - Arguments to update many ModulePrices.
+     * @example
+     * // Update many ModulePrices
+     * const modulePrice = await prisma.modulePrice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more ModulePrices and only return the `moduleCode`
+     * const modulePriceWithModuleCodeOnly = await prisma.modulePrice.updateManyAndReturn({
+     *   select: { moduleCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends ModulePriceUpdateManyAndReturnArgs>(args: SelectSubset<T, ModulePriceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ModulePricePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ModulePrice.
@@ -57922,6 +61972,40 @@ export namespace Prisma {
      * Filter which ModulePrices to update
      */
     where?: ModulePriceWhereInput
+    /**
+     * Limit how many ModulePrices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * ModulePrice updateManyAndReturn
+   */
+  export type ModulePriceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ModulePrice
+     */
+    select?: ModulePriceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the ModulePrice
+     */
+    omit?: ModulePriceOmit<ExtArgs> | null
+    /**
+     * The data used to update ModulePrices.
+     */
+    data: XOR<ModulePriceUpdateManyMutationInput, ModulePriceUncheckedUpdateManyInput>
+    /**
+     * Filter which ModulePrices to update
+     */
+    where?: ModulePriceWhereInput
+    /**
+     * Limit how many ModulePrices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ModulePriceIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -57984,6 +62068,10 @@ export namespace Prisma {
      * Filter which ModulePrices to delete
      */
     where?: ModulePriceWhereInput
+    /**
+     * Limit how many ModulePrices to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -58156,6 +62244,12 @@ export namespace Prisma {
     moduleSize?: boolean | ModuleSizeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cabinetSizeModuleSize"]>
 
+  export type CabinetSizeModuleSizeSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    cabinetSizeCode?: boolean
+    moduleSizeCode?: boolean
+    cabinetSize?: boolean | CabinetSizeDefaultArgs<ExtArgs>
+    moduleSize?: boolean | ModuleSizeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["cabinetSizeModuleSize"]>
 
   export type CabinetSizeModuleSizeSelectScalar = {
     cabinetSizeCode?: boolean
@@ -58168,6 +62262,10 @@ export namespace Prisma {
     moduleSize?: boolean | ModuleSizeDefaultArgs<ExtArgs>
   }
   export type CabinetSizeModuleSizeIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    cabinetSize?: boolean | CabinetSizeDefaultArgs<ExtArgs>
+    moduleSize?: boolean | ModuleSizeDefaultArgs<ExtArgs>
+  }
+  export type CabinetSizeModuleSizeIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cabinetSize?: boolean | CabinetSizeDefaultArgs<ExtArgs>
     moduleSize?: boolean | ModuleSizeDefaultArgs<ExtArgs>
   }
@@ -58385,6 +62483,36 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends CabinetSizeModuleSizeUpdateManyArgs>(args: SelectSubset<T, CabinetSizeModuleSizeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CabinetSizeModuleSizes and returns the data updated in the database.
+     * @param {CabinetSizeModuleSizeUpdateManyAndReturnArgs} args - Arguments to update many CabinetSizeModuleSizes.
+     * @example
+     * // Update many CabinetSizeModuleSizes
+     * const cabinetSizeModuleSize = await prisma.cabinetSizeModuleSize.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CabinetSizeModuleSizes and only return the `cabinetSizeCode`
+     * const cabinetSizeModuleSizeWithCabinetSizeCodeOnly = await prisma.cabinetSizeModuleSize.updateManyAndReturn({
+     *   select: { cabinetSizeCode: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CabinetSizeModuleSizeUpdateManyAndReturnArgs>(args: SelectSubset<T, CabinetSizeModuleSizeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CabinetSizeModuleSizePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one CabinetSizeModuleSize.
@@ -58871,6 +62999,40 @@ export namespace Prisma {
      * Filter which CabinetSizeModuleSizes to update
      */
     where?: CabinetSizeModuleSizeWhereInput
+    /**
+     * Limit how many CabinetSizeModuleSizes to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CabinetSizeModuleSize updateManyAndReturn
+   */
+  export type CabinetSizeModuleSizeUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CabinetSizeModuleSize
+     */
+    select?: CabinetSizeModuleSizeSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CabinetSizeModuleSize
+     */
+    omit?: CabinetSizeModuleSizeOmit<ExtArgs> | null
+    /**
+     * The data used to update CabinetSizeModuleSizes.
+     */
+    data: XOR<CabinetSizeModuleSizeUpdateManyMutationInput, CabinetSizeModuleSizeUncheckedUpdateManyInput>
+    /**
+     * Filter which CabinetSizeModuleSizes to update
+     */
+    where?: CabinetSizeModuleSizeWhereInput
+    /**
+     * Limit how many CabinetSizeModuleSizes to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CabinetSizeModuleSizeIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -58933,6 +63095,10 @@ export namespace Prisma {
      * Filter which CabinetSizeModuleSizes to delete
      */
     where?: CabinetSizeModuleSizeWhereInput
+    /**
+     * Limit how many CabinetSizeModuleSizes to delete.
+     */
+    limit?: number
   }
 
   /**
@@ -61078,8 +65244,8 @@ export namespace Prisma {
     NOT?: ScreenTypeOptionWhereInput | ScreenTypeOptionWhereInput[]
     screenTypeCode?: StringFilter<"ScreenTypeOption"> | string
     optionCode?: StringFilter<"ScreenTypeOption"> | string
-    screenType?: XOR<ScreenTypeRelationFilter, ScreenTypeWhereInput>
-    option?: XOR<OptionRelationFilter, OptionWhereInput>
+    screenType?: XOR<ScreenTypeScalarRelationFilter, ScreenTypeWhereInput>
+    option?: XOR<OptionScalarRelationFilter, OptionWhereInput>
   }
 
   export type ScreenTypeOptionOrderByWithRelationInput = {
@@ -61096,8 +65262,8 @@ export namespace Prisma {
     NOT?: ScreenTypeOptionWhereInput | ScreenTypeOptionWhereInput[]
     screenTypeCode?: StringFilter<"ScreenTypeOption"> | string
     optionCode?: StringFilter<"ScreenTypeOption"> | string
-    screenType?: XOR<ScreenTypeRelationFilter, ScreenTypeWhereInput>
-    option?: XOR<OptionRelationFilter, OptionWhereInput>
+    screenType?: XOR<ScreenTypeScalarRelationFilter, ScreenTypeWhereInput>
+    option?: XOR<OptionScalarRelationFilter, OptionWhereInput>
   }, "screenTypeCode_optionCode">
 
   export type ScreenTypeOptionOrderByWithAggregationInput = {
@@ -61122,8 +65288,8 @@ export namespace Prisma {
     NOT?: ScreenTypeControlTypeWhereInput | ScreenTypeControlTypeWhereInput[]
     screenTypeCode?: StringFilter<"ScreenTypeControlType"> | string
     controlTypeCode?: StringFilter<"ScreenTypeControlType"> | string
-    screenType?: XOR<ScreenTypeRelationFilter, ScreenTypeWhereInput>
-    controlType?: XOR<ControlTypeRelationFilter, ControlTypeWhereInput>
+    screenType?: XOR<ScreenTypeScalarRelationFilter, ScreenTypeWhereInput>
+    controlType?: XOR<ControlTypeScalarRelationFilter, ControlTypeWhereInput>
   }
 
   export type ScreenTypeControlTypeOrderByWithRelationInput = {
@@ -61140,8 +65306,8 @@ export namespace Prisma {
     NOT?: ScreenTypeControlTypeWhereInput | ScreenTypeControlTypeWhereInput[]
     screenTypeCode?: StringFilter<"ScreenTypeControlType"> | string
     controlTypeCode?: StringFilter<"ScreenTypeControlType"> | string
-    screenType?: XOR<ScreenTypeRelationFilter, ScreenTypeWhereInput>
-    controlType?: XOR<ControlTypeRelationFilter, ControlTypeWhereInput>
+    screenType?: XOR<ScreenTypeScalarRelationFilter, ScreenTypeWhereInput>
+    controlType?: XOR<ControlTypeScalarRelationFilter, ControlTypeWhereInput>
   }, "screenTypeCode_controlTypeCode">
 
   export type ScreenTypeControlTypeOrderByWithAggregationInput = {
@@ -61166,8 +65332,8 @@ export namespace Prisma {
     NOT?: ScreenTypeSensorWhereInput | ScreenTypeSensorWhereInput[]
     screenTypeCode?: StringFilter<"ScreenTypeSensor"> | string
     sensorCode?: StringFilter<"ScreenTypeSensor"> | string
-    screenType?: XOR<ScreenTypeRelationFilter, ScreenTypeWhereInput>
-    sensor?: XOR<SensorRelationFilter, SensorWhereInput>
+    screenType?: XOR<ScreenTypeScalarRelationFilter, ScreenTypeWhereInput>
+    sensor?: XOR<SensorScalarRelationFilter, SensorWhereInput>
   }
 
   export type ScreenTypeSensorOrderByWithRelationInput = {
@@ -61184,8 +65350,8 @@ export namespace Prisma {
     NOT?: ScreenTypeSensorWhereInput | ScreenTypeSensorWhereInput[]
     screenTypeCode?: StringFilter<"ScreenTypeSensor"> | string
     sensorCode?: StringFilter<"ScreenTypeSensor"> | string
-    screenType?: XOR<ScreenTypeRelationFilter, ScreenTypeWhereInput>
-    sensor?: XOR<SensorRelationFilter, SensorWhereInput>
+    screenType?: XOR<ScreenTypeScalarRelationFilter, ScreenTypeWhereInput>
+    sensor?: XOR<SensorScalarRelationFilter, SensorWhereInput>
   }, "screenTypeCode_sensorCode">
 
   export type ScreenTypeSensorOrderByWithAggregationInput = {
@@ -61210,8 +65376,8 @@ export namespace Prisma {
     NOT?: ItemCategoryRelationWhereInput | ItemCategoryRelationWhereInput[]
     itemCode?: StringFilter<"ItemCategoryRelation"> | string
     categoryCode?: StringFilter<"ItemCategoryRelation"> | string
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
   }
 
   export type ItemCategoryRelationOrderByWithRelationInput = {
@@ -61228,8 +65394,8 @@ export namespace Prisma {
     NOT?: ItemCategoryRelationWhereInput | ItemCategoryRelationWhereInput[]
     itemCode?: StringFilter<"ItemCategoryRelation"> | string
     categoryCode?: StringFilter<"ItemCategoryRelation"> | string
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
   }, "itemCode_categoryCode">
 
   export type ItemCategoryRelationOrderByWithAggregationInput = {
@@ -61254,8 +65420,8 @@ export namespace Prisma {
     NOT?: ItemSubcategoryRelationWhereInput | ItemSubcategoryRelationWhereInput[]
     itemCode?: StringFilter<"ItemSubcategoryRelation"> | string
     subcategoryCode?: StringFilter<"ItemSubcategoryRelation"> | string
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }
 
   export type ItemSubcategoryRelationOrderByWithRelationInput = {
@@ -61272,8 +65438,8 @@ export namespace Prisma {
     NOT?: ItemSubcategoryRelationWhereInput | ItemSubcategoryRelationWhereInput[]
     itemCode?: StringFilter<"ItemSubcategoryRelation"> | string
     subcategoryCode?: StringFilter<"ItemSubcategoryRelation"> | string
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }, "itemCode_subcategoryCode">
 
   export type ItemSubcategoryRelationOrderByWithAggregationInput = {
@@ -61299,7 +65465,7 @@ export namespace Prisma {
     itemCode?: StringFilter<"ItemPrice"> | string
     priceUsd?: DecimalNullableFilter<"ItemPrice"> | Decimal | DecimalJsLike | number | string | null
     priceRub?: DecimalNullableFilter<"ItemPrice"> | Decimal | DecimalJsLike | number | string | null
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
   }
 
   export type ItemPriceOrderByWithRelationInput = {
@@ -61316,7 +65482,7 @@ export namespace Prisma {
     NOT?: ItemPriceWhereInput | ItemPriceWhereInput[]
     priceUsd?: DecimalNullableFilter<"ItemPrice"> | Decimal | DecimalJsLike | number | string | null
     priceRub?: DecimalNullableFilter<"ItemPrice"> | Decimal | DecimalJsLike | number | string | null
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
   }, "itemCode">
 
   export type ItemPriceOrderByWithAggregationInput = {
@@ -61345,8 +65511,8 @@ export namespace Prisma {
     NOT?: ItemSupplierWhereInput | ItemSupplierWhereInput[]
     itemCode?: StringFilter<"ItemSupplier"> | string
     supplierCode?: StringFilter<"ItemSupplier"> | string
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
-    supplier?: XOR<SupplierRelationFilter, SupplierWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    supplier?: XOR<SupplierScalarRelationFilter, SupplierWhereInput>
   }
 
   export type ItemSupplierOrderByWithRelationInput = {
@@ -61363,8 +65529,8 @@ export namespace Prisma {
     NOT?: ItemSupplierWhereInput | ItemSupplierWhereInput[]
     itemCode?: StringFilter<"ItemSupplier"> | string
     supplierCode?: StringFilter<"ItemSupplier"> | string
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
-    supplier?: XOR<SupplierRelationFilter, SupplierWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
+    supplier?: XOR<SupplierScalarRelationFilter, SupplierWhereInput>
   }, "itemCode_supplierCode">
 
   export type ItemSupplierOrderByWithAggregationInput = {
@@ -61389,8 +65555,8 @@ export namespace Prisma {
     NOT?: ItemCategorySubcategoryWhereInput | ItemCategorySubcategoryWhereInput[]
     categoryCode?: StringFilter<"ItemCategorySubcategory"> | string
     subcategoryCode?: StringFilter<"ItemCategorySubcategory"> | string
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }
 
   export type ItemCategorySubcategoryOrderByWithRelationInput = {
@@ -61407,8 +65573,8 @@ export namespace Prisma {
     NOT?: ItemCategorySubcategoryWhereInput | ItemCategorySubcategoryWhereInput[]
     categoryCode?: StringFilter<"ItemCategorySubcategory"> | string
     subcategoryCode?: StringFilter<"ItemCategorySubcategory"> | string
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }, "categoryCode_subcategoryCode">
 
   export type ItemCategorySubcategoryOrderByWithAggregationInput = {
@@ -61433,8 +65599,8 @@ export namespace Prisma {
     NOT?: CabinetCategoryWhereInput | CabinetCategoryWhereInput[]
     cabinetCode?: StringFilter<"CabinetCategory"> | string
     categoryCode?: StringFilter<"CabinetCategory"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
   }
 
   export type CabinetCategoryOrderByWithRelationInput = {
@@ -61451,8 +65617,8 @@ export namespace Prisma {
     NOT?: CabinetCategoryWhereInput | CabinetCategoryWhereInput[]
     cabinetCode?: StringFilter<"CabinetCategory"> | string
     categoryCode?: StringFilter<"CabinetCategory"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
   }, "cabinetCode_categoryCode">
 
   export type CabinetCategoryOrderByWithAggregationInput = {
@@ -61477,8 +65643,8 @@ export namespace Prisma {
     NOT?: CabinetSubcategoryWhereInput | CabinetSubcategoryWhereInput[]
     cabinetCode?: StringFilter<"CabinetSubcategory"> | string
     subcategoryCode?: StringFilter<"CabinetSubcategory"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }
 
   export type CabinetSubcategoryOrderByWithRelationInput = {
@@ -61495,8 +65661,8 @@ export namespace Prisma {
     NOT?: CabinetSubcategoryWhereInput | CabinetSubcategoryWhereInput[]
     cabinetCode?: StringFilter<"CabinetSubcategory"> | string
     subcategoryCode?: StringFilter<"CabinetSubcategory"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }, "cabinetCode_subcategoryCode">
 
   export type CabinetSubcategoryOrderByWithAggregationInput = {
@@ -61521,8 +65687,8 @@ export namespace Prisma {
     NOT?: CabinetLocationWhereInput | CabinetLocationWhereInput[]
     cabinetCode?: StringFilter<"CabinetLocation"> | string
     locationCode?: StringFilter<"CabinetLocation"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    location?: XOR<LocationRelationFilter, LocationWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    location?: XOR<LocationScalarRelationFilter, LocationWhereInput>
   }
 
   export type CabinetLocationOrderByWithRelationInput = {
@@ -61539,8 +65705,8 @@ export namespace Prisma {
     NOT?: CabinetLocationWhereInput | CabinetLocationWhereInput[]
     cabinetCode?: StringFilter<"CabinetLocation"> | string
     locationCode?: StringFilter<"CabinetLocation"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    location?: XOR<LocationRelationFilter, LocationWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    location?: XOR<LocationScalarRelationFilter, LocationWhereInput>
   }, "cabinetCode_locationCode">
 
   export type CabinetLocationOrderByWithAggregationInput = {
@@ -61565,8 +65731,8 @@ export namespace Prisma {
     NOT?: CabinetPlacementWhereInput | CabinetPlacementWhereInput[]
     cabinetCode?: StringFilter<"CabinetPlacement"> | string
     placementCode?: StringFilter<"CabinetPlacement"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    placement?: XOR<PlacementRelationFilter, PlacementWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    placement?: XOR<PlacementScalarRelationFilter, PlacementWhereInput>
   }
 
   export type CabinetPlacementOrderByWithRelationInput = {
@@ -61583,8 +65749,8 @@ export namespace Prisma {
     NOT?: CabinetPlacementWhereInput | CabinetPlacementWhereInput[]
     cabinetCode?: StringFilter<"CabinetPlacement"> | string
     placementCode?: StringFilter<"CabinetPlacement"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    placement?: XOR<PlacementRelationFilter, PlacementWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    placement?: XOR<PlacementScalarRelationFilter, PlacementWhereInput>
   }, "cabinetCode_placementCode">
 
   export type CabinetPlacementOrderByWithAggregationInput = {
@@ -61609,8 +65775,8 @@ export namespace Prisma {
     NOT?: CabinetMaterialWhereInput | CabinetMaterialWhereInput[]
     cabinetCode?: StringFilter<"CabinetMaterial"> | string
     materialCode?: StringFilter<"CabinetMaterial"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    material?: XOR<MaterialRelationFilter, MaterialWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    material?: XOR<MaterialScalarRelationFilter, MaterialWhereInput>
   }
 
   export type CabinetMaterialOrderByWithRelationInput = {
@@ -61627,8 +65793,8 @@ export namespace Prisma {
     NOT?: CabinetMaterialWhereInput | CabinetMaterialWhereInput[]
     cabinetCode?: StringFilter<"CabinetMaterial"> | string
     materialCode?: StringFilter<"CabinetMaterial"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    material?: XOR<MaterialRelationFilter, MaterialWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    material?: XOR<MaterialScalarRelationFilter, MaterialWhereInput>
   }, "cabinetCode_materialCode">
 
   export type CabinetMaterialOrderByWithAggregationInput = {
@@ -61653,8 +65819,8 @@ export namespace Prisma {
     NOT?: CabinetCabinetSizeWhereInput | CabinetCabinetSizeWhereInput[]
     cabinetCode?: StringFilter<"CabinetCabinetSize"> | string
     cabinetSizeCode?: StringFilter<"CabinetCabinetSize"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    size?: XOR<CabinetSizeRelationFilter, CabinetSizeWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    size?: XOR<CabinetSizeScalarRelationFilter, CabinetSizeWhereInput>
   }
 
   export type CabinetCabinetSizeOrderByWithRelationInput = {
@@ -61671,8 +65837,8 @@ export namespace Prisma {
     NOT?: CabinetCabinetSizeWhereInput | CabinetCabinetSizeWhereInput[]
     cabinetCode?: StringFilter<"CabinetCabinetSize"> | string
     cabinetSizeCode?: StringFilter<"CabinetCabinetSize"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    size?: XOR<CabinetSizeRelationFilter, CabinetSizeWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    size?: XOR<CabinetSizeScalarRelationFilter, CabinetSizeWhereInput>
   }, "cabinetCode_cabinetSizeCode">
 
   export type CabinetCabinetSizeOrderByWithAggregationInput = {
@@ -61697,8 +65863,8 @@ export namespace Prisma {
     NOT?: CabinetPitchWhereInput | CabinetPitchWhereInput[]
     cabinetCode?: StringFilter<"CabinetPitch"> | string
     pitchCode?: StringFilter<"CabinetPitch"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    pitch?: XOR<PitchRelationFilter, PitchWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    pitch?: XOR<PitchScalarRelationFilter, PitchWhereInput>
   }
 
   export type CabinetPitchOrderByWithRelationInput = {
@@ -61715,8 +65881,8 @@ export namespace Prisma {
     NOT?: CabinetPitchWhereInput | CabinetPitchWhereInput[]
     cabinetCode?: StringFilter<"CabinetPitch"> | string
     pitchCode?: StringFilter<"CabinetPitch"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    pitch?: XOR<PitchRelationFilter, PitchWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    pitch?: XOR<PitchScalarRelationFilter, PitchWhereInput>
   }, "cabinetCode_pitchCode">
 
   export type CabinetPitchOrderByWithAggregationInput = {
@@ -61741,8 +65907,8 @@ export namespace Prisma {
     NOT?: CabinetManufacturerWhereInput | CabinetManufacturerWhereInput[]
     cabinetCode?: StringFilter<"CabinetManufacturer"> | string
     manufacturerCode?: StringFilter<"CabinetManufacturer"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    manufacturer?: XOR<ManufacturerRelationFilter, ManufacturerWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    manufacturer?: XOR<ManufacturerScalarRelationFilter, ManufacturerWhereInput>
   }
 
   export type CabinetManufacturerOrderByWithRelationInput = {
@@ -61759,8 +65925,8 @@ export namespace Prisma {
     NOT?: CabinetManufacturerWhereInput | CabinetManufacturerWhereInput[]
     cabinetCode?: StringFilter<"CabinetManufacturer"> | string
     manufacturerCode?: StringFilter<"CabinetManufacturer"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    manufacturer?: XOR<ManufacturerRelationFilter, ManufacturerWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    manufacturer?: XOR<ManufacturerScalarRelationFilter, ManufacturerWhereInput>
   }, "cabinetCode_manufacturerCode">
 
   export type CabinetManufacturerOrderByWithAggregationInput = {
@@ -61785,8 +65951,8 @@ export namespace Prisma {
     NOT?: CabinetSupplierWhereInput | CabinetSupplierWhereInput[]
     cabinetCode?: StringFilter<"CabinetSupplier"> | string
     supplierCode?: StringFilter<"CabinetSupplier"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    supplier?: XOR<SupplierRelationFilter, SupplierWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    supplier?: XOR<SupplierScalarRelationFilter, SupplierWhereInput>
   }
 
   export type CabinetSupplierOrderByWithRelationInput = {
@@ -61803,8 +65969,8 @@ export namespace Prisma {
     NOT?: CabinetSupplierWhereInput | CabinetSupplierWhereInput[]
     cabinetCode?: StringFilter<"CabinetSupplier"> | string
     supplierCode?: StringFilter<"CabinetSupplier"> | string
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    supplier?: XOR<SupplierRelationFilter, SupplierWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    supplier?: XOR<SupplierScalarRelationFilter, SupplierWhereInput>
   }, "cabinetCode_supplierCode">
 
   export type CabinetSupplierOrderByWithAggregationInput = {
@@ -61830,8 +65996,8 @@ export namespace Prisma {
     cabinetCode?: StringFilter<"CabinetItemComponent"> | string
     itemCode?: StringFilter<"CabinetItemComponent"> | string
     quantity?: IntFilter<"CabinetItemComponent"> | number
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
   }
 
   export type CabinetItemComponentOrderByWithRelationInput = {
@@ -61850,8 +66016,8 @@ export namespace Prisma {
     cabinetCode?: StringFilter<"CabinetItemComponent"> | string
     itemCode?: StringFilter<"CabinetItemComponent"> | string
     quantity?: IntFilter<"CabinetItemComponent"> | number
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
   }, "cabinetCode_itemCode">
 
   export type CabinetItemComponentOrderByWithAggregationInput = {
@@ -61881,7 +66047,7 @@ export namespace Prisma {
     cabinetCode?: StringFilter<"CabinetPrice"> | string
     priceUsd?: DecimalNullableFilter<"CabinetPrice"> | Decimal | DecimalJsLike | number | string | null
     priceRub?: DecimalNullableFilter<"CabinetPrice"> | Decimal | DecimalJsLike | number | string | null
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
   }
 
   export type CabinetPriceOrderByWithRelationInput = {
@@ -61898,7 +66064,7 @@ export namespace Prisma {
     NOT?: CabinetPriceWhereInput | CabinetPriceWhereInput[]
     priceUsd?: DecimalNullableFilter<"CabinetPrice"> | Decimal | DecimalJsLike | number | string | null
     priceRub?: DecimalNullableFilter<"CabinetPrice"> | Decimal | DecimalJsLike | number | string | null
-    cabinet?: XOR<CabinetRelationFilter, CabinetWhereInput>
+    cabinet?: XOR<CabinetScalarRelationFilter, CabinetWhereInput>
   }, "cabinetCode">
 
   export type CabinetPriceOrderByWithAggregationInput = {
@@ -61927,8 +66093,8 @@ export namespace Prisma {
     NOT?: ModuleCategoryWhereInput | ModuleCategoryWhereInput[]
     moduleCode?: StringFilter<"ModuleCategory"> | string
     categoryCode?: StringFilter<"ModuleCategory"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
   }
 
   export type ModuleCategoryOrderByWithRelationInput = {
@@ -61945,8 +66111,8 @@ export namespace Prisma {
     NOT?: ModuleCategoryWhereInput | ModuleCategoryWhereInput[]
     moduleCode?: StringFilter<"ModuleCategory"> | string
     categoryCode?: StringFilter<"ModuleCategory"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    category?: XOR<ItemCategoryRelationFilter, ItemCategoryWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    category?: XOR<ItemCategoryScalarRelationFilter, ItemCategoryWhereInput>
   }, "moduleCode_categoryCode">
 
   export type ModuleCategoryOrderByWithAggregationInput = {
@@ -61971,8 +66137,8 @@ export namespace Prisma {
     NOT?: ModuleSubcategoryWhereInput | ModuleSubcategoryWhereInput[]
     moduleCode?: StringFilter<"ModuleSubcategory"> | string
     subcategoryCode?: StringFilter<"ModuleSubcategory"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }
 
   export type ModuleSubcategoryOrderByWithRelationInput = {
@@ -61989,8 +66155,8 @@ export namespace Prisma {
     NOT?: ModuleSubcategoryWhereInput | ModuleSubcategoryWhereInput[]
     moduleCode?: StringFilter<"ModuleSubcategory"> | string
     subcategoryCode?: StringFilter<"ModuleSubcategory"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    subcategory?: XOR<ItemSubcategoryRelationFilter, ItemSubcategoryWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    subcategory?: XOR<ItemSubcategoryScalarRelationFilter, ItemSubcategoryWhereInput>
   }, "moduleCode_subcategoryCode">
 
   export type ModuleSubcategoryOrderByWithAggregationInput = {
@@ -62015,8 +66181,8 @@ export namespace Prisma {
     NOT?: ModuleLocationWhereInput | ModuleLocationWhereInput[]
     moduleCode?: StringFilter<"ModuleLocation"> | string
     locationCode?: StringFilter<"ModuleLocation"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    location?: XOR<LocationRelationFilter, LocationWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    location?: XOR<LocationScalarRelationFilter, LocationWhereInput>
   }
 
   export type ModuleLocationOrderByWithRelationInput = {
@@ -62033,8 +66199,8 @@ export namespace Prisma {
     NOT?: ModuleLocationWhereInput | ModuleLocationWhereInput[]
     moduleCode?: StringFilter<"ModuleLocation"> | string
     locationCode?: StringFilter<"ModuleLocation"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    location?: XOR<LocationRelationFilter, LocationWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    location?: XOR<LocationScalarRelationFilter, LocationWhereInput>
   }, "moduleCode_locationCode">
 
   export type ModuleLocationOrderByWithAggregationInput = {
@@ -62059,8 +66225,8 @@ export namespace Prisma {
     NOT?: ModuleRefreshRateWhereInput | ModuleRefreshRateWhereInput[]
     moduleCode?: StringFilter<"ModuleRefreshRate"> | string
     refreshRateCode?: StringFilter<"ModuleRefreshRate"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    refreshRate?: XOR<RefreshRateRelationFilter, RefreshRateWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    refreshRate?: XOR<RefreshRateScalarRelationFilter, RefreshRateWhereInput>
   }
 
   export type ModuleRefreshRateOrderByWithRelationInput = {
@@ -62077,8 +66243,8 @@ export namespace Prisma {
     NOT?: ModuleRefreshRateWhereInput | ModuleRefreshRateWhereInput[]
     moduleCode?: StringFilter<"ModuleRefreshRate"> | string
     refreshRateCode?: StringFilter<"ModuleRefreshRate"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    refreshRate?: XOR<RefreshRateRelationFilter, RefreshRateWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    refreshRate?: XOR<RefreshRateScalarRelationFilter, RefreshRateWhereInput>
   }, "moduleCode_refreshRateCode">
 
   export type ModuleRefreshRateOrderByWithAggregationInput = {
@@ -62103,8 +66269,8 @@ export namespace Prisma {
     NOT?: ModuleBrightnessWhereInput | ModuleBrightnessWhereInput[]
     moduleCode?: StringFilter<"ModuleBrightness"> | string
     brightnessCode?: StringFilter<"ModuleBrightness"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    brightness?: XOR<BrightnessRelationFilter, BrightnessWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    brightness?: XOR<BrightnessScalarRelationFilter, BrightnessWhereInput>
   }
 
   export type ModuleBrightnessOrderByWithRelationInput = {
@@ -62121,8 +66287,8 @@ export namespace Prisma {
     NOT?: ModuleBrightnessWhereInput | ModuleBrightnessWhereInput[]
     moduleCode?: StringFilter<"ModuleBrightness"> | string
     brightnessCode?: StringFilter<"ModuleBrightness"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    brightness?: XOR<BrightnessRelationFilter, BrightnessWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    brightness?: XOR<BrightnessScalarRelationFilter, BrightnessWhereInput>
   }, "moduleCode_brightnessCode">
 
   export type ModuleBrightnessOrderByWithAggregationInput = {
@@ -62147,8 +66313,8 @@ export namespace Prisma {
     NOT?: ModuleModuleSizeWhereInput | ModuleModuleSizeWhereInput[]
     moduleCode?: StringFilter<"ModuleModuleSize"> | string
     moduleSizeCode?: StringFilter<"ModuleModuleSize"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    size?: XOR<ModuleSizeRelationFilter, ModuleSizeWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    size?: XOR<ModuleSizeScalarRelationFilter, ModuleSizeWhereInput>
   }
 
   export type ModuleModuleSizeOrderByWithRelationInput = {
@@ -62165,8 +66331,8 @@ export namespace Prisma {
     NOT?: ModuleModuleSizeWhereInput | ModuleModuleSizeWhereInput[]
     moduleCode?: StringFilter<"ModuleModuleSize"> | string
     moduleSizeCode?: StringFilter<"ModuleModuleSize"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    size?: XOR<ModuleSizeRelationFilter, ModuleSizeWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    size?: XOR<ModuleSizeScalarRelationFilter, ModuleSizeWhereInput>
   }, "moduleCode_moduleSizeCode">
 
   export type ModuleModuleSizeOrderByWithAggregationInput = {
@@ -62191,8 +66357,8 @@ export namespace Prisma {
     NOT?: ModulePitchWhereInput | ModulePitchWhereInput[]
     moduleCode?: StringFilter<"ModulePitch"> | string
     pitchCode?: StringFilter<"ModulePitch"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    pitch?: XOR<PitchRelationFilter, PitchWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    pitch?: XOR<PitchScalarRelationFilter, PitchWhereInput>
   }
 
   export type ModulePitchOrderByWithRelationInput = {
@@ -62209,8 +66375,8 @@ export namespace Prisma {
     NOT?: ModulePitchWhereInput | ModulePitchWhereInput[]
     moduleCode?: StringFilter<"ModulePitch"> | string
     pitchCode?: StringFilter<"ModulePitch"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    pitch?: XOR<PitchRelationFilter, PitchWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    pitch?: XOR<PitchScalarRelationFilter, PitchWhereInput>
   }, "moduleCode_pitchCode">
 
   export type ModulePitchOrderByWithAggregationInput = {
@@ -62235,8 +66401,8 @@ export namespace Prisma {
     NOT?: ModuleManufacturerWhereInput | ModuleManufacturerWhereInput[]
     moduleCode?: StringFilter<"ModuleManufacturer"> | string
     manufacturerCode?: StringFilter<"ModuleManufacturer"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    manufacturer?: XOR<ManufacturerRelationFilter, ManufacturerWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    manufacturer?: XOR<ManufacturerScalarRelationFilter, ManufacturerWhereInput>
   }
 
   export type ModuleManufacturerOrderByWithRelationInput = {
@@ -62253,8 +66419,8 @@ export namespace Prisma {
     NOT?: ModuleManufacturerWhereInput | ModuleManufacturerWhereInput[]
     moduleCode?: StringFilter<"ModuleManufacturer"> | string
     manufacturerCode?: StringFilter<"ModuleManufacturer"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    manufacturer?: XOR<ManufacturerRelationFilter, ManufacturerWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    manufacturer?: XOR<ManufacturerScalarRelationFilter, ManufacturerWhereInput>
   }, "moduleCode_manufacturerCode">
 
   export type ModuleManufacturerOrderByWithAggregationInput = {
@@ -62280,8 +66446,8 @@ export namespace Prisma {
     moduleCode?: StringFilter<"ModuleItemComponent"> | string
     itemCode?: StringFilter<"ModuleItemComponent"> | string
     quantity?: IntFilter<"ModuleItemComponent"> | number
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
   }
 
   export type ModuleItemComponentOrderByWithRelationInput = {
@@ -62300,8 +66466,8 @@ export namespace Prisma {
     moduleCode?: StringFilter<"ModuleItemComponent"> | string
     itemCode?: StringFilter<"ModuleItemComponent"> | string
     quantity?: IntFilter<"ModuleItemComponent"> | number
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    item?: XOR<ItemRelationFilter, ItemWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    item?: XOR<ItemScalarRelationFilter, ItemWhereInput>
   }, "moduleCode_itemCode">
 
   export type ModuleItemComponentOrderByWithAggregationInput = {
@@ -62330,8 +66496,8 @@ export namespace Prisma {
     NOT?: ModuleOptionWhereInput | ModuleOptionWhereInput[]
     moduleCode?: StringFilter<"ModuleOption"> | string
     optionCode?: StringFilter<"ModuleOption"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    option?: XOR<OptionRelationFilter, OptionWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    option?: XOR<OptionScalarRelationFilter, OptionWhereInput>
   }
 
   export type ModuleOptionOrderByWithRelationInput = {
@@ -62348,8 +66514,8 @@ export namespace Prisma {
     NOT?: ModuleOptionWhereInput | ModuleOptionWhereInput[]
     moduleCode?: StringFilter<"ModuleOption"> | string
     optionCode?: StringFilter<"ModuleOption"> | string
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
-    option?: XOR<OptionRelationFilter, OptionWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
+    option?: XOR<OptionScalarRelationFilter, OptionWhereInput>
   }, "moduleCode_optionCode">
 
   export type ModuleOptionOrderByWithAggregationInput = {
@@ -62375,7 +66541,7 @@ export namespace Prisma {
     moduleCode?: StringFilter<"ModulePrice"> | string
     priceUsd?: DecimalNullableFilter<"ModulePrice"> | Decimal | DecimalJsLike | number | string | null
     priceRub?: DecimalNullableFilter<"ModulePrice"> | Decimal | DecimalJsLike | number | string | null
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
   }
 
   export type ModulePriceOrderByWithRelationInput = {
@@ -62392,7 +66558,7 @@ export namespace Prisma {
     NOT?: ModulePriceWhereInput | ModulePriceWhereInput[]
     priceUsd?: DecimalNullableFilter<"ModulePrice"> | Decimal | DecimalJsLike | number | string | null
     priceRub?: DecimalNullableFilter<"ModulePrice"> | Decimal | DecimalJsLike | number | string | null
-    module?: XOR<ModuleRelationFilter, ModuleWhereInput>
+    module?: XOR<ModuleScalarRelationFilter, ModuleWhereInput>
   }, "moduleCode">
 
   export type ModulePriceOrderByWithAggregationInput = {
@@ -62421,8 +66587,8 @@ export namespace Prisma {
     NOT?: CabinetSizeModuleSizeWhereInput | CabinetSizeModuleSizeWhereInput[]
     cabinetSizeCode?: StringFilter<"CabinetSizeModuleSize"> | string
     moduleSizeCode?: StringFilter<"CabinetSizeModuleSize"> | string
-    cabinetSize?: XOR<CabinetSizeRelationFilter, CabinetSizeWhereInput>
-    moduleSize?: XOR<ModuleSizeRelationFilter, ModuleSizeWhereInput>
+    cabinetSize?: XOR<CabinetSizeScalarRelationFilter, CabinetSizeWhereInput>
+    moduleSize?: XOR<ModuleSizeScalarRelationFilter, ModuleSizeWhereInput>
   }
 
   export type CabinetSizeModuleSizeOrderByWithRelationInput = {
@@ -62439,8 +66605,8 @@ export namespace Prisma {
     NOT?: CabinetSizeModuleSizeWhereInput | CabinetSizeModuleSizeWhereInput[]
     cabinetSizeCode?: StringFilter<"CabinetSizeModuleSize"> | string
     moduleSizeCode?: StringFilter<"CabinetSizeModuleSize"> | string
-    cabinetSize?: XOR<CabinetSizeRelationFilter, CabinetSizeWhereInput>
-    moduleSize?: XOR<ModuleSizeRelationFilter, ModuleSizeWhereInput>
+    cabinetSize?: XOR<CabinetSizeScalarRelationFilter, CabinetSizeWhereInput>
+    moduleSize?: XOR<ModuleSizeScalarRelationFilter, ModuleSizeWhereInput>
   }, "cabinetSizeCode_moduleSizeCode">
 
   export type CabinetSizeModuleSizeOrderByWithAggregationInput = {
@@ -66381,12 +70547,12 @@ export namespace Prisma {
     id?: SortOrder
   }
 
-  export type ScreenTypeRelationFilter = {
+  export type ScreenTypeScalarRelationFilter = {
     is?: ScreenTypeWhereInput
     isNot?: ScreenTypeWhereInput
   }
 
-  export type OptionRelationFilter = {
+  export type OptionScalarRelationFilter = {
     is?: OptionWhereInput
     isNot?: OptionWhereInput
   }
@@ -66411,7 +70577,7 @@ export namespace Prisma {
     optionCode?: SortOrder
   }
 
-  export type ControlTypeRelationFilter = {
+  export type ControlTypeScalarRelationFilter = {
     is?: ControlTypeWhereInput
     isNot?: ControlTypeWhereInput
   }
@@ -66436,7 +70602,7 @@ export namespace Prisma {
     controlTypeCode?: SortOrder
   }
 
-  export type SensorRelationFilter = {
+  export type SensorScalarRelationFilter = {
     is?: SensorWhereInput
     isNot?: SensorWhereInput
   }
@@ -66461,12 +70627,12 @@ export namespace Prisma {
     sensorCode?: SortOrder
   }
 
-  export type ItemRelationFilter = {
+  export type ItemScalarRelationFilter = {
     is?: ItemWhereInput
     isNot?: ItemWhereInput
   }
 
-  export type ItemCategoryRelationFilter = {
+  export type ItemCategoryScalarRelationFilter = {
     is?: ItemCategoryWhereInput
     isNot?: ItemCategoryWhereInput
   }
@@ -66491,7 +70657,7 @@ export namespace Prisma {
     categoryCode?: SortOrder
   }
 
-  export type ItemSubcategoryRelationFilter = {
+  export type ItemSubcategoryScalarRelationFilter = {
     is?: ItemSubcategoryWhereInput
     isNot?: ItemSubcategoryWhereInput
   }
@@ -66571,7 +70737,7 @@ export namespace Prisma {
     _max?: NestedDecimalNullableFilter<$PrismaModel>
   }
 
-  export type SupplierRelationFilter = {
+  export type SupplierScalarRelationFilter = {
     is?: SupplierWhereInput
     isNot?: SupplierWhereInput
   }
@@ -66616,7 +70782,7 @@ export namespace Prisma {
     subcategoryCode?: SortOrder
   }
 
-  export type CabinetRelationFilter = {
+  export type CabinetScalarRelationFilter = {
     is?: CabinetWhereInput
     isNot?: CabinetWhereInput
   }
@@ -66661,7 +70827,7 @@ export namespace Prisma {
     subcategoryCode?: SortOrder
   }
 
-  export type LocationRelationFilter = {
+  export type LocationScalarRelationFilter = {
     is?: LocationWhereInput
     isNot?: LocationWhereInput
   }
@@ -66686,7 +70852,7 @@ export namespace Prisma {
     locationCode?: SortOrder
   }
 
-  export type PlacementRelationFilter = {
+  export type PlacementScalarRelationFilter = {
     is?: PlacementWhereInput
     isNot?: PlacementWhereInput
   }
@@ -66711,7 +70877,7 @@ export namespace Prisma {
     placementCode?: SortOrder
   }
 
-  export type MaterialRelationFilter = {
+  export type MaterialScalarRelationFilter = {
     is?: MaterialWhereInput
     isNot?: MaterialWhereInput
   }
@@ -66736,7 +70902,7 @@ export namespace Prisma {
     materialCode?: SortOrder
   }
 
-  export type CabinetSizeRelationFilter = {
+  export type CabinetSizeScalarRelationFilter = {
     is?: CabinetSizeWhereInput
     isNot?: CabinetSizeWhereInput
   }
@@ -66761,7 +70927,7 @@ export namespace Prisma {
     cabinetSizeCode?: SortOrder
   }
 
-  export type PitchRelationFilter = {
+  export type PitchScalarRelationFilter = {
     is?: PitchWhereInput
     isNot?: PitchWhereInput
   }
@@ -66786,7 +70952,7 @@ export namespace Prisma {
     pitchCode?: SortOrder
   }
 
-  export type ManufacturerRelationFilter = {
+  export type ManufacturerScalarRelationFilter = {
     is?: ManufacturerWhereInput
     isNot?: ManufacturerWhereInput
   }
@@ -66890,7 +71056,7 @@ export namespace Prisma {
     priceRub?: SortOrder
   }
 
-  export type ModuleRelationFilter = {
+  export type ModuleScalarRelationFilter = {
     is?: ModuleWhereInput
     isNot?: ModuleWhereInput
   }
@@ -66955,7 +71121,7 @@ export namespace Prisma {
     locationCode?: SortOrder
   }
 
-  export type RefreshRateRelationFilter = {
+  export type RefreshRateScalarRelationFilter = {
     is?: RefreshRateWhereInput
     isNot?: RefreshRateWhereInput
   }
@@ -66980,7 +71146,7 @@ export namespace Prisma {
     refreshRateCode?: SortOrder
   }
 
-  export type BrightnessRelationFilter = {
+  export type BrightnessScalarRelationFilter = {
     is?: BrightnessWhereInput
     isNot?: BrightnessWhereInput
   }
@@ -67005,7 +71171,7 @@ export namespace Prisma {
     brightnessCode?: SortOrder
   }
 
-  export type ModuleSizeRelationFilter = {
+  export type ModuleSizeScalarRelationFilter = {
     is?: ModuleSizeWhereInput
     isNot?: ModuleSizeWhereInput
   }
