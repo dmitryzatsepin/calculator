@@ -38,6 +38,8 @@ export class ModuleService {
                 where.options = filters.isFlex
                     ? { some: { optionCode: 'flex' } }
                     : { none: { optionCode: 'flex' } };
+            } else {
+                where.options = { none: { optionCode: 'flex' } };
             }
         } else {
             where.options = { none: { optionCode: 'flex' } };

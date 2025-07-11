@@ -34,7 +34,6 @@
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
-    "dataloader": "^2.0.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.5.0",
     "express": "^5.0.1",
@@ -71,7 +70,6 @@
     "typescript": "^5.8.3"
   },
   "prisma": {
-    "schema": "./prisma/schema.prisma",
     "seed": "pnpm run prisma:seed"
   }
 }
