@@ -1,7 +1,7 @@
 // src/middleware/errorHandler.ts (Новый файл)
 import { Request, Response, NextFunction, ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
-import { Prisma } from '../../prisma/generated/client';
+import { Prisma } from '../prisma/generated/client';
 import { JsonWebTokenError } from 'jsonwebtoken'; // Если используете JWT
 
 export const errorHandler: ErrorRequestHandler = (err, req: Request, res: Response, next: NextFunction) => {
@@ -30,18 +30,18 @@ export const errorHandler: ErrorRequestHandler = (err, req: Request, res: Respon
 
         switch (err.code) {
             case 'P2002': // Unique constraint violation
-            status = 409; // Conflict
-            const target = err.meta?.target; // Сохраним в переменную для удобства
-            // Проверяем, что target существует и является массивом
-            const targetString = Array.isArray(target)
-                ? target.join(', ')
-                : 'неизвестные поля'; // Запасной вариант, если target не массив
-            message = `Запись с таким(и) уникальным(и) полем(ами) уже существует: ${targetString}`;
-            break;
+                status = 409; // Conflict
+                const target = err.meta?.target; // Сохраним в переменную для удобства
+                // Проверяем, что target существует и является массивом
+                const targetString = Array.isArray(target)
+                    ? target.join(', ')
+                    : 'неизвестные поля'; // Запасной вариант, если target не массив
+                message = `Запись с таким(и) уникальным(и) полем(ами) уже существует: ${targetString}`;
+                break;
             case 'P2014': // Required relation violation
-                 status = 400;
-                 message = `Ошибка связи между таблицами: ${err.meta?.relation_name}`;
-                 break;
+                status = 400;
+                message = `Ошибка связи между таблицами: ${err.meta?.relation_name}`;
+                break;
             case 'P2025': // Record to update/delete not found
                 status = 404; // Not Found
                 message = `Запись для ${req.method === 'DELETE' ? 'удаления' : 'обновления'} не найдена`;
@@ -63,10 +63,10 @@ export const errorHandler: ErrorRequestHandler = (err, req: Request, res: Respon
         });
     }
 
-     if (err instanceof JsonWebTokenError) {
+    if (err instanceof JsonWebTokenError) {
         // Пример обработки ошибок JWT
         res.status(401).json({ message: 'Невалидный токен аутентификации' });
-     }
+    }
 
 
     // Общая ошибка сервера

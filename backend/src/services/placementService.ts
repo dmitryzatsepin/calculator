@@ -1,5 +1,5 @@
 // backend/src/services/placementService.ts
-import { PrismaClient, Prisma, Placement } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, Placement } from "../prisma/generated/client";
 
 export class PlacementService {
   private prisma: PrismaClient;

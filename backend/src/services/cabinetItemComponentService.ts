@@ -1,5 +1,5 @@
 // backend/src/services/cabinetItemComponentService.ts
-import { PrismaClient, Prisma, CabinetItemComponent } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, CabinetItemComponent } from "../prisma/generated/client";
 
 export class CabinetItemComponentService {
   private prisma: PrismaClient;

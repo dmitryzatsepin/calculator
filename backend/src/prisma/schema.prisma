@@ -1,0 +1,627 @@
+// Файл: backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+generator pothos {
+  provider = "prisma-pothos-types"
+  output       = "./pothos-types.ts"
+  clientOutput = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Модель пользователя ---
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  name      String
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// --- СПРАВОЧНИКИ ---
+
+// Лист: screen_type
+model ScreenType {
+  id           Int                   @id @default(autoincrement())
+  code         String                @unique @map("screen_type_code")
+  name         String                @map("screen_type_name")
+  active       Boolean               @default(true) @map("active")
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  options      ScreenTypeOption[]    // Связь через ScreenTypeOption
+  controlTypes ScreenTypeControlType[] // Связь через ScreenTypeControlType
+  sensors      ScreenTypeSensor[]      // Связь через ScreenTypeSensor
+
+  @@map("screen_types")
+}
+
+// Лист: material
+model Material {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("material_code")
+  name      String   @map("material_name")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cabinets CabinetMaterial[]
+
+  @@map("materials")
+}
+
+// Лист: location
+model Location {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("location_code")
+  name      String   @map("location_name")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cabinets CabinetLocation[]
+  modules  ModuleLocation[]
+
+  @@map("locations")
+}
+
+// Лист: placement
+model Placement {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("placement_code")
+  name      String   @map("placement_name")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cabinets CabinetPlacement[]
+
+  @@map("placements")
+}
+
+// Лист: option
+model Option {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("option_code")
+  name      String   @map("option_name")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screenTypes ScreenTypeOption[]
+  modules     ModuleOption[]
+
+  @@map("options")
+}
+
+// Лист: sensor
+model Sensor {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("sensor_code")
+  name      String   @map("sensor")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screenTypes ScreenTypeSensor[]
+
+  @@map("sensors")
+}
+
+// Лист: control_type
+model ControlType {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("control_type_code")
+  name      String   @map("control_type")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screenTypes ScreenTypeControlType[]
+
+  @@map("control_types")
+}
+
+// Лист: pitch
+model Pitch {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique @map("pitch_code")
+  pitchValue Decimal  @map("pitch") @db.Decimal(5, 2)
+  active     Boolean  @default(true) @map("active")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  cabinets CabinetPitch[]
+  modules  ModulePitch[]
+
+  @@map("pitches")
+}
+
+// Лист: refresh_rate
+model RefreshRate {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("refresh_rate_code")
+  value     Int      @map("refresh_rate")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  modules ModuleRefreshRate[]
+
+  @@map("refresh_rates")
+}
+
+// Лист: brightness
+model Brightness {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("brightness_code")
+  value     Int      @map("brightness")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  modules ModuleBrightness[]
+
+  @@map("brightness_values")
+}
+
+// Лист: manufacturer
+model Manufacturer {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("manufacturer_code")
+  name      String   @map("manufacturer_name")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cabinets CabinetManufacturer[]
+  modules  ModuleManufacturer[]
+
+  @@map("manufacturers")
+}
+
+// Лист: supplier
+model Supplier {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("supplier_code")
+  name      String   @map("supplier_name")
+  active    Boolean  @default(true) @map("active")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cabinets CabinetSupplier[]
+  items    ItemSupplier[]
+
+  @@map("suppliers")
+}
+
+// Лист: ip_protection
+model IpProtection {
+  id              Int      @id @default(autoincrement())
+  code            String   @unique @map("ip_code")
+  protectionSolid String   @map("protection_solid")
+  protectionWater String   @map("protection_water")
+  active          Boolean  @default(true) @map("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("ip_protection")
+}
+
+// Лист: module_size
+model ModuleSize {
+  id           Int                     @id @default(autoincrement())
+  code         String                  @unique @map("module_size_code")
+  size         String                  @map("module_size")
+  width        Int                     @map("width")
+  height       Int                     @map("height")
+  active       Boolean                 @default(true) @map("active")
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+  modules      ModuleModuleSize[]
+  cabinetSizes CabinetSizeModuleSize[]
+
+  @@map("module_sizes")
+}
+
+// Лист: cabinet_size
+model CabinetSize {
+  id          Int                     @id @default(autoincrement())
+  code        String                  @unique @map("cabinet_size_code")
+  size        String                  @map("cabinet_size")
+  width       Int                     @map("width")
+  height      Int                     @map("height")
+  active      Boolean                 @default(true) @map("active")
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  cabinets    CabinetCabinetSize[]
+  moduleSizes CabinetSizeModuleSize[]
+
+  @@map("cabinet_sizes")
+}
+
+// Лист: item_category
+model ItemCategory {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique @map("item_category_code")
+  name      String     @map("item_category_name") 
+  active    Boolean    @default(true) @map("active")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  subcategories ItemCategorySubcategory[]
+  items         ItemCategoryRelation[]
+  cabinets      CabinetCategory[]         
+  modules       ModuleCategory[]          
+
+  @@map("item_categories")
+}
+
+// Лист: item_subcategory
+model ItemSubcategory {
+  id        Int        @id @default(autoincrement())
+  code      String     @unique @map("item_subcategory_code")
+  name      String     @map("item_subcategory_name") 
+  active    Boolean    @default(true) @map("active")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  categories ItemCategorySubcategory[]
+  items      ItemSubcategoryRelation[]
+  cabinets   CabinetSubcategory[]      
+  modules    ModuleSubcategory[]       
+
+  @@map("item_subcategories")
+}
+
+// --- ОСНОВНЫЕ СУЩНОСТИ ---
+
+model Cabinet {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @map("cabinet_code")
+  sku         String?  @unique @map("cabinet_sku")
+  name        String?  @map("cabinet_name")
+  active      Boolean  @default(true) @map("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Связи M-N
+  categories   CabinetCategory[]
+  subcategories CabinetSubcategory[]
+  locations    CabinetLocation[]
+  placements   CabinetPlacement[]
+  materials    CabinetMaterial[]
+  sizes        CabinetCabinetSize[]
+  pitches      CabinetPitch[]
+  manufacturers CabinetManufacturer[]
+  suppliers    CabinetSupplier[]
+  items        CabinetItemComponent[]
+  prices       CabinetPrice[]
+
+  @@map("cabinets")
+}
+
+model Module {
+  id           Int      @id @default(autoincrement())
+  code         String   @unique @map("module_code")
+  sku          String?  @unique @map("module_sku")
+  name         String?  @map("module_name")
+  moduleOption String?  @map("module_option")
+  active       Boolean  @default(true) @map("active")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  categories   ModuleCategory[]
+  subcategories ModuleSubcategory[]
+  locations    ModuleLocation[]
+  refreshRates ModuleRefreshRate[]
+  brightnesses ModuleBrightness[]
+  sizes        ModuleModuleSize[]
+  pitches      ModulePitch[]
+  manufacturers ModuleManufacturer[]
+  items        ModuleItemComponent[]
+  options      ModuleOption[]
+  prices       ModulePrice[]
+
+  @@map("modules")
+}
+
+model Item {
+  id            Int        @id @default(autoincrement())
+  code          String     @unique @map("item_code")
+  sku           String?    @map("item_sku")
+  name          String     @map("item_name")
+  active        Boolean    @default(true) @map("active")
+  comment       String?    @map("comment")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  categories    ItemCategoryRelation[]    
+  subcategories ItemSubcategoryRelation[] 
+  prices        ItemPrice[]
+  suppliers     ItemSupplier[]
+  cabinets      CabinetItemComponent[]
+  modules       ModuleItemComponent[]
+
+  @@map("items") 
+}
+
+
+// --- СВЯЗУЮЩИЕ ТАБЛИЦЫ (МНОГИЕ-КО-МНОГИМ) ---
+
+// Связи для ScreenType
+model ScreenTypeOption {
+  screenTypeCode String @map("screen_type_code")
+  optionCode     String @map("option_code")
+  screenType     ScreenType @relation(fields: [screenTypeCode], references: [code], onDelete: Cascade)
+  option         Option     @relation(fields: [optionCode], references: [code], onDelete: Cascade)
+  @@id([screenTypeCode, optionCode])
+  @@map("screen_type_options")
+}
+model ScreenTypeControlType {
+  screenTypeCode String @map("screen_type_code")
+  controlTypeCode String @map("control_type_code")
+  screenType    ScreenType  @relation(fields: [screenTypeCode], references: [code], onDelete: Cascade)
+  controlType   ControlType @relation(fields: [controlTypeCode], references: [code], onDelete: Cascade)
+  @@id([screenTypeCode, controlTypeCode])
+  @@map("screen_type_control_types")
+}
+model ScreenTypeSensor {
+  screenTypeCode String @map("screen_type_code")
+  sensorCode     String @map("sensor_code")
+  screenType     ScreenType @relation(fields: [screenTypeCode], references: [code], onDelete: Cascade)
+  sensor         Sensor     @relation(fields: [sensorCode], references: [code], onDelete: Cascade)
+  @@id([screenTypeCode, sensorCode])
+  @@map("screen_type_sensors")
+}
+
+// --- Связи для Item ---
+// Здесь определяем связующие таблицы.
+
+model ItemCategoryRelation {
+  itemCode     String       @map("item_code")
+  categoryCode String       @map("item_category_code")
+  item         Item         @relation(fields: [itemCode], references: [code], onDelete: Cascade)
+  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
+  @@id([itemCode, categoryCode])
+  @@map("item_categories_items") 
+}
+model ItemSubcategoryRelation {
+  itemCode        String          @map("item_code")
+  subcategoryCode String          @map("item_subcategory_code")
+  item            Item            @relation(fields: [itemCode], references: [code], onDelete: Cascade)
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
+  @@id([itemCode, subcategoryCode])
+  @@map("item_subcategories_items") 
+}
+model ItemPrice {
+  itemCode String   @map("item_code")
+  priceUsd Decimal? @map("price_usd") @db.Decimal(12, 2)
+  priceRub Decimal? @map("price_rub") @db.Decimal(12, 2)
+  item     Item     @relation(fields: [itemCode], references: [code], onDelete: Cascade)
+  @@id([itemCode]) 
+  @@map("item_prices")
+}
+model ItemSupplier {
+  itemCode     String   @map("item_code")
+  supplierCode String   @map("supplier_code")
+  item         Item     @relation(fields: [itemCode], references: [code], onDelete: Cascade)
+  supplier     Supplier @relation(fields: [supplierCode], references: [code], onDelete: Cascade)
+  @@id([itemCode, supplierCode])
+  @@map("item_suppliers")
+}
+
+// Связи для Category и Subcategory
+model ItemCategorySubcategory {
+  categoryCode    String          @map("item_category_code")
+  subcategoryCode String          @map("item_subcategory_code")
+  category        ItemCategory    @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
+  @@id([categoryCode, subcategoryCode])
+  @@map("item_category_subcategories")
+}
+
+// Связи для Cabinet
+model CabinetCategory {
+  cabinetCode  String       @map("cabinet_code")
+  categoryCode String       @map("item_category_code")
+  cabinet      Cabinet      @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, categoryCode])
+  @@map("cabinet_categories")
+}
+model CabinetSubcategory {
+  cabinetCode     String          @map("cabinet_code")
+  subcategoryCode String          @map("item_subcategory_code")
+  cabinet         Cabinet         @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, subcategoryCode])
+  @@map("cabinet_subcategories")
+}
+model CabinetLocation {
+  cabinetCode  String   @map("cabinet_code")
+  locationCode String   @map("location_code")
+  cabinet      Cabinet  @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  location     Location @relation(fields: [locationCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, locationCode])
+  @@map("cabinet_locations")
+}
+model CabinetPlacement {
+  cabinetCode   String    @map("cabinet_code")
+  placementCode String    @map("placement_code")
+  cabinet       Cabinet   @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  placement     Placement @relation(fields: [placementCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, placementCode])
+  @@map("cabinet_placements_cabinets")
+}
+model CabinetMaterial {
+  cabinetCode  String   @map("cabinet_code")
+  materialCode String   @map("material_code")
+  cabinet      Cabinet  @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  material     Material @relation(fields: [materialCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, materialCode])
+  @@map("cabinet_materials")
+}
+model CabinetCabinetSize {
+  cabinetCode     String      @map("cabinet_code")
+  cabinetSizeCode String      @map("size_code")
+  cabinet         Cabinet     @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  size            CabinetSize @relation(fields: [cabinetSizeCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, cabinetSizeCode])
+  @@map("cabinet_cabinet_sizes")
+}
+model CabinetPitch {
+  cabinetCode String  @map("cabinet_code")
+  pitchCode   String  @map("pitch_code")
+  cabinet     Cabinet @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  pitch       Pitch   @relation(fields: [pitchCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, pitchCode])
+  @@map("cabinet_pitches")
+}
+model CabinetManufacturer {
+  cabinetCode      String       @map("cabinet_code")
+  manufacturerCode String       @map("manufacturer_code")
+  cabinet          Cabinet      @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  manufacturer     Manufacturer @relation(fields: [manufacturerCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, manufacturerCode])
+  @@map("cabinet_manufacturers")
+}
+model CabinetSupplier {
+  cabinetCode  String   @map("cabinet_code")
+  supplierCode String   @map("supplier_code")
+  cabinet      Cabinet  @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  supplier     Supplier @relation(fields: [supplierCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode, supplierCode])
+  @@map("cabinet_suppliers")
+}
+model CabinetItemComponent {
+    cabinetCode String    @map("cabinet_code")
+    itemCode    String    @map("item_code") 
+    quantity    Int       @map("item_count") 
+    cabinet Cabinet @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+    item    Item    @relation(fields: [itemCode], references: [code], onDelete: Restrict)
+    @@id([cabinetCode, itemCode])
+    @@map("cabinet_items_components") 
+ }
+model CabinetPrice {
+  cabinetCode String   @map("cabinet_code")
+  priceUsd    Decimal? @map("price_usd") @db.Decimal(12, 2)
+  priceRub    Decimal? @map("price_rub") @db.Decimal(12, 2)
+  cabinet     Cabinet  @relation(fields: [cabinetCode], references: [code], onDelete: Cascade)
+  @@id([cabinetCode]) 
+  @@map("cabinet_prices")
+}
+
+// Связи для Module
+model ModuleCategory {
+  moduleCode   String       @map("module_code")
+  categoryCode String       @map("item_category_code")
+  module       Module       @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  category     ItemCategory @relation(fields: [categoryCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, categoryCode])
+  @@map("module_categories")
+}
+model ModuleSubcategory {
+  moduleCode      String          @map("module_code")
+  subcategoryCode String          @map("item_subcategory_code")
+  module          Module          @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  subcategory     ItemSubcategory @relation(fields: [subcategoryCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, subcategoryCode])
+  @@map("module_subcategories")
+}
+model ModuleLocation {
+  moduleCode   String   @map("module_code")
+  locationCode String   @map("location_code")
+  module       Module   @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  location     Location @relation(fields: [locationCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, locationCode])
+  @@map("module_locations")
+}
+model ModuleRefreshRate {
+  moduleCode      String      @map("module_code")
+  refreshRateCode String      @map("refresh_rate_code")
+  module          Module      @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  refreshRate     RefreshRate @relation(fields: [refreshRateCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, refreshRateCode])
+  @@map("module_refresh_rates")
+}
+model ModuleBrightness {
+  moduleCode     String     @map("module_code")
+  brightnessCode String     @map("brightness_code")
+  module         Module     @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  brightness     Brightness @relation(fields: [brightnessCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, brightnessCode])
+  @@map("module_brightness_values")
+}
+model ModuleModuleSize {
+  moduleCode     String     @map("module_code")
+  moduleSizeCode String     @map("module_size_code")
+  module         Module     @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  size           ModuleSize @relation(fields: [moduleSizeCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, moduleSizeCode])
+  @@map("module_module_sizes")
+}
+model ModulePitch {
+  moduleCode String @map("module_code")
+  pitchCode  String @map("pitch_code")
+  module     Module @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  pitch      Pitch  @relation(fields: [pitchCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, pitchCode])
+  @@map("module_pitches")
+}
+model ModuleManufacturer {
+  moduleCode       String       @map("module_code")
+  manufacturerCode String       @map("manufacturer_code")
+  module           Module       @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  manufacturer     Manufacturer @relation(fields: [manufacturerCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, manufacturerCode])
+  @@map("module_manufacturers")
+}
+model ModuleItemComponent {
+    moduleCode String @map("module_code")
+    itemCode   String @map("item_code") 
+    quantity   Int    @map("item_count") 
+    module Module @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+    item   Item   @relation(fields: [itemCode], references: [code], onDelete: Restrict)
+    @@id([moduleCode, itemCode])
+    @@map("module_items_components") 
+ }
+model ModuleOption {
+  moduleCode String @map("module_code")
+  optionCode String @map("option_code")
+  module     Module @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  option     Option @relation(fields: [optionCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode, optionCode])
+  @@map("module_options")
+}
+model ModulePrice {
+  moduleCode String   @map("module_code")
+  priceUsd   Decimal? @map("price_usd") @db.Decimal(12, 2)
+  priceRub   Decimal? @map("price_rub") @db.Decimal(12, 2)
+  module     Module   @relation(fields: [moduleCode], references: [code], onDelete: Cascade)
+  @@id([moduleCode]) 
+  @@map("module_prices")
+}
+
+// --- Связи размеров ---
+model CabinetSizeModuleSize { 
+  cabinetSizeCode String @map("cabinet_size_code")
+  moduleSizeCode  String @map("module_size_code")
+  cabinetSize CabinetSize @relation(fields: [cabinetSizeCode], references: [code], onDelete: Cascade)
+  moduleSize  ModuleSize  @relation(fields: [moduleSizeCode], references: [code], onDelete: Cascade)
+  @@id([cabinetSizeCode, moduleSizeCode])
+  @@map("cabinet_size_module_sizes")
+}

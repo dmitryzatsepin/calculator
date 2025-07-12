@@ -1,5 +1,5 @@
 // backend/src/services/ipProtectionService.ts
-import { PrismaClient, Prisma, IpProtection } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, IpProtection } from "../prisma/generated/client";
 
 // Тип для фильтров
 export interface IpProtectionFilters {

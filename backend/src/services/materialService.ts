@@ -1,5 +1,5 @@
 // backend/src/services/materialService.ts
-import { PrismaClient, Prisma, Material } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, Material } from "../prisma/generated/client";
 
 export interface MaterialFilters {
   onlyActive?: boolean | null;

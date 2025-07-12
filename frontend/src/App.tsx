@@ -25,7 +25,7 @@ const App = () => {
           <CalculatorDataProvider>
 
             <CalculationResultProvider>
-              <BrowserRouter>
+              <BrowserRouter basename="/apps/led-calculator">
                 <Routes>
                   {/* Теперь DisplayCalculator имеет доступ ко всем трем контекстам */}
                   <Route path="/" element={<DisplayCalculator />} />

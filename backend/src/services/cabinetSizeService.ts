@@ -1,5 +1,5 @@
 // backend/src/services/cabinetSizeService.ts
-import { PrismaClient, Prisma, CabinetSize } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, CabinetSize } from "../prisma/generated/client";
 
 export class CabinetSizeService {
     private prisma: PrismaClient;

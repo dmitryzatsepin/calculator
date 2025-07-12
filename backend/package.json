@@ -4,20 +4,10 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "ts-node src/server.ts",
-    "prisma:studio": "prisma studio",
-    "prisma:migrate": "prisma migrate",
-    "prisma:generate": "prisma generate",
-    "prisma:reset": "prisma migrate reset",
-    "prisma:seed": "tsx prisma/seed/index.ts",
-    "prisma:seed:upsert": "tsx prisma/seed/index.ts --upsert",
-    "clean": "rm -rf dist",
-    "copy-engine": "tsx copy-engine.ts",
-    "copy-prisma-client": "tsx copy-prisma-client.ts",
-    "build": "pnpm run clean && pnpm prisma generate && npm run copy-prisma-client && tsc && pnpm run copy-engine",
-    "start": "PRISMA_CLIENT_LOCATION=./dist/prisma/client NODE_PATH=./dist node dist/server.js",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push --force-reset"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "rm -rf dist && pnpm prisma:generate && tsc && cp -r src/prisma/generated dist/prisma/generated",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate"
   },
   "keywords": [],
   "author": "",
@@ -70,6 +60,7 @@
     "typescript": "^5.8.3"
   },
   "prisma": {
+    "schema": "src/prisma/schema.prisma",
     "seed": "pnpm run prisma:seed"
   }
 }

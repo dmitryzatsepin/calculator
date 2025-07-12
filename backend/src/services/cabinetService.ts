@@ -1,5 +1,5 @@
 // backend/src/services/cabinetService.ts
-import { PrismaClient, Prisma, Cabinet } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, Cabinet } from "../prisma/generated/client";
 
 export interface CabinetFilters {
   locationCode?: string | null;

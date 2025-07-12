@@ -1,0 +1,7 @@
+index.ts (Главный файл запуска сидинга)
+utils.ts (Вспомогательные функции: чтение Excel, safeInt и т.д.)
+config.ts (Конфигурация листов Excel и маппингов)
+clearDatabase.ts (Функция для очистки таблиц)
+seedReferences.ts (Функция для сидинга справочников)
+seedEntities.ts (Функция для сидинга основных сущностей: Cabinet, Module, Item)
+seedRelations.ts (Функция для сидинга связующих таблиц)

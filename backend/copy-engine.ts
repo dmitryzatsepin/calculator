@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import path from 'path'
 
 async function copyEngine() {
-  const source = path.resolve('prisma/generated/client/libquery_engine-debian-openssl-3.0.x.so.node')
+  const source = path.resolve('src/prisma/generated/client/libquery_engine-debian-openssl-3.0.x.so.node')
   const dest = path.resolve('dist/query-engine.so.node')
 
   try {

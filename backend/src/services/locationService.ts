@@ -1,5 +1,5 @@
 // backend/src/services/locationService.ts
-import { PrismaClient, Prisma, Location } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, Location } from "../prisma/generated/client";
 
 export interface LocationFilters {
     onlyActive?: boolean | null;

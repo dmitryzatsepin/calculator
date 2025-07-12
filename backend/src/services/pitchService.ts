@@ -1,5 +1,5 @@
 // backend/src/services/pitchService.ts
-import { PrismaClient, Prisma, Pitch } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, Pitch } from "../prisma/generated/client";
 
 export interface PitchFilters {
     onlyActive?: boolean | null;

@@ -1,0 +1,421 @@
+// prisma/seed/configs/relationMN.configs.ts
+import type { RelationMNConfig } from '../types.config';
+
+export const relationMNConfigs: RelationMNConfig[] = [
+  {
+    sheetName: "item_category>item_subcategory",
+    modelName: "itemCategorySubcategory",
+    field1: {
+      excelCol: "item_category_code",
+      prismaField: "categoryCode",
+      mapRef: "itemCategory",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "item_subcategory_code",
+      prismaField: "subcategoryCode",
+      mapRef: "itemSubcategory",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet_size>module_size",
+    modelName: "cabinetSizeModuleSize",
+    field1: {
+      excelCol: "cabinet_size_code",
+      prismaField: "cabinetSizeCode",
+      mapRef: "cabinetSize",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "module_size_code",
+      prismaField: "moduleSizeCode",
+      mapRef: "moduleSize",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "screen_type>option",
+    modelName: "screenTypeOption",
+    field1: {
+      excelCol: "screen_type_code",
+      prismaField: "screenTypeCode",
+      mapRef: "screenType",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "option_code",
+      prismaField: "optionCode",
+      mapRef: "option",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "screen_type>control_type",
+    modelName: "screenTypeControlType",
+    field1: {
+      excelCol: "screen_type_code",
+      prismaField: "screenTypeCode",
+      mapRef: "screenType",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "control_type_code",
+      prismaField: "controlTypeCode",
+      mapRef: "controlType",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "screen_type>sensor",
+    modelName: "screenTypeSensor",
+    field1: {
+      excelCol: "screen_type_code",
+      prismaField: "screenTypeCode",
+      mapRef: "screenType",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "sensor_code",
+      prismaField: "sensorCode",
+      mapRef: "sensor",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "item>category",
+    modelName: "itemCategoryRelation",
+    field1: {
+      excelCol: "item_code",
+      prismaField: "itemCode",
+      mapRef: "item",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "item_category_code",
+      prismaField: "categoryCode",
+      mapRef: "itemCategory",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "item>subcategory",
+    modelName: "itemSubcategoryRelation",
+    field1: {
+      excelCol: "item_code",
+      prismaField: "itemCode",
+      mapRef: "item",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "item_subcategory_code",
+      prismaField: "subcategoryCode",
+      mapRef: "itemSubcategory",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "item>supplier",
+    modelName: "itemSupplier",
+    field1: {
+      excelCol: "item_code",
+      prismaField: "itemCode",
+      mapRef: "item",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "supplier_code",
+      prismaField: "supplierCode",
+      mapRef: "supplier",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>category",
+    modelName: "cabinetCategory",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "item_category_code",
+      prismaField: "categoryCode",
+      mapRef: "itemCategory",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>subcategory",
+    modelName: "cabinetSubcategory",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "item_subcategory_code",
+      prismaField: "subcategoryCode",
+      mapRef: "itemSubcategory",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>location",
+    modelName: "cabinetLocation",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "location_code",
+      prismaField: "locationCode",
+      mapRef: "location",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>placement",
+    modelName: "cabinetPlacement",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "placement_code",
+      prismaField: "placementCode",
+      mapRef: "placement",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>material",
+    modelName: "cabinetMaterial",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "material_code",
+      prismaField: "materialCode",
+      mapRef: "material",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>cabinet_size",
+    modelName: "cabinetCabinetSize",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "size_code",
+      prismaField: "cabinetSizeCode",
+      mapRef: "cabinetSize",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>pitch",
+    modelName: "cabinetPitch",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "pitch_code",
+      prismaField: "pitchCode",
+      mapRef: "pitch",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>manufacturer",
+    modelName: "cabinetManufacturer",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "manufacturer_code",
+      prismaField: "manufacturerCode",
+      mapRef: "manufacturer",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "cabinet>supplier",
+    modelName: "cabinetSupplier",
+    field1: {
+      excelCol: "cabinet_code",
+      prismaField: "cabinetCode",
+      mapRef: "cabinet",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "supplier_code",
+      prismaField: "supplierCode",
+      mapRef: "supplier",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>category",
+    modelName: "moduleCategory",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "item_category_code",
+      prismaField: "categoryCode",
+      mapRef: "itemCategory",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>subcategory",
+    modelName: "moduleSubcategory",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "item_subcategory_code",
+      prismaField: "subcategoryCode",
+      mapRef: "itemSubcategory",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>location",
+    modelName: "moduleLocation",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "location_code",
+      prismaField: "locationCode",
+      mapRef: "location",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>refresh_rate",
+    modelName: "moduleRefreshRate",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "refresh_rate_code",
+      prismaField: "refreshRateCode",
+      mapRef: "refreshRate",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>brightness",
+    modelName: "moduleBrightness",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "brightness_code",
+      prismaField: "brightnessCode",
+      mapRef: "brightness",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>module_size",
+    modelName: "moduleModuleSize",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "module_size_code",
+      prismaField: "moduleSizeCode",
+      mapRef: "moduleSize",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>pitch",
+    modelName: "modulePitch",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "pitch_code",
+      prismaField: "pitchCode",
+      mapRef: "pitch",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>manufacturer",
+    modelName: "moduleManufacturer",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "manufacturer_code",
+      prismaField: "manufacturerCode",
+      mapRef: "manufacturer",
+      mapKey: "code",
+    },
+  },
+  {
+    sheetName: "module>option",
+    modelName: "moduleOption",
+    field1: {
+      excelCol: "module_code",
+      prismaField: "moduleCode",
+      mapRef: "module",
+      mapKey: "code",
+    },
+    field2: {
+      excelCol: "option_code",
+      prismaField: "optionCode",
+      mapRef: "option",
+      mapKey: "code",
+    },
+  },
+];

@@ -1,11 +1,11 @@
 // backend/src/graphql/builder.ts
 import SchemaBuilder from '@pothos/core';
 import PrismaPlugin from '@pothos/plugin-prisma';
-import type PrismaTypes from '../../prisma/pothos-types';
+import type PrismaTypes from '../prisma/pothos-types';
 import RelayPlugin from '@pothos/plugin-relay';
 import { prisma } from '../lib/prisma';
 import { DateResolver, DateTimeResolver } from 'graphql-scalars';
-import { User as PrismaUser } from '../../prisma/generated/client';
+import { User as PrismaUser } from '../prisma/generated/client';
 
 // --- Импортируем типы наших сервисов ---
 import { AuthService } from '../services/authService';

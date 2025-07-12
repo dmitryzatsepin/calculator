@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import path from 'path'
 
 async function copyPrismaClient() {
-  const source = path.resolve('prisma/generated/client')
+  const source = path.resolve('src/prisma/generated/client')
   const dest = path.resolve('dist/prisma/client')
 
   try {

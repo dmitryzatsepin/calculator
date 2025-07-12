@@ -13,6 +13,13 @@ if (!endpoint) {
     console.error("GraphQL endpoint URL could not be determined.");
 }
 
-export const graphQLClient = new GraphQLClient(endpoint || '', {
+const fullEndpointUrl = new URL(endpoint, window.location.origin).href;
 
+console.log("Resolved GraphQL Endpoint URL:", fullEndpointUrl);
+
+export const graphQLClient = new GraphQLClient(fullEndpointUrl, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
 });

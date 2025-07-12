@@ -1,5 +1,5 @@
 // backend/src/services/itemSubcategoryService.ts
-import { PrismaClient, Prisma, ItemSubcategory } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, ItemSubcategory } from "../prisma/generated/client";
 
 export class ItemSubcategoryService {
     private prisma: PrismaClient;

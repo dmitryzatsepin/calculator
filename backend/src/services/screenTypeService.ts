@@ -1,5 +1,5 @@
 // backend/src/services/screenTypeService.ts
-import { PrismaClient, Prisma, ScreenType } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, ScreenType } from "../prisma/generated/client";
 
 export interface ScreenTypeFilters {
   onlyActive?: boolean | null;

@@ -1,5 +1,5 @@
 // backend/src/services/brightnessService.ts
-import { PrismaClient, Prisma } from "../../prisma/generated/client";
+import { PrismaClient, Prisma } from "../prisma/generated/client";
 
 export interface BrightnessFilters {
   locationCode: string;

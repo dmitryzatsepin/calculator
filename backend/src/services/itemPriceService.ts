@@ -1,5 +1,5 @@
 // backend/src/services/itemPriceService.ts
-import { PrismaClient, ItemPrice } from "../../prisma/generated/client";
+import { PrismaClient, ItemPrice } from "../prisma/generated/client";
 
 export class ItemPriceService {
     private prisma: PrismaClient;

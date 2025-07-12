@@ -1,5 +1,5 @@
 // backend/src/services/sensorService.ts
-import { PrismaClient, Prisma, Sensor } from "../../prisma/generated/client";
+import { PrismaClient, Prisma, Sensor } from "../prisma/generated/client";
 
 export interface SensorFilters {
     onlyActive?: boolean | null;
