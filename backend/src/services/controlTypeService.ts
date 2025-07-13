@@ -1,5 +1,5 @@
 // backend/src/services/controlTypeService.ts
-import { PrismaClient, Prisma, ControlType } from "../prisma/generated/client"; // <--- ДОБАВЛЕНО 'ControlType'
+import { PrismaClient, Prisma, ControlType } from "@prisma/client";
 
 export interface ControlTypeFilters {
     onlyActive?: boolean | null;

@@ -1,5 +1,5 @@
 // backend/src/services/refreshRateService.ts
-import { PrismaClient, Prisma, RefreshRate } from "../prisma/generated/client";
+import { PrismaClient, Prisma, RefreshRate } from "@prisma/client";
 
 export interface RefreshRateFilters {
   onlyActive?: boolean | null;

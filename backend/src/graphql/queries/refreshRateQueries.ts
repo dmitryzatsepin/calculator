@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/refreshRateQueries.ts
-import { builder } from '../builder';
-import { RefreshRateService } from '../../services/refreshRateService';
+import { builder } from '../builder.js';
+import { RefreshRateService } from '../../services/refreshRateService.js';
 
 const getRefreshRateService = (ctx: any) => new RefreshRateService(ctx.prisma);
 

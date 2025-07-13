@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/pitchQueries.ts
-import { builder } from '../builder';
-import { PitchService } from '../../services/pitchService';
+import { builder } from '../builder.js';
+import { PitchService } from '../../services/pitchService.js';
 
 const getPitchService = (ctx: any) => new PitchService(ctx.prisma);
 

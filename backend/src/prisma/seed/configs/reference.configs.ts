@@ -1,6 +1,6 @@
 // prisma/seed/configs/reference.configs.ts
-import type { ReferenceConfig } from '../types.config';
-import { safeBoolean, safeInt, safeDecimal } from "../utils";
+import type { ReferenceConfig } from '../types.config.js';
+import { safeBoolean, safeInt, safeDecimal } from "../utils.js";
 
 export const referenceConfigs: ReferenceConfig[] = [
   {

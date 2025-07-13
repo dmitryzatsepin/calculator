@@ -1,5 +1,5 @@
 // backend/src/services/manufacturerService.ts
-import { PrismaClient, Prisma, Manufacturer } from "../prisma/generated/client";
+import { PrismaClient, Prisma, Manufacturer } from "@prisma/client";
 
 export class ManufacturerService {
     private prisma: PrismaClient;

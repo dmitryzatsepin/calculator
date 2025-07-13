@@ -2,13 +2,11 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./generated/client"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 generator pothos {
   provider = "prisma-pothos-types"
-  output       = "./pothos-types.ts"
   clientOutput = "./generated/client"
 }
 

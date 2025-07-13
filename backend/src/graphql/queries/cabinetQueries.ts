@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/cabinetQueries.ts
-import { builder } from '../builder';
-import { CabinetService } from '../../services/cabinetService';
+import { builder } from '../builder.js';
+import { CabinetService } from '../../services/cabinetService.js';
 
 const CabinetFilterInput = builder.inputType('CabinetFilterInput', {
   fields: (t) => ({

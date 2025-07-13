@@ -1,36 +1,39 @@
 // backend/src/graphql/builder.ts
 import SchemaBuilder from '@pothos/core';
 import PrismaPlugin from '@pothos/plugin-prisma';
-import type PrismaTypes from '../prisma/pothos-types';
+import PrismaTypes from '../prisma/pothos-types.js';
 import RelayPlugin from '@pothos/plugin-relay';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 import { DateResolver, DateTimeResolver } from 'graphql-scalars';
-import { User as PrismaUser } from '../prisma/generated/client';
+import { User as PrismaUser } from '@prisma/client';
 
 // --- Импортируем типы наших сервисов ---
-import { AuthService } from '../services/authService';
-import { CabinetService } from '../services/cabinetService';
-import { ItemService } from '../services/itemService';
-import { LocationService } from '../services/locationService';
-import { MaterialService } from '../services/materialService';
-import { ModuleService } from '../services/moduleService';
-import { OptionService } from '../services/optionService';
-import { PitchService } from '../services/pitchService';
-import { PriceService } from '../services/priceService';
-import { RefreshRateService } from '../services/refreshRateService';
-import { ScreenTypeService } from '../services/screenTypeService';
-import { SensorService } from '../services/sensorService';
-import { BrightnessService } from '../services/brightnessService';
-import { ControlTypeService } from '../services/controlTypeService';
-import { IpProtectionService } from '../services/ipProtectionService';
-import { ItemCategoryService } from '../services/itemCategoryService';
-import { ItemSubcategoryService } from '../services/itemSubcategoryService';
-import { ManufacturerService } from '../services/manufacturerService';
-import { PlacementService } from '../services/placementService';
-import { SupplierService } from '../services/supplierService';
-import { CabinetItemComponentService } from '../services/cabinetItemComponentService';
-import { CabinetPriceService } from '../services/cabinetPriceService';
-import { CabinetSizeService } from '../services/cabinetSizeService';
+import { AuthService } from '../services/authService.js';
+import { CabinetService } from '../services/cabinetService.js';
+import { ItemService } from '../services/itemService.js';
+import { LocationService } from '../services/locationService.js';
+import { MaterialService } from '../services/materialService.js';
+import { ModuleService } from '../services/moduleService.js';
+import { ModuleSizeService } from '../services/moduleSizeService.js';
+import { ModuleItemComponentService } from '../services/moduleItemComponentService.js';
+import { ModulePriceService } from '../services/modulePriceService.js';
+import { OptionService } from '../services/optionService.js';
+import { PitchService } from '../services/pitchService.js';
+import { PriceService } from '../services/priceService.js';
+import { RefreshRateService } from '../services/refreshRateService.js';
+import { ScreenTypeService } from '../services/screenTypeService.js';
+import { SensorService } from '../services/sensorService.js';
+import { BrightnessService } from '../services/brightnessService.js';
+import { ControlTypeService } from '../services/controlTypeService.js';
+import { IpProtectionService } from '../services/ipProtectionService.js';
+import { ItemCategoryService } from '../services/itemCategoryService.js';
+import { ItemSubcategoryService } from '../services/itemSubcategoryService.js';
+import { ManufacturerService } from '../services/manufacturerService.js';
+import { PlacementService } from '../services/placementService.js';
+import { SupplierService } from '../services/supplierService.js';
+import { CabinetItemComponentService } from '../services/cabinetItemComponentService.js';
+import { CabinetPriceService } from '../services/cabinetPriceService.js';
+import { CabinetSizeService } from '../services/cabinetSizeService.js';
 
 // --- Определяем интерфейс для объекта сервисов ---
 export interface Services {
@@ -40,6 +43,9 @@ export interface Services {
   locationService: LocationService;
   materialService: MaterialService;
   moduleService: ModuleService;
+  moduleSizeService: ModuleSizeService;
+  moduleItemComponentService: ModuleItemComponentService;
+  modulePriceService: ModulePriceService;
   optionService: OptionService;
   pitchService: PitchService;
   priceService: PriceService;

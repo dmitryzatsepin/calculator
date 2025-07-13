@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/locationQueries.ts
-import { builder } from '../builder';
-import { LocationService } from '../../services/locationService';
+import { builder } from '../builder.js';
+import { LocationService } from '../../services/locationService.js';
 
 const getLocationService = (ctx: any) => new LocationService(ctx.prisma);
 

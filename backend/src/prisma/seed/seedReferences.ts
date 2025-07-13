@@ -1,11 +1,11 @@
 // prisma/seed/seedReferences.ts
-import { PrismaClient } from '../generated/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 type PrismaModelName = keyof Omit<PrismaClient, `$${string}` | symbol>;
 import * as XLSX from 'xlsx';
-import { getDataFromSheet, safeBoolean, safeInt, safeDecimal } from './utils';
-import { referenceConfigs, IdMaps } from './config';
-import type { SeedMode } from './index'; // Импортируем тип режима
+import { getDataFromSheet, safeBoolean, safeInt, safeDecimal } from './utils.js';
+import { referenceConfigs, IdMaps } from './config.js';
+import type { SeedMode } from './index.js'; // Импортируем тип режима
 
 /**
  * Заполняет справочные таблицы.

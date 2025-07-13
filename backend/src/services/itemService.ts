@@ -1,5 +1,5 @@
 // backend/src/services/itemService.ts
-import { PrismaClient, Prisma, Item } from "../prisma/generated/client";
+import { PrismaClient, Prisma, Item } from "@prisma/client";
 import DataLoader from 'dataloader';
 
 export interface ItemFilters {

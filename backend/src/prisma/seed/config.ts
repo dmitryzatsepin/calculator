@@ -1,7 +1,7 @@
 // prisma/seed/config.ts
 import { PrismaClient, Prisma } from "@prisma/client";
 import { Decimal } from '@prisma/client/runtime/library';
-import { safeBoolean, safeInt, safeDecimal } from "./utils";
+import { safeBoolean, safeInt, safeDecimal } from "./utils.js";
 
 // Получаем типы моделей Prisma
 type PrismaModels = keyof Omit<PrismaClient, `$${string}` | symbol | "user">; // Исключаем User и методы

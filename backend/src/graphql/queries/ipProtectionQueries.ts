@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/ipProtectionQueries.ts
-import { builder } from '../builder';
-import { IpProtectionService } from '../../services/ipProtectionService';
+import { builder } from '../builder.js';
+import { IpProtectionService } from '../../services/ipProtectionService.js';
 
 const getIpProtectionService = (ctx: any) => new IpProtectionService(ctx.prisma);
 

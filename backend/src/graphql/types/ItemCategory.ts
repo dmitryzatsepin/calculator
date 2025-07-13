@@ -1,9 +1,22 @@
 // src/graphql/types/ItemCategory.ts
-import { builder } from '../builder';
+
+import { builder } from '../builder.js';
+import type { Prisma } from '@prisma/client';
+import type { GraphQLContext } from '../builder.js';
+
+type ItemCategory = Prisma.ItemCategoryGetPayload<{}>;
+
+type ItemCategoryFieldBuilder = Parameters<
+  Parameters<typeof builder.prismaNode>[1]['fields']
+>[0];
 
 builder.prismaNode('ItemCategory', {
   id: { field: 'id' },
-  fields: (t) => ({
+  findUnique: (id: string, { prisma }: GraphQLContext) =>
+    prisma.itemCategory.findUnique({
+      where: { id: parseInt(id, 10) },
+    }),
+  fields: (t: ItemCategoryFieldBuilder) => ({
     code: t.exposeString('code'),
     name: t.exposeString('name'),
     active: t.exposeBoolean('active'),

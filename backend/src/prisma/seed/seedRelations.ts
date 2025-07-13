@@ -1,11 +1,11 @@
 // prisma/seed/seedRelations.ts
-import { PrismaClient, Prisma } from '../generated/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 const prisma = new PrismaClient();
 type PrismaModelName = keyof Omit<PrismaClient, `$${string}` | symbol>;
 import * as XLSX from 'xlsx';
-import { getDataFromSheet } from './utils';
-import { relationMNConfigs, relationCountConfigs, IdMaps } from './config';
-import type { SeedMode } from './index';
+import { getDataFromSheet } from './utils.js';
+import { relationMNConfigs, relationCountConfigs, IdMaps } from './config.js';
+import type { SeedMode } from './index.js';
 
 /**
  * Заполняет связующие таблицы M-N и таблицы с количеством.

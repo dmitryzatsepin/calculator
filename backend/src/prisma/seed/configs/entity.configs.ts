@@ -1,6 +1,6 @@
 // prisma/seed/configs/entity.configs.ts
-import type { EntityConfig } from '../types.config';
-import { safeBoolean } from "../utils";
+import type { EntityConfig } from '../types.config.js';
+import { safeBoolean } from "../utils.js";
 
 export const entityConfigs: EntityConfig[] = [
   {

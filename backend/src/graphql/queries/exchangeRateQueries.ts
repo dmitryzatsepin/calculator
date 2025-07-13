@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/exchangeRateQueries.ts
-import { builder } from '../builder';
-import { ExchangeRateService } from '../../services/exchangeRateService';
+import { builder } from '../builder.js';
+import { ExchangeRateService } from '../../services/exchangeRateService.js';
 
 // Вспомогательная функция для создания экземпляра сервиса
 // Поскольку сервис не зависит от контекста (prisma), его можно создать один раз

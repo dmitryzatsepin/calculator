@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/sensorQueries.ts
-import { builder } from '../builder';
-import { SensorService } from '../../services/sensorService';
+import { builder } from '../builder.js';
+import { SensorService } from '../../services/sensorService.js';
 
 const getSensorService = (ctx: any) => new SensorService(ctx.prisma);
 

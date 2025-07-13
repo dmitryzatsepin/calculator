@@ -1,5 +1,5 @@
 // prisma/seed/configs/relationMN.configs.ts
-import type { RelationMNConfig } from '../types.config';
+import type { RelationMNConfig } from '../types.config.js';
 
 export const relationMNConfigs: RelationMNConfig[] = [
   {

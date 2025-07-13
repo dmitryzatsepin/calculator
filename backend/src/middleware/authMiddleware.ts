@@ -1,8 +1,7 @@
 // src/middleware/authMiddleware.ts
 import { Request, Response, NextFunction } from "express";
 import passport from "passport";
-// ИМПОРТИРУЕМ НАШ ТИП (укажи правильный путь!)
-import { CustomUser } from "../types/express"; // <--- ДОБАВИЛИ ИМПОРТ
+import { CustomUser } from "../types/express/index.js";
 
 // Интерфейс User здесь больше не нужен, так как импортируем CustomUser
 // interface User { ... }
@@ -19,16 +18,16 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export const admin = (req: Request, res: Response, next: NextFunction) => {
-    console.log('Admin middleware вызван...');
-    // ЯВНО ПРИВОДИМ ТИП req.user к CustomUser
-    const user = req.user as CustomUser; // <--- ЯВНОЕ ПРИВЕДЕНИЕ ТИПА
-    if (user && user.role === 'ADMIN') {
-        console.log('Доступ разрешен для ADMIN');
-        next();
-    } else {
-        console.log('Доступ запрещен. Требуются права администратора.', { userRole: user?.role });
-        res.status(403);
-        const error = new Error('Доступ запрещен. Требуются права администратора.');
-        next(error);
-    }
+  console.log('Admin middleware вызван...');
+  // ЯВНО ПРИВОДИМ ТИП req.user к CustomUser
+  const user = req.user as CustomUser; // <--- ЯВНОЕ ПРИВЕДЕНИЕ ТИПА
+  if (user && user.role === 'ADMIN') {
+    console.log('Доступ разрешен для ADMIN');
+    next();
+  } else {
+    console.log('Доступ запрещен. Требуются права администратора.', { userRole: user?.role });
+    res.status(403);
+    const error = new Error('Доступ запрещен. Требуются права администратора.');
+    next(error);
+  }
 };

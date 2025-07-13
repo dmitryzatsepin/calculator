@@ -1,16 +1,20 @@
 // prisma/seed/index.ts
-import { PrismaClient } from '../generated/client';
-import * as XLSX from 'xlsx';
+import { PrismaClient } from '@prisma/client';
+import XLSX from 'xlsx';
 import * as path from 'path';
 import * as fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Импортируем наши модули сидинга
-import { clearDatabase } from '../seed/clearDatabase';
-import { createIdMaps } from './config'; // Импортируем функцию создания карт
-import { seedReferences } from '../seed/seedReferences';
-import { seedEntities } from '../seed/seedEntities';
-import { seedRelations } from '../seed/seedRelations';
-import { seedPrices } from './seedPrices';
+import { clearDatabase } from '../seed/clearDatabase.js';
+import { createIdMaps } from './config.js'; // Импортируем функцию создания карт
+import { seedReferences } from '../seed/seedReferences.js';
+import { seedEntities } from '../seed/seedEntities.js';
+import { seedRelations } from '../seed/seedRelations.js';
+import { seedPrices } from './seedPrices.js';
 
 const prisma = new PrismaClient();
 
@@ -29,7 +33,7 @@ if (modeArg) {
         console.warn(`⚠️ Неизвестный режим '--mode=${modeValue}'. Используется режим по умолчанию: 'clear'.`);
     }
 } else if (args.includes('--upsert') || args.includes('-u')) { // Альтернативный флаг
-     seedMode = 'upsert';
+    seedMode = 'upsert';
 }
 
 console.log(`🌱 Начало выполнения скрипта сидинга в режиме: ${seedMode.toUpperCase()}`);
@@ -39,7 +43,7 @@ async function main() {
     const startTime = Date.now();
 
     // 1. Проверка и чтение Excel файла
-    const excelFilePath = path.resolve(__dirname, '../../data/database.xlsx');
+    const excelFilePath = path.resolve(__dirname, '../../../data/database.xlsx');
     console.log(`[Main] Используется Excel файл: ${excelFilePath}`);
     if (!fs.existsSync(excelFilePath)) {
         console.error(`❌ КРИТИЧЕСКАЯ ОШИБКА: Файл Excel не найден по пути: ${excelFilePath}`);
@@ -50,8 +54,8 @@ async function main() {
         workbook = XLSX.readFile(excelFilePath);
         console.log('[Main] Файл Excel успешно прочитан.');
     } catch (e) {
-         console.error(`❌ КРИТИЧЕСКАЯ ОШИБКА: Не удалось прочитать файл Excel:`, e);
-         process.exit(1);
+        console.error(`❌ КРИТИЧЕСКАЯ ОШИБКА: Не удалось прочитать файл Excel:`, e);
+        process.exit(1);
     }
 
     // 2. Очистка базы данных (ТОЛЬКО В РЕЖИМЕ 'clear')
@@ -76,17 +80,17 @@ async function main() {
         // Передаем режим в функцию сидинга
         await seedReferences(prisma, workbook, idMaps, seedMode);
     } catch (e) {
-         console.error(`❌ Ошибка на этапе сидинга справочников. Выполнение прервано.`);
-         process.exit(1);
+        console.error(`❌ Ошибка на этапе сидинга справочников. Выполнение прервано.`);
+        process.exit(1);
     }
 
     // 5. Сидинг Основных Сущностей (использует upsert в соответствующем режиме)
     try {
-         // Передаем режим в функцию сидинга
+        // Передаем режим в функцию сидинга
         await seedEntities(prisma, workbook, idMaps, seedMode);
     } catch (e) {
-         console.error(`❌ Ошибка на этапе сидинга основных сущностей. Выполнение прервано.`);
-         process.exit(1);
+        console.error(`❌ Ошибка на этапе сидинга основных сущностей. Выполнение прервано.`);
+        process.exit(1);
     }
 
     // 6. Сидинг Связей (использует upsert/createMany в соответствующем режиме)
@@ -95,8 +99,8 @@ async function main() {
         await seedRelations(prisma, workbook, idMaps, seedMode);
         await seedPrices(prisma, workbook, idMaps, seedMode);
     } catch (e) {
-         console.error(`❌ Ошибка на этапе сидинга связей. Выполнение прервано.`);
-         process.exit(1);
+        console.error(`❌ Ошибка на этапе сидинга связей. Выполнение прервано.`);
+        process.exit(1);
     }
 
     const endTime = Date.now();
@@ -106,12 +110,12 @@ async function main() {
 
 // Запуск и обработка финальных ошибок/отключения
 main()
-  .catch((e) => {
-    console.error('\n💥 НЕПРЕДВИДЕННАЯ ОШИБКА В main():', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    console.log('--- [Main] Отключение от БД ---');
-    await prisma.$disconnect();
-    console.log('--- [Main] Отключение от БД завершено ---');
-  });
+    .catch((e) => {
+        console.error('\n💥 НЕПРЕДВИДЕННАЯ ОШИБКА В main():', e);
+        process.exit(1);
+    })
+    .finally(async () => {
+        console.log('--- [Main] Отключение от БД ---');
+        await prisma.$disconnect();
+        console.log('--- [Main] Отключение от БД завершено ---');
+    });

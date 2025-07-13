@@ -1,5 +1,5 @@
 // backend/src/services/moduleItemComponentService.ts
-import { PrismaClient, ModuleItemComponent } from "../prisma/generated/client";
+import { PrismaClient, ModuleItemComponent } from "@prisma/client";
 
 export class ModuleItemComponentService {
     private prisma: PrismaClient;

@@ -1,6 +1,10 @@
 // backend/src/server.ts
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const envPath = path.resolve(__dirname, '../.env');
 dotenv.config({ path: envPath });
@@ -10,43 +14,47 @@ import http from "http";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
-import expressPlayground from "graphql-playground-middleware-express";
+import pkg from "graphql-playground-middleware-express";
+const { default: expressPlayground } = pkg;
 
 // --- GraphQL, Prisma и Зависимости для Контекста ---
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
-import { schema } from "./graphql/schema";
-import { prisma } from "./lib/prisma";
-import { GraphQLContext, Services } from "./graphql/builder"; // <-- Импортируем Services
+import { schema } from "./graphql/schema.js";
+import { prisma } from "./lib/prisma.js";
+import { GraphQLContext, Services } from "./graphql/builder.js";
 import { validateSchema } from "graphql";
 import jwt from 'jsonwebtoken';
-import { User as PrismaUser } from './prisma/generated/client';
+import { User as PrismaUser } from '@prisma/client';
 
 // --- Импорты всех сервисов ---
-import { AuthService } from './services/authService';
-import { CabinetService } from './services/cabinetService';
-import { ItemService } from './services/itemService';
-import { LocationService } from './services/locationService';
-import { MaterialService } from './services/materialService';
-import { ModuleService } from './services/moduleService';
-import { OptionService } from './services/optionService';
-import { PitchService } from './services/pitchService';
-import { PriceService } from './services/priceService';
-import { RefreshRateService } from './services/refreshRateService';
-import { ScreenTypeService } from './services/screenTypeService';
-import { SensorService } from './services/sensorService';
-import { BrightnessService } from './services/brightnessService';
-import { ControlTypeService } from './services/controlTypeService';
-import { IpProtectionService } from './services/ipProtectionService';
-import { ItemCategoryService } from './services/itemCategoryService';
-import { ItemSubcategoryService } from './services/itemSubcategoryService';
-import { ManufacturerService } from './services/manufacturerService';
-import { PlacementService } from './services/placementService';
-import { SupplierService } from './services/supplierService';
-import { CabinetItemComponentService } from './services/cabinetItemComponentService';
-import { CabinetPriceService } from './services/cabinetPriceService';
-import { CabinetSizeService } from './services/cabinetSizeService';
+import { AuthService } from './services/authService.js';
+import { CabinetService } from './services/cabinetService.js';
+import { ItemService } from './services/itemService.js';
+import { LocationService } from './services/locationService.js';
+import { MaterialService } from './services/materialService.js';
+import { ModuleService } from './services/moduleService.js';
+import { OptionService } from './services/optionService.js';
+import { PitchService } from './services/pitchService.js';
+import { PriceService } from './services/priceService.js';
+import { RefreshRateService } from './services/refreshRateService.js';
+import { ScreenTypeService } from './services/screenTypeService.js';
+import { SensorService } from './services/sensorService.js';
+import { BrightnessService } from './services/brightnessService.js';
+import { ControlTypeService } from './services/controlTypeService.js';
+import { IpProtectionService } from './services/ipProtectionService.js';
+import { ItemCategoryService } from './services/itemCategoryService.js';
+import { ItemSubcategoryService } from './services/itemSubcategoryService.js';
+import { ManufacturerService } from './services/manufacturerService.js';
+import { PlacementService } from './services/placementService.js';
+import { SupplierService } from './services/supplierService.js';
+import { CabinetItemComponentService } from './services/cabinetItemComponentService.js';
+import { CabinetPriceService } from './services/cabinetPriceService.js';
+import { CabinetSizeService } from './services/cabinetSizeService.js';
+import { ModuleSizeService } from './services/moduleSizeService.js';
+import { ModuleItemComponentService } from './services/moduleItemComponentService.js';
+import { ModulePriceService } from './services/modulePriceService.js';
 
 // --- Инициализация ---
 dotenv.config();
@@ -97,19 +105,113 @@ async function startServer() {
   console.log("✅ Apollo Server started successfully");
 
   // 5. Middleware
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-  app.use(cors({/* ... */ }));
-  app.use(morgan("dev"));
-  app.use(helmet());
-  console.log('✅ Basic middleware applied');
+  // app.use(express.json({ limit: '10mb' }));
+  // app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+  // app.use(cors({/* ... */ }));
+  // app.use(morgan("dev"));
+  // app.use(helmet());
+  // console.log('✅ Basic middleware applied');
+
+  // 5. Middleware (Режим отладки)
+
+  // ШПИОНСКОЕ MIDDLEWARE
+  app.use((req, res, next) => {
+    console.log('--- НОВЫЙ ЗАПРОС ---');
+    console.log('Время:', new Date().toISOString());
+    console.log('Метод:', req.method);
+    console.log('URL:', req.originalUrl);
+    console.log('Заголовки:', req.headers);
+
+    const jsonParser = express.json({ limit: '10mb' });
+
+    jsonParser(req, res, (err) => {
+      if (err) {
+        console.error('ОШИБКА JSON ПАРСЕРА:', err);
+        return next(err);
+      }
+      console.log('Тело (после json парсера):', req.body);
+      console.log('--- КОНЕЦ ЗАПРОСА ---');
+      next(); // Передаем управление дальше
+    });
+  });
+
+  app.use(cors());
 
   // 6. GraphQL Endpoint
+  // app.use(
+  //   GRAPHQL_PATH,
+  //   cors<cors.CorsRequest>(),
+  //   expressMiddleware(apolloServer, {
+  //     context: async ({ req }): Promise<GraphQLContext> => {
+  //       let currentUser: PrismaUser | null = null;
+  //       const authHeader = req.headers.authorization;
+
+  //       if (authHeader && authHeader.startsWith('Bearer ')) {
+  //         const token = authHeader.split(' ')[1];
+  //         try {
+  //           const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: number;[key: string]: any };
+  //           if (decoded && typeof decoded.id === 'number') {
+  //             currentUser = await prisma.user.findUnique({ where: { id: decoded.id } });
+  //             if (!currentUser) console.warn(`[AUTH CONTEXT] User ID ${decoded.id} from token not found in DB.`);
+  //             else console.log(`[AUTH CONTEXT] Authenticated user: ${currentUser.email}`);
+  //           }
+  //         } catch (err) {
+  //           console.warn(`[AUTH CONTEXT] JWT verification error: ${(err as Error).message}`);
+  //           currentUser = null;
+  //         }
+  //       }
+
+  //       // --- ИНИЦИАЛИЗАЦИЯ СЕРВИСОВ ---
+  //       // Создаем экземпляры всех сервисов один раз на каждый запрос
+  //       const services: Services = {
+  //         authService: new AuthService(prisma),
+  //         cabinetService: new CabinetService(prisma),
+  //         itemService: new ItemService(prisma),
+  //         locationService: new LocationService(prisma),
+  //         materialService: new MaterialService(prisma),
+  //         moduleService: new ModuleService(prisma),
+  //         optionService: new OptionService(prisma),
+  //         pitchService: new PitchService(prisma),
+  //         priceService: new PriceService(prisma),
+  //         refreshRateService: new RefreshRateService(prisma),
+  //         screenTypeService: new ScreenTypeService(prisma),
+  //         sensorService: new SensorService(prisma),
+  //         brightnessService: new BrightnessService(prisma),
+  //         controlTypeService: new ControlTypeService(prisma),
+  //         ipProtectionService: new IpProtectionService(prisma),
+  //         itemCategoryService: new ItemCategoryService(prisma),
+  //         itemSubcategoryService: new ItemSubcategoryService(prisma),
+  //         manufacturerService: new ManufacturerService(prisma),
+  //         placementService: new PlacementService(prisma),
+  //         supplierService: new SupplierService(prisma),
+  //         cabinetItemComponentService: new CabinetItemComponentService(prisma),
+  //         cabinetPriceService: new CabinetPriceService(prisma),
+  //         cabinetSizeService: new CabinetSizeService(prisma),
+  //       };
+
+  //       // Возвращаем расширенный объект контекста
+  //       return {
+  //         prisma,
+  //         currentUser,
+  //         auth: authHeader || null,
+  //         services,
+  //       };
+  //     },
+  //   })
+  // );
+  // console.log(`✅ GraphQL endpoint configured at ${GRAPHQL_PATH}`);
+
+
+  // 6. GraphQL Endpoint (Оригинальный код + Логирование)
   app.use(
     GRAPHQL_PATH,
-    cors<cors.CorsRequest>(),
     expressMiddleware(apolloServer, {
       context: async ({ req }): Promise<GraphQLContext> => {
+        // --- НАША ОТЛАДОЧНАЯ СТРОКА ---
+        console.log('[КОНТЕКСТ] Создание контекста. req.body:', req.body);
+        // --------------------------------
+
+        // --- ВЕСЬ ВАШ ОРИГИНАЛЬНЫЙ КОД НИЖЕ ---
         let currentUser: PrismaUser | null = null;
         const authHeader = req.headers.authorization;
 
@@ -128,8 +230,6 @@ async function startServer() {
           }
         }
 
-        // --- ИНИЦИАЛИЗАЦИЯ СЕРВИСОВ ---
-        // Создаем экземпляры всех сервисов один раз на каждый запрос
         const services: Services = {
           authService: new AuthService(prisma),
           cabinetService: new CabinetService(prisma),
@@ -154,9 +254,11 @@ async function startServer() {
           cabinetItemComponentService: new CabinetItemComponentService(prisma),
           cabinetPriceService: new CabinetPriceService(prisma),
           cabinetSizeService: new CabinetSizeService(prisma),
+          moduleSizeService: new ModuleSizeService(prisma),
+          moduleItemComponentService: new ModuleItemComponentService(prisma),
+          modulePriceService: new ModulePriceService(prisma),
         };
 
-        // Возвращаем расширенный объект контекста
         return {
           prisma,
           currentUser,
@@ -166,7 +268,6 @@ async function startServer() {
       },
     })
   );
-  console.log(`✅ GraphQL endpoint configured at ${GRAPHQL_PATH}`);
 
   // 7. GraphQL Playground Endpoint
   app.get(PLAYGROUND_PATH, expressPlayground({ endpoint: GRAPHQL_PATH }));

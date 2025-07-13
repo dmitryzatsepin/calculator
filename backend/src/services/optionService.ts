@@ -1,5 +1,5 @@
 // backend/src/services/optionService.ts
-import { PrismaClient, Prisma, Option } from "../prisma/generated/client";
+import { PrismaClient, Prisma, Option } from "@prisma/client";
 
 export class OptionService {
     private prisma: PrismaClient;

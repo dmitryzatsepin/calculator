@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/itemQueries.ts
-import { builder } from '../builder';
-import { ItemService } from '../../services/itemService';
+import { builder } from '../builder.js';
+import { ItemService } from '../../services/itemService.js';
 
 const getItemService = (ctx: any) => new ItemService(ctx.prisma);
 
@@ -14,9 +14,9 @@ builder.queryFields((t) => ({
     },
     // Используем totalCount для получения общего количества записей (полезно для UI)
     totalCount: (parent, args, ctx) => {
-        return ctx.prisma.item.count({
-            where: { active: args.onlyActive ?? undefined }
-        });
+      return ctx.prisma.item.count({
+        where: { active: args.onlyActive ?? undefined }
+      });
     },
     resolve: (query, _parent, args, ctx) => {
       return getItemService(ctx).findMany(query, { onlyActive: args.onlyActive });

@@ -1,11 +1,11 @@
 // prisma/seed/seedEntities.ts
-import { PrismaClient } from '../generated/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 type PrismaModelName = keyof Omit<PrismaClient, `$${string}` | symbol>;
 import * as XLSX from 'xlsx';
-import { getDataFromSheet, safeBoolean, safeInt, safeDecimal } from './utils';
-import { entityConfigs, type IdMaps } from './config';
-import type { SeedMode } from './index';
+import { getDataFromSheet, safeBoolean, safeInt, safeDecimal } from './utils.js';
+import { entityConfigs, type IdMaps } from './config.js';
+import type { SeedMode } from './index.js';
 
 /**
  * @param prisma Экземпляр PrismaClient

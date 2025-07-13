@@ -2,7 +2,7 @@
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { GraphQLError } from "graphql";
-import { PrismaClient, User as PrismaUser } from "../prisma/generated/client";
+import { PrismaClient, User as PrismaUser } from "@prisma/client";
 
 interface TokenPayload {
   id: string;

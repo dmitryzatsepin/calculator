@@ -13,6 +13,8 @@ import { CalculatorFormProvider } from "./context/CalculatorFormProvider";
 import { CalculatorDataProvider } from "./context/CalculatorDataProvider";
 import { CalculationResultProvider } from "./context/CalculationResultProvider";
 
+console.log("--- V3: BUILD OF", new Date().toISOString(), "---");
+
 // --- Настройка QueryClient ---
 const queryClient = new QueryClient({
   defaultOptions: {

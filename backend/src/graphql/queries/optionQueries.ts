@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/optionQueries.ts
-import { builder } from '../builder';
-import { OptionService } from '../../services/optionService';
+import { builder } from '../builder.js';
+import { OptionService } from '../../services/optionService.js';
 
 const getOptionService = (ctx: any) => new OptionService(ctx.prisma);
 

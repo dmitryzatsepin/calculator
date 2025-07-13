@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/materialQueries.ts
-import { builder } from '../builder';
-import { MaterialService } from '../../services/materialService';
+import { builder } from '../builder.js';
+import { MaterialService } from '../../services/materialService.js';
 
 const getMaterialService = (ctx: any) => new MaterialService(ctx.prisma);
 

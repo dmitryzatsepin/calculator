@@ -1,5 +1,5 @@
 // backend/src/services/priceService.ts
-import { PrismaClient } from "../prisma/generated/client";
+import { PrismaClient } from "@prisma/client";
 
 export interface PriceRequest {
   moduleCode?: string | null;

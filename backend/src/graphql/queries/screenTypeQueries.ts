@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/screenTypeQueries.ts
-import { builder } from '../builder';
-import { ScreenTypeService } from '../../services/screenTypeService';
+import { builder } from '../builder.js';
+import { ScreenTypeService } from '../../services/screenTypeService.js';
 
 const getScreenTypeService = (ctx: any) => new ScreenTypeService(ctx.prisma);
 

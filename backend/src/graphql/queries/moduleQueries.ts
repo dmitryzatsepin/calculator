@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/moduleQueries.ts
-import { builder } from '../builder';
-import { ModuleService } from '../../services/moduleService';
+import { builder } from '../builder.js';
+import { ModuleService } from '../../services/moduleService.js';
 const ModuleFilterInput = builder.inputType('ModuleFilterInput', {
   fields: (t) => ({
     locationCode: t.string({ required: false }),

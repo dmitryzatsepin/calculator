@@ -1,9 +1,9 @@
 // backend/src/graphql/mutations/authMutations.ts
-import { builder } from "../builder";
+import { builder } from "../builder.js";
 import { GraphQLError } from "graphql";
-import { User as PrismaUser } from "../../prisma/generated/client";
-import { UserObjectRef } from "../types/User";
-import { AuthService, AuthPayload as AuthPayloadType } from "../../services/authService"; // <-- 
+import { User as PrismaUser } from "@prisma/client";
+import { UserObjectRef } from "../types/User.js";
+import { AuthService, AuthPayload as AuthPayloadType } from "../../services/authService.js"; // <-- 
 const RegisterInput = builder.inputType("RegisterInput", {
   description: "Данные для регистрации нового пользователя",
   fields: (t) => ({

@@ -1,6 +1,6 @@
 // prisma/seed/configs/price.configs.ts
-import type { PriceConfig } from '../types.config';
-import { safeDecimal } from "../utils";
+import type { PriceConfig } from '../types.config.js';
+import { safeDecimal } from "../utils.js";
 
 export const priceConfigs: PriceConfig[] = [
   {

@@ -1,13 +1,15 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "src/server.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "rm -rf dist && pnpm prisma:generate && tsc && cp -r src/prisma/generated dist/prisma/generated",
+    "build": "rm -rf dist && pnpm prisma:generate && tsc --showConfig && tsc",
     "start": "node dist/server.js",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate --no-hints",
+    "prisma:seed": "tsx src/prisma/seed/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -56,6 +58,7 @@
     "@types/passport-local": "^1.0.38",
     "prisma": "^6.9.0",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.8.3"
   },

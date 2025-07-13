@@ -1,17 +1,20 @@
 {
   "compilerOptions": {
+    // --- База ---
     "target": "ES2022",
-    "module": "CommonJS",
-    "lib": ["ES2022"],
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+
+    // --- Выходные файлы ---
+    "outDir": "./dist",
+    
+    // --- JSX (если используете, на всякий случай) ---
+    "jsx": "react-jsx" 
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["src"], // Компилируем только папку src
+  "exclude": ["node_modules", "dist"] // Исключаем все остальное
 }

@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/brightnessQueries.ts
-import { builder } from '../builder';
-import { BrightnessService } from '../../services/brightnessService';
+import { builder } from '../builder.js';
+import { BrightnessService } from '../../services/brightnessService.js';
 
 const getBrightnessService = (ctx: any) => new BrightnessService(ctx.prisma);
 

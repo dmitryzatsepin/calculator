@@ -1,11 +1,11 @@
 // prisma/seed/seedPrices.ts
-import { PrismaClient } from '../generated/client';
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 type PrismaModelName = keyof Omit<PrismaClient, `$${string}` | symbol>;
 import * as XLSX from 'xlsx';
-import { getDataFromSheet, safeDecimal } from './utils'; // Убедитесь, что safeDecimal импортирован
-import { priceConfigs, IdMaps } from './config'; // Импортируем конфиг цен
-import type { SeedMode } from './index'; // Импортируем тип режима
+import { getDataFromSheet, safeDecimal } from './utils.js'; // Убедитесь, что safeDecimal импортирован
+import { priceConfigs, IdMaps } from './config.js'; // Импортируем конфиг цен
+import type { SeedMode } from './index.js'; // Импортируем тип режима
 
 /**
  * Заполняет таблицы цен (ItemPrice, CabinetPrice, ModulePrice).

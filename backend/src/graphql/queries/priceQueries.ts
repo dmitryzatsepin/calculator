@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/priceQueries.ts
-import { builder } from '../builder';
-import { PriceService, PriceResult } from '../../services/priceService';
+import { builder } from '../builder.js';
+import { PriceService, PriceResult } from '../../services/priceService.js';
 const PriceRequestInput = builder.inputType('PriceRequestInput', {
   fields: (t) => ({
     moduleCode: t.string({ required: false }),

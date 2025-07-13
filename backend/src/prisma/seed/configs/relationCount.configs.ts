@@ -1,6 +1,6 @@
 // prisma/seed/configs/relationCount.configs.ts
-import type { RelationCountConfig } from '../types.config';
-import { safeInt } from "../utils";
+import type { RelationCountConfig } from '../types.config.js';
+import { safeInt } from "../utils.js";
 
 export const relationCountConfigs: RelationCountConfig[] = [
   {

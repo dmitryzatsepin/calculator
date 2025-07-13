@@ -1,15 +1,28 @@
 // backend/src/graphql/types/CabinetSize.ts
-import { builder } from '../builder';
-import { ModuleSizeService } from '../../services/moduleSizeService';
-import { CabinetService } from '../../services/cabinetService';
 
-const getModuleSizeService = (ctx: any) => new ModuleSizeService(ctx.prisma);
-const getCabinetService = (ctx: any) => new CabinetService(ctx.prisma);
+import { builder } from '../builder.js';
+import type { Prisma } from '@prisma/client';
+import type { GraphQLContext } from '../builder.js';
+
+import { ModuleSizeService } from '../../services/moduleSizeService.js';
+import { CabinetService } from '../../services/cabinetService.js';
+
+
+// --- Типизация ---
+type CabinetSize = Prisma.CabinetSizeGetPayload<{}>;
+type CabinetSizeFieldBuilder = Parameters<Parameters<typeof builder.prismaNode>[1]['fields']>[0];
+
+// --- Типизированные вспомогательные функции ---
+const getModuleSizeService = (ctx: GraphQLContext) => new ModuleSizeService(ctx.prisma);
+const getCabinetService = (ctx: GraphQLContext) => new CabinetService(ctx.prisma);
 
 builder.prismaNode('CabinetSize', {
   id: { field: 'id' },
-  fields: (t) => ({
-    // Простые поля
+  findUnique: (id: string, { prisma }: GraphQLContext) =>
+    prisma.cabinetSize.findUnique({
+      where: { id: parseInt(id, 10) },
+    }),
+  fields: (t: CabinetSizeFieldBuilder) => ({
     code: t.exposeString('code'),
     size: t.exposeString('size'),
     width: t.exposeInt('width'),
@@ -23,7 +36,12 @@ builder.prismaNode('CabinetSize', {
       type: ['ModuleSize'],
       description: "Размеры модулей, совместимые с данным размером кабинета.",
       args: { onlyActive: t.arg.boolean({ defaultValue: true }) },
-      resolve: (query, parent, args, ctx) => {
+      resolve: (
+        query: Prisma.ModuleSizeFindManyArgs,
+        parent: CabinetSize,
+        args: { onlyActive: boolean },
+        ctx: GraphQLContext
+      ) => {
         return getModuleSizeService(ctx).findCompatibleByCabinetSizeCode(
           query,
           parent.code,
@@ -37,7 +55,12 @@ builder.prismaNode('CabinetSize', {
       type: ['Cabinet'],
       description: "Кабинеты, имеющие данный размер.",
       args: { onlyActive: t.arg.boolean({ defaultValue: true }) },
-      resolve: (query, parent, args, ctx) => {
+      resolve: (
+        query: Prisma.CabinetFindManyArgs,
+        parent: CabinetSize,
+        args: { onlyActive: boolean },
+        ctx: GraphQLContext
+      ) => {
         return getCabinetService(ctx).findByCabinetSizeCode(
           query,
           parent.code,

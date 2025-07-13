@@ -1,6 +1,6 @@
 // backend/src/graphql/queries/controlTypeQueries.ts
-import { builder } from '../builder';
-import { ControlTypeService } from '../../services/controlTypeService';
+import { builder } from '../builder.js';
+import { ControlTypeService } from '../../services/controlTypeService.js';
 
 const getControlTypeService = (ctx: any) => new ControlTypeService(ctx.prisma);
 

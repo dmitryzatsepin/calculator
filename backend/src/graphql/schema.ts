@@ -1,54 +1,54 @@
 // src/graphql/schema.ts
-import { builder } from './builder';
+import { builder } from './builder.js';
 
 // Импортируем типы
-import './types/User';
-import './types/ScreenType';
-import './types/Location';
-import './types/Placement';
-import './types/Material';
-import './types/RefreshRate';
-import './types/Brightness';
-import './types/IpProtection';
-import './types/Sensor';
-import './types/ControlType';
-import './types/Pitch';
-import './types/Module';
-import './types/ModuleBrightness';
-import './types/ModuleItemComponent';
-import './types/ModulePrice';
-import './types/ModuleRefreshRate';
-import './types/ModuleSize';
-import './types/ModuleModuleSize';
-import './types/Option';
-import './types/Cabinet';
-import './types/CabinetSize';
-import './types/CabinetCabinetSize';
-import './types/Manufacturer';
-import './types/Supplier';
-import './types/Item';
-import './types/ItemCategory';
-import './types/ItemSubcategory';
-import './types/CabinetItemComponent';
+import './types/User.js';
+import './types/ScreenType.js';
+import './types/Location.js';
+import './types/Placement.js';
+import './types/Material.js';
+import './types/RefreshRate.js';
+import './types/Brightness.js';
+import './types/IpProtection.js';
+import './types/Sensor.js';
+import './types/ControlType.js';
+import './types/Pitch.js';
+import './types/Module.js';
+import './types/ModuleBrightness.js';
+import './types/ModuleItemComponent.js';
+import './types/ModulePrice.js';
+import './types/ModuleRefreshRate.js';
+import './types/ModuleSize.js';
+import './types/ModuleModuleSize.js';
+import './types/Option.js';
+import './types/Cabinet.js';
+import './types/CabinetSize.js';
+import './types/CabinetCabinetSize.js';
+import './types/Manufacturer.js';
+import './types/Supplier.js';
+import './types/Item.js';
+import './types/ItemCategory.js';
+import './types/ItemSubcategory.js';
+import './types/CabinetItemComponent.js';
 
 // Импортируем запросы
-import './queries/screenTypeQueries';
-import './queries/locationQueries';
-import './queries/materialQueries';
-import './queries/refreshRateQueries';
-import './queries/brightnessQueries';
-import './queries/ipProtectionQueries';
-import './queries/sensorQueries';
-import './queries/controlTypeQueries';
-import './queries/pitchQueries';
-import './queries/moduleQueries';
-import './queries/optionQueries';
-import './queries/cabinetQueries';
-import './queries/itemQueries';
-import './queries/exchangeRateQueries';
-import './queries/priceQueries'
+import './queries/screenTypeQueries.js';
+import './queries/locationQueries.js';
+import './queries/materialQueries.js';
+import './queries/refreshRateQueries.js';
+import './queries/brightnessQueries.js';
+import './queries/ipProtectionQueries.js';
+import './queries/sensorQueries.js';
+import './queries/controlTypeQueries.js';
+import './queries/pitchQueries.js';
+import './queries/moduleQueries.js';
+import './queries/optionQueries.js';
+import './queries/cabinetQueries.js';
+import './queries/itemQueries.js';
+import './queries/exchangeRateQueries.js';
+import './queries/priceQueries.js'
 
 // Импортируем мутации
-import './mutations/authMutations';
+import './mutations/authMutations.js';
 
 export const schema = builder.toSchema();

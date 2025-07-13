@@ -1,5 +1,5 @@
 // backend/src/services/moduleSizeService.ts
-import { PrismaClient, Prisma, ModuleSize } from "../prisma/generated/client";
+import { PrismaClient, Prisma, ModuleSize } from "@prisma/client";
 
 export class ModuleSizeService {
     private prisma: PrismaClient;

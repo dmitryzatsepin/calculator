@@ -1,5 +1,5 @@
 // backend/src/services/moduleService.ts
-import { PrismaClient, Prisma, Module } from "../prisma/generated/client";
+import { PrismaClient, Prisma, Module } from "@prisma/client";
 
 // Тип для фильтров, который сервис будет принимать
 export interface ModuleFilters {
