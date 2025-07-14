@@ -1,9 +1,10 @@
-import React, { useMemo } from "react"; // Импортируем useMemo
+// src/components/CostCalculationTable.tsx
+import React, { useMemo } from "react";
 import type {
   CostCalculationResult,
   CostLineItem,
-} from "../types/calculationTypes"; // Убедитесь, что путь верный
-import { Table, Text, Title, Paper } from "@mantine/core"; // Импорты Mantine
+} from "../../types/calculationTypes";
+import { Table, Text, Title, Paper } from "@mantine/core";
 
 // Интерфейс пропсов компонента
 interface CostCalculationTableProps {
@@ -144,10 +145,10 @@ export const CostCalculationTable: React.FC<CostCalculationTableProps> = ({
       {/* Выводим заголовок для секции подытогов, если есть хотя бы один подытог */}
       {(Object.keys(mainSubtotals).length > 0 ||
         Object.keys(zipSubtotals).length > 0) && (
-        <Title order={5} mb="xs" mt="lg">
-          Итоги по категориям
-        </Title>
-      )}
+          <Title order={5} mb="xs" mt="lg">
+            Итоги по категориям
+          </Title>
+        )}
       {/* Рендерим подытоги для основной комплектации */}
       {renderSubtotals(mainSubtotals, "Основная комплектация")}
       {/* Рендерим подытоги для ЗИП */}

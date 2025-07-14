@@ -1,3 +1,4 @@
+// src/components/CalculatorForm.tsx
 import { useCallback, useMemo, useEffect } from "react";
 import {
   Stack,
