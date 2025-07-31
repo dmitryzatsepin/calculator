@@ -10,9 +10,12 @@ import type {
   Module as GqlModule,
   Cabinet as GqlCabinet,
   Maybe,
+  VideoProcessor as GqlVideoProcessor,
 } from "../generated/graphql/graphql";
 
 // --- Типы для ответов GraphQL из calculator.gql.ts ---
+
+export type VideoProcessor = GqlVideoProcessor;
 
 export type InitialDataQueryResult = {
   screenTypes: Maybe<Array<Maybe<Pick<GqlScreenType, "id" | "code" | "name">>>>;
@@ -64,6 +67,8 @@ export type ModuleDetailsData = {
   items?: Maybe<Array<Maybe<ModuleDetailsGqlItemComponentData>>>;
   powerConsumptionAvg?: number | null;
   powerConsumptionMax?: number | null;
+  brightness?: number | null;
+  refreshRate?: number | null;
 };
 export type ModuleDetailsQueryResult = {
   moduleDetails: Maybe<ModuleDetailsData>;

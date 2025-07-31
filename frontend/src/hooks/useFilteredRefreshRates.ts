@@ -1,14 +1,17 @@
-// frontend/src/hooks/useFilteredRefreshRates.ts
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { graphQLClient } from '../services/graphqlClient';
 import { GET_FILTERED_REFRESH_RATE_OPTIONS } from '../graphql/calculator.gql';
 import type {
-  GetFilteredRefreshRateOptionsQuery,
   RefreshRate as GqlRefreshRate,
+  Maybe,
 } from "../generated/graphql/graphql";
 
-// GqlRefreshRate уже должен содержать code и value из фрагмента RefreshRateFields
+// Определяем тип для ответа GraphQL вручную
+type FilteredRefreshRatesQueryResult = {
+  getFilteredRefreshRateOptions?: Maybe<Array<Maybe<GqlRefreshRate>>>;
+};
+
 export type ProcessedRefreshRateOption = GqlRefreshRate;
 
 export interface FilteredRefreshRatesHookResult {
@@ -17,23 +20,6 @@ export interface FilteredRefreshRatesHookResult {
   isError: boolean;
   error: Error | null;
 }
-
-const fetchFilteredRefreshRatesQuery = async (
-  locationCode: string,
-  pitchCode: string,
-  isFlex: boolean
-): Promise<GetFilteredRefreshRateOptionsQuery> => {
-  const variables = {
-    locationCode,
-    pitchCode,
-    isFlex,
-    onlyActive: true,
-  };
-  return graphQLClient.request<GetFilteredRefreshRateOptionsQuery>(
-    GET_FILTERED_REFRESH_RATE_OPTIONS,
-    variables
-  );
-};
 
 export function useFilteredRefreshRates(
   locationCode: string | null,
@@ -47,18 +33,15 @@ export function useFilteredRefreshRates(
     isLoading,
     isError,
     error,
-  } = useQuery<GetFilteredRefreshRateOptionsQuery, Error, GetFilteredRefreshRateOptionsQuery>({
+  } = useQuery<FilteredRefreshRatesQueryResult, Error>({
     queryKey: ["filteredRefreshRateOptions", locationCode, pitchCode, isFlex],
-    queryFn: () => {
-      if (!locationCode || !pitchCode) {
-        return Promise.reject(
-          new Error("Location code and Pitch code are required to fetch refresh rates.")
-        );
-      }
-      return fetchFilteredRefreshRatesQuery(locationCode, pitchCode, isFlex);
-    },
+    queryFn: () =>
+      graphQLClient.request(
+        GET_FILTERED_REFRESH_RATE_OPTIONS,
+        { locationCode, pitchCode, isFlex, onlyActive: true }
+      ),
     enabled,
-    staleTime: 1000 * 60 * 10, // 10 минут
+    staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });
 

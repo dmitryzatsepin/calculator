@@ -222,6 +222,8 @@ export const GET_MODULE_DETAILS = gql`
         width
         height
       }
+      brightness
+      refreshRate
       # items { quantity item { code name sku } }
       # powerConsumptionAvg
       # powerConsumptionMax
@@ -252,6 +254,28 @@ export const GET_PRICES_BY_CODES = gql`
       code
       priceUsd
       priceRub
+    }
+  }
+`;
+
+
+export const VideoProcessorFields = gql`
+  fragment VideoProcessorFields on VideoProcessor {
+    id
+    code
+    name
+    maxResolutionX
+    maxResolutionY
+    priceUsd
+    priceRub
+  }
+`;
+
+export const GET_VIDEO_PROCESSORS = gql`
+  ${VideoProcessorFields}
+  query GetVideoProcessors {
+    videoProcessors(onlyActive: true) {
+      ...VideoProcessorFields
     }
   }
 `;

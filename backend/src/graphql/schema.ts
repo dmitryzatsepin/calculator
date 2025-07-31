@@ -30,6 +30,7 @@ import './types/Item.js';
 import './types/ItemCategory.js';
 import './types/ItemSubcategory.js';
 import './types/CabinetItemComponent.js';
+import './types/VideoProcessor.js';
 
 // Импортируем запросы
 import './queries/screenTypeQueries.js';
@@ -47,6 +48,7 @@ import './queries/cabinetQueries.js';
 import './queries/itemQueries.js';
 import './queries/exchangeRateQueries.js';
 import './queries/priceQueries.js'
+import './queries/videoProcessorQueries.js';
 
 // Импортируем мутации
 import './mutations/authMutations.js';

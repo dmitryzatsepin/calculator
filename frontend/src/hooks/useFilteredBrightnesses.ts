@@ -1,15 +1,17 @@
-// frontend/src/hooks/useFilteredBrightnesses.ts
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { graphQLClient } from '../services/graphqlClient';
 import { GET_FILTERED_BRIGHTNESS_OPTIONS } from '../graphql/calculator.gql';
 import type {
-  GetFilteredBrightnessOptionsQuery, // Тип полного ответа от graphql-codegen
-  Brightness as GqlBrightness, // Тип для одного элемента Brightness
-  // Maybe, // Не нужен, если возвращаем очищенный массив
+  Brightness as GqlBrightness,
+  Maybe,
 } from "../generated/graphql/graphql";
 
-// GqlBrightness уже должен содержать code и value из фрагмента BrightnessFields
+// Определяем тип для ответа GraphQL вручную
+type FilteredBrightnessesQueryResult = {
+  getFilteredBrightnessOptions?: Maybe<Array<Maybe<GqlBrightness>>>;
+};
+
 export type ProcessedBrightnessOption = GqlBrightness;
 
 export interface FilteredBrightnessesHookResult {
@@ -19,32 +21,12 @@ export interface FilteredBrightnessesHookResult {
   error: Error | null;
 }
 
-const fetchFilteredBrightnessesQuery = async (
-  locationCode: string,
-  pitchCode: string,
-  refreshRateCode: string,
-  isFlex: boolean
-): Promise<GetFilteredBrightnessOptionsQuery> => {
-  const variables = {
-    locationCode,
-    pitchCode,
-    refreshRateCode,
-    isFlex,
-    onlyActive: true,
-  };
-  return graphQLClient.request<GetFilteredBrightnessOptionsQuery>(
-    GET_FILTERED_BRIGHTNESS_OPTIONS,
-    variables
-  );
-};
-
 export function useFilteredBrightnesses(
   locationCode: string | null,
   pitchCode: string | null,
   refreshRateCode: string | null,
-  isFlex: boolean // isFlex не может быть null, передаем его всегда
+  isFlex: boolean
 ): FilteredBrightnessesHookResult {
-  // Запрос активен только если ВСЕ необходимые параметры предоставлены
   const enabled = !!locationCode && !!pitchCode && !!refreshRateCode;
 
   const {
@@ -52,18 +34,15 @@ export function useFilteredBrightnesses(
     isLoading,
     isError,
     error,
-  } = useQuery<GetFilteredBrightnessOptionsQuery, Error, GetFilteredBrightnessOptionsQuery>({
+  } = useQuery<FilteredBrightnessesQueryResult, Error>({
     queryKey: ["filteredBrightnessOptions", locationCode, pitchCode, refreshRateCode, isFlex],
-    queryFn: () => {
-      if (!locationCode || !pitchCode || !refreshRateCode) {
-        return Promise.reject(
-          new Error("Location, Pitch, and RefreshRate codes are required to fetch brightness options.")
-        );
-      }
-      return fetchFilteredBrightnessesQuery(locationCode, pitchCode, refreshRateCode, isFlex);
-    },
+    queryFn: () =>
+      graphQLClient.request(
+        GET_FILTERED_BRIGHTNESS_OPTIONS,
+        { locationCode, pitchCode, refreshRateCode, isFlex, onlyActive: true }
+      ),
     enabled,
-    staleTime: 1000 * 60 * 10, // 10 минут
+    staleTime: 1000 * 60 * 10,
     refetchOnWindowFocus: false,
   });
 

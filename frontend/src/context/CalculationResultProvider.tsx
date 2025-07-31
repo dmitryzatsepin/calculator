@@ -1,3 +1,4 @@
+// frontend/src/context/CalculationResultProvider.tsx
 import {
     createContext,
     useState,
@@ -13,8 +14,9 @@ import type {
     CostCalculationResult,
     ModuleData,
     CabinetData,
+    CostLineItem,
 } from "../types/calculationTypes";
-import type { CabinetDetailsData } from '../graphql/calculator.types';
+import type { CabinetDetailsData, VideoProcessor } from '../graphql/calculator.types';
 
 import { useCalculatorForm } from "./CalculatorFormProvider";
 import { useCalculatorData } from "./CalculatorDataProvider";
@@ -62,15 +64,16 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
             height: size.height,
             powerConsumptionAvg: details.powerConsumptionAvg,
             powerConsumptionMax: details.powerConsumptionMax,
-            brightness: details.brightness, // <-- Теперь просто берем готовое
-            refreshRate: details.refreshRate, // <-- Теперь просто берем готовое
+            brightness: details.brightness,
+            refreshRate: details.refreshRate,
             components: [],
         };
-    }, [dataState.moduleDetails]);
+    },
+        [dataState.moduleDetails]);
 
     const processedCabinetData = useMemo((): CabinetData | null => {
         const details: CabinetDetailsData | null = dataState.cabinetDetails;
-        if (!details || !details.sizes || details.sizes.length === 0) return null;
+        if (!details || !details.sizes || details.sizes.length === 0 || details.active === false) return null;
 
         const sizeLink = details.sizes[0];
         if (!sizeLink || !sizeLink.size) return null;
@@ -114,6 +117,7 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         locationSelectOptions: dataState.locationSelectOptions,
         materialSelectOptions: dataState.materialSelectOptions,
         protectionSelectOptions: dataState.protectionSelectOptions,
+        allProcessors: dataState.videoProcessors,
         ...formState,
     }), [
         isCalculationReady,
@@ -124,6 +128,7 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         dataState.locationSelectOptions,
         dataState.materialSelectOptions,
         dataState.protectionSelectOptions,
+        dataState.videoProcessors,
         formState
     ]);
 

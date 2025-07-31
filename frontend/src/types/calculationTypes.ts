@@ -75,7 +75,8 @@ export type CostCalculationResult = {
   costItems: CostLineItem[];      // Массив строк основной комплектации
   zipItems: CostLineItem[];       // Массив строк ЗИП
   totalCostRub: number;          // Общая стоимость (основные + ЗИП) в рублях
-  conversionRate?: number;       // Примененный курс конвертации (для информации)
+  conversionRate?: number;
+  additionalItems?: CostLineItem[];
 };
 
 // --- Тип для хранения цен (используется в контексте и сервисе) ---
@@ -118,3 +119,7 @@ export type SelectOption = {
   label: string;
   value: string;
 };
+
+import type { VideoProcessor as GqlVideoProcessor } from '../generated/graphql/graphql';
+
+export type VideoProcessor = GqlVideoProcessor;

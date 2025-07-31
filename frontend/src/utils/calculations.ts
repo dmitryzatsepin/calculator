@@ -6,6 +6,7 @@ import type {
     PriceMap,
     ModuleData,
     CabinetData,
+    VideoProcessor,
 } from '../types/calculationTypes';
 
 const validateAndGetInitialParams = (
@@ -150,7 +151,8 @@ export function calculateCosts(
     techSpecs: TechnicalSpecsResult,
     prices: PriceMap,
     dollarRate: number,
-    selectedMaterialCode: string | null
+    selectedMaterialCode: string | null,
+    allProcessors: VideoProcessor[] // <-- Типизируем allProcessors
 ): CostCalculationResult | null {
     if (!techSpecs || !prices || !dollarRate || dollarRate <= 0) {
         console.error("calculateCosts: Отсутствуют необходимые данные для расчета.");
@@ -253,10 +255,47 @@ export function calculateCosts(
         }
     }
 
-    const finalTotalCost = totalCostRub + totalZipCostRub;
+    const additionalItems: CostLineItem[] = [];
+    let additionalTotalRub = 0;
+
+    if (allProcessors && allProcessors.length > 0) {
+        const requiredPixels = techSpecs.totalPixels;
+        const suitableProcessors = allProcessors.filter(p => p.maxResolutionX * p.maxResolutionY >= requiredPixels);
+        const selectedProcessor = suitableProcessors[0];
+
+        if (selectedProcessor) {
+            const processorPriceRub = getPriceRub(selectedProcessor.code);
+            if (processorPriceRub !== null) {
+                additionalItems.push({
+                    label: `Процессор: ${selectedProcessor.name}`,
+                    quantity: 1,
+                    unitPriceRub: processorPriceRub,
+                    totalPriceRub: processorPriceRub,
+                    details: `(${selectedProcessor.code})`
+                });
+                additionalTotalRub += processorPriceRub;
+            }
+        }
+    }
+
+    const montazhCost = techSpecs.activeAreaM2 * 10000;
+    additionalItems.push({ label: 'Монтаж', quantity: 1, unitPriceRub: montazhCost, totalPriceRub: montazhCost });
+    additionalTotalRub += montazhCost;
+
+    const konstrukciyaCost = techSpecs.activeAreaM2 * 10000;
+    additionalItems.push({ label: 'Металлоконструкция', quantity: 1, unitPriceRub: konstrukciyaCost, totalPriceRub: konstrukciyaCost });
+    additionalTotalRub += konstrukciyaCost;
+
+    const dostavkaCost = 10000;
+    additionalItems.push({ label: 'Доставка', quantity: 1, unitPriceRub: dostavkaCost, totalPriceRub: dostavkaCost });
+    additionalTotalRub += dostavkaCost;
+
+    const finalTotalCost = totalCostRub + totalZipCostRub + additionalTotalRub;
+
     return {
         costItems,
         zipItems,
+        additionalItems,
         totalCostRub: Number(finalTotalCost.toFixed(2)),
         conversionRate: Number(conversionRate.toFixed(4)),
     };

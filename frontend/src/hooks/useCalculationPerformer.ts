@@ -6,6 +6,7 @@ import type {
   ModuleData,
   CabinetData,
   PriceMap,
+  VideoProcessor,
 } from '../types/calculationTypes';
 import {
   calculateTechnicalSpecs,
@@ -30,6 +31,7 @@ interface CalculationParams {
   heightMm: string | number;
   selectedScreenTypeCode: string | null;
   localDollarRateInput: number | string;
+  allProcessors: VideoProcessor[];
 }
 
 interface CalculationSetters {
@@ -60,6 +62,7 @@ export function useCalculationPerformer(
     heightMm,
     selectedScreenTypeCode,
     localDollarRateInput,
+    allProcessors,
   } = params;
 
   const {
@@ -133,7 +136,8 @@ export function useCalculationPerformer(
         techSpecResult,
         priceMap,
         Number(localDollarRateInput),
-        isCabinetScreenTypeSelected ? selectedMaterialCode : null
+        isCabinetScreenTypeSelected ? selectedMaterialCode : null,
+        allProcessors
       );
       setCostDetailsState(costResult);
       setIsDrawerOpenState(true);
@@ -148,7 +152,7 @@ export function useCalculationPerformer(
   }, [
     isCalculationReady, selectedModuleDetails, isCabinetScreenTypeSelected, selectedCabinetDetails, priceMap,
     gqlFilteredPitches, selectedPitchCode, locationSelectOptions, selectedLocationCode, materialSelectOptions, selectedMaterialCode,
-    selectedProtectionCode, widthMm, heightMm, selectedScreenTypeCode, localDollarRateInput,
+    selectedProtectionCode, widthMm, heightMm, selectedScreenTypeCode, localDollarRateInput, allProcessors,
     setIsCalculatingState, setCalculationResultState, setCostDetailsState, setIsDrawerOpenState,
   ]);
 

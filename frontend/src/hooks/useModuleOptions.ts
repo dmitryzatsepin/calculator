@@ -18,48 +18,17 @@ export interface ModuleOptionsHookResult {
   error: Error | null;
 }
 
-// Теперь интерфейс фильтров содержит только то, что мы реально используем
 export interface UseModuleOptionsFilters {
   locationCode?: string | null;
   pitchCode?: string | null;
 }
 
-const fetchModuleOptionsQuery = async (
-  filters: ModuleFilterInput,
-  isFlex: boolean
-): Promise<ModuleOptionsQueryResult> => {
-  const gqlFilters: ModuleFilterInput & { isFlex?: boolean } = { ...filters };
-  if (isFlex) {
-    gqlFilters.isFlex = isFlex;
-  }
-
-  const variables = {
-    filters: gqlFilters,
-    onlyActive: true,
-  };
-  return graphQLClient.request<ModuleOptionsQueryResult>(GET_MODULE_OPTIONS, variables);
-};
-
 export function useModuleOptions(
   filters: UseModuleOptionsFilters | null,
   isFlex: boolean
 ): ModuleOptionsHookResult {
-  // Условие включения запроса осталось прежним
+  // Условие для запуска запроса: должны быть выбраны и локация, и шаг пикселя
   const enabled = !!(filters?.locationCode && filters?.pitchCode);
-
-  const queryFilters: ModuleFilterInput | undefined = useMemo(() => {
-    if (!enabled || !filters) {
-      return undefined;
-    }
-    // Создаем объект только с теми полями, которые нам нужны.
-    // Отсутствующие ключи будут проигнорированы GraphQL, что нам и нужно.
-    const finalFilters: ModuleFilterInput = {
-      locationCode: filters.locationCode,
-      pitchCode: filters.pitchCode,
-    };
-    return finalFilters;
-  }, [enabled, filters]);
-
 
   const {
     data: rawData,
@@ -67,16 +36,27 @@ export function useModuleOptions(
     isFetching,
     isError,
     error,
-  } = useQuery<ModuleOptionsQueryResult, Error, ModuleOptionsQueryResult>({
-    queryKey: ["moduleOptions", queryFilters, isFlex],
+  } = useQuery<ModuleOptionsQueryResult, Error>({
+    queryKey: ["moduleOptions", filters, isFlex],
+
     queryFn: () => {
-      if (!queryFilters) {
-        return Promise.reject(
-          new Error("Filters are required to fetch module options.")
-        );
+      const gqlFilters: ModuleFilterInput = {
+        locationCode: filters!.locationCode,
+        pitchCode: filters!.pitchCode,
+      };
+
+      if (isFlex) {
+        gqlFilters.isFlex = true;
       }
-      return fetchModuleOptionsQuery(queryFilters, isFlex);
+
+      const variables = {
+        filters: gqlFilters,
+        onlyActive: true,
+      };
+
+      return graphQLClient.request<ModuleOptionsQueryResult>(GET_MODULE_OPTIONS, variables);
     },
+
     enabled,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,

@@ -34,6 +34,7 @@ import { SupplierService } from '../services/supplierService.js';
 import { CabinetItemComponentService } from '../services/cabinetItemComponentService.js';
 import { CabinetPriceService } from '../services/cabinetPriceService.js';
 import { CabinetSizeService } from '../services/cabinetSizeService.js';
+import { VideoProcessorService } from '../services/videoProcessorService.js';
 
 // --- Определяем интерфейс для объекта сервисов ---
 export interface Services {
@@ -63,6 +64,7 @@ export interface Services {
   cabinetItemComponentService: CabinetItemComponentService;
   cabinetPriceService: CabinetPriceService;
   cabinetSizeService: CabinetSizeService;
+  videoProcessorService: VideoProcessorService;
 }
 
 // --- Расширяем GraphQLContext ---

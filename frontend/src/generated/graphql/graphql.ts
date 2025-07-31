@@ -1,5 +1,4 @@
 /* eslint-disable */
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -23,9 +22,7 @@ export type Scalars = {
 /** Результат успешной аутентификации */
 export type AuthPayload = {
   __typename?: 'AuthPayload';
-  /** JWT токен доступа */
   token?: Maybe<Scalars['String']['output']>;
-  /** Данные аутентифицированного пользователя */
   user?: Maybe<User>;
 };
 
@@ -54,7 +51,7 @@ export type Cabinet = Node & {
   pitches?: Maybe<Array<Pitch>>;
   placements?: Maybe<Array<Placement>>;
   price?: Maybe<CabinetPrice>;
-  sizes?: Maybe<Array<CabinetSize>>;
+  sizes?: Maybe<Array<CabinetCabinetSize>>;
   sku?: Maybe<Scalars['String']['output']>;
   subcategories?: Maybe<Array<ItemSubcategory>>;
   suppliers?: Maybe<Array<Supplier>>;
@@ -67,6 +64,14 @@ export type CabinetItemsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type CabinetCabinetSize = {
+  __typename?: 'CabinetCabinetSize';
+  cabinet?: Maybe<Cabinet>;
+  cabinetCode?: Maybe<Scalars['String']['output']>;
+  cabinetSizeCode?: Maybe<Scalars['String']['output']>;
+  size?: Maybe<CabinetSize>;
 };
 
 export type CabinetFilterInput = {
@@ -97,7 +102,6 @@ export type CabinetItemsConnectionEdge = {
 
 export type CabinetPrice = Node & {
   __typename?: 'CabinetPrice';
-  cabinetCode?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   priceRub?: Maybe<Scalars['Float']['output']>;
   priceUsd?: Maybe<Scalars['Float']['output']>;
@@ -139,11 +143,11 @@ export type ControlType = Node & {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
-export type IpProtection = {
+export type IpProtection = Node & {
   __typename?: 'IpProtection';
   active?: Maybe<Scalars['Boolean']['output']>;
   code?: Maybe<Scalars['String']['output']>;
-  id?: Maybe<Scalars['ID']['output']>;
+  id: Scalars['ID']['output'];
   protectionSolid?: Maybe<Scalars['String']['output']>;
   protectionWater?: Maybe<Scalars['String']['output']>;
 };
@@ -177,7 +181,6 @@ export type ItemCategory = Node & {
 export type ItemPrice = Node & {
   __typename?: 'ItemPrice';
   id: Scalars['ID']['output'];
-  itemCode?: Maybe<Scalars['String']['output']>;
   priceRub?: Maybe<Scalars['Float']['output']>;
   priceUsd?: Maybe<Scalars['Float']['output']>;
 };
@@ -204,9 +207,7 @@ export type Location = Node & {
 
 /** Данные для входа пользователя */
 export type LoginInput = {
-  /** Email пользователя */
   email: Scalars['String']['input'];
-  /** Пароль пользователя */
   password: Scalars['String']['input'];
 };
 
@@ -233,13 +234,12 @@ export type Material = Node & {
 export type Module = Node & {
   __typename?: 'Module';
   active?: Maybe<Scalars['Boolean']['output']>;
-  /** Связи модуля с доступными значениями яркости. */
   brightnesses?: Maybe<Array<ModuleBrightness>>;
   categories?: Maybe<Array<ItemCategory>>;
   code?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
-  items?: Maybe<ModuleItemsConnection>;
+  items?: Maybe<Array<ModuleItemComponent>>;
   locations?: Maybe<Array<Location>>;
   manufacturers?: Maybe<Array<Manufacturer>>;
   moduleOption?: Maybe<Scalars['String']['output']>;
@@ -247,7 +247,6 @@ export type Module = Node & {
   options?: Maybe<Array<Option>>;
   pitches?: Maybe<Array<Pitch>>;
   price?: Maybe<ModulePrice>;
-  /** Связи модуля с доступными значениями частоты обновления. */
   refreshRates?: Maybe<Array<ModuleRefreshRate>>;
   sizes?: Maybe<Array<ModuleSize>>;
   sku?: Maybe<Scalars['String']['output']>;
@@ -256,11 +255,8 @@ export type Module = Node & {
 };
 
 
-export type ModuleItemsArgs = {
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
+export type ModuleSizesArgs = {
+  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type ModuleBrightness = {
@@ -271,6 +267,7 @@ export type ModuleBrightness = {
 
 export type ModuleFilterInput = {
   brightnessCode?: InputMaybe<Scalars['String']['input']>;
+  isFlex?: InputMaybe<Scalars['Boolean']['input']>;
   locationCode?: InputMaybe<Scalars['String']['input']>;
   pitchCode?: InputMaybe<Scalars['String']['input']>;
   refreshRateCode?: InputMaybe<Scalars['String']['input']>;
@@ -282,29 +279,28 @@ export type ModuleItemComponent = {
   quantity?: Maybe<Scalars['Int']['output']>;
 };
 
-export type ModuleItemsConnection = {
-  __typename?: 'ModuleItemsConnection';
-  edges?: Maybe<Array<Maybe<ModuleItemsConnectionEdge>>>;
-  pageInfo: PageInfo;
-};
-
-export type ModuleItemsConnectionEdge = {
-  __typename?: 'ModuleItemsConnectionEdge';
-  cursor: Scalars['String']['output'];
-  node?: Maybe<ModuleItemComponent>;
+export type ModuleModuleSize = {
+  __typename?: 'ModuleModuleSize';
+  moduleCode?: Maybe<Scalars['String']['output']>;
+  moduleSizeCode?: Maybe<Scalars['String']['output']>;
+  size?: Maybe<ModuleSize>;
 };
 
 export type ModulePrice = Node & {
   __typename?: 'ModulePrice';
   id: Scalars['ID']['output'];
+  module?: Maybe<Module>;
   moduleCode?: Maybe<Scalars['String']['output']>;
   priceRub?: Maybe<Scalars['Float']['output']>;
   priceUsd?: Maybe<Scalars['Float']['output']>;
 };
 
-export type ModuleRefreshRate = {
+export type ModuleRefreshRate = Node & {
   __typename?: 'ModuleRefreshRate';
+  id: Scalars['ID']['output'];
+  module?: Maybe<Module>;
   moduleCode?: Maybe<Scalars['String']['output']>;
+  refreshRate?: Maybe<RefreshRate>;
   refreshRateCode?: Maybe<Scalars['String']['output']>;
 };
 
@@ -401,24 +397,41 @@ export type Placement = Node & {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type PriceInfo = {
+  __typename?: 'PriceInfo';
+  code?: Maybe<Scalars['String']['output']>;
+  priceRub?: Maybe<Scalars['Float']['output']>;
+  priceUsd?: Maybe<Scalars['Float']['output']>;
+};
+
+export type PriceRequestInput = {
+  cabinetCode?: InputMaybe<Scalars['String']['input']>;
+  itemCodes?: InputMaybe<Array<Scalars['String']['input']>>;
+  moduleCode?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Query = {
   __typename?: 'Query';
-  /** Получить один кабинет по его уникальному коду. */
+  /** Получить кабинет по коду */
   cabinetByCode?: Maybe<Cabinet>;
-  /** Получить отфильтрованный список кабинетов для выбора. */
+  /** Получить детальную информацию о кабинете */
+  cabinetDetails?: Maybe<Cabinet>;
+  /** Получить отфильтрованный список кабинетов */
   cabinetOptions?: Maybe<Array<Cabinet>>;
-  /** Получить список всех кабинетов. */
+  /** Получить список всех кабинетов */
   cabinets?: Maybe<Array<Cabinet>>;
-  /** Найти все кабинеты, совместимые с модулями, имеющими указанный шаг пикселя. */
+  /** [Устарело] Кабинеты по шагу пикселя */
   cabinetsByPitch?: Maybe<Array<Cabinet>>;
   /** Получить список всех доступных типов управления. */
   controlTypes?: Maybe<Array<ControlType>>;
-  /** Получить текущий курс доллара США от ЦБ РФ (с поиском предыдущего рабочего дня). */
+  /** Получить текущий курс доллара США от ЦБ РФ. Ищет последний доступный курс за последние 7 дней. */
   getCurrentDollarRate?: Maybe<Scalars['Float']['output']>;
-  /** Получить доступные значения яркости для модулей, подходящих под расположение и шаг пикселя. */
+  /** Получить доступные значения яркости для модулей, подходящих под фильтры. */
   getFilteredBrightnessOptions?: Maybe<Array<Brightness>>;
-  /** Получить доступные значения частоты обновления для модулей, подходящих под расположение и шаг пикселя. */
+  /** Получить доступные значения частоты обновления для модулей, подходящих под фильтры. */
   getFilteredRefreshRateOptions?: Maybe<Array<RefreshRate>>;
+  /** Получить цены для списка кодов модулей, кабинетов и комплектующих. */
+  getPricesByCodes?: Maybe<Array<PriceInfo>>;
   /** Получить одну степень IP-защиты по ее коду. */
   ipProtectionByCode?: Maybe<IpProtection>;
   /** Получить список всех степеней IP-защиты. */
@@ -434,8 +447,10 @@ export type Query = {
   /** Получить список всех материалов. */
   materials?: Maybe<Array<Material>>;
   moduleByCode?: Maybe<Module>;
+  /** Получить подробную информацию о модуле по его коду. */
+  moduleDetails?: Maybe<Module>;
   /** Получить отфильтрованный список модулей для выбора. */
-  moduleOptions?: Maybe<Array<Module>>;
+  moduleOptions?: Maybe<QueryModuleOptionsConnection>;
   node?: Maybe<Node>;
   nodes: Array<Maybe<Node>>;
   /** Получить список опций, доступных для указанного типа экрана. */
@@ -454,10 +469,17 @@ export type Query = {
   screenTypes?: Maybe<Array<ScreenType>>;
   /** Получить список всех доступных сенсоров. */
   sensors?: Maybe<Array<Sensor>>;
+  /** Получить список всех активных видеопроцессоров, отсортированных по цене. */
+  videoProcessors?: Maybe<Array<VideoProcessor>>;
 };
 
 
 export type QueryCabinetByCodeArgs = {
+  code: Scalars['String']['input'];
+};
+
+
+export type QueryCabinetDetailsArgs = {
   code: Scalars['String']['input'];
 };
 
@@ -474,10 +496,6 @@ export type QueryCabinetsArgs = {
 
 
 export type QueryCabinetsByPitchArgs = {
-  onlyActiveCabinetSizes?: InputMaybe<Scalars['Boolean']['input']>;
-  onlyActiveCabinets?: InputMaybe<Scalars['Boolean']['input']>;
-  onlyActiveModuleSizes?: InputMaybe<Scalars['Boolean']['input']>;
-  onlyActiveModules?: InputMaybe<Scalars['Boolean']['input']>;
   pitchCode: Scalars['String']['input'];
 };
 
@@ -488,6 +506,7 @@ export type QueryControlTypesArgs = {
 
 
 export type QueryGetFilteredBrightnessOptionsArgs = {
+  isFlex?: InputMaybe<Scalars['Boolean']['input']>;
   locationCode: Scalars['String']['input'];
   onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
   pitchCode: Scalars['String']['input'];
@@ -496,9 +515,15 @@ export type QueryGetFilteredBrightnessOptionsArgs = {
 
 
 export type QueryGetFilteredRefreshRateOptionsArgs = {
+  isFlex?: InputMaybe<Scalars['Boolean']['input']>;
   locationCode: Scalars['String']['input'];
   onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
   pitchCode: Scalars['String']['input'];
+};
+
+
+export type QueryGetPricesByCodesArgs = {
+  codes: PriceRequestInput;
 };
 
 
@@ -546,8 +571,17 @@ export type QueryModuleByCodeArgs = {
 };
 
 
+export type QueryModuleDetailsArgs = {
+  code: Scalars['String']['input'];
+};
+
+
 export type QueryModuleOptionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
   filters?: InputMaybe<ModuleFilterInput>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
   onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -607,12 +641,26 @@ export type QueryItemsConnection = {
   __typename?: 'QueryItemsConnection';
   edges?: Maybe<Array<Maybe<QueryItemsConnectionEdge>>>;
   pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
 };
 
 export type QueryItemsConnectionEdge = {
   __typename?: 'QueryItemsConnectionEdge';
   cursor: Scalars['String']['output'];
   node?: Maybe<Item>;
+};
+
+export type QueryModuleOptionsConnection = {
+  __typename?: 'QueryModuleOptionsConnection';
+  edges?: Maybe<Array<Maybe<QueryModuleOptionsConnectionEdge>>>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type QueryModuleOptionsConnectionEdge = {
+  __typename?: 'QueryModuleOptionsConnectionEdge';
+  cursor: Scalars['String']['output'];
+  node?: Maybe<Module>;
 };
 
 export type RefreshRate = Node & {
@@ -627,11 +675,8 @@ export type RefreshRate = Node & {
 
 /** Данные для регистрации нового пользователя */
 export type RegisterInput = {
-  /** Email нового пользователя */
   email: Scalars['String']['input'];
-  /** Имя пользователя (опционально) */
-  name?: InputMaybe<Scalars['String']['input']>;
-  /** Пароль (мин. 8 символов) */
+  name: Scalars['String']['input'];
   password: Scalars['String']['input'];
 };
 
@@ -683,132 +728,14 @@ export type User = {
   role?: Maybe<Role>;
 };
 
-export type OptionFieldsFragment = { __typename?: 'Option', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'OptionFieldsFragment' };
-
-export type LocationFieldsFragment = { __typename?: 'Location', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'LocationFieldsFragment' };
-
-export type MaterialFieldsFragment = { __typename?: 'Material', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'MaterialFieldsFragment' };
-
-export type PitchFieldsFragment = { __typename?: 'Pitch', id: string, code?: string | null, pitchValue?: number | null, active?: boolean | null } & { ' $fragmentName'?: 'PitchFieldsFragment' };
-
-export type BrightnessFieldsFragment = { __typename?: 'Brightness', id: string, code?: string | null, value?: number | null, active?: boolean | null } & { ' $fragmentName'?: 'BrightnessFieldsFragment' };
-
-export type RefreshRateFieldsFragment = { __typename?: 'RefreshRate', id: string, code?: string | null, value?: number | null, active?: boolean | null } & { ' $fragmentName'?: 'RefreshRateFieldsFragment' };
-
-export type SensorFieldsFragment = { __typename?: 'Sensor', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'SensorFieldsFragment' };
-
-export type ControlTypeFieldsFragment = { __typename?: 'ControlType', id: string, code?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'ControlTypeFieldsFragment' };
-
-export type ModuleOptionFieldsFragment = { __typename?: 'Module', id: string, code?: string | null, sku?: string | null, name?: string | null, active?: boolean | null, brightnesses?: Array<{ __typename?: 'ModuleBrightness', brightnessCode?: string | null }> | null, refreshRates?: Array<{ __typename?: 'ModuleRefreshRate', refreshRateCode?: string | null }> | null } & { ' $fragmentName'?: 'ModuleOptionFieldsFragment' };
-
-export type CabinetOptionFieldsFragment = { __typename?: 'Cabinet', id: string, code?: string | null, sku?: string | null, name?: string | null, active?: boolean | null } & { ' $fragmentName'?: 'CabinetOptionFieldsFragment' };
-
-export type GetInitialDataQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetInitialDataQuery = { __typename?: 'Query', screenTypes?: Array<{ __typename?: 'ScreenType', id: string, code?: string | null, name?: string | null }> | null, locations?: Array<(
-    { __typename?: 'Location' }
-    & { ' $fragmentRefs'?: { 'LocationFieldsFragment': LocationFieldsFragment } }
-  )> | null, materials?: Array<(
-    { __typename?: 'Material' }
-    & { ' $fragmentRefs'?: { 'MaterialFieldsFragment': MaterialFieldsFragment } }
-  )> | null, ipProtections?: Array<{ __typename?: 'IpProtection', id?: string | null, code?: string | null }> | null, sensors?: Array<(
-    { __typename?: 'Sensor' }
-    & { ' $fragmentRefs'?: { 'SensorFieldsFragment': SensorFieldsFragment } }
-  )> | null, controlTypes?: Array<(
-    { __typename?: 'ControlType' }
-    & { ' $fragmentRefs'?: { 'ControlTypeFieldsFragment': ControlTypeFieldsFragment } }
-  )> | null };
-
-export type GetScreenTypeOptionsQueryVariables = Exact<{
-  screenTypeCode: Scalars['String']['input'];
-  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetScreenTypeOptionsQuery = { __typename?: 'Query', optionsByScreenType?: Array<(
-    { __typename?: 'Option' }
-    & { ' $fragmentRefs'?: { 'OptionFieldsFragment': OptionFieldsFragment } }
-  )> | null };
-
-export type GetPitchOptionsByLocationQueryVariables = Exact<{
-  locationCode: Scalars['String']['input'];
-  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetPitchOptionsByLocationQuery = { __typename?: 'Query', pitchOptionsByLocation?: Array<(
-    { __typename?: 'Pitch' }
-    & { ' $fragmentRefs'?: { 'PitchFieldsFragment': PitchFieldsFragment } }
-  )> | null };
-
-export type GetFilteredRefreshRateOptionsQueryVariables = Exact<{
-  locationCode: Scalars['String']['input'];
-  pitchCode: Scalars['String']['input'];
-  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetFilteredRefreshRateOptionsQuery = { __typename?: 'Query', getFilteredRefreshRateOptions?: Array<(
-    { __typename?: 'RefreshRate' }
-    & { ' $fragmentRefs'?: { 'RefreshRateFieldsFragment': RefreshRateFieldsFragment } }
-  )> | null };
-
-export type GetFilteredBrightnessOptionsQueryVariables = Exact<{
-  locationCode: Scalars['String']['input'];
-  pitchCode: Scalars['String']['input'];
-  refreshRateCode: Scalars['String']['input'];
-  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetFilteredBrightnessOptionsQuery = { __typename?: 'Query', getFilteredBrightnessOptions?: Array<(
-    { __typename?: 'Brightness' }
-    & { ' $fragmentRefs'?: { 'BrightnessFieldsFragment': BrightnessFieldsFragment } }
-  )> | null };
-
-export type GetModuleOptionsQueryVariables = Exact<{
-  filters?: InputMaybe<ModuleFilterInput>;
-  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetModuleOptionsQuery = { __typename?: 'Query', moduleOptions?: Array<(
-    { __typename?: 'Module' }
-    & { ' $fragmentRefs'?: { 'ModuleOptionFieldsFragment': ModuleOptionFieldsFragment } }
-  )> | null };
-
-export type GetCabinetOptionsQueryVariables = Exact<{
-  filters?: InputMaybe<CabinetFilterInput>;
-  onlyActive?: InputMaybe<Scalars['Boolean']['input']>;
-}>;
-
-
-export type GetCabinetOptionsQuery = { __typename?: 'Query', cabinetOptions?: Array<(
-    { __typename?: 'Cabinet' }
-    & { ' $fragmentRefs'?: { 'CabinetOptionFieldsFragment': CabinetOptionFieldsFragment } }
-  )> | null };
-
-export type GetDollarRateQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetDollarRateQuery = { __typename?: 'Query', getCurrentDollarRate?: number | null };
-
-export const OptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Option"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<OptionFieldsFragment, unknown>;
-export const LocationFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<LocationFieldsFragment, unknown>;
-export const MaterialFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MaterialFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Material"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<MaterialFieldsFragment, unknown>;
-export const PitchFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PitchFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Pitch"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"pitchValue"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<PitchFieldsFragment, unknown>;
-export const BrightnessFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BrightnessFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Brightness"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<BrightnessFieldsFragment, unknown>;
-export const RefreshRateFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RefreshRateFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RefreshRate"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<RefreshRateFieldsFragment, unknown>;
-export const SensorFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<SensorFieldsFragment, unknown>;
-export const ControlTypeFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ControlTypeFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ControlType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<ControlTypeFieldsFragment, unknown>;
-export const ModuleOptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ModuleOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Module"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"brightnesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"brightnessCode"}}]}},{"kind":"Field","name":{"kind":"Name","value":"refreshRates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshRateCode"}}]}}]}}]} as unknown as DocumentNode<ModuleOptionFieldsFragment, unknown>;
-export const CabinetOptionFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"CabinetOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Cabinet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<CabinetOptionFieldsFragment, unknown>;
-export const GetInitialDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetInitialData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"screenTypes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"locations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"LocationFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"materials"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"MaterialFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"ipProtections"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}}]}},{"kind":"Field","name":{"kind":"Name","value":"sensors"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"SensorFields"}}]}},{"kind":"Field","name":{"kind":"Name","value":"controlTypes"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"BooleanValue","value":true}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ControlTypeFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"LocationFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Location"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"MaterialFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Material"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"SensorFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Sensor"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ControlTypeFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"ControlType"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetInitialDataQuery, GetInitialDataQueryVariables>;
-export const GetScreenTypeOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetScreenTypeOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"screenTypeCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"optionsByScreenType"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"screenTypeCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"screenTypeCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Option"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetScreenTypeOptionsQuery, GetScreenTypeOptionsQueryVariables>;
-export const GetPitchOptionsByLocationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPitchOptionsByLocation"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pitchOptionsByLocation"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"locationCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PitchFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PitchFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Pitch"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"pitchValue"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetPitchOptionsByLocationQuery, GetPitchOptionsByLocationQueryVariables>;
-export const GetFilteredRefreshRateOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFilteredRefreshRateOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pitchCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getFilteredRefreshRateOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"locationCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"pitchCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pitchCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"RefreshRateFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"RefreshRateFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RefreshRate"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetFilteredRefreshRateOptionsQuery, GetFilteredRefreshRateOptionsQueryVariables>;
-export const GetFilteredBrightnessOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetFilteredBrightnessOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pitchCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"refreshRateCode"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getFilteredBrightnessOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"locationCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"locationCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"pitchCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pitchCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"refreshRateCode"},"value":{"kind":"Variable","name":{"kind":"Name","value":"refreshRateCode"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"BrightnessFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"BrightnessFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Brightness"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetFilteredBrightnessOptionsQuery, GetFilteredBrightnessOptionsQueryVariables>;
-export const GetModuleOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetModuleOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ModuleFilterInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"moduleOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ModuleOptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ModuleOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Module"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}},{"kind":"Field","name":{"kind":"Name","value":"brightnesses"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"brightnessCode"}}]}},{"kind":"Field","name":{"kind":"Name","value":"refreshRates"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"refreshRateCode"}}]}}]}}]} as unknown as DocumentNode<GetModuleOptionsQuery, GetModuleOptionsQueryVariables>;
-export const GetCabinetOptionsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCabinetOptions"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"filters"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"CabinetFilterInput"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Boolean"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cabinetOptions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"filters"},"value":{"kind":"Variable","name":{"kind":"Name","value":"filters"}}},{"kind":"Argument","name":{"kind":"Name","value":"onlyActive"},"value":{"kind":"Variable","name":{"kind":"Name","value":"onlyActive"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"CabinetOptionFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"CabinetOptionFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Cabinet"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"sku"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"active"}}]}}]} as unknown as DocumentNode<GetCabinetOptionsQuery, GetCabinetOptionsQueryVariables>;
-export const GetDollarRateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDollarRate"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"getCurrentDollarRate"}}]}}]} as unknown as DocumentNode<GetDollarRateQuery, GetDollarRateQueryVariables>;
+export type VideoProcessor = Node & {
+  __typename?: 'VideoProcessor';
+  active?: Maybe<Scalars['Boolean']['output']>;
+  code?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  maxResolutionX?: Maybe<Scalars['Int']['output']>;
+  maxResolutionY?: Maybe<Scalars['Int']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  priceRub?: Maybe<Scalars['Float']['output']>;
+  priceUsd?: Maybe<Scalars['Float']['output']>;
+};

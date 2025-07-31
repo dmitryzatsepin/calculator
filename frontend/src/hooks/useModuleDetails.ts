@@ -1,4 +1,3 @@
-// frontend/src/hooks/useModuleDetails.ts
 import { useQuery, QueryKey } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { graphQLClient } from '../services/graphqlClient';
@@ -16,17 +15,9 @@ export interface ModuleDetailsHookResult {
   error: Error | null;
 }
 
-const fetchModuleDetailsQuery = async (moduleCode: string): Promise<ModuleDetailsQueryResult> => {
-  // console.log(`[useModuleDetails] Fetching details for module: ${moduleCode}`);
-  const variables = { code: moduleCode };
-  return graphQLClient.request<ModuleDetailsQueryResult>(GET_MODULE_DETAILS, variables);
-};
-
 export function useModuleDetails(moduleCode: string | null): ModuleDetailsHookResult {
-  const enabled = !!moduleCode;
-
   const {
-    data: rawData,
+    data,
     isLoading,
     isFetching,
     isError,
@@ -35,23 +26,25 @@ export function useModuleDetails(moduleCode: string | null): ModuleDetailsHookRe
     queryKey: ["moduleDetails", moduleCode],
     queryFn: () => {
       if (!moduleCode) {
-        return Promise.reject(new Error("Module code is required to fetch details."));
+        return Promise.resolve({ moduleDetails: null });
       }
-      return fetchModuleDetailsQuery(moduleCode);
+      console.log('>>> [useModuleDetails] ОТПРАВКА ЗАПРОСА С КОДОМ:', moduleCode);
+      return graphQLClient.request(GET_MODULE_DETAILS, { code: moduleCode });
     },
-    enabled,
+
+    enabled: !!moduleCode,
+
     staleTime: 1000 * 60 * 15,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
 
-  // Используем useMemo для возврата moduleDetails из rawData
-  const moduleDetailsData = useMemo((): ModuleDetailsData | null => {
-    return rawData?.moduleDetails ?? null;
-  }, [rawData]);
+  const moduleDetails = useMemo((): ModuleDetailsData | null => {
+    return data?.moduleDetails ?? null;
+  }, [data]);
 
   return {
-    moduleDetails: moduleDetailsData,
+    moduleDetails,
     isLoading,
     isFetching,
     isError,

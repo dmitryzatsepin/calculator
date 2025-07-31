@@ -5,7 +5,7 @@
   "description": "",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch --ignore 'src/prisma/generated' --ignore 'src/prisma/pothos-types.ts' src/server.ts",
     "build": "rm -rf dist && pnpm prisma:generate && tsc --showConfig && tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate --no-hints",

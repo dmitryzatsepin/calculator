@@ -1,3 +1,4 @@
+// frontend/src/context/CalculatorFormProvider.tsx
 import { createContext, useState, useMemo, useCallback, useContext, ReactNode } from "react";
 
 // Состояние формы

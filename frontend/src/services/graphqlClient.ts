@@ -1,18 +1,14 @@
-// src/services/graphqlClient.ts
 import { GraphQLClient } from 'graphql-request';
 
-// Используем import.meta.env для доступа к переменным окружения в Vite
-const endpoint = import.meta.env.VITE_GRAPHQL_ENDPOINT || "http://localhost:5000/api/v1";
+// Для локальной разработки endpoint должен быть '/api/local', 
+// чтобы vite proxy его перехватил.
+// Для продакшена, где нет vite, он будет таким же,
+// и его перехватит Angie.
+const endpoint = '/api/local';
 
-console.log("Using GraphQL Endpoint:", endpoint);
-
-if (!import.meta.env.VITE_GRAPHQL_ENDPOINT) {
-    console.warn("VITE_GRAPHQL_ENDPOINT environment variable is not set. Using default:", endpoint);
-}
-if (!endpoint) {
-    console.error("GraphQL endpoint URL could not be determined.");
-}
-
+// Мы используем window.location.origin, чтобы СОЗДАТЬ полный URL
+// для GraphQLClient, который не умеет в относительные пути.
+// Это будет работать и локально, и на проде.
 const fullEndpointUrl = new URL(endpoint, window.location.origin).href;
 
 console.log("Resolved GraphQL Endpoint URL:", fullEndpointUrl);

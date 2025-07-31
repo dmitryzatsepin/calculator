@@ -33,6 +33,39 @@ builder.prismaNode('Module', {
         createdAt: t.expose('createdAt', { type: 'DateTime' }),
         updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
 
+        // Измененный резолвер с логами
+        brightness: t.int({
+            nullable: true,
+            resolve: async (parent: Module, _args: {}, ctx: GraphQLContext) => {
+                console.log(`[DEBUG] Ищем яркость для модуля: ${parent.code}`);
+
+                const relation = await ctx.prisma.moduleBrightness.findFirst({
+                    where: { moduleCode: parent.code },
+                    include: { brightness: true }
+                });
+
+                console.log(`[DEBUG] Результат из базы (relation):`, relation);
+
+                if (relation && relation.brightness) {
+                    console.log(`[DEBUG] Найдено значение яркости:`, relation.brightness.value);
+                    return relation.brightness.value;
+                } else {
+                    console.log(`[DEBUG] Связь или значение яркости не найдены.`);
+                    return null;
+                }
+            }
+        }),
+        refreshRate: t.int({
+            nullable: true,
+            resolve: async (parent: Module, _args: {}, ctx: GraphQLContext) => {
+                const relation = await ctx.prisma.moduleRefreshRate.findFirst({
+                    where: { moduleCode: parent.code },
+                    include: { refreshRate: true }
+                });
+                return relation?.refreshRate.value ?? null;
+            }
+        }),
+
         categories: t.prismaField({
             type: ['ItemCategory'],
             resolve: (query: Prisma.ItemCategoryFindManyArgs, parent: Module, _args: {}, ctx: GraphQLContext) =>

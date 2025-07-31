@@ -1,12 +1,16 @@
 import { createContext, useMemo, useContext, ReactNode, useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
 import { useCalculatorForm } from "./CalculatorFormProvider";
+import { graphQLClient } from '../services/graphqlClient';
+import { GET_VIDEO_PROCESSORS, GET_FILTERED_BRIGHTNESS_OPTIONS, GET_FILTERED_REFRESH_RATE_OPTIONS } from '../graphql/calculator.gql';
 
 import type { ProcessedInitialData } from '../hooks/useInitialCalculatorData';
 import type { ProcessedScreenTypeOption } from '../hooks/useScreenTypeOptions';
 import type { ProcessedPitchOption } from '../hooks/usePitchOptions';
 import type { ProcessedModuleOption } from '../hooks/useModuleOptions';
 import type { ProcessedCabinetOption } from '../hooks/useCabinetOptions';
-import type { Maybe } from "../generated/graphql/graphql";
+import type { Maybe, VideoProcessor as GqlVideoProcessor, Brightness as GqlBrightness, RefreshRate as GqlRefreshRate } from "../generated/graphql/graphql";
 import type { PriceMap } from '../types/calculationTypes';
 import type { ModuleDetailsData, CabinetDetailsData } from '../graphql/calculator.types';
 import type { PriceRequestArgs } from '../hooks/useComponentPrices';
@@ -23,11 +27,23 @@ import { useComponentPrices } from '../hooks/useComponentPrices';
 
 type SelectOption = { label: string; value: string };
 
-// Добавляем новый тип для обогащенных данных
 type EnrichedModuleDetails = ModuleDetailsData & {
     brightness?: number | null;
     refreshRate?: number | null;
 };
+
+interface VideoProcessorsQueryResult {
+    videoProcessors?: Maybe<Array<Maybe<GqlVideoProcessor>>>;
+}
+
+interface BrightnessQueryResult {
+    getFilteredBrightnessOptions?: Maybe<Array<Maybe<GqlBrightness>>>;
+}
+
+interface RefreshRateQueryResult {
+    getFilteredRefreshRateOptions?: Maybe<Array<Maybe<GqlRefreshRate>>>;
+}
+
 
 interface CalculatorDataContextType {
     hasProOption: boolean;
@@ -55,7 +71,7 @@ interface CalculatorDataContextType {
     isLoadingDollarRate: boolean;
     isErrorDollarRate: boolean;
     errorDollarRate: Error | null;
-    moduleDetails: EnrichedModuleDetails | null; // <-- ИЗМЕНЕНО
+    moduleDetails: EnrichedModuleDetails | null;
     isLoadingModuleDetails: boolean;
     isFetchingModuleDetails: boolean;
     isErrorModuleDetails: boolean;
@@ -80,6 +96,10 @@ interface CalculatorDataContextType {
     pitchSelectOptions: SelectOption[];
     moduleSelectOptions: SelectOption[];
     cabinetSelectOptions: SelectOption[];
+    videoProcessors: GqlVideoProcessor[];
+    isLoadingVideoProcessors: boolean;
+    selectedBrightnessData: GqlBrightness | null;
+    selectedRefreshRateData: GqlRefreshRate | null;
 }
 
 const CalculatorDataContext = createContext<CalculatorDataContextType | undefined>(undefined);
@@ -124,15 +144,47 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
     const dollarRateResult = useDollarRate(isReadyForPricing);
     const moduleDetailsResult = useModuleDetails(selectedModuleCode);
     const cabinetDetailsResult = useCabinetDetails(selectedCabinetCode, isCabinetScreenTypeSelected);
+
+    const { data: videoProcessorsData, isLoading: isLoadingVideoProcessors } = useQuery<VideoProcessorsQueryResult>({
+        queryKey: ['videoProcessors'],
+        queryFn: () => graphQLClient.request(GET_VIDEO_PROCESSORS),
+        staleTime: 1000 * 60 * 60,
+        refetchOnWindowFocus: false,
+    });
+    const videoProcessors = useMemo(() => (videoProcessorsData?.videoProcessors?.filter(Boolean) as GqlVideoProcessor[]) ?? [], [videoProcessorsData]);
+
+    const { data: refreshRateData } = useQuery<RefreshRateQueryResult>({
+        queryKey: ['refreshRates', moduleOptionsFilters, isFlexSelected],
+        queryFn: () => graphQLClient.request(GET_FILTERED_REFRESH_RATE_OPTIONS, { ...moduleOptionsFilters, isFlex: isFlexSelected, onlyActive: true }),
+        enabled: !!selectedLocationCode && !!selectedPitchCode,
+    });
+    const refreshRateOptions = useMemo(() => refreshRateData?.getFilteredRefreshRateOptions?.filter(Boolean) as GqlRefreshRate[] ?? [], [refreshRateData]);
+
+    const { data: brightnessData } = useQuery<BrightnessQueryResult>({
+        queryKey: ['brightnesses', moduleOptionsFilters, isFlexSelected],
+        queryFn: () => graphQLClient.request(GET_FILTERED_BRIGHTNESS_OPTIONS, { ...moduleOptionsFilters, isFlex: isFlexSelected, onlyActive: true }),
+        enabled: !!selectedLocationCode && !!selectedPitchCode,
+    });
+    const brightnessOptions = useMemo(() => brightnessData?.getFilteredBrightnessOptions?.filter(Boolean) as GqlBrightness[] ?? [], [brightnessData]);
+
+    const selectedRefreshRateData = useMemo(() => refreshRateOptions.length > 0 ? refreshRateOptions[0] : null, [refreshRateOptions]);
+    const selectedBrightnessData = useMemo(() => brightnessOptions.length > 0 ? brightnessOptions[0] : null, [brightnessOptions]);
+
     const priceRequestArgs = useMemo((): PriceRequestArgs | null => {
         const itemCodesSet = new Set<string>(["bp300", "receiver", "magnets", "steel_cab_price_m2"]);
+        videoProcessors.forEach(p => {
+            if (p?.code) {
+                itemCodesSet.add(p.code);
+            }
+        });
         const args: PriceRequestArgs = {};
         if (selectedModuleCode) args.moduleCode = selectedModuleCode;
         if (isCabinetScreenTypeSelected && selectedCabinetCode) args.cabinetCode = selectedCabinetCode;
         if (itemCodesSet.size > 0) args.itemCodes = Array.from(itemCodesSet);
         if (!args.moduleCode && !args.cabinetCode && (!args.itemCodes || args.itemCodes.length === 0)) return null;
         return args;
-    }, [selectedModuleCode, selectedCabinetCode, isCabinetScreenTypeSelected]);
+    }, [selectedModuleCode, selectedCabinetCode, isCabinetScreenTypeSelected, videoProcessors]);
+
     const priceResult = useComponentPrices(priceRequestArgs, isReadyForPricing);
 
     useEffect(() => {
@@ -146,7 +198,7 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
             return;
         }
         const allRefreshRateCodes = moduleOptionsResult.modules.flatMap(m => m.refreshRates?.map(r => r.refreshRateCode) ?? []).filter((code): code is string => !!code);
-        const uniqueSortedCodes = [...new Set(allRefreshRateCodes)].sort();
+        const uniqueSortedCodes = [...new Set(allRefreshRateCodes)].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
         const hasChoice = uniqueSortedCodes.length > 1;
         setHasProOption(hasChoice);
         if (uniqueSortedCodes.length === 0) return;
@@ -158,23 +210,15 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
     }, [selectedPitchCode, moduleOptionsResult.modules, moduleOptionsResult.isFetching, isProVersionSelected, selectedModuleCode, setSelectedModuleCode]);
 
     const enrichedModuleDetails = useMemo((): EnrichedModuleDetails | null => {
-        if (!moduleDetailsResult.moduleDetails) return null;
-
-        const moduleFromOptions = moduleOptionsResult.modules.find(m => m.code === moduleDetailsResult.moduleDetails!.code);
-        if (!moduleFromOptions) return moduleDetailsResult.moduleDetails;
-
-        const brightnessCode = moduleFromOptions.brightnesses?.[0]?.brightnessCode;
-        const refreshRateCode = moduleFromOptions.refreshRates?.[0]?.refreshRateCode;
-
-        const brightnessValue = brightnessCode ? parseInt(brightnessCode, 10) : null;
-        const refreshRateValue = refreshRateCode ? parseInt(refreshRateCode, 10) : null;
+        const details = moduleDetailsResult.moduleDetails;
+        if (!details) return null;
 
         return {
-            ...moduleDetailsResult.moduleDetails,
-            brightness: !isNaN(brightnessValue!) ? brightnessValue : null,
-            refreshRate: !isNaN(refreshRateValue!) ? refreshRateValue : null,
+            ...details,
+            brightness: details.brightness,
+            refreshRate: details.refreshRate,
         };
-    }, [moduleDetailsResult.moduleDetails, moduleOptionsResult.modules]);
+    }, [moduleDetailsResult.moduleDetails]);
 
     const screenTypeSegments = useMemo((): SelectOption[] => initialDataResult.screenTypes.map(st => ({ value: st.code ?? '', label: st.name ?? st.code ?? '' })), [initialDataResult.screenTypes]);
     const locationSelectOptions = useMemo((): SelectOption[] => initialDataResult.locations.filter(loc => loc.active && loc.code && loc.name).map(loc => ({ value: loc.code as string, label: loc.name as string })), [initialDataResult.locations]);
@@ -201,7 +245,7 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
         isLoadingCabinets: cabinetOptionsResult.isLoading, isErrorCabinets: cabinetOptionsResult.isError, errorCabinets: cabinetOptionsResult.error,
         dollarRateValue: dollarRateResult.dollarRate,
         isLoadingDollarRate: dollarRateResult.isLoading, isErrorDollarRate: dollarRateResult.isError, errorDollarRate: dollarRateResult.error,
-        moduleDetails: enrichedModuleDetails, // <-- ИЗМЕНЕНО
+        moduleDetails: enrichedModuleDetails,
         isLoadingModuleDetails: moduleDetailsResult.isLoading, isFetchingModuleDetails: moduleDetailsResult.isFetching, isErrorModuleDetails: moduleDetailsResult.isError, errorModuleDetails: moduleDetailsResult.error,
         cabinetDetails: cabinetDetailsResult.cabinetDetails,
         isLoadingCabinetDetails: cabinetDetailsResult.isLoading, isFetchingCabinetDetails: cabinetDetailsResult.isFetching, isErrorCabinetDetails: cabinetDetailsResult.isError, errorCabinetDetails: cabinetDetailsResult.error,
@@ -212,13 +256,18 @@ export const CalculatorDataProvider = ({ children }: { children: ReactNode }) =>
         sensorSelectOptions, controlTypeSelectOptions,
         pitchSelectOptions,
         moduleSelectOptions, cabinetSelectOptions,
+        videoProcessors,
+        isLoadingVideoProcessors,
+        selectedBrightnessData,
+        selectedRefreshRateData,
     }), [
         hasProOption, initialDataResult, screenTypeOptionsResult, pitchOptionsResult,
-        moduleOptionsResult, cabinetOptionsResult, dollarRateResult, enrichedModuleDetails, cabinetDetailsResult, priceResult, // <-- ИЗМЕНЕНО
-        moduleDetailsResult, // Добавил как зависимость
+        moduleOptionsResult, cabinetOptionsResult, dollarRateResult, enrichedModuleDetails, cabinetDetailsResult, priceResult,
+        moduleDetailsResult,
         screenTypeSegments, isFlexOptionAvailableForSelectedScreenType, locationSelectOptions, materialSelectOptions, protectionSelectOptions,
         sensorSelectOptions, controlTypeSelectOptions, pitchSelectOptions,
-        moduleSelectOptions, cabinetSelectOptions,
+        moduleSelectOptions, cabinetSelectOptions, videoProcessors, isLoadingVideoProcessors,
+        selectedBrightnessData, selectedRefreshRateData
     ]);
 
     return (
