@@ -1,4 +1,3 @@
-// frontend/src/context/CalculationResultProvider.tsx
 import {
     createContext,
     useState,
@@ -16,7 +15,7 @@ import type {
     CabinetData,
     CostLineItem,
 } from "../types/calculationTypes";
-import type { CabinetDetailsData, VideoProcessor } from '../graphql/calculator.types';
+import type { CabinetDetailsData } from '../graphql/calculator.types';
 
 import { useCalculatorForm } from "./CalculatorFormProvider";
 import { useCalculatorData } from "./CalculatorDataProvider";
@@ -32,6 +31,10 @@ interface CalculationResultContextType {
     performCalculation: () => Promise<void>;
     setIsDrawerOpen: (open: boolean) => void;
     resetQuery: () => void;
+    editableZipItems: CostLineItem[];
+    setEditableZipItems: React.Dispatch<React.SetStateAction<CostLineItem[]>>;
+    editableAdditionalItems: CostLineItem[];
+    setEditableAdditionalItems: React.Dispatch<React.SetStateAction<CostLineItem[]>>;
 }
 
 const CalculationResultContext = createContext<CalculationResultContextType | undefined>(undefined);
@@ -68,8 +71,7 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
             refreshRate: details.refreshRate,
             components: [],
         };
-    },
-        [dataState.moduleDetails]);
+    }, [dataState.moduleDetails]);
 
     const processedCabinetData = useMemo((): CabinetData | null => {
         const details: CabinetDetailsData | null = dataState.cabinetDetails;
@@ -91,6 +93,8 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
     const [isDrawerOpen, setIsDrawerOpenState] = useState<boolean>(false);
     const [calculationResult, setCalculationResultState] = useState<TechnicalSpecsResult | null>(null);
     const [costDetails, setCostDetailsState] = useState<CostCalculationResult | null>(null);
+    const [editableZipItems, setEditableZipItems] = useState<CostLineItem[]>([]);
+    const [editableAdditionalItems, setEditableAdditionalItems] = useState<CostLineItem[]>([]);
 
     const isCalculationReady = useMemo((): boolean => {
         return checkCalculationReadiness({
@@ -137,7 +141,9 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         setCalculationResultState,
         setCostDetailsState,
         setIsDrawerOpenState,
-    }), []);
+        setEditableZipItems,
+        setEditableAdditionalItems,
+    }), [setEditableZipItems, setEditableAdditionalItems]);
 
     const performCalculation = useCalculationPerformer(calculationParams, calculationSetters);
 
@@ -155,9 +161,13 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         performCalculation,
         setIsDrawerOpen: setIsDrawerOpenState,
         resetQuery,
+        editableZipItems,
+        setEditableZipItems,
+        editableAdditionalItems,
+        setEditableAdditionalItems,
     }), [
         isCalculating, isDrawerOpen, calculationResult, costDetails,
-        isCalculationReady, performCalculation, resetQuery
+        isCalculationReady, performCalculation, resetQuery, editableZipItems, editableAdditionalItems
     ]);
 
     return (

@@ -1,21 +1,10 @@
-// src/components/CostCalculationTable.tsx
 import React, { useMemo } from "react";
-import type {
-  CostCalculationResult,
-  CostLineItem,
-} from "../../types/calculationTypes";
-import { Table, Text, Title, Paper } from "@mantine/core";
+import type { CostLineItem } from "../../types/calculationTypes";
+import { Table, Title, Paper, NumberInput, Text } from "@mantine/core";
+import { useCalculationResult } from '../../context/CalculationResultProvider';
 
-// Интерфейс пропсов компонента
-interface CostCalculationTableProps {
-  costDetails: CostCalculationResult | null;
-}
-
-// Функция для форматирования чисел как валюты
 const formatCurrency = (value: number | null | undefined): string => {
-  if (value === null || value === undefined) {
-    return "-";
-  }
+  if (value === null || value === undefined) return "-";
   return value.toLocaleString("ru-RU", {
     style: "currency",
     currency: "RUB",
@@ -24,44 +13,30 @@ const formatCurrency = (value: number | null | undefined): string => {
   });
 };
 
-// Функция расчета подытогов по категориям
-const calculateSubtotals = (items: CostLineItem[]): Record<string, number> => {
-  const subtotals: Record<string, number> = {};
-  items.forEach((item) => {
-    // Используем часть строки до ':' как ключ категории
-    const category = item.label.split(":")[0].trim();
-    subtotals[category] = (subtotals[category] || 0) + item.totalPriceRub;
-  });
-  return subtotals;
-};
+const renderTotalRow = (label: string, total: number) => (
+  <Table.Tfoot>
+    <Table.Tr>
+      <Table.Td colSpan={3} style={{ textAlign: "right", fontWeight: "bold" }}>{label}</Table.Td>
+      <Table.Td style={{ textAlign: "right", fontWeight: "bold" }}>{formatCurrency(total)}</Table.Td>
+    </Table.Tr>
+  </Table.Tfoot>
+);
 
-// Основной компонент таблицы расчета стоимости
-export const CostCalculationTable: React.FC<CostCalculationTableProps> = ({
-  costDetails,
-}) => {
-  // Если нет данных, ничего не рендерим
-  if (!costDetails) {
-    return null;
-  }
+const renderAdditionalTotalRow = (label: string, total: number) => (
+  <Table.Tfoot>
+    <Table.Tr>
+      <Table.Td style={{ textAlign: "right", fontWeight: "bold" }}>{label}</Table.Td>
+      <Table.Td style={{ textAlign: "right", fontWeight: "bold" }}>{formatCurrency(total)}</Table.Td>
+    </Table.Tr>
+  </Table.Tfoot>
+);
 
-  // Вычисляем подытоги с помощью useMemo для оптимизации
-  const mainSubtotals = useMemo(
-    () => calculateSubtotals(costDetails.costItems),
-    [costDetails.costItems]
-  );
-  const zipSubtotals = useMemo(
-    () => calculateSubtotals(costDetails.zipItems),
-    [costDetails.zipItems]
-  );
+const renderMainItemsTable = (items: CostLineItem[], title: string, total: number) => {
+  if (!items || items.length === 0) return null;
 
-  // Вспомогательная функция для рендеринга основной таблицы строк затрат
-  const renderCostItems = (items: CostLineItem[], title: string) => (
+  return (
     <>
-      {/* Заголовок секции */}
-      <Title order={5} mt="md" mb="xs">
-        {title}
-      </Title>
-      {/* Таблица Mantine */}
+      <Title order={5} mt="xl" mb="xs">{title}</Title>
       <Table highlightOnHover withTableBorder withColumnBorders>
         <Table.Thead>
           <Table.Tr>
@@ -69,119 +44,158 @@ export const CostCalculationTable: React.FC<CostCalculationTableProps> = ({
             <Table.Th style={{ textAlign: "right" }}>Кол-во</Table.Th>
             <Table.Th style={{ textAlign: "right" }}>Цена за ед.</Table.Th>
             <Table.Th style={{ textAlign: "right" }}>Стоимость</Table.Th>
-            {/* <Table.Th>Детали</Table.Th> */}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {/* Рендерим строки для каждого элемента */}
           {items.map((item, index) => (
             <Table.Tr key={`${title}-${index}`}>
               <Table.Td>{item.label}</Table.Td>
-              <Table.Td style={{ textAlign: "right" }}>
-                {item.quantity}
-              </Table.Td>
-              <Table.Td style={{ textAlign: "right" }}>
-                {formatCurrency(item.unitPriceRub)}
-              </Table.Td>
-              <Table.Td style={{ textAlign: "right" }}>
-                {formatCurrency(item.totalPriceRub)}
-              </Table.Td>
-              {/* <Table.Td>{item.details ?? '-'}</Table.Td> */}
+              <Table.Td style={{ textAlign: "right" }}>{item.quantity}</Table.Td>
+              <Table.Td style={{ textAlign: "right" }}>{formatCurrency(item.unitPriceRub)}</Table.Td>
+              <Table.Td style={{ textAlign: "right" }}>{formatCurrency(item.totalPriceRub)}</Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
+        {renderTotalRow("Итого:", total)}
       </Table>
     </>
   );
+};
 
-  // Вспомогательная функция для рендеринга блока с подытогами
-  const renderSubtotals = (
-    subtotals: Record<string, number>,
-    title: string // Принимаем заголовок для группы подытогов
-  ) => {
-    const entries = Object.entries(subtotals);
-    // Если нет подытогов, ничего не рендерим
-    if (entries.length === 0) return null;
+const renderZipTable = (items: CostLineItem[], onItemsChange: (items: CostLineItem[]) => void, total: number) => {
+  if (!items || items.length === 0) return null;
 
-    return (
-      // Блок для группы подытогов
-      <div style={{ marginTop: "15px" }}>
-        <Text fw={500} size="sm" mb="xs">
-          {title}:
-        </Text>
-        <Table withTableBorder={false} withColumnBorders={false}>
-          <Table.Tbody>
-            {entries.map(([category, total]) => (
-              <Table.Tr key={category}>
-                <Table.Td>{category}</Table.Td>
-                <Table.Td style={{ textAlign: "right" }}>
-                  {formatCurrency(total)}
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </div>
-    );
-  };
+  return (
+    <>
+      <Title order={5} mt="xl" mb="xs">Комплект ЗИП</Title>
+      <Table highlightOnHover withTableBorder withColumnBorders>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Наименование</Table.Th>
+            <Table.Th style={{ textAlign: "right" }}>Кол-во</Table.Th>
+            <Table.Th style={{ textAlign: "right" }}>Цена за ед.</Table.Th>
+            <Table.Th style={{ textAlign: "right" }}>Стоимость</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {items.map((item, index) => (
+            <Table.Tr key={`zip-${index}`}>
+              <Table.Td>{item.label}</Table.Td>
+              <Table.Td style={{ textAlign: "right", width: 120 }}>
+                <NumberInput
+                  value={item.quantity}
+                  onChange={(newQuantity) => {
+                    const updatedItems = items.map(currentItem =>
+                      currentItem.label === item.label ? { ...currentItem, quantity: Number(newQuantity) || 0 } : currentItem
+                    );
+                    onItemsChange(updatedItems);
+                  }}
+                  min={0} step={1} hideControls styles={{ input: { textAlign: 'right' } }}
+                />
+              </Table.Td>
+              <Table.Td style={{ textAlign: "right" }}>{formatCurrency(item.unitPriceRub)}</Table.Td>
+              <Table.Td style={{ textAlign: "right" }}>{formatCurrency(item.totalPriceRub)}</Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+        {renderTotalRow("Итого ЗИП:", total)}
+      </Table>
+    </>
+  );
+};
 
-  // Основная разметка компонента
+const renderAdditionalTable = (items: CostLineItem[], onItemsChange: (items: CostLineItem[]) => void, total: number) => {
+  if (!items || items.length === 0) return null;
+
+  return (
+    <>
+      <Title order={5} mt="xl" mb="xs">Дополнительные услуги и работы</Title>
+      <Table highlightOnHover withTableBorder withColumnBorders>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Наименование</Table.Th>
+            <Table.Th style={{ textAlign: "right" }}>Стоимость</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
+          {items.map((item, index) => (
+            <Table.Tr key={`additional-${index}`}>
+              <Table.Td>{item.label}</Table.Td>
+              <Table.Td style={{ textAlign: "right", width: 180 }}>
+                <NumberInput
+                  value={item.totalPriceRub}
+                  onChange={(newTotal) => {
+                    const newTotalNum = Number(newTotal) || 0;
+                    const updatedItems = items.map(currentItem =>
+                      currentItem.label === item.label
+                        ? { ...currentItem, totalPriceRub: newTotalNum, unitPriceRub: newTotalNum }
+                        : currentItem
+                    );
+                    onItemsChange(updatedItems);
+                  }}
+                  min={0} step={1000} hideControls styles={{ input: { textAlign: 'right' } }}
+                  thousandSeparator=" "
+                />
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+        {renderAdditionalTotalRow("Итого доп. услуги:", total)}
+      </Table>
+    </>
+  );
+};
+
+export const CostCalculationTable: React.FC = () => {
+  const {
+    costDetails,
+    editableZipItems,
+    setEditableZipItems,
+    editableAdditionalItems,
+    setEditableAdditionalItems
+  } = useCalculationResult();
+
+  if (!costDetails) return null;
+
+  const dynamicTotals = useMemo(() => {
+    const mainTotal = costDetails.costItems.reduce((sum: number, item) => sum + item.totalPriceRub, 0);
+
+    const updatedZipItems = editableZipItems.map(item => ({
+      ...item,
+      totalPriceRub: item.quantity * (item.unitPriceRub ?? 0),
+    }));
+    const zipTotal = updatedZipItems.reduce((sum: number, item) => sum + item.totalPriceRub, 0);
+
+    const additionalTotal = editableAdditionalItems.reduce((sum: number, item) => sum + item.totalPriceRub, 0);
+
+    return {
+      mainTotal,
+      zipTotal,
+      additionalTotal,
+      grandTotal: mainTotal + zipTotal + additionalTotal,
+      updatedZipItems,
+    };
+  }, [costDetails, editableZipItems, editableAdditionalItems]);
+
   return (
     <Paper shadow="sm" p="lg" mt="md" withBorder>
-      {/* Заголовок всего блока расчета */}
-      <Title order={5} mb="md">
-        Расчет стоимости
-      </Title>
+      <Title order={5} mb="md">Расчет стоимости</Title>
 
-      {/* Рендерим таблицу для основной комплектации, если есть данные */}
-      {costDetails.costItems.length > 0 &&
-        renderCostItems(costDetails.costItems, "Основная комплектация")}
+      {renderMainItemsTable(costDetails.costItems, "Основная комплектация", dynamicTotals.mainTotal)}
 
-      {/* Рендерим таблицу для ЗИП, если есть данные */}
-      {costDetails.zipItems.length > 0 &&
-        renderCostItems(costDetails.zipItems, "Комплект ЗИП")}
+      {renderZipTable(dynamicTotals.updatedZipItems, setEditableZipItems, dynamicTotals.zipTotal)}
 
-      {/* --- Блок с подытогами --- */}
-      {/* Выводим заголовок для секции подытогов, если есть хотя бы один подытог */}
-      {(Object.keys(mainSubtotals).length > 0 ||
-        Object.keys(zipSubtotals).length > 0) && (
-          <Title order={5} mb="xs" mt="lg">
-            Итоги по категориям
-          </Title>
-        )}
-      {/* Рендерим подытоги для основной комплектации */}
-      {renderSubtotals(mainSubtotals, "Основная комплектация")}
-      {/* Рендерим подытоги для ЗИП */}
-      {renderSubtotals(zipSubtotals, "Комплект ЗИП")}
-      {/* -------------------------- */}
+      {renderAdditionalTable(editableAdditionalItems, setEditableAdditionalItems, dynamicTotals.additionalTotal)}
 
-      {/* --- Общий итог и курс конвертации --- */}
-      <div
-        style={{
-          marginTop: "20px",
-          borderTop: "1px solid #e0e0e0", // Линия-разделитель
-          paddingTop: "15px",
-          textAlign: "right",
-          fontWeight: "bold",
-          fontSize: "1.1em",
-        }}
-      >
-        Итоговая стоимость: {formatCurrency(costDetails.totalCostRub)}
+      <div style={{ marginTop: "40px", borderTop: "1px solid #e0e0e0", paddingTop: "15px", textAlign: "right", fontWeight: "bold", fontSize: "1.2em" }}>
+        Итоговая стоимость: {formatCurrency(dynamicTotals.grandTotal)}
       </div>
-      {/* Отображаем курс, если он есть */}
+
       {costDetails.conversionRate && (
-        <div
-          style={{
-            marginTop: "5px",
-            textAlign: "right",
-            fontSize: "0.9em",
-            color: "#666",
-          }}
-        >
+        <div style={{ marginTop: "5px", textAlign: "right", fontSize: "0.9em", color: "#666" }}>
           (Курс конвертации USD-RUB: {costDetails.conversionRate.toFixed(2)})
         </div>
       )}
-      {/* -------------------------- */}
     </Paper>
   );
 };

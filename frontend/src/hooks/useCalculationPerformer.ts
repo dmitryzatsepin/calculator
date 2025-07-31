@@ -7,6 +7,7 @@ import type {
   CabinetData,
   PriceMap,
   VideoProcessor,
+  CostLineItem,
 } from '../types/calculationTypes';
 import {
   calculateTechnicalSpecs,
@@ -39,6 +40,8 @@ interface CalculationSetters {
   setCalculationResultState: (result: TechnicalSpecsResult | null) => void;
   setCostDetailsState: (costs: CostCalculationResult | null) => void;
   setIsDrawerOpenState: (isOpen: boolean) => void;
+  setEditableZipItems: (items: CostLineItem[]) => void;
+  setEditableAdditionalItems: (items: CostLineItem[]) => void;
 }
 
 export function useCalculationPerformer(
@@ -70,6 +73,8 @@ export function useCalculationPerformer(
     setCalculationResultState,
     setCostDetailsState,
     setIsDrawerOpenState,
+    setEditableZipItems,
+    setEditableAdditionalItems,
   } = setters;
 
   const performCalculation = useCallback(async () => {
@@ -95,6 +100,8 @@ export function useCalculationPerformer(
     setIsCalculatingState(true);
     setCalculationResultState(null);
     setCostDetailsState(null);
+    setEditableZipItems([]);
+    setEditableAdditionalItems([]);
 
     try {
       const pitchObject = gqlFilteredPitches.find(p => p?.code === selectedPitchCode);
@@ -139,7 +146,10 @@ export function useCalculationPerformer(
         isCabinetScreenTypeSelected ? selectedMaterialCode : null,
         allProcessors
       );
+
       setCostDetailsState(costResult);
+      setEditableZipItems(costResult?.zipItems ?? []);
+      setEditableAdditionalItems(costResult?.additionalItems ?? []);
       setIsDrawerOpenState(true);
 
     } catch (calcError: any) {
@@ -153,7 +163,7 @@ export function useCalculationPerformer(
     isCalculationReady, selectedModuleDetails, isCabinetScreenTypeSelected, selectedCabinetDetails, priceMap,
     gqlFilteredPitches, selectedPitchCode, locationSelectOptions, selectedLocationCode, materialSelectOptions, selectedMaterialCode,
     selectedProtectionCode, widthMm, heightMm, selectedScreenTypeCode, localDollarRateInput, allProcessors,
-    setIsCalculatingState, setCalculationResultState, setCostDetailsState, setIsDrawerOpenState,
+    setIsCalculatingState, setCalculationResultState, setCostDetailsState, setIsDrawerOpenState, setEditableZipItems, setEditableAdditionalItems
   ]);
 
   return performCalculation;

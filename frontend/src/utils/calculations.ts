@@ -49,34 +49,62 @@ const calculateDimensions = (params: ReturnType<typeof validateAndGetInitialPara
         requestedScreenWidthMm, requestedScreenHeightMm, isCabinetType
     } = params;
 
-    let totalCabinets = 0, cabinetsX = 0, cabinetsY = 0, modulesPerCabinet = 0;
-    let actualScreenWidthMm = 0, actualScreenHeightMm = 0, totalModules = 0;
-
-    if (isCabinetType) {
-        cabinetsX = Math.floor(requestedScreenWidthMm / cabinetWidthMm);
-        cabinetsY = Math.floor(requestedScreenHeightMm / cabinetHeightMm);
-        totalCabinets = cabinetsX * cabinetsY;
-        if (totalCabinets === 0) return null;
-
-        actualScreenWidthMm = cabinetsX * cabinetWidthMm;
-        actualScreenHeightMm = cabinetsY * cabinetHeightMm;
-        const modulesPerCabX = Math.round(cabinetWidthMm / moduleWidthMm);
-        const modulesPerCabY = Math.round(cabinetHeightMm / moduleHeightMm);
-        modulesPerCabinet = modulesPerCabX * modulesPerCabY;
-        totalModules = totalCabinets * modulesPerCabinet;
-    } else {
+    if (!isCabinetType) {
         const modulesX = Math.floor(requestedScreenWidthMm / moduleWidthMm);
         const modulesY = Math.floor(requestedScreenHeightMm / moduleHeightMm);
-        totalModules = modulesX * modulesY;
+        const totalModules = modulesX * modulesY;
         if (totalModules === 0) return null;
 
-        actualScreenWidthMm = modulesX * moduleWidthMm;
-        actualScreenHeightMm = modulesY * moduleHeightMm;
+        const actualScreenWidthMm = modulesX * moduleWidthMm;
+        const actualScreenHeightMm = modulesY * moduleHeightMm;
+
+        return {
+            actualScreenWidthMm, actualScreenHeightMm, totalModules,
+            cabinetsX: 0, cabinetsY: 0, totalCabinets: 0, modulesPerCabinet: 0
+        };
     }
 
-    return {
-        actualScreenWidthMm, actualScreenHeightMm, totalModules, cabinetsX, cabinetsY, totalCabinets, modulesPerCabinet
-    };
+    const modulesPerCabinet = (cabinetWidthMm / moduleWidthMm) * (cabinetHeightMm / moduleHeightMm);
+
+    const horizCabinetsX = Math.floor(requestedScreenWidthMm / cabinetWidthMm);
+    const horizCabinetsY = Math.floor(requestedScreenHeightMm / cabinetHeightMm);
+    const horizTotalCabinets = horizCabinetsX * horizCabinetsY;
+    const horizActualWidth = horizCabinetsX * cabinetWidthMm;
+    const horizActualHeight = horizCabinetsY * cabinetHeightMm;
+
+    const vertCabinetsX = Math.floor(requestedScreenWidthMm / cabinetHeightMm);
+    const vertCabinetsY = Math.floor(requestedScreenHeightMm / cabinetWidthMm);
+    const vertTotalCabinets = vertCabinetsX * vertCabinetsY;
+    const vertActualWidth = vertCabinetsX * cabinetHeightMm;
+    const vertActualHeight = vertCabinetsY * cabinetWidthMm;
+
+    const requestedArea = requestedScreenWidthMm * requestedScreenHeightMm;
+    const diffHorizontal = horizTotalCabinets > 0 ? Math.abs(requestedArea - (horizActualWidth * horizActualHeight)) : Infinity;
+    const diffVertical = vertTotalCabinets > 0 ? Math.abs(requestedArea - (vertActualWidth * vertActualHeight)) : Infinity;
+
+    if (diffVertical < diffHorizontal) {
+        return {
+            cabinetsX: vertCabinetsX,
+            cabinetsY: vertCabinetsY,
+            totalCabinets: vertTotalCabinets,
+            actualScreenWidthMm: vertActualWidth,
+            actualScreenHeightMm: vertActualHeight,
+            modulesPerCabinet: modulesPerCabinet,
+            totalModules: vertTotalCabinets * modulesPerCabinet,
+        };
+    } else if (horizTotalCabinets > 0) {
+        return {
+            cabinetsX: horizCabinetsX,
+            cabinetsY: horizCabinetsY,
+            totalCabinets: horizTotalCabinets,
+            actualScreenWidthMm: horizActualWidth,
+            actualScreenHeightMm: horizActualHeight,
+            modulesPerCabinet: modulesPerCabinet,
+            totalModules: horizTotalCabinets * modulesPerCabinet,
+        };
+    }
+
+    return null;
 };
 
 export function calculateTechnicalSpecs(
@@ -152,7 +180,7 @@ export function calculateCosts(
     prices: PriceMap,
     dollarRate: number,
     selectedMaterialCode: string | null,
-    allProcessors: VideoProcessor[] // <-- Типизируем allProcessors
+    allProcessors: VideoProcessor[]
 ): CostCalculationResult | null {
     if (!techSpecs || !prices || !dollarRate || dollarRate <= 0) {
         console.error("calculateCosts: Отсутствуют необходимые данные для расчета.");
@@ -230,20 +258,16 @@ export function calculateCosts(
     }
 
     const zipItems: CostLineItem[] = [];
-    let totalZipCostRub = 0;
-
     if (modulePriceRub !== null) {
         const zipModulesCount = Math.max(1, Math.floor(techSpecs.modulesCountTotal * 0.05));
         const total = zipModulesCount * modulePriceRub;
         zipItems.push({ label: 'ЗИП: Модули', quantity: zipModulesCount, unitPriceRub: modulePriceRub, totalPriceRub: total });
-        totalZipCostRub += total;
     }
     if (psuPriceRub !== null) {
         const zipModulesCount = Math.max(1, Math.floor(techSpecs.modulesCountTotal * 0.05));
         const zipPsuCount = Math.max(1, Math.floor(zipModulesCount * 0.2));
         const total = zipPsuCount * psuPriceRub;
         zipItems.push({ label: 'ЗИП: Блоки питания', quantity: zipPsuCount, unitPriceRub: psuPriceRub, totalPriceRub: total });
-        totalZipCostRub += total;
     }
     if (rcvCardPriceRub !== null) {
         const totalRcvCardCount = Math.ceil(techSpecs.resolutionWidthPx / 256) * Math.ceil(techSpecs.resolutionHeightPx / 256);
@@ -251,46 +275,41 @@ export function calculateCosts(
             const zipRcvCardCount = Math.max(1, Math.floor(totalRcvCardCount * 0.2));
             const total = zipRcvCardCount * rcvCardPriceRub;
             zipItems.push({ label: 'ЗИП: Приемные карты', quantity: zipRcvCardCount, unitPriceRub: rcvCardPriceRub, totalPriceRub: total });
-            totalZipCostRub += total;
         }
     }
 
     const additionalItems: CostLineItem[] = [];
-    let additionalTotalRub = 0;
-
+    let processorPriceRub = 28000;
     if (allProcessors && allProcessors.length > 0) {
         const requiredPixels = techSpecs.totalPixels;
-        const suitableProcessors = allProcessors.filter(p => p.maxResolutionX * p.maxResolutionY >= requiredPixels);
+        const suitableProcessors = allProcessors.filter(p =>
+            typeof p.maxResolutionX === 'number' &&
+            typeof p.maxResolutionY === 'number' &&
+            (p.maxResolutionX * p.maxResolutionY) >= requiredPixels
+        );
         const selectedProcessor = suitableProcessors[0];
 
-        if (selectedProcessor) {
-            const processorPriceRub = getPriceRub(selectedProcessor.code);
-            if (processorPriceRub !== null) {
-                additionalItems.push({
-                    label: `Процессор: ${selectedProcessor.name}`,
-                    quantity: 1,
-                    unitPriceRub: processorPriceRub,
-                    totalPriceRub: processorPriceRub,
-                    details: `(${selectedProcessor.code})`
-                });
-                additionalTotalRub += processorPriceRub;
+        if (selectedProcessor && selectedProcessor.code) {
+            const price = getPriceRub(selectedProcessor.code);
+            if (price !== null) {
+                processorPriceRub = price;
             }
         }
     }
+    additionalItems.push({ label: 'Видеоконтроллер', quantity: 1, unitPriceRub: processorPriceRub, totalPriceRub: processorPriceRub });
 
     const montazhCost = techSpecs.activeAreaM2 * 10000;
     additionalItems.push({ label: 'Монтаж', quantity: 1, unitPriceRub: montazhCost, totalPriceRub: montazhCost });
-    additionalTotalRub += montazhCost;
 
-    const konstrukciyaCost = techSpecs.activeAreaM2 * 10000;
+    const konstrukciyaCost = techSpecs.activeAreaM2 * 8000;
     additionalItems.push({ label: 'Металлоконструкция', quantity: 1, unitPriceRub: konstrukciyaCost, totalPriceRub: konstrukciyaCost });
-    additionalTotalRub += konstrukciyaCost;
 
-    const dostavkaCost = 10000;
+    const dostavkaCost = 11800;
     additionalItems.push({ label: 'Доставка', quantity: 1, unitPriceRub: dostavkaCost, totalPriceRub: dostavkaCost });
-    additionalTotalRub += dostavkaCost;
 
-    const finalTotalCost = totalCostRub + totalZipCostRub + additionalTotalRub;
+    const zipTotal = zipItems.reduce((sum, item) => sum + item.totalPriceRub, 0);
+    const additionalTotal = additionalItems.reduce((sum, item) => sum + item.totalPriceRub, 0);
+    const finalTotalCost = totalCostRub + zipTotal + additionalTotal;
 
     return {
         costItems,
