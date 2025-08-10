@@ -16,11 +16,13 @@ import type {
     CostLineItem,
 } from "../types/calculationTypes";
 import type { CabinetDetailsData } from '../graphql/calculator.types';
+import type { Bitrix24Params } from '../hooks/useBitrix24Params';
 
 import { useCalculatorForm } from "./CalculatorFormProvider";
 import { useCalculatorData } from "./CalculatorDataProvider";
 import { useCalculationPerformer } from "../hooks/useCalculationPerformer";
 import { checkCalculationReadiness } from "../utils/calculatorValidation";
+import { useBitrix24Params } from "../hooks/useBitrix24Params";
 
 interface CalculationResultContextType {
     isCalculating: boolean;
@@ -35,6 +37,9 @@ interface CalculationResultContextType {
     setEditableZipItems: React.Dispatch<React.SetStateAction<CostLineItem[]>>;
     editableAdditionalItems: CostLineItem[];
     setEditableAdditionalItems: React.Dispatch<React.SetStateAction<CostLineItem[]>>;
+    // Добавляем параметры Битрикс24
+    bitrix24Params: Bitrix24Params | null;
+    isBitrix24Available: boolean;
 }
 
 const CalculationResultContext = createContext<CalculationResultContextType | undefined>(undefined);
@@ -51,6 +56,10 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
     const queryClient = useQueryClient();
     const formState = useCalculatorForm();
     const dataState = useCalculatorData();
+
+    // Получаем параметры Битрикс24
+    const bitrix24Params = useBitrix24Params();
+    const isBitrix24Available = !!bitrix24Params;
 
     const processedModuleData = useMemo((): ModuleData | null => {
         const details = dataState.moduleDetails;
@@ -165,9 +174,13 @@ export const CalculationResultProvider = ({ children }: { children: ReactNode })
         setEditableZipItems,
         editableAdditionalItems,
         setEditableAdditionalItems,
+        // Добавляем параметры Битрикс24
+        bitrix24Params,
+        isBitrix24Available,
     }), [
         isCalculating, isDrawerOpen, calculationResult, costDetails,
-        isCalculationReady, performCalculation, resetQuery, editableZipItems, editableAdditionalItems
+        isCalculationReady, performCalculation, resetQuery, editableZipItems, editableAdditionalItems,
+        bitrix24Params, isBitrix24Available
     ]);
 
     return (

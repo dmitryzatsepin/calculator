@@ -1,10 +1,11 @@
 // src/components/CalculationResults.tsx
 import React, { useState } from 'react';
-import { Table, Text, Paper, ThemeIcon, Alert, Group } from '@mantine/core';
-import { IconAlertCircle, IconBolt, IconDimensions, IconComponents, IconMapPin, IconRulerMeasure } from '@tabler/icons-react';
+import { Table, Text, Paper, ThemeIcon, Alert, Group, Notification } from '@mantine/core';
+import { IconAlertCircle, IconBolt, IconDimensions, IconComponents, IconMapPin, IconRulerMeasure, IconCheck, IconX } from '@tabler/icons-react';
 
 // --- Импорт НОВОГО КОНТЕКСТА ---
 import { useCalculationResult } from '../../context/CalculationResultProvider';
+import { Bitrix24Service } from '../../services/bitrix24Service';
 
 // --- Импорты компонентов ---
 import SendToBitrixButton from '../inputs/SendToBitrixButton';
@@ -13,8 +14,9 @@ import CostCalculationTable from './CostCalculationTable';
 // Убираем props из определения компонента
 const CalculationResults: React.FC = () => {
     // Получаем все необходимые данные из нового хука
-    const { calculationResult, costDetails } = useCalculationResult();
+    const { calculationResult, costDetails, bitrix24Params, isBitrix24Available } = useCalculationResult();
     const [isSending, setIsSending] = useState(false);
+    const [sendResult, setSendResult] = useState<{ success: boolean; message: string } | null>(null);
 
     // Переименовываем 'calculationResult' в 'results' для удобства,
     // чтобы не менять весь код ниже
@@ -28,18 +30,37 @@ const CalculationResults: React.FC = () => {
         );
     }
 
-    // Логика отправки в Битрикс
+    // Логика отправки в Битрикс24
     const handleSendToBitrix = async () => {
-        if (!results) return;
+        if (!results || !bitrix24Params) {
+            setSendResult({ success: false, message: 'Параметры Битрикс24 недоступны' });
+            return;
+        }
+
         setIsSending(true);
-        console.log("Отправка в Битрикс24:", results, costDetails); // Добавили costDetails в лог
-        // TODO: Реализовать логику отправки данных results и costDetails в Битрикс24
+        setSendResult(null);
+
         try {
-            // await sendDataToBitrixAPI({ techSpecs: results, costs: costDetails }); // Пример вызова API
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Имитация задержки
-            console.log("Данные 'отправлены'");
+            const calculationData = {
+                techSpecs: results,
+                costs: costDetails
+            };
+
+            console.log("Отправка в Битрикс24:", { params: bitrix24Params, data: calculationData });
+
+            const result = await Bitrix24Service.sendCalculationData(bitrix24Params, calculationData);
+
+            console.log("Данные успешно отправлены в Битрикс24:", result);
+            setSendResult({
+                success: true,
+                message: `Данные отправлены! Создан смарт-процесс ID: ${result.smartProcess?.id || 'N/A'}`
+            });
         } catch (error) {
             console.error("Ошибка отправки в Битрикс:", error);
+            setSendResult({
+                success: false,
+                message: `Ошибка отправки: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`
+            });
         } finally {
             setIsSending(false);
         }
@@ -103,8 +124,8 @@ const CalculationResults: React.FC = () => {
             </Table>
 
             {/* Таблица с РАСЧЕТОМ СТОИМОСТИ */}
-            {/* Используем costDetails из контекста */}
-            <CostCalculationTable costDetails={costDetails} />
+            {/* CostCalculationTable получает данные из контекста */}
+            <CostCalculationTable />
 
             {/* БЛОК С КНОПКОЙ ОТПРАВКИ */}
             <Group justify="flex-end" mt="xl">
@@ -112,9 +133,23 @@ const CalculationResults: React.FC = () => {
                     onClick={handleSendToBitrix}
                     loading={isSending}
                     disabled={isSending}
+                    isBitrix24Available={isBitrix24Available}
                     size="sm"
                 />
             </Group>
+
+            {sendResult && (
+                <Notification
+                    icon={sendResult.success ? <IconCheck size={18} /> : <IconX size={18} />}
+                    color={sendResult.success ? 'green' : 'red'}
+                    title={sendResult.success ? 'Отправка успешна!' : 'Отправка не удалась!'}
+                    mt="md"
+                    withCloseButton
+                    onClose={() => setSendResult(null)}
+                >
+                    {sendResult.message}
+                </Notification>
+            )}
 
         </Paper>
     );

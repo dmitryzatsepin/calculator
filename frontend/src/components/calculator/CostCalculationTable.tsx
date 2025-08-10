@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import type { CostLineItem } from "../../types/calculationTypes";
-import { Table, Title, Paper, NumberInput, Text } from "@mantine/core";
+import { Table, Title, Paper, NumberInput } from "@mantine/core";
 import { useCalculationResult } from '../../context/CalculationResultProvider';
 
 const formatCurrency = (value: number | null | undefined): string => {
