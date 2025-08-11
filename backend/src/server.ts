@@ -107,19 +107,26 @@ async function startServer() {
   // --- ИЗМЕНЕНИЕ: ПРИВОДИМ MIDDLEWARE К СТАНДАРТУ APOLLO ---
 
   // 5. Middleware
-  // Включаем CORS для всех запросов
   app.use(cors());
-  // Включаем логгер
   app.use(morgan("dev"));
-  // Включаем Helmet для безопасности
   app.use(helmet());
 
   // 6. GraphQL Endpoint
-  // Путь '/api/v1' теперь будет обрабатывать JSON и Apollo вместе.
-  // Это самый надежный способ.
+  const GRAPHQL_PATH = '/api/v1';
+
+  app.use(GRAPHQL_PATH, (req, res, next) => {
+    console.log('--- [DEBUG 1/2] ---');
+    console.log(`Request received: ${req.method} ${req.originalUrl}`);
+    console.log('Request headers:', req.headers);
+    // На этом этапе мы ожидаем увидеть 'content-type': 'application/json'
+    next();
+  });
+
+
+
   app.use(
     GRAPHQL_PATH,
-    express.json({ limit: '10mb' }), // JSON парсер должен быть здесь, ДО expressMiddleware
+    express.json({ limit: '10mb' }), // JSON парсер ДОЛЖЕН быть здесь для GraphQL
     expressMiddleware(apolloServer, {
       context: async ({ req }): Promise<GraphQLContext> => {
         // --- Ваш полный код создания контекста ---

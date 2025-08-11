@@ -6,21 +6,16 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // Правило №1: Для API Центробанка
+      // Правило №1: Для API Центробанка (корректно)
       '/api/currency': {
         target: 'https://www.cbr-xml-daily.ru/daily_json.js',
         changeOrigin: true,
-        // 👇 Убираем параметр, так как он не нужен 👇
         rewrite: () => '',
       },
-      // Правило №2: Для твоего локального бэкенда
-      '/api/local': {
+      // Правило №2: Для вашего локального бэкенда (теперь тоже корректно)
+      '/api/v1': {
         target: 'http://localhost:5000',
         changeOrigin: true,
-        rewrite: (path) => {
-          console.log(`Rewriting path: ${path} to /api/v1`);
-          return '/api/v1';
-        }
       }
     }
   }
